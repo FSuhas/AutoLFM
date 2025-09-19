@@ -9,6 +9,7 @@ broadcastStartTime = 0
 lastBroadcastTime = 0
 broadcastedHalf = false
 broadcastedOneSecBefore = false
+messagesSentCount = 0
 
 iconUpdateFrame = CreateFrame("Frame")  -- Frame pour gérer l'update des icônes
 
@@ -34,6 +35,7 @@ function stopMessageBroadcast()
     AutoLFMMinimapBtn:SetPushedTexture("Interface\\AddOns\\AutoLFM\\icon\\fermer.png")
     -- Désactiver la mise à jour de l'icône
     iconUpdateFrame:SetScript("OnUpdate", nil)
+    messagesSentCount = 0
 end
 
 -- Fonction pour envoyer un message dans tous les canaux sélectionnés
@@ -84,6 +86,7 @@ function sendMessageToSelectedChannels(message)
     else
         DEFAULT_CHAT_FRAME:AddMessage("Error: No channel selected.")
     end
+    messagesSentCount = messagesSentCount + 1
 end
 
 -- Fonction pour démarrer la diffusion du message

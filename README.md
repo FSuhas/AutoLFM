@@ -59,3 +59,109 @@ Les commandes Slash permettent d'interagir facilement avec l'addon via la fenêt
 ## Aide et Support
 
 Pour toute question, suggestion ou rapport de bug, vous pouvez nous contacter via les forums de WoW ou sur la page GitHub de l'addon.
+
+
+## API
+### Availability Check
+```
+if AutoLFM_API and AutoLFM_API.IsAvailable() then
+    local status = AutoLFM_API.GetFullStatus()
+end
+```
+
+### Main Function
+**AutoLFM\_API.GetFullStatus()**
+```
+{
+    groupType = "dungeon|raid|other",
+    selectedContent = {
+        type = "dungeon|raid|other",
+        list = { "DM", "STRAT", ... },           -- Selected abbreviations
+        details = {                              -- Details for each content
+            ["DM"] = {
+                name = "Dire Maul",
+                abrev = "DM",
+                size = 5,                        -- For dungeons
+                levelMin = 55, levelMax = 60
+            },
+            ["MC"] = {
+                name = "Molten Core",
+                abrev = "MC", 
+                sizeMin = 20, sizeMax = 40       -- For raids
+            }
+        }
+    },
+    playerCount = {
+        currentInGroup = 3,                      -- Current players in group
+        desiredTotal = 5,                        -- Desired total number
+        missing = 2                              -- Missing players to recruit
+    },
+    rolesNeeded = { "tank", "heal", "dps" },     -- Requested roles
+    dynamicMessage = {
+        combined = "LF2M DM tank heal",          -- Generated final message
+        userInput = "PST with gear",             -- User personal message
+        hasUserInput = true                      -- true if personal message exists
+    },
+    selectedChannels = { "LookingForGroup", "Trade - City", ... },
+    broadcastStats = {
+        isActive = true,                         -- true if broadcast is active
+        messagesSent = 15,                       -- Total messages sent
+        searchDuration = 450.2                   -- Search duration in seconds
+    },
+    timing = {
+        intervalSeconds = 80,                    -- Interval between messages
+        timeUntilNext = 23.5                     -- Time until next message
+    }
+}
+```
+
+### Individual Functions
+| Function | Description | Return Type |
+| --- | --- | --- |
+| `AutoLFM_API.GetGroupType()` | Current group type | string |
+| `AutoLFM_API.GetSelectedContent()` | Selected content (dungeons/raids) | table |
+| `AutoLFM_API.GetPlayerCount()` | Player count information | table |
+| `AutoLFM_API.GetRolesNeeded()` | Requested roles | array |
+| `AutoLFM_API.GetDynamicMessage()` | Generated dynamic message | table |
+| `AutoLFM_API.GetSelectedChannels()` | Selected channels | array |
+| `AutoLFM_API.GetBroadcastStats()` | Broadcast statistics | table |
+| `AutoLFM_API.GetTiming()` | Timing information | table |
+| `AutoLFM_API.IsAvailable()` | Check if API is ready | boolean |
+| `AutoLFM_API.GetVersion()` | API version | string |
+
+### Callback System
+```
+-- Register callback
+AutoLFM_API.RegisterCallback("MyAddon", function(status)
+    -- Function called when data changes
+end)
+
+-- Unregister callback
+AutoLFM_API.UnregisterCallback("MyAddon")
+```
+
+### Usage Example
+```
+if AutoLFM_API and AutoLFM_API.IsAvailable() then
+    local status = AutoLFM_API.GetFullStatus()
+    print("Type: " .. status.groupType)
+    print("Players: " .. status.playerCount.currentInGroup .. 
+          "/" .. status.playerCount.desiredTotal)
+    print("Messages sent: " .. status.broadcastStats.messagesSent)
+end
+```
+
+### Error Handling
+```
+local success, status = pcall(AutoLFM_API.GetFullStatus)
+if success then
+    -- Use the data
+else
+    print("API Error: " .. tostring(status))
+end
+```
+
+### Debug Commands
+*   `/lfmapi debug` - Display all data in chat
+*   `/lfmapi status` - Test API availability
+*   `/lfmapi` - List available commands

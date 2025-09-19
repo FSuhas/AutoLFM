@@ -1,4 +1,7 @@
 AddOn: AutoLFM
+Version: 1.6.8
+Add API
+
 Version: 1.6.7
 Add FPS/MS display frame with drag-and-drop functionality
 
