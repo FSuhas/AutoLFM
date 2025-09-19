@@ -153,24 +153,26 @@ SlashCmdList["LFM"] = function(msg)
 
     -- Commande pour afficher le bouton de la minimap
     if args[1] == "minimap" and args[2] == "show" then
-      if AutoLFMMinimapBtn:IsVisible() then
-          DEFAULT_CHAT_FRAME:AddMessage("The minimap button is already visible.", 1.0, 0.0, 0.0)  -- Texte rouge
-      else
-          AutoLFMMinimapBtn:Show()
-          DEFAULT_CHAT_FRAME:AddMessage("The minimap button has been redisplayed.", 0.0, 1.0, 0.0)  -- Texte vert
-      end
-      return
+        if AutoLFMMinimapBtn and not AutoLFMMinimapBtn:IsShown() then
+            AutoLFMMinimapBtn:Show()
+            AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = false
+            DEFAULT_CHAT_FRAME:AddMessage("The minimap button has been redisplayed.", 0.0, 1.0, 0.0) -- Texte vert
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("The minimap button is already visible.", 1.0, 0.0, 0.0) -- Texte rouge
+        end
+        return
     end
 
-        -- Commande pour masquer le bouton de la minimap
+    -- Commande pour masquer le bouton de la minimap
     if args[1] == "minimap" and args[2] == "hide" then
-      if AutoLFMMinimapBtn:IsVisible() then
-        AutoLFMMinimapBtn:Hide()  -- Masquer le bouton
-        DEFAULT_CHAT_FRAME:AddMessage("The minimap button has been hidden.", 0.0, 1.0, 0.0)  -- Texte vert
-      else
-        DEFAULT_CHAT_FRAME:AddMessage("The minimap button is already hidden.", 1.0, 0.0, 0.0)  -- Texte rouge
-      end
-      return
+        if AutoLFMMinimapBtn and AutoLFMMinimapBtn:IsShown() then
+            AutoLFMMinimapBtn:Hide()
+            AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = true
+            DEFAULT_CHAT_FRAME:AddMessage("The minimap button has been hidden.", 0.0, 1.0, 0.0) -- Texte vert
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("The minimap button is already hidden.", 1.0, 0.0, 0.0) -- Texte rouge
+        end
+        return
     end
 
     if args[1] == "broadcast" then

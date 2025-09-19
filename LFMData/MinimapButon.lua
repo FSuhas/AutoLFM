@@ -3,13 +3,15 @@ AutoLFMMinimapBtn = nil
 
 -- Fonction d'initialisation du bouton minimap
 function InitMinimapButton()
-    if AutoLFMMinimapBtn then
-        AutoLFMMinimapBtn:Show()
-        return
-    end
+    local isHidden = AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden
 
-    if not AutoLFM_SavedVariables[uniqueIdentifier] then
-        AutoLFM_SavedVariables[uniqueIdentifier] = {}
+    if AutoLFMMinimapBtn then
+        if isHidden then
+            AutoLFMMinimapBtn:Hide()
+        else
+            AutoLFMMinimapBtn:Show()
+        end
+        return
     end
 
     AutoLFMMinimapBtn = CreateFrame("Button", "AutoLFMMinimapBtn", Minimap)
