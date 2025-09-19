@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------------
 --                       Cadre Principal AutoLFM classic                       --
 ---------------------------------------------------------------------------------
+searchStartTime = 0
 
 AutoLFM = CreateFrame("Frame", "AutoLFM", UIParent)
 AutoLFM:SetWidth(384)
@@ -767,11 +768,13 @@ toggleButton:SetScript("OnClick", function()
             stopMessageBroadcast()
             toggleButton:SetText("Start")  -- Réinitialiser le texte à "Start" si on arrête
             PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_Denied.ogg")
+            searchStartTime = 0  -- AJOUT : Réinitialiser quand on arrête
         else
             swapChannelFrame()
             startMessageBroadcast()
             toggleButton:SetText("Stop")  -- Changer le texte à "Stop" lorsqu'on commence
             PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_RoleCheck.ogg")
+            searchStartTime = GetTime()  -- AJOUT : Enregistrer le début de la recherche
         end
     else
         DEFAULT_CHAT_FRAME:AddMessage("2112 : Broadcast has not started because one or more channels are invalid.")
