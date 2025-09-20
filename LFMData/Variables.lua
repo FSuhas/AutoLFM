@@ -66,7 +66,7 @@ donjons = {
   { nom = "Scholomance 5", abrev = "Scholo 5", size = 5, lvl = "58-60", lvl_min = 58, lvl_max = 60 },
   { nom = "Stratholme UD 5", abrev = "Strat UD 5", size = 5, lvl = "58-60", lvl_min = 58, lvl_max = 60 },
   { nom = "Stormwind Vault", abrev = "SWV", size = 5, lvl = "60", lvl_min = 60, lvl_max = 60 },
-  { nom = "Karazhan Crypt", abrev = "Kara Crypt", size = 5, lvl = "58-60", lvl_min = 58, lvl_max = 60 },
+  { nom = "Karazhan Crypt", abrev = "Kara Crypt", size = 5, lvl = "60", lvl_min = 60, lvl_max = 60 },
   { nom = "Caverns of Time. Black Morass", abrev = "Black Morass", size = 5, lvl = "60", lvl_min = 60, lvl_max = 60 },
   
 }
