@@ -191,7 +191,7 @@ function calculer_priorite(niveau_joueur, donjon)
   -- => trop faible pour entrer
   -- Exemple : Donjon 24–32, joueur 22 → Rouge
   --------------------------------------------------
-  if niveau_joueur < min + 1 then
+  if niveau_joueur < min then
     return 3
   end
 
