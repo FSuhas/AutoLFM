@@ -29,6 +29,15 @@ if not AutoLFM_API then
     AutoLFM_API = {}
 end
 
+local API_VERSION = "1.0.0"
+local DEFAULT_DUNGEON_SIZE = 5
+
+-- Utilitaire pour affichage
+local function Print(msg)
+    local prefix = "|cff00ff00[AutoLFM API]|r "
+    DEFAULT_CHAT_FRAME:AddMessage(prefix .. (msg or ""))
+end
+
 function AutoLFM_API.GetFullStatus()
     local status = {
         groupType = AutoLFM_API.GetGroupType(),
@@ -43,9 +52,10 @@ function AutoLFM_API.GetFullStatus()
     return status
 end
 
+-- Détermine le type de groupe
 function AutoLFM_API.GetGroupType()
-    local selectedDungeons = GetSelectedDungeons() or {}
-    local selectedRaids = GetSelectedRaids() or {}
+    local selectedDungeons = GetSelectedDungeons and GetSelectedDungeons() or {}
+    local selectedRaids = GetSelectedRaids and GetSelectedRaids() or {}
 
     if table.getn(selectedRaids) > 0 then
         return "raid"
@@ -56,6 +66,7 @@ function AutoLFM_API.GetGroupType()
     end
 end
 
+
 function AutoLFM_API.GetSelectedContent()
     local groupType = AutoLFM_API.GetGroupType()
     local content = {
@@ -63,10 +74,10 @@ function AutoLFM_API.GetSelectedContent()
         list = {},
         details = {}
     }
-    
+
     if groupType == "dungeon" then
         local selectedDungeons = GetSelectedDungeons() or {}
-        for _, dungeonAbrev in pairs(selectedDungeons) do
+        for _, dungeonAbrev in ipairs(selectedDungeons) do
             table.insert(content.list, dungeonAbrev)
             for _, donjon in pairs(donjons) do
                 if donjon.abrev == dungeonAbrev then
@@ -83,7 +94,7 @@ function AutoLFM_API.GetSelectedContent()
         end
     elseif groupType == "raid" then
         local selectedRaids = GetSelectedRaids() or {}
-        for _, raidAbrev in pairs(selectedRaids) do
+        for _, raidAbrev in ipairs(selectedRaids) do
             table.insert(content.list, raidAbrev)
             for _, raid in pairs(raids) do
                 if raid.abrev == raidAbrev then
@@ -115,26 +126,25 @@ function AutoLFM_API.GetPlayerCount()
 
     if groupType == "raid" then
         desiredTotal = sliderValue or 0
-        missing = desiredTotal - currentInGroup
-    elseif groupType == "dungeon" or groupType == "other" then
-        desiredTotal = 5 
-        missing = desiredTotal - currentInGroup
+    else
+        desiredTotal = DEFAULT_DUNGEON_SIZE
     end
 
+    missing = desiredTotal - currentInGroup
     if missing < 0 then missing = 0 end
 
     return {
         currentInGroup = currentInGroup,
         desiredTotal = desiredTotal,
-        missing = missing 
+        missing = missing
     }
 end
 
 function AutoLFM_API.GetRolesNeeded()
-    local selectedRoles = GetSelectedRoles() or {}
+    local selectedRoles = GetSelectedRoles and GetSelectedRoles() or {}
     local rolesList = {}
 
-    for _, role in pairs(selectedRoles) do
+    for _, role in ipairs(selectedRoles) do
         table.insert(rolesList, role)
     end
 
@@ -142,7 +152,7 @@ function AutoLFM_API.GetRolesNeeded()
 end
 
 function AutoLFM_API.GetDynamicMessage()
-    local combined = GetCombinedMessage() or ""
+    local combined = GetCombinedMessage and GetCombinedMessage() or ""
     local userInput = userInputMessage or ""
 
     return {
@@ -163,6 +173,7 @@ function AutoLFM_API.GetSelectedChannels()
     return channelList
 end
 
+-- Stats de broadcast
 function AutoLFM_API.GetBroadcastStats()
     local broadcasting = isBroadcasting or false
     local startTime = broadcastStartTime or 0
@@ -185,6 +196,7 @@ function AutoLFM_API.GetBroadcastStats()
     return stats
 end
 
+-- Timing
 function AutoLFM_API.GetTiming()
     local interval = slider and slider:GetValue() or 80
     local nextBroadcast = 0
@@ -202,38 +214,42 @@ function AutoLFM_API.GetTiming()
     }
 end
 
+-- Vérifie si l’API est dispo
 function AutoLFM_API.IsAvailable()
-    return (AutoLFM ~= nil and 
-            selectedDungeons ~= nil and 
-            selectedRaids ~= nil and 
-            selectedRoles ~= nil)
+    return (AutoLFM ~= nil and
+            type(GetSelectedDungeons) == "function" and
+            type(GetSelectedRaids) == "function" and
+            type(GetSelectedRoles) == "function")
 end
 
+-- Version
 function AutoLFM_API.GetVersion()
-    return "1.0.0"
+    return API_VERSION
 end
 
+-- Debug print
 function AutoLFM_API.DebugPrint()
     if not AutoLFM_API.IsAvailable() then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffff0000[AutoLFM API]|r API not available")
+        Print("|cffff0000API not available|r")
         return
     end
 
     local status = AutoLFM_API.GetFullStatus()
 
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM API Debug]|r")
-    DEFAULT_CHAT_FRAME:AddMessage("Group Type: " .. status.groupType)
-    DEFAULT_CHAT_FRAME:AddMessage("Content: " .. table.getn(status.selectedContent.list) .. " items")
-    DEFAULT_CHAT_FRAME:AddMessage("Players: " .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
-    DEFAULT_CHAT_FRAME:AddMessage("Roles: " .. table.concat(status.rolesNeeded, ", "))
-    DEFAULT_CHAT_FRAME:AddMessage("Message: " .. status.dynamicMessage.combined)
-    DEFAULT_CHAT_FRAME:AddMessage("Channels: " .. table.concat(status.selectedChannels, ", "))
-    DEFAULT_CHAT_FRAME:AddMessage("Broadcasting: " .. (status.broadcastStats.isActive and "Yes" or "No"))
-    DEFAULT_CHAT_FRAME:AddMessage("Messages sent: " .. status.broadcastStats.messagesSent)
-    DEFAULT_CHAT_FRAME:AddMessage("Search duration: " .. math.floor(status.broadcastStats.searchDuration) .. "s")
-    DEFAULT_CHAT_FRAME:AddMessage("Next broadcast in: " .. math.floor(status.timing.timeUntilNext) .. "s")
+    Print("[Debug]")
+    Print("Group Type: " .. status.groupType)
+    Print("Content: " .. table.getn(status.selectedContent.list) .. " items")
+    Print("Players: " .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
+    Print("Roles: " .. table.concat(status.rolesNeeded, ", "))
+    Print("Message: " .. status.dynamicMessage.combined)
+    Print("Channels: " .. table.concat(status.selectedChannels, ", "))
+    Print("Broadcasting: " .. (status.broadcastStats.isActive and "Yes" or "No"))
+    Print("Messages sent: " .. status.broadcastStats.messagesSent)
+    Print("Search duration: " .. math.floor(status.broadcastStats.searchDuration) .. "s")
+    Print("Next broadcast in: " .. math.floor(status.timing.timeUntilNext) .. "s")
 end
 
+-- Callbacks
 AutoLFM_API.callbacks = AutoLFM_API.callbacks or {}
 
 function AutoLFM_API.RegisterCallback(addonName, callback)
@@ -244,24 +260,25 @@ function AutoLFM_API.UnregisterCallback(addonName)
     AutoLFM_API.callbacks[addonName] = nil
 end
 
-function AutoLFM_API.NotifyDataChanged()
+function AutoLFM_API.NotifyDataChanged(eventType)
     for addonName, callback in pairs(AutoLFM_API.callbacks) do
         if type(callback) == "function" then
-            pcall(callback, AutoLFM_API.GetFullStatus())
+            pcall(callback, AutoLFM_API.GetFullStatus(), eventType)
         end
     end
 end
 
+-- Slash command
 SLASH_LFMAPI1 = "/lfmapi"
 SlashCmdList["LFMAPI"] = function(msg)
     if msg == "debug" then
         AutoLFM_API.DebugPrint()
     elseif msg == "status" then
-        local status = AutoLFM_API.GetFullStatus()
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM API]|r Status retrieved successfully")
+        AutoLFM_API.GetFullStatus()
+        Print("Status retrieved successfully")
     else
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM API Commands]|r")
-        DEFAULT_CHAT_FRAME:AddMessage("/lfmapi debug - Show all current data")
-        DEFAULT_CHAT_FRAME:AddMessage("/lfmapi status - Test API availability")
+        Print("Commands:")
+        Print("/lfmapi debug - Show all current data")
+        Print("/lfmapi status - Test API availability")
     end
 end
