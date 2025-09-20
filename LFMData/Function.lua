@@ -176,24 +176,52 @@ function ClearAllBackdrops(framesTable)
 end
 
 function calculer_priorite(niveau_joueur, donjon)
-  local diff_min = niveau_joueur - donjon.lvl_min  -- Différence par rapport au niveau minimum du donjon
-  local diff_max = niveau_joueur - donjon.lvl_max  -- Différence par rapport au niveau maximum du donjon
+  -- Priorités :
+  -- 1 = vert   (adapté, zone de confort)
+  -- 2 = orange (début du range, faisable mais encore un peu bas)
+  -- 3 = rouge  (trop faible, quasi infaisable)
+  -- 4 = gris   (trop haut, trivial)
 
-  local priority
+  local min = donjon.lvl_min
+  local max = donjon.lvl_max
 
-  if diff_min > 7 then
-      priority = 4  -- Gris : trop élevé, le joueur a plus de 7 niveaux au-dessus du donjon
-  elseif diff_min >= 3 then
-      priority = 1  -- Vert : adapté, joueur est à +2 niveaux du niveau minimum du donjon
-  elseif diff_min >= 1 then
-      priority = 2  -- Orange : légèrement en dessous, joueur à 1 niveau en dessous du niveau minimum
-  elseif diff_min < 0 and math.abs(diff_min) > 5 then
-      priority = 3  -- Rouge : trop faible, joueur a plus de 5 niveaux en dessous du donjon
-  else
-      priority = 3  -- Rouge : situation où le joueur est trop faible mais moins de 5 niveaux en dessous
+  --------------------------------------------------
+  -- Règle 1 : Rouge
+  -- Si le joueur est plus d’1 niveau en dessous du niveau minimum
+  -- => trop faible pour entrer
+  -- Exemple : Donjon 24–32, joueur 22 → Rouge
+  --------------------------------------------------
+  if niveau_joueur < min + 1 then
+    return 3
   end
 
-  return priority
+  --------------------------------------------------
+  -- Règle 2 : Orange
+  -- Si le joueur est entre [min+1] et [min+5]
+  -- => il peut y aller, mais reste en début de fourchette (challenge élevé)
+  -- Exemple : Donjon 22–30, joueur 25 → Orange
+  --------------------------------------------------
+  if niveau_joueur <= min + 5 then
+    return 2
+  end
+
+  --------------------------------------------------
+  -- Règle 3 : Vert
+  -- Si le joueur est entre [min+6] et [max]
+  -- => zone idéale pour ce donjon
+  -- Exemple : Donjon 17–24, joueur 25 → Vert
+  --------------------------------------------------
+  if niveau_joueur <= max then
+    return 1
+  end
+
+  --------------------------------------------------
+  -- Règle 4 : Gris
+  -- Si le joueur est au-dessus du niveau max
+  -- => donjon trivial, plus intéressant
+  -- Exemple : Donjon 18–23, joueur 25 → Gris
+  --------------------------------------------------
+  return 4
 end
 
 
