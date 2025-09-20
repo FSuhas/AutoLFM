@@ -211,7 +211,7 @@ function calculer_priorite(niveau_joueur, donjon)
   -- => zone idéale pour ce donjon
   -- Exemple : Donjon 17–24, joueur 25 → Vert
   --------------------------------------------------
-  if niveau_joueur <= max then
+  if niveau_joueur <= max - 1 then
     return 1
   end
 
