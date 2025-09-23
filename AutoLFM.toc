@@ -19,6 +19,7 @@ LFMData\Broadcast.lua
 LFMData\API.lua
 
 LFMUI\Classic.lua
+LFMUI\Turtle.lua
 
 AutoLFM.lua
 

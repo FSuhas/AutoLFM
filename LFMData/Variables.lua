@@ -142,7 +142,8 @@ end
 
 -- Liste des thèmes disponibles
 availableThemes = {
-    "Classic"
+    "Classic",
+    "Turtle"
 }
 
 -- Thème sélectionné (chargé depuis les variables sauvegardées)
