@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: |cffffffffAuto|r|cff0070DDL|rF|cffff0000M|r |cff00FF00- |r|cffadd8e6Gon|r|cffffffffdo|r|cffff7f7fLeon|r|cff00FF00 -|r
 ## Notes: Automated LFM Message
-## Version: 1.6.8
+## Version: 1.6.9
 ## Author: Gondoleon
 ## DefaultState: Enabled
 ## SavedVariables: AutoLFM_SavedVariables
@@ -19,7 +19,6 @@ LFMData\Broadcast.lua
 LFMData\API.lua
 
 LFMUI\Classic.lua
-LFMUI\Modern.lua
 
 AutoLFM.lua
 
