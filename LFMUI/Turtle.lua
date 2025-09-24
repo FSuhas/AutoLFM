@@ -1,4 +1,3 @@
-
 -- Helpers
 local FRAME_SIZE = {384, 512}
 local ROLE_SIZE = {54, 54}
@@ -8,7 +7,6 @@ local function setSize(obj, w, h)
 	obj:SetWidth(w)
 	obj:SetHeight(h)
 end
-
 
 -- Main frame
 local AutoLFMTurtleFrame = CreateFrame("Frame", "AutoLFMTurtleFrame", UIParent)
@@ -21,25 +19,21 @@ local AutoLFMTurtleFrame = CreateFrame("Frame", "AutoLFMTurtleFrame", UIParent)
   AutoLFMTurtleFrame:SetScript("OnDragStop", function(self) this:StopMovingOrSizing() end)
   AutoLFMTurtleFrame:Hide()
 
-
 -- Icon
 local portrait = AutoLFMTurtleFrame:CreateTexture(nil, "BACKGROUND")
   portrait:SetTexture("Interface\\FrameXML\\LFT\\images\\ui-lfg-portrait")
   setSize(portrait, 64, 64)
   portrait:SetPoint("TOPLEFT", 7, -6)
 
-
 -- Title
 local title = AutoLFMTurtleFrame:CreateFontString("AutoLFMTurtleFrameTitle", "OVERLAY", "GameFontNormal")
   title:SetText("AutoLFM")
   title:SetPoint("TOP", 0, -18)
 
-
 -- Close button
 local closeBtn = CreateFrame("Button", nil, AutoLFMTurtleFrame, "UIPanelCloseButton")
   closeBtn:SetPoint("TOPRIGHT", AutoLFMTurtleFrame, "TOPRIGHT", -27, -8)
   closeBtn:SetScript("OnClick", function() AutoLFMTurtleFrame:Hide() end)
-
 
 -- Windows texture
 local frame = AutoLFMTurtleFrame:CreateTexture(nil, "ARTWORK")
@@ -47,13 +41,111 @@ local frame = AutoLFMTurtleFrame:CreateTexture(nil, "ARTWORK")
   setSize(frame, 512, 512)
   frame:SetPoint("TOPLEFT", AutoLFMTurtleFrame, "TOPLEFT")
 
-
 -- Background image
 local bgWall = AutoLFMTurtleFrame:CreateTexture(nil, "BACKGROUND")
   bgWall:SetTexture("Interface\\FrameXML\\LFT\\images\\ui-lfg-background-dungeonwall")
   setSize(bgWall, 512, 256)
   bgWall:SetPoint("TOP", 85, -155)
 
+-- Tabs
+local CurrentTab = 1
+local function CreateTab(name, id, text, parent)
+  local tab = CreateFrame("Button", name, parent)
+	  setSize(tab, 96, 32)
+	  tab:SetID(id)
+	local tabText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	  tabText:SetPoint("CENTER", 0, 2)
+	  tabText:SetText(text)
+	  tab.text = tabText
+	  tab.isActive = false
+	return tab
+end
+local tab1 = CreateTab("AutoLFMTurtleFrameTab1", 1, "Dungeons", AutoLFMTurtleFrame)
+local tab2 = CreateTab("AutoLFMTurtleFrameTab2", 2, "Raids", AutoLFMTurtleFrame)
+local tab3 = CreateTab("AutoLFMTurtleFrameTab3", 3, "Options", AutoLFMTurtleFrame)
+local function SetTab(frame, id)
+	CurrentTab = id
+tab1.isActive = false
+  tab1:ClearAllPoints()
+	tab1:SetPoint("BOTTOMLEFT", AutoLFMTurtleFrame, "BOTTOMLEFT", 20, 45)
+	tab1:SetNormalTexture(tab1:CreateTexture(nil, "BACKGROUND"))
+	tab1:GetNormalTexture():SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-InactiveTab")
+	tab1:GetNormalTexture():SetAllPoints()
+	tab1.text:SetTextColor(1, 0.82, 0)
+tab2.isActive = false
+	tab2:ClearAllPoints()
+  tab2:SetPoint("BOTTOMLEFT", AutoLFMTurtleFrame, "BOTTOMLEFT", 110, 45)
+	tab2:SetNormalTexture(tab2:CreateTexture(nil, "BACKGROUND"))
+	tab2:GetNormalTexture():SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-InactiveTab")
+	tab2:GetNormalTexture():SetAllPoints()
+	tab2.text:SetTextColor(1, 0.82, 0)
+tab3.isActive = false
+	tab3:ClearAllPoints()
+  tab3:SetPoint("BOTTOMLEFT", AutoLFMTurtleFrame, "BOTTOMLEFT", 250, 45)
+	tab3:SetNormalTexture(tab2:CreateTexture(nil, "BACKGROUND"))
+	tab3:GetNormalTexture():SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-InactiveTab")
+	tab3:GetNormalTexture():SetAllPoints()
+	tab3.text:SetTextColor(1, 0.82, 0)
+if id == 1 then
+	tab1.isActive = true
+	  tab1:SetNormalTexture(tab1:CreateTexture(nil, "BACKGROUND"))
+	  tab1:GetNormalTexture():SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ActiveTab")
+	  tab1:GetNormalTexture():SetAllPoints()
+		tab1.text:SetTextColor(0.8, 0.8, 0.8)
+    tab1:SetScript("OnEnter", function()
+		  tab1:SetHighlightTexture(nil)
+    end)
+    tab2:SetScript("OnEnter", function()
+		  tab2:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight")
+    end)
+    tab3:SetScript("OnEnter", function()
+		  tab3:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight")
+    end)
+elseif id == 2 then
+	tab2.isActive = true
+		tab2:SetNormalTexture(tab2:CreateTexture(nil, "BACKGROUND"))
+		tab2:GetNormalTexture():SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ActiveTab")
+		tab2:GetNormalTexture():SetAllPoints()
+		tab2.text:SetTextColor(0.8, 0.8, 0.8)
+    tab1:SetScript("OnEnter", function()
+		  tab1:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight")
+    end)
+    tab2:SetScript("OnEnter", function()
+		  tab2:SetHighlightTexture(nil)
+    end)
+    tab3:SetScript("OnEnter", function()
+		  tab3:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-DialogBox-Button-Highlight")
+    end)
+else
+  tab3.isActive = true
+		tab3:SetNormalTexture(tab2:CreateTexture(nil, "BACKGROUND"))
+		tab3:GetNormalTexture():SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ActiveTab")
+		tab3:GetNormalTexture():SetAllPoints()
+		tab3.text:SetTextColor(0.8, 0.8, 0.8)
+    tab1:SetScript("OnEnter", function()
+		  tab1:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight")
+    end)
+    tab2:SetScript("OnEnter", function()
+		  tab2:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight")
+    end)
+    tab3:SetScript("OnEnter", function()
+		  tab3:SetHighlightTexture(nil)
+    end)
+	end
+end
+tab1:SetScript("OnClick", function()
+	SetTab(AutoLFMTurtleFrame, 1)
+	print("Dungeons")
+end)
+tab2:SetScript("OnClick", function()
+	SetTab(AutoLFMTurtleFrame, 2)
+	print("Raids")
+end)
+tab3:SetScript("OnClick", function()
+	SetTab(AutoLFMTurtleFrame, 3)
+	print("Options")
+end)
+SetTab(AutoLFMTurtleFrame, 1)
 
 -- Role buttons
 local roleData = {
@@ -80,7 +172,6 @@ for i, data in ipairs(roleData) do
     btn:SetScript("OnClick", function() check:Click() end)
 end
 
-
 -- InputUser broadcast
 local function setupPlaceholder(editBox, text)
 	local placeholder = editBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
@@ -101,7 +192,6 @@ local editBox = CreateFrame("EditBox", "AutoLFMTurtleFrameEditBox", AutoLFMTurtl
   editBox:SetMaxLetters(50)
   setupPlaceholder(editBox, "Add details")
 
-
 -- Raids/Dungeons
 local function updateInstanceList()
 	local data = showingRaids and raids or donjons
@@ -111,7 +201,6 @@ local function updateInstanceList()
 	else
 		raidSliderBg:Hide()
 	end
-
 
 -- Scroll
 if currentScrollContent then
@@ -155,7 +244,6 @@ local function updateScrollFrameSize()
 end
 updateScrollFrameSize()
 
-
 -- Raid size background
 raidSliderBg = CreateFrame("Frame", nil, AutoLFMTurtleFrame)
   setSize(raidSliderBg, 295, 30)
@@ -163,12 +251,10 @@ raidSliderBg = CreateFrame("Frame", nil, AutoLFMTurtleFrame)
   raidSliderBg:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background", edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", tile = true, tileSize = 32, edgeSize = 8, insets = {left = 4, right = 4, top = 4, bottom = 4}})
   raidSliderBg:Hide()
 
-
 -- Raid size label
 local sliderLabel = raidSliderBg:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sliderLabel:SetText("Group Size:")
   sliderLabel:SetPoint("LEFT", raidSliderBg, "LEFT", 10, 0)
-
 
 -- Input raid size
 local sizeEditBox = CreateFrame("EditBox", "AutoLFMTurtleFrameSizeEditBox", raidSliderBg, "InputBoxTemplate")
@@ -177,7 +263,6 @@ local sizeEditBox = CreateFrame("EditBox", "AutoLFMTurtleFrameSizeEditBox", raid
   sizeEditBox:SetAutoFocus(false)
   sizeEditBox:SetMaxLetters(2)
   sizeEditBox:SetText("25")
-
 
 -- Raid size slider
 local raidSizeSlider = CreateFrame("Slider", "AutoLFMTurtleFrameRaidSizeSlider", raidSliderBg)
@@ -189,7 +274,6 @@ local raidSizeSlider = CreateFrame("Slider", "AutoLFMTurtleFrameRaidSizeSlider",
   raidSizeSlider:SetOrientation("HORIZONTAL")
   raidSizeSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
   raidSizeSlider:SetBackdrop({bgFile = "Interface\\Buttons\\UI-SliderBar-Background", edgeFile = "Interface\\Buttons\\UI-SliderBar-Border", tile = true, tileSize = 8, edgeSize = 8, insets = {left = 3, right = 3, top = 6, bottom = 6}})
-
 
 -- Sync slider and input raid size
 raidSizeSlider:SetScript("OnValueChanged", function()
@@ -203,10 +287,8 @@ sizeEditBox:SetScript("OnTextChanged", function()
 	  end
 end)
 
-
 -- Instance list
 updateInstanceList()
-
 
 -- Raids button
 local instanceTypeBtn = CreateFrame("Button", "AutoLFMTurtleFrameRaidsButton", AutoLFMTurtleFrame, "UIPanelButtonTemplate")
@@ -220,19 +302,16 @@ local instanceTypeBtn = CreateFrame("Button", "AutoLFMTurtleFrameRaidsButton", A
 	updateScrollFrameSize()
 end)
 
-
 -- Search button
 local searchBtn = CreateFrame("Button", "AutoLFMTurtleFrameSearchButton", AutoLFMTurtleFrame, "UIPanelButtonTemplate")
   setSize(searchBtn, BUTTON_SIZE[1], BUTTON_SIZE[2])
   searchBtn:SetPoint("BOTTOM", AutoLFMTurtleFrame, "BOTTOM", -10, 79)
   searchBtn:SetText("Search")
 
-
 -- Options button
 local optionsBtn = CreateFrame("Button", "AutoLFMTurtleFrameOptionsButton", AutoLFMTurtleFrame, "UIPanelButtonTemplate")
   setSize(optionsBtn, BUTTON_SIZE[1], BUTTON_SIZE[2])
   optionsBtn:SetPoint("BOTTOMRIGHT", AutoLFMTurtleFrame, "BOTTOMRIGHT", -45, 79)
-  optionsBtn:SetText("Options")
   optionsBtn:SetText("Options")
   optionsBtn:GetNormalTexture():SetVertexColor(0.4, 0.6, 1.0)
   optionsBtn:GetHighlightTexture():SetVertexColor(0.6, 0.8, 1.0)
