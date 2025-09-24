@@ -1,4 +1,7 @@
 AddOn: AutoLFM
+Version: 1.6.9
+Add theme management
+
 Version: 1.6.8
 Add API
 

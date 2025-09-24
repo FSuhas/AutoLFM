@@ -284,3 +284,45 @@ function clearSelectedRoles()
     end
     -- Mettre à jour l'affichage après avoir désélectionné tous les rôles
 end
+
+---------------------------------------------------------------------------------
+--                           Gestion des Thèmes                               --
+---------------------------------------------------------------------------------
+
+function GetCurrentTheme()
+    return selectedTheme or "Classic"
+end
+
+function LoadTheme(themeName)
+    if not themeName or themeName == "" then
+        if AutoLFM_SavedVariables and AutoLFM_SavedVariables[uniqueIdentifier] then
+            themeName = AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme
+        end
+        if not themeName or themeName == "" then
+            themeName = "Classic"
+        end
+    end
+    
+    themeName = string.upper(string.sub(themeName, 1, 1)) .. string.lower(string.sub(themeName, 2))
+    
+    local themeExists = false
+    for _, theme in ipairs(availableThemes) do
+        if theme == themeName then
+            themeExists = true
+            break
+        end
+    end
+    
+    if not themeExists then
+        DEFAULT_CHAT_FRAME:AddMessage("Theme '" .. themeName .. "' not found. Loading Classic theme.")
+        themeName = "Classic"
+    end
+    
+    if AutoLFM_SavedVariables and AutoLFM_SavedVariables[uniqueIdentifier] then
+        AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme = themeName
+    end
+    selectedTheme = themeName
+    
+    local themeFile = "Interface\\AddOns\\AutoLFM\\LFMUI\\" .. themeName .. ".lua"
+    
+end
