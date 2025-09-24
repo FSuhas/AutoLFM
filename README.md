@@ -51,23 +51,6 @@ Les commandes Slash permettent d'interagir facilement avec l'addon via la fenêt
 1. Ouvrez le menu des options de l'addon avec `/lfm`.
 2. Vous pouvez personnaliser le message de recherche de groupe et définir des préférences spécifiques pour les types de groupes que vous souhaitez contruire.
 
-##  Add theme
-`AutoLFM.toc` :
-```
-LFMUI/_MyTheme_.lua
-```
-`LFMData/Variables.lua` :
-```lua
-availableThemes = {
-      [...],
-      "_MyTheme_"
-}
-```
-Main frame in `LFMUI/_MyTheme_.lua` must be :
-```lua
-AutoLFM_MyTheme_Frame = CreateFrame("Frame", "AutoLFM_MyTheme_Frame", UIParent)
-```
-
 ## Dépannage
 
 - **Le message LFM ne s'affiche pas** : Assurez-vous que l'addon est bien activé dans le menu AddOns avant de vous connecter.

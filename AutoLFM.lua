@@ -38,8 +38,6 @@ local function OnPlayerEnteringWorld(self, event)
   DEFAULT_CHAT_FRAME:AddMessage(seg2 .. seg3 .. seg4 .. seg5 .. seg6 .. seg7 .. seg8 .. seg9)
   DEFAULT_CHAT_FRAME:AddMessage(seg10 .. seg11)
   
-  LoadTheme(AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme)
-  
   InitMinimapButton()
   DisplayDungeonsByColor()
   ShowDungeonUI()
@@ -116,12 +114,11 @@ end
 
 -- Définir les slash commandes
 SLASH_LFM1 = "/lfm"
-SLASH_LFM2 = "/lfm help"
-SLASH_LFM3 = "/lfm broadcast"
-SLASH_LFM4 = "/lfm minimap show"
-SLASH_LFM5 = "/lfm minimap hide"
-SLASH_LFM6 = "/lfm minimap reset"
-SLASH_LFM7 = "/lfm theme"
+SLASH_LFM3 = "/lfm help"
+SLASH_LFM2 = "/lfm broadcast"
+SLASH_LFM5 = "/lfm minimap show"
+SLASH_LFM6 = "/lfm minimap hide"
+SLASH_LFM = "/lfm minimap reset"
 
 
 -- Fonction principale des commandes Slash
@@ -139,23 +136,16 @@ SlashCmdList["LFM"] = function(msg)
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap show   |cffFFFFFFDisplays the minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap hide   |cffFFFFFFHide minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap reset   |cffFFFFFFReset minimap button position.")
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme <name>   |cffFFFFFFChange theme (Classic, Modern).")
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme list   |cffFFFFFFList available themes.")
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme current   |cffFFFFFFShow current theme.")
         return
     end
 
     -- Commande pour ouvrir la fenêtre AutoLFM
     if args[1] == "" or args[1] == "open" then
-        local frameName = "AutoLFM" .. GetCurrentTheme() .. "Frame"
-        if GetCurrentTheme() == "Classic" then frameName = "AutoLFM" end
-        
-        local frame = getglobal(frameName)
-        if frame then
-            if frame:IsVisible() then
-                frame:Hide()
+        if AutoLFM then
+            if AutoLFM:IsVisible() then
+                AutoLFM:Hide()  -- Si la fenêtre est visible, la cacher
             else
-                frame:Show()
+                AutoLFM:Show()  -- Si la fenêtre est cachée, l'afficher
             end
         end
         return
@@ -204,26 +194,13 @@ SlashCmdList["LFM"] = function(msg)
         return
     end
 
-    -- Gestion des thèmes
-    if args[1] == "theme" then
-        if args[2] == "list" then
-            DEFAULT_CHAT_FRAME:AddMessage("|cffffff00Available themes:")
-            for _, theme in ipairs(GetAvailableThemes()) do
-                local color = (theme == GetCurrentTheme()) and "|cff00ff00" or "|cffffffff"
-                DEFAULT_CHAT_FRAME:AddMessage(color .. "- " .. theme)
-            end
-            return
-        elseif args[2] == "current" then
-            DEFAULT_CHAT_FRAME:AddMessage("|cffffff00Current theme: |cff00ff00" .. GetCurrentTheme())
-            return
-        elseif args[2] and args[2] ~= "" then
-            LoadTheme(args[2])
-            return
-        else
-            DEFAULT_CHAT_FRAME:AddMessage("|cffff0000Usage: /lfm theme <theme_name> | list | current")
-            return
-        end
-    end
+    -- if args[1] == "ui" and args[2] == "classic" then
+    --     LoadUILayout("Classic")
+    --     return
+    -- elseif args[1] == "ui" and args[2] == "modern" then
+    --     LoadUILayout("Modern")
+    --     return
+    -- end
 
     -- Ajout dans la fonction SlashCmdList["LFM"]
     if args[1] == "minimap" and args[2] == "reset" then

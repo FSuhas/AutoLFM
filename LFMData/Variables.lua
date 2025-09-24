@@ -135,19 +135,6 @@ if not AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels then
     AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = {}
 end
 
--- Initialiser le thème si nécessaire
-if not AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme then
-    AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme = "Classic"
-end
-
--- Liste des thèmes disponibles
-availableThemes = {
-    "Classic",
-    "Turtle"
-}
-
--- Thème sélectionné (chargé depuis les variables sauvegardées)
-selectedTheme = AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme
 
 -- Liste des canaux sélectionnés (chargée depuis les variables sauvegardées)
 -- Référence pratique
