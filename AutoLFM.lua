@@ -240,23 +240,54 @@ mgFrame = CreateFrame("Frame", "MGSpamFrame")
 -- Slash command
 SLASH_MG1 = "/mg"
 SlashCmdList["MG"] = function(msg)
-    if msg == "stop" then
+    local args = {}
+    for word in string.gfind(msg, "[^ ]+") do
+        table.insert(args, word)
+    end
+
+    -- Commande stop
+    if args[1] == "stop" then
         mgRunning = false
         mgFrame:SetScript("OnUpdate", nil)
         DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[MG]|r Spam arrêté.")
         return
     end
 
-    if msg == "" then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[MG]|r Usage : /mg <message> ou /mg stop")
+    -- Commande interval
+    if args[1] == "interval" then
+        if args[2] and tonumber(args[2]) then
+            mgInterval = tonumber(args[2])
+            DEFAULT_CHAT_FRAME:AddMessage("|cff55ff55[MG]|r Nouvel interval : " .. mgInterval .. " secondes.")
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[MG]|r Usage : /mg interval <secondes>")
+        end
         return
     end
 
+    -- Commande msg (affiche le message, l'intervalle et l'état)
+    if args[1] == "msg" then
+        if mgMessage then
+            local etat = mgRunning and "|cff55ff55Actif|r" or "|cffff5555Inactif|r"
+            DEFAULT_CHAT_FRAME:AddMessage("|cff55ff55[MG]|r Message : " .. mgMessage .. " | Intervalle : " .. mgInterval .. "s | État : " .. etat)
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[MG]|r Aucun message défini.")
+        end
+        return
+    end
+
+    -- Pas de message
+    if msg == "" then
+        DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[MG]|r Usage : /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
+        return
+    end
+
+    -- Vérif guilde
     if not IsInGuild() then
         DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[MG]|r Vous n'êtes pas dans une guilde.")
         return
     end
 
+    -- Lancement spam
     mgMessage = msg
     mgElapsed = mgInterval
     mgRunning = true
@@ -280,12 +311,12 @@ SlashCmdList["MG"] = function(msg)
         if mgElapsed >= mgInterval then
             mgElapsed = 0
             SendChatMessage("|cff00ffff" .. mgMessage .. "|r", "GUILD")
-
         end
     end)
 
     DEFAULT_CHAT_FRAME:AddMessage("|cff55ff55[MG]|r Spam lancé toutes les " .. mgInterval .. "s : " .. msg)
 end
+
 
 
 ---------------------------------------------------------------------------------
