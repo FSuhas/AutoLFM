@@ -104,7 +104,6 @@ end
 -- Définir les slash commandes
 SLASH_LFM1 = "/lfm"
 SLASH_LFM3 = "/lfm help"
-SLASH_LFM2 = "/lfm broadcast"
 SLASH_LFM5 = "/lfm minimap show"
 SLASH_LFM6 = "/lfm minimap hide"
 SLASH_LFM = "/lfm minimap reset"
@@ -121,7 +120,6 @@ SlashCmdList["LFM"] = function(msg)
         DEFAULT_CHAT_FRAME:AddMessage("|cffffff00Available commands :")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm  |cffFFFFFFOpens AutoLFM window.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm help   |cffFFFFFFDisplays all available orders.")  -- Bleu clair pour la commande et blanc pour l'explication
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm broadcast   |cffFFFFFFOpen Broadcast settings.")  -- Bleu clair pour la commande et blanc pour l'explication
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap show   |cffFFFFFFDisplays the minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap hide   |cffFFFFFFHide minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap reset   |cffFFFFFFReset minimap button position.")
@@ -160,19 +158,6 @@ SlashCmdList["LFM"] = function(msg)
             DEFAULT_CHAT_FRAME:AddMessage("The minimap button has been hidden.", 0.0, 1.0, 0.0) -- Texte vert
         else
             DEFAULT_CHAT_FRAME:AddMessage("The minimap button is already hidden.", 1.0, 0.0, 0.0) -- Texte rouge
-        end
-        return
-    end
-
-    if args[1] == "broadcast" then
-        if channelsFrame:IsVisible() then
-            channelsFrame:Hide()  -- Cacher le cadre des canaux
-            DEFAULT_CHAT_FRAME:AddMessage("Channels frame hidden.")  -- Message de confirmation
-        else
-            CreateChannelButtons()
-            LoadSelectedChannels()
-            channelsFrame:Show()  -- Afficher le cadre des canaux
-            DEFAULT_CHAT_FRAME:AddMessage("Channels frame displayed.")  -- Message de confirmation
         end
         return
     end

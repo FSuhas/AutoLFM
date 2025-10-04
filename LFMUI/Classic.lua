@@ -571,12 +571,6 @@ channelsFrame = CreateFrame("Frame", nil, insideMore)
 channelsFrame:SetPoint("TOP", sliderframe, "BOTTOM", 0, -20)
 channelsFrame:SetWidth(250)
 channelsFrame:SetHeight(90)
-channelsFrame:SetBackdrop({
-  bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-  edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-  edgeSize = 12,
-  insets = { left = 5, right = 5, top = 5, bottom = 5 },
-})
 
 local titleText = channelsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 titleText:SetPoint("TOP", channelsFrame, "TOP", 0, -10)
