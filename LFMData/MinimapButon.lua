@@ -7,9 +7,9 @@ function InitMinimapButton()
 
     if AutoLFMMinimapBtn then
         if isHidden then
-            AutoLFMMinimapBtn:Hide()
+            HideUIPanel(AutoLFM)
         else
-            AutoLFMMinimapBtn:Show()
+            ShowUIPanel(AutoLFM)
         end
         return
     end

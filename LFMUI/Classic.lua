@@ -1,17 +1,17 @@
----------------------------------------------------------------------------------
---                       Cadre Principal AutoLFM classic                       --
----------------------------------------------------------------------------------
+--------------------------------------------------
+-- Variables
+--------------------------------------------------
 searchStartTime = 0
+local texturePath = "Interface\\AddOns\\AutoLFM\\LFMUI\\Textures\\"
 
+--------------------------------------------------
+-- Main
+--------------------------------------------------
 AutoLFM = CreateFrame("Frame", "AutoLFM", UIParent)
+UIPanelWindows["AutoLFM"] = { area = "left", pushable = 3 }
 AutoLFM:SetWidth(384)
 AutoLFM:SetHeight(512)
-AutoLFM:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-AutoLFM:EnableMouse(true)
-AutoLFM:SetMovable(true)
-AutoLFM:RegisterForDrag("LeftButton")
-AutoLFM:SetScript("OnDragStart", function(self) this:StartMoving() end)
-AutoLFM:SetScript("OnDragStop", function(self) this:StopMovingOrSizing() end)
+AutoLFM:Hide()
 
 -- Background Textures (gauche)
 tl = AutoLFM:CreateTexture(nil, "ARTWORK")

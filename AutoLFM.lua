@@ -143,9 +143,9 @@ SlashCmdList["LFM"] = function(msg)
     if args[1] == "" or args[1] == "open" then
         if AutoLFM then
             if AutoLFM:IsVisible() then
-                AutoLFM:Hide()  -- Si la fenêtre est visible, la cacher
+                HideUIPanel(AutoLFM)  -- Si la fenêtre est visible, la cacher
             else
-                AutoLFM:Show()  -- Si la fenêtre est cachée, l'afficher
+                ShowUIPanel(AutoLFM)  -- Si la fenêtre est cachée, l'afficher
             end
         end
         return
