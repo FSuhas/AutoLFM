@@ -65,18 +65,18 @@ function tableCount(t)
     return count
 end
 
-function OnUpdateHandler(self, elapsed)
-    now = GetTime()
-    if now >= nextChange then
-        eyeOpen = not eyeOpen
-        eye:SetTexture(eyeOpen and openTexture or closedTexture)
-        if eyeOpen then
-            nextChange = now + math.random(1, 3)
-        else
-            nextChange = now + 0.15
-        end
-    end
-end
+--function OnUpdateHandler(self, elapsed)
+--    now = GetTime()
+--    if now >= nextChange then
+--        eyeOpen = not eyeOpen
+--        eye:SetTexture(eyeOpen and openTexture or closedTexture)
+--        if eyeOpen then
+--            nextChange = now + math.random(1, 3)
+--        else
+--            nextChange = now + 0.15
+--        end
+--    end
+--end
 
 for _, donjon in pairs(donjons) do
   if donjonCount >= maxDonjons then

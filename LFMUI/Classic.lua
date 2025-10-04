@@ -8,43 +8,30 @@ local texturePath = "Interface\\AddOns\\AutoLFM\\LFMUI\\Textures\\"
 -- Main
 --------------------------------------------------
 AutoLFM = CreateFrame("Frame", "AutoLFM", UIParent)
-UIPanelWindows["AutoLFM"] = { area = "left", pushable = 3 }
-AutoLFM:SetWidth(384)
-AutoLFM:SetHeight(512)
-AutoLFM:Hide()
+  UIPanelWindows["AutoLFM"] = { area = "left", pushable = 3 }
+  AutoLFM:SetWidth(384)
+  AutoLFM:SetHeight(512)
+  AutoLFM:Hide()
 
--- Background Textures (gauche)
-tl = AutoLFM:CreateTexture(nil, "ARTWORK")
-tl:SetTexture("Interface\\Spellbook\\UI-SpellbookPanel-TopLeft")
-tl:SetWidth(256)
-tl:SetHeight(256)
-tl:SetPoint("TOPLEFT", 0, 0)
+local mainTexture = AutoLFM:CreateTexture(nil, "LOW")
+  mainTexture:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 0, 0)
+  mainTexture:SetWidth(512)
+  mainTexture:SetHeight(512)
+  mainTexture:SetTexture(texturePath .. "mainFrame")
 
-tr = AutoLFM:CreateTexture(nil, "ARTWORK")
-tr:SetTexture("Interface\\Spellbook\\UI-SpellbookPanel-TopRight")
-tr:SetWidth(128)
-tr:SetHeight(256)
-tr:SetPoint("TOPRIGHT", 0, 0)
+local mainIcon = AutoLFM:CreateTexture(nil, "BACKGROUND")
+  mainIcon:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 7, -6)
+  mainIcon:SetWidth(64)
+  mainIcon:SetHeight(64)
+  mainIcon:SetTexture(texturePath .. "mainIcon")
 
-bl = AutoLFM:CreateTexture(nil, "ARTWORK")
-bl:SetTexture("Interface\\Spellbook\\UI-SpellbookPanel-BotLeft")
-bl:SetWidth(256)
-bl:SetHeight(256)
-bl:SetPoint("BOTTOMLEFT", 0, 0)
+local mainTitle = AutoLFM:CreateFontString(nil, "MEDIUM", "GameFontNormal")
+  mainTitle:SetPoint("TOP", AutoLFM, "TOP", 0, -18)
+  mainTitle:SetText("AutoLFM")
 
-br = AutoLFM:CreateTexture(nil, "ARTWORK")
-br:SetTexture("Interface\\Spellbook\\UI-SpellbookPanel-BotRight")
-br:SetWidth(128)
-br:SetHeight(256)
-br:SetPoint("BOTTOMRIGHT", 0, 0)
-
--- Icon (Overlay)
-ring = AutoLFM:CreateTexture("AutoLFMSpellbookRing", "OVERLAY")
-ring:SetTexture("Interface\\AddOns\\AutoLFM\\icon\\ring.png")
-ring:SetWidth(52)
-ring:SetHeight(52)
-ring:SetPoint("TOPLEFT", 13, -11)
-ring:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+local close = CreateFrame("Button", nil, AutoLFM, "UIPanelCloseButton")
+  close:SetPoint("TOPRIGHT", AutoLFM, "TOPRIGHT", -27, -8)
+  close:SetScript("OnClick", function() HideUIPanel(AutoLFM) end)
 
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
@@ -80,12 +67,12 @@ rt_br:SetHeight(256)
 rt_br:SetPoint("BOTTOMRIGHT", rightPanel, "BOTTOMRIGHT")
 
 
-eyeOpen = true
-eye = AutoLFM:CreateTexture(nil, "OVERLAY")
-eye:SetWidth(52)
-eye:SetHeight(52)
-eye:SetPoint("TOPLEFT", 13, -11)
-eye:SetTexture(openTexture)
+--eyeOpen = true
+--eye = AutoLFM:CreateTexture(nil, "OVERLAY")
+--eye:SetWidth(52)
+--eye:SetHeight(52)
+--eye:SetPoint("TOPLEFT", 13, -11)
+--eye:SetTexture(openTexture)
 
 
 -- Close Button
