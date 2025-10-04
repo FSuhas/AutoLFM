@@ -7,63 +7,54 @@ function updateMsgFrameCombined()
   local totalGroupSize = 5
   
   local selectedContent = {}
-  local selectedCountRoles = 0
-  
-  for _, role in pairs(selectedRoles) do
-    selectedCountRoles = selectedCountRoles + 1
-  end
+  local selectedCountRoles = table.getn(selectedRoles)
   
   local rolesList = table.concat(selectedRoles, " & ")
-  local finalRolesSegment = ""
-  if selectedCountRoles == 3 then
-    finalRolesSegment = "Need All"
-  elseif selectedCountRoles > 0 then
-    finalRolesSegment = "Need " .. rolesList
-  end
+  local finalRolesSegment = selectedCountRoles == 3 and "Need All" or (selectedCountRoles > 0 and "Need " .. rolesList or "")
   
   local selectedRaids = GetSelectedRaids()
   local isRaidSelected = false
   local raidSize = 0
   
+  -- Process raids
   if table.getn(selectedRaids) > 0 then
-    for _, raidTag in pairs(selectedRaids) do
-      for _, raid in pairs(raids) do
-        if raid.tag == raidTag then
-          table.insert(selectedContent, raid.tag)
-          
-          if raid.sizeMin == raid.sizeMax then
-            if currentSliderFrame then
-              currentSliderFrame:Hide()
-              currentSliderFrame = nil
-            end
-            if sliderSizeFrame then
-              sliderSizeFrame:Hide()
-            end
-            raidSize = raid.sizeMin
-            sliderValue = raid.sizeMin
-          else
-            if sliderSize then
-              sliderSize:SetMinMaxValues(raid.sizeMin, raid.sizeMax)
-              local initVal = sliderValue ~= 0 and sliderValue or raid.sizeMin
-              sliderSize:SetValue(initVal)
-              if UpdateSliderText then
-                UpdateSliderText(sliderSize:GetValue())
-              end
-            end
-            if AutoLFM and AutoLFM:IsShown() and sliderSizeFrame then
-              sliderSizeFrame:Show()
-              currentSliderFrame = sliderSizeFrame
-            end
-            raidSize = sliderValue
+    local raidTag = selectedRaids[1]
+    for _, raid in pairs(raids) do
+      if raid.tag == raidTag then
+        table.insert(selectedContent, raid.tag)
+        
+        -- Handle slider visibility
+        local isFixedSize = raid.sizeMin == raid.sizeMax
+        
+        if isFixedSize then
+          if currentSliderFrame then
+            currentSliderFrame:Hide()
+            currentSliderFrame = nil
           end
-          
-          isRaidSelected = true
-          break
+          if sliderSizeFrame then sliderSizeFrame:Hide() end
+          raidSize = raid.sizeMin
+          sliderValue = raid.sizeMin
+        else
+          if sliderSize then
+            sliderSize:SetMinMaxValues(raid.sizeMin, raid.sizeMax)
+            local initVal = sliderValue ~= 0 and sliderValue or raid.sizeMin
+            sliderSize:SetValue(initVal)
+            if UpdateSliderText then UpdateSliderText(initVal) end
+          end
+          if AutoLFM and AutoLFM:IsShown() and sliderSizeFrame then
+            sliderSizeFrame:Show()
+            currentSliderFrame = sliderSizeFrame
+          end
+          raidSize = sliderValue
         end
+        
+        isRaidSelected = true
+        break
       end
     end
   end
   
+  -- Process dungeons if no raid selected
   if not isRaidSelected then
     for _, dungeonTag in pairs(selectedDungeons) do
       for _, dungeon in pairs(dungeons) do
@@ -71,7 +62,7 @@ function updateMsgFrameCombined()
           local missingPlayers = totalGroupSize - totalPlayersInGroup
           if missingPlayers < 0 then
             missingPlayers = 0
-            stopMessageBroadcast()
+            if stopMessageBroadcast then stopMessageBroadcast() end
           end
           if missingPlayers > 0 then
             table.insert(selectedContent, dungeon.tag)
@@ -83,23 +74,21 @@ function updateMsgFrameCombined()
   end
   
   local contentCount = table.getn(selectedContent)
+  
+  -- Early exit if nothing selected
   if contentCount == 0 and selectedCountRoles == 0 and userInputMessage == "" then
     combinedMessage = ""
-    msgTextDj:SetText(combinedMessage)
-    msgTextRaids:SetText(combinedMessage)
+    if msgTextDj then msgTextDj:SetText("") end
+    if msgTextRaids then msgTextRaids:SetText("") end
     return
   end
   
+  -- Calculate missing players
   local mate = 0
   local raidPlayerCountText = ""
-  local currentCount = 0
   
   if isRaidSelected then
-    if totalPlayersInRaid > 0 then
-      currentCount = totalPlayersInRaid
-    else
-      currentCount = totalPlayersInGroup
-    end
+    local currentCount = totalPlayersInRaid > 0 and totalPlayersInRaid or totalPlayersInGroup
     mate = raidSize - currentCount
     if mate < 0 then mate = 0 end
     raidPlayerCountText = " " .. currentCount .. "/" .. raidSize
@@ -108,40 +97,30 @@ function updateMsgFrameCombined()
     if mate < 0 then mate = 0 end
   end
   
+  -- Build message
   local contentMessage = table.concat(selectedContent, " & ")
   
   if contentCount == 0 and selectedCountRoles == 0 then
     combinedMessage = userInputMessage
-    
   elseif contentCount == 0 and selectedCountRoles > 0 then
     combinedMessage = finalRolesSegment
     if userInputMessage ~= "" then
       combinedMessage = combinedMessage .. " " .. userInputMessage
     end
-    
   elseif contentCount > 0 and selectedCountRoles == 0 then
-    if isRaidSelected then
-      combinedMessage = contentMessage .. " LF" .. mate .. "M" .. raidPlayerCountText
-    else
-      combinedMessage = "LF" .. mate .. "M for " .. contentMessage
-    end
+    combinedMessage = isRaidSelected and (contentMessage .. " LF" .. mate .. "M" .. raidPlayerCountText) or ("LF" .. mate .. "M for " .. contentMessage)
     if userInputMessage ~= "" then
       combinedMessage = combinedMessage .. " " .. userInputMessage
     end
-    
-  elseif contentCount > 0 and selectedCountRoles > 0 then
-    if isRaidSelected then
-      combinedMessage = contentMessage .. " LF" .. mate .. "M " .. finalRolesSegment .. raidPlayerCountText
-    else
-      combinedMessage = "LF" .. mate .. "M for " .. contentMessage .. " " .. finalRolesSegment
-    end
+  else
+    combinedMessage = isRaidSelected and (contentMessage .. " LF" .. mate .. "M " .. finalRolesSegment .. raidPlayerCountText) or ("LF" .. mate .. "M for " .. contentMessage .. " " .. finalRolesSegment)
     if userInputMessage ~= "" then
       combinedMessage = combinedMessage .. " " .. userInputMessage
     end
   end
   
-  msgTextDj:SetText(combinedMessage)
-  msgTextRaids:SetText(combinedMessage)
+  if msgTextDj then msgTextDj:SetText(combinedMessage) end
+  if msgTextRaids then msgTextRaids:SetText(combinedMessage) end
   
   if AutoLFM_API and AutoLFM_API.NotifyDataChanged then
     AutoLFM_API.NotifyDataChanged()

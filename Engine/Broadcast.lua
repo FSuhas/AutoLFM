@@ -1,19 +1,24 @@
 --------------------------------------------------
 -- Broadcast Functions
 --------------------------------------------------
+local lastMessageSent = 0
+local MIN_INTERVAL = 30
+
+--------------------------------------------------
+-- Icon Toggle
+--------------------------------------------------
 function toggleMinimapButtonIcon()
   if not AutoLFMMinimapBtn then return end
   
-  local randomChoice = math.random(1, 2)
-  if randomChoice == 1 then
-    AutoLFMMinimapBtn:SetNormalTexture(texturePath .. "Eyes\\eye01")
-    AutoLFMMinimapBtn:SetPushedTexture(texturePath .. "Eyes\\eye04")
-  else
-    AutoLFMMinimapBtn:SetNormalTexture(texturePath .. "Eyes\\eye04")
-    AutoLFMMinimapBtn:SetPushedTexture(texturePath .. "Eyes\\eye01")
-  end
+  local icon = math.random(1, 2) == 1 and "eye01" or "eye04"
+  local pushed = icon == "eye01" and "eye04" or "eye01"
+  AutoLFMMinimapBtn:SetNormalTexture(texturePath .. "Eyes\\" .. icon)
+  AutoLFMMinimapBtn:SetPushedTexture(texturePath .. "Eyes\\" .. pushed)
 end
 
+--------------------------------------------------
+-- Stop Broadcast
+--------------------------------------------------
 function stopMessageBroadcast()
   isBroadcasting = false
   DEFAULT_CHAT_FRAME:AddMessage("Broadcast stopped")
@@ -30,13 +35,6 @@ function stopMessageBroadcast()
 end
 
 --------------------------------------------------
--- Initialize Frame
---------------------------------------------------
-if not iconUpdateFrame then
-  iconUpdateFrame = CreateFrame("Frame")
-end
-
---------------------------------------------------
 -- Send Message
 --------------------------------------------------
 function sendMessageToSelectedChannels(message)
@@ -45,28 +43,27 @@ function sendMessageToSelectedChannels(message)
     return false
   end
   
-  local allChannelsValid = true
+  local now = GetTime()
+  if now - lastMessageSent < MIN_INTERVAL then
+    local remaining = math.ceil(MIN_INTERVAL - (now - lastMessageSent))
+    DEFAULT_CHAT_FRAME:AddMessage("Anti-spam: wait " .. remaining .. "s before next broadcast.", 1, 0.5, 0)
+    return false
+  end
   
+  -- Validate channels
   for channelName, _ in pairs(selectedChannels) do
     local channelId = GetChannelName(channelName)
     if not (channelId and channelId > 0) then
       DEFAULT_CHAT_FRAME:AddMessage("Error: The channel " .. channelName .. " is invalid or closed.")
-      allChannelsValid = false
-      break
+      DEFAULT_CHAT_FRAME:AddMessage("Message not sent: one or more channels are invalid.")
+      return false
     end
   end
   
-  if not allChannelsValid then
-    DEFAULT_CHAT_FRAME:AddMessage("Message not sent: one or more channels are invalid.")
-    return false
-  end
-  
-  -- Send messages to all valid channels
+  -- Send to all valid channels
   for channelName, _ in pairs(selectedChannels) do
     local channelId = GetChannelName(channelName)
-    if channelId and channelId > 0 then
-      SendChatMessage(message, "CHANNEL", nil, channelId)
-    end
+    SendChatMessage(message, "CHANNEL", nil, channelId)
   end
   
   messagesSentCount = messagesSentCount + 1
@@ -94,15 +91,17 @@ function startMessageBroadcast()
     iconUpdateFrame = CreateFrame("Frame")
   end
   
+  local lastIconUpdate = GetTime()
   iconUpdateFrame:SetScript("OnUpdate", function()
     if not isBroadcasting then
       iconUpdateFrame:SetScript("OnUpdate", nil)
       return
     end
     
-    if GetTime() - broadcastStartTime >= 0.3 then
+    local now = GetTime()
+    if now - lastIconUpdate >= 0.3 then
       toggleMinimapButtonIcon()
-      broadcastStartTime = GetTime()
+      lastIconUpdate = now
     end
   end)
 end
@@ -119,7 +118,7 @@ broadcastFrame:SetScript("OnUpdate", function()
   
   local sliderValue = slider and slider:GetValue() or 80
   local timeElapsed = GetTime() - lastBroadcastTime
-  local halfSliderValue = sliderValue / 2
+  local halfSliderValue = sliderValue * 0.5
   local oneSecondBefore = sliderValue - 1
   
   if not broadcastedHalf and timeElapsed >= halfSliderValue and timeElapsed < halfSliderValue + 1 then
