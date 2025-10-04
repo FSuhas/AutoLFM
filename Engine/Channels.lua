@@ -2,7 +2,7 @@
 -- Channel Management
 --------------------------------------------------
 
-channelsToFind = {"WORLD", "LookingForGroup", "Hardcore"}
+channelsToFind = {"WORLD", "LookingForGroup", "Hardcore", "testketa"}
 foundChannels = {}
 channelsFrame = nil
 
