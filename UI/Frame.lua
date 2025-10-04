@@ -727,3 +727,14 @@ AutoLFM:SetScript("OnEvent", function()
     end
   end
 end)
+
+--------------------------------------------------
+-- Display Lists After Frames Created
+--------------------------------------------------
+if AutoLFM_DungeonList and contentFrame then
+  AutoLFM_DungeonList.Display(contentFrame)
+end
+
+if AutoLFM_RaidList and raidContentFrame then
+  AutoLFM_RaidList.Display(raidContentFrame)
+end

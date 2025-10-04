@@ -1,12 +1,51 @@
----------------------------------------------------------------------------------
---                            Log Message                                      --
----------------------------------------------------------------------------------
-
+--------------------------------------------------
+-- Log Message
+--------------------------------------------------
 local msglog = CreateFrame("Frame")
 msglog:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-local function OnPlayerEnteringWorld(self, event)
+local initSteps = {
+  step1 = false,
+  step2 = false,
+  step3 = false
+}
 
+local function TryInitStep1()
+  if initSteps.step1 then return true end
+  
+  if LoadSelectedChannels then
+    LoadSelectedChannels()
+    initSteps.step1 = true
+    return true
+  end
+  return false
+end
+
+local function TryInitStep2()
+  if initSteps.step2 then return true end
+  if not initSteps.step1 then return false end
+  
+  if InitMinimapButton then
+    InitMinimapButton()
+    initSteps.step2 = true
+    return true
+  end
+  return false
+end
+
+local function TryInitStep3()
+  if initSteps.step3 then return true end
+  if not initSteps.step2 then return false end
+  
+  if AutoLFM then
+    AutoLFM:Hide()
+  end
+  
+  initSteps.step3 = true
+  return true
+end
+
+local function OnPlayerEnteringWorld()
   local seg2 = "|cffffffff <"
   local seg3 = "|cffffff00 Auto "
   local seg4 = "|cff0070DDL"
@@ -17,30 +56,22 @@ local function OnPlayerEnteringWorld(self, event)
   local seg9 = "|cff00FF00 Loaded successfully !"
   local seg10 = "|cffffff00   More information with  : "
   local seg11 = "|cff00FFFF  /lfm help"
-
+  
   DEFAULT_CHAT_FRAME:AddMessage(seg2 .. seg3 .. seg4 .. seg5 .. seg6 .. seg7 .. seg8 .. seg9)
   DEFAULT_CHAT_FRAME:AddMessage(seg10 .. seg11)
   
-  if InitMinimapButton then
-    InitMinimapButton()
-  end
+  TryInitStep1()
+  TryInitStep2()
+  TryInitStep3()
   
-  if AutoLFM_DungeonList and contentFrame then
-    AutoLFM_DungeonList.Display(contentFrame)
-  end
-  
-  if AutoLFM_RaidList and raidContentFrame then
-    AutoLFM_RaidList.Display(raidContentFrame)
-  end
-  
-if AutoLFM then
-  AutoLFM:Hide()
-end
   msglog:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
 
-msglog:SetScript("OnEvent", OnPlayerEnteringWorld)
-
+msglog:SetScript("OnEvent", function()
+  if event == "PLAYER_ENTERING_WORLD" then
+    OnPlayerEnteringWorld()
+  end
+end)
 
 ---------------------------------------------------------------------------------
 --                           Slash Commande                                    --
