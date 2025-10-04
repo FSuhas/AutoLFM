@@ -55,13 +55,12 @@ function InitMinimapButton()
 
     -- Clic gauche toggle interface sauf si Ctrl enfoncé
     AutoLFMMinimapBtn:SetScript("OnClick", function()
-        if IsControlKeyDown() then return end
-        if AutoLFM:IsShown() then
-            AutoLFM:Hide()
-        else
-            AutoLFM:Show()
-            swapChannelFrame()
-        end
+      if IsControlKeyDown() then return end
+      if AutoLFM:IsShown() then
+        AutoLFM:Hide()
+      else
+        AutoLFM:Show()
+      end
     end)
 
     -- Rendre déplaçable avec Ctrl + clic gauche
