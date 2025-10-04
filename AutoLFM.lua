@@ -194,14 +194,6 @@ SlashCmdList["LFM"] = function(msg)
         return
     end
 
-    -- if args[1] == "ui" and args[2] == "classic" then
-    --     LoadUILayout("Classic")
-    --     return
-    -- elseif args[1] == "ui" and args[2] == "modern" then
-    --     LoadUILayout("Modern")
-    --     return
-    -- end
-
     -- Ajout dans la fonction SlashCmdList["LFM"]
     if args[1] == "minimap" and args[2] == "reset" then
         -- Réinitialiser la position sauvegardée
