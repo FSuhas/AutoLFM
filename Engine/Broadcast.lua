@@ -30,6 +30,13 @@ function stopMessageBroadcast()
 end
 
 --------------------------------------------------
+-- Initialize Frame
+--------------------------------------------------
+if not iconUpdateFrame then
+  iconUpdateFrame = CreateFrame("Frame")
+end
+
+--------------------------------------------------
 -- Send Message
 --------------------------------------------------
 function sendMessageToSelectedChannels(message)
