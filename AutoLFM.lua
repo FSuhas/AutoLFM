@@ -27,6 +27,8 @@ local function OnPlayerEnteringWorld(self, event)
   DEFAULT_CHAT_FRAME:AddMessage(seg2 .. seg3 .. seg4 .. seg5 .. seg6 .. seg7 .. seg8 .. seg9)
   DEFAULT_CHAT_FRAME:AddMessage(seg10 .. seg11)
   
+  LoadTheme(AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme)
+  
   InitMinimapButton()
   DisplayDungeonsByColor()
   AutoLFM:Hide()
@@ -123,6 +125,9 @@ SlashCmdList["LFM"] = function(msg)
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap show   |cffFFFFFFDisplays the minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap hide   |cffFFFFFFHide minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap reset   |cffFFFFFFReset minimap button position.")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme <name>   |cffFFFFFFChange theme (Classic, Modern).")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme list   |cffFFFFFFList available themes.")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme current   |cffFFFFFFShow current theme.")
         return
     end
 
