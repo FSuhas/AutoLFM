@@ -405,48 +405,21 @@ function UpdateSliderText(value)
   end
 end
 
-function ShowSliderForRaid(raid)
-  if currentSliderFrame then
-    currentSliderFrame:Hide()
+  function ShowSliderForRaid(raid)
+    -- Cette fonction est maintenant gérée directement dans updateMsgFrameCombined
+    -- On la garde vide pour compatibilité mais elle n'est plus appelée
   end
-  
-  if not raid or not raid.size_min or not raid.size_max then
-    return
-  end
-  
-  -- Hide slider if fixed size
-  if raid.size_min == raid.size_max then
-    sliderSizeFrame:Hide()
-    sliderValue = raid.size_min
-    currentSliderFrame = nil
-    if updateMsgFrameCombined then
-      updateMsgFrameCombined()
-    end
-    return
-  end
-  
-  -- Show slider only for variable size
-  sliderSize:SetMinMaxValues(raid.size_min, raid.size_max)
-  
-  local initVal = sliderValue ~= 0 and sliderValue or raid.size_min
-  sliderSize:SetValue(initVal)
-  
-  UpdateSliderText(sliderSize:GetValue())
-  
-  if AutoLFM and AutoLFM:IsShown() then
-    sliderSizeFrame:Show()
-  end
-  
-  currentSliderFrame = sliderSizeFrame
-end
 
-function HideSliderForRaid()
-  if sliderSizeFrame then
-    sliderSizeFrame:Hide()
+  function HideSliderForRaid()
+    if sliderSizeFrame then
+      sliderSizeFrame:Hide()
+    end
+    if currentSliderFrame then
+      currentSliderFrame:Hide()
+      currentSliderFrame = nil
+    end
+    sliderValue = 0
   end
-  sliderValue = 0
-  currentSliderFrame = nil
-end
 
 sliderSize:SetScript("OnValueChanged", function()
   local value = sliderSize:GetValue()

@@ -31,20 +31,45 @@ function updateMsgFrameCombined()
     local raidSize = 0
 
     if table.getn(selectedRaids) > 0 then
-        for _, raidAbrev in pairs(selectedRaids) do
-            for _, raid in pairs(raids) do
-                if raid.abrev == raidAbrev then
-                    table.insert(selectedContent, raid.abrev)
-                    ShowSliderForRaid(raid)
-                    if raid.size_min == raid.size_max then
-                        sliderSizeFrame:Hide()
-                    end
-                    isRaidSelected = true
-                    raidSize = sliderValue
-                    break
+      for _, raidAbrev in pairs(selectedRaids) do
+        for _, raid in pairs(raids) do
+          if raid.abrev == raidAbrev then
+            table.insert(selectedContent, raid.abrev)
+            
+            -- Show/hide slider WITHOUT calling updateMsgFrameCombined
+            if raid.size_min == raid.size_max then
+              -- Fixed size: hide slider, use fixed value
+              if currentSliderFrame then
+                currentSliderFrame:Hide()
+                currentSliderFrame = nil
+              end
+              if sliderSizeFrame then
+                sliderSizeFrame:Hide()
+              end
+              raidSize = raid.size_min
+              sliderValue = raid.size_min
+            else
+              -- Variable size: show slider
+              if sliderSize then
+                sliderSize:SetMinMaxValues(raid.size_min, raid.size_max)
+                local initVal = sliderValue ~= 0 and sliderValue or raid.size_min
+                sliderSize:SetValue(initVal)
+                if UpdateSliderText then
+                  UpdateSliderText(sliderSize:GetValue())
                 end
+              end
+              if AutoLFM and AutoLFM:IsShown() and sliderSizeFrame then
+                sliderSizeFrame:Show()
+                currentSliderFrame = sliderSizeFrame
+              end
+              raidSize = sliderValue
             end
+            
+            isRaidSelected = true
+            break
+          end
         end
+      end
     end
 
     -- Donjons si aucun raid sélectionné
