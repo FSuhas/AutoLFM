@@ -99,13 +99,16 @@ tabs = {}
 currentTab = 1
 local function onTabClick(tabNum)
   currentTab = tabNum
-  if insideList then insideList:SetShown(tabNum <= 2) end
-  if insideMore then insideMore:SetShown(tabNum == 3) end
-  
+  if insideList then
+    if tabNum <= 2 then insideList:Show() else insideList:Hide() end
+  end
+  if insideMore then
+    if tabNum == 3 then insideMore:Show() else insideMore:Hide() end
+  end
   for i = 1, 3 do
     local active = i == tabNum
-    tabs[i].bg:SetTexture(texturePath .. (active and "tabActive" or "tabInactive"))
-    tabs[i].text:SetTextColor(1, active and 1 or 0.82, active and 1 or 0)
+      tabs[i].bg:SetTexture(texturePath .. (active and "tabActive" or "tabInactive"))
+      tabs[i].text:SetTextColor(1, active and 1 or 0.82, active and 1 or 0)
     if active then tabs[i].highlight:Hide() end
   end
 end
@@ -143,7 +146,8 @@ end
 
 local tabActions = {
   function() djScrollFrame:Show() raidFrame:Hide() raidContentFrame:Hide() raidScrollFrame:Hide() msgFrameDj:Show() msgFrameRaids:Hide() clearSelectedRaids() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() HideSliderForRaid() swapChannelFrame() ClearAllBackdrops(raidClickableFrames) end,
-  function() djScrollFrame:Hide() raidFrame:Show() raidContentFrame:Show() raidScrollFrame:Show() msgFrameDj:Hide() msgFrameRaids:Show() clearSelectedDungeons() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() swapChannelFrame() ClearAllBackdrops(donjonClickableFrames) end
+  function() djScrollFrame:Hide() raidFrame:Show() raidContentFrame:Show() raidScrollFrame:Show() msgFrameDj:Hide() msgFrameRaids:Show() clearSelectedDungeons() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() swapChannelFrame() ClearAllBackdrops(donjonClickableFrames) end,
+  function() if djScrollFrame then djScrollFrame:Hide() end if raidFrame then raidFrame:Hide() end if raidContentFrame then raidContentFrame:Hide() end if raidScrollFrame then raidScrollFrame:Hide() end if msgFrameDj then msgFrameDj:Hide() end if msgFrameRaids then msgFrameRaids:Hide() end end
 }
 
 local function createTabs()
@@ -153,7 +157,28 @@ local function createTabs()
     end
 end
 
+--------------------------------------------------
+-- Inside Frames
+--------------------------------------------------
+local function createInsideFrames()
+  insideList = CreateFrame("Frame", nil, AutoLFM)
+    insideList:SetPoint("TOP", AutoLFM, "TOP", -5, -157)
+    insideList:SetWidth(323)
+    insideList:SetHeight(253)
+    insideList:SetFrameStrata("HIGH")
+    insideList:Show()
+
+  insideMore = CreateFrame("Frame", nil, AutoLFM)
+    insideMore:SetPoint("TOP", AutoLFM, "TOP", 0, -158)
+    insideMore:SetWidth(330)
+    insideMore:SetHeight(270)
+    insideMore:SetFrameStrata("HIGH")
+    insideMore:Hide()
+end
+
+createInsideFrames()
 createTabs()
+
 
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
