@@ -206,6 +206,163 @@ end
 djframe, djScrollFrame, contentFrame = createScrollFrame("Dungeons", insideList)
 raidFrame, raidScrollFrame, raidContentFrame = createScrollFrame("raids", insideList)
 
+---------------------------------------------------------------------------------
+--                            Raid Size Slider                                --
+---------------------------------------------------------------------------------
+sliderValue = 0
+currentSliderFrame = nil
+sliderSizeFrame = nil
+sliderSizeEditBox = nil
+sliderSize = nil
+
+local function createRaidSizeControls(AutoLFM)
+  local raidSizeFrame = CreateFrame("Frame", nil, AutoLFM)
+    raidSizeFrame:SetPoint("BOTTOM", AutoLFM, "BOTTOM", -16, 75)
+    raidSizeFrame:SetWidth(300)
+    raidSizeFrame:SetHeight(30)
+    raidSizeFrame:Hide()
+  
+  local raidSizeIcon = raidSizeFrame:CreateTexture(nil, "ARTWORK")
+    raidSizeIcon:SetPoint("LEFT", raidSizeFrame, "LEFT", 0, 0)
+    raidSizeIcon:SetWidth(18)
+    raidSizeIcon:SetHeight(18)
+    raidSizeIcon:SetTexture(texturePath .. "Icons\\group")
+  
+  local raidSizeEditBox = CreateFrame("EditBox", "AutoLFM_RaidSizeEditBox", raidSizeFrame)
+    raidSizeEditBox:SetPoint("LEFT", raidSizeIcon, "RIGHT", 10, 0)
+    raidSizeEditBox:SetWidth(25)
+    raidSizeEditBox:SetHeight(20)
+    raidSizeEditBox:SetFont("Fonts\\FRIZQT__.TTF", 12)
+    raidSizeEditBox:SetJustifyH("CENTER")
+    raidSizeEditBox:SetBackdrop({
+      bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+      tile = true,
+      tileSize = 8,
+      edgeSize = 8,
+      insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    raidSizeEditBox:SetBackdropColor(0, 0, 0, 0.8)
+    raidSizeEditBox:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+    raidSizeEditBox:SetAutoFocus(false)
+    raidSizeEditBox:SetMaxLetters(2)
+    raidSizeEditBox:SetText("18")
+    raidSizeEditBox:SetTextInsets(2, 2, 0, 0)
+  
+  local iconButton = CreateFrame("Button", nil, raidSizeFrame)
+    iconButton:SetAllPoints(raidSizeIcon)
+    iconButton:SetScript("OnClick", function()
+      raidSizeEditBox:SetFocus()
+      raidSizeEditBox:HighlightText()
+    end)
+  
+  local raidSizeSlider = CreateFrame("Slider", "AutoLFM_RaidSizeSlider", raidSizeFrame)
+    raidSizeSlider:SetPoint("LEFT", raidSizeEditBox, "RIGHT", 10, 0)
+    raidSizeSlider:SetWidth(135)
+    raidSizeSlider:SetHeight(17)
+    raidSizeSlider:SetMinMaxValues(10, 40)
+    raidSizeSlider:SetValue(25)
+    raidSizeSlider:SetValueStep(1)
+    raidSizeSlider:SetOrientation("HORIZONTAL")
+    raidSizeSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+    raidSizeSlider:SetBackdrop({
+      bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
+      edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
+      tile = true,
+      tileSize = 8,
+      edgeSize = 8,
+      insets = {left = 3, right = 3, top = 6, bottom = 6}
+    })
+    raidSizeSlider:EnableMouse(true)
+  
+  raidSizeSlider:SetScript("OnMouseDown", function()
+    this.dragging = true
+  end)
+  
+  raidSizeSlider:SetScript("OnMouseUp", function()
+    this.dragging = false
+  end)
+  
+  raidSizeSlider:SetScript("OnUpdate", function()
+    if this.dragging then
+      local x, y = GetCursorPosition()
+      local scale = this:GetEffectiveScale()
+      local left = this:GetLeft() * scale
+      local width = this:GetWidth() * scale
+      local relX = (x - left) / width
+      relX = math.max(0, math.min(1, relX))
+      local minVal, maxVal = this:GetMinMaxValues()
+      local newVal = minVal + (maxVal - minVal) * relX
+      this:SetValue(newVal)
+      local top = this:GetTop() * scale
+      local bottom = this:GetBottom() * scale
+      local right = this:GetRight() * scale
+      if not (x >= left and x <= right and y >= bottom and y <= top) then
+        this.dragging = false
+      end
+    end
+  end)
+  
+  return raidSizeFrame, raidSizeEditBox, raidSizeSlider
+end
+
+sliderSizeFrame, sliderSizeEditBox, sliderSize = createRaidSizeControls(AutoLFM)
+
+function UpdateSliderText(value)
+  if value then
+    sliderSizeEditBox:SetText(tostring(value))
+  else
+    sliderSizeEditBox:SetText("")
+  end
+end
+
+function ShowSliderForRaid(raid)
+  if currentSliderFrame then
+    currentSliderFrame:Hide()
+  end
+  if not raid or not raid.size_min or not raid.size_max then
+    return
+  end
+  sliderSize:SetMinMaxValues(raid.size_min, raid.size_max)
+
+  local initVal = sliderValue ~= 0 and sliderValue or raid.size_min
+    sliderSize:SetValue(initVal)
+  
+  UpdateSliderText(sliderSize:GetValue())
+
+  if AutoLFM and AutoLFM:IsShown() then
+    sliderSizeFrame:Show()
+  end
+
+  currentSliderFrame = sliderSizeFrame
+end
+
+function HideSliderForRaid()
+  if sliderSizeFrame then
+    sliderSizeFrame:Hide()
+  end
+  sliderValue = 0
+  currentSliderFrame = nil
+end
+
+sliderSize:SetScript("OnValueChanged", function()
+  local value = sliderSize:GetValue()
+  sliderValue = value
+  raidSize = value
+  UpdateSliderText(value)
+  updateMsgFrameCombined()
+end)
+
+sliderSizeEditBox:SetScript("OnTextChanged", function()
+  local value = tonumber(sliderSizeEditBox:GetText())
+  if value then
+    local minVal, maxVal = sliderSize:GetMinMaxValues()
+    if value >= minVal and value <= maxVal then
+      sliderSize:SetValue(value)
+    end
+  end
+end)
+
 
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
@@ -356,6 +513,15 @@ insets = { left = 5, right = 5, top = 5, bottom = 5 },
 })
 editBox:SetTextColor(1, 1, 1)  -- Couleur du texte blanc
 
+-- Script pour gérer le changement de texte dans editBox
+editBox:SetScript("OnTextChanged", function(self)
+  userInputMessage = this:GetText()
+  if userInputMessage ~= "" then
+    return updateMsgFrameCombined(userInputMessage)
+  end
+  updateMsgFrameCombined()
+end)
+
 function CreateQuestLink(questIndex)
     if not AutoLFM or not AutoLFM:IsVisible() then
         return -- autoLFM fermé, ne fait rien
@@ -473,180 +639,7 @@ slider:SetMinMaxValues(40, 120)
 slider:SetValue(80)
 slider:SetValueStep(10)
 
---------------------------------------------------
--- Raid Size Controls
---------------------------------------------------
-local function createRaidSizeControls(AutoLFM)
-  local raidSizeFrame = CreateFrame("Frame", nil, AutoLFM)
-  raidSizeFrame:SetPoint("BOTTOM", AutoLFM, "BOTTOM", -16, 75)
-  raidSizeFrame:SetWidth(300)
-  raidSizeFrame:SetHeight(30)
-  raidSizeFrame:Hide()
-  
-  local raidSizeIcon = raidSizeFrame:CreateTexture(nil, "ARTWORK")
-  raidSizeIcon:SetTexture(texturePath .. "Icons\\group")
-  raidSizeIcon:SetPoint("LEFT", raidSizeFrame, "LEFT", 0, 0)
-  raidSizeIcon:SetWidth(18)
-  raidSizeIcon:SetHeight(18)
-  
-  local raidSizeEditBox = CreateFrame("EditBox", "AutoLFM_RaidSizeEditBox", raidSizeFrame)
-  raidSizeEditBox:SetPoint("LEFT", raidSizeIcon, "RIGHT", 10, 0)
-  raidSizeEditBox:SetWidth(25)
-  raidSizeEditBox:SetHeight(20)
-  raidSizeEditBox:SetFont("Fonts\\FRIZQT__.TTF", 12)
-  raidSizeEditBox:SetJustifyH("CENTER")
-  raidSizeEditBox:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 }
-  })
-  raidSizeEditBox:SetBackdropColor(0, 0, 0, 0.8)
-  raidSizeEditBox:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
-  raidSizeEditBox:SetAutoFocus(false)
-  raidSizeEditBox:SetMaxLetters(2)
-  raidSizeEditBox:SetText("18")
-  raidSizeEditBox:SetTextInsets(2, 2, 0, 0)
-  
-  -- Bouton invisible sur l'icône pour la rendre cliquable
-  local iconButton = CreateFrame("Button", nil, raidSizeFrame)
-  iconButton:SetAllPoints(raidSizeIcon)
-  iconButton:SetScript("OnClick", function()
-    raidSizeEditBox:SetFocus()
-    raidSizeEditBox:HighlightText()
-  end)
-  
-  local raidSizeSlider = CreateFrame("Slider", "AutoLFM_RaidSizeSlider", raidSizeFrame)
-  raidSizeSlider:SetPoint("LEFT", raidSizeEditBox, "RIGHT", 10, 0)
-  raidSizeSlider:SetWidth(135)
-  raidSizeSlider:SetHeight(17)
-  raidSizeSlider:SetMinMaxValues(10, 40)
-  raidSizeSlider:SetValue(25)
-  raidSizeSlider:SetValueStep(1)
-  raidSizeSlider:SetOrientation("HORIZONTAL")
-  raidSizeSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
-  raidSizeSlider:SetBackdrop({
-    bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
-    edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = {left = 3, right = 3, top = 6, bottom = 6}
-  })
-  raidSizeSlider:EnableMouse(true)
-  
-  raidSizeSlider:SetScript("OnMouseDown", function()
-    this.dragging = true
-  end)
-  
-  raidSizeSlider:SetScript("OnMouseUp", function()
-    this.dragging = false
-  end)
-  
-  raidSizeSlider:SetScript("OnUpdate", function()
-    if this.dragging then
-      local x, y = GetCursorPosition()
-      local scale = this:GetEffectiveScale()
-      local left = this:GetLeft() * scale
-      local width = this:GetWidth() * scale
-      local relX = (x - left) / width
-      relX = math.max(0, math.min(1, relX))
-      local minVal, maxVal = this:GetMinMaxValues()
-      local newVal = minVal + (maxVal - minVal) * relX
-      this:SetValue(newVal)
-      
-      local top = this:GetTop() * scale
-      local bottom = this:GetBottom() * scale
-      local right = this:GetRight() * scale
-      
-      if not (x >= left and x <= right and y >= bottom and y <= top) then
-        this.dragging = false
-      end
-    end
-  end)
-  
-  return raidSizeFrame, raidSizeEditBox, raidSizeSlider
-end
 
-sliderSizeFrame, sliderSizeEditBox, sliderSize = createRaidSizeControls(AutoLFM)
-
-sliderValue = 0
-currentSliderFrame = nil
-
---------------------------------------------------
--- Slider Functions
---------------------------------------------------
-function UpdateSliderText(value)
-  if value then
-    sliderSizeEditBox:SetText(tostring(value))
-  else
-    sliderSizeEditBox:SetText("")
-  end
-end
-
-function ShowSliderForRaid(raid)
-  if currentSliderFrame then
-    currentSliderFrame:Hide()
-  end
-
-  if not raid or not raid.size_min or not raid.size_max then
-    return
-  end
-
-  sliderSize:SetMinMaxValues(raid.size_min, raid.size_max)
-  
-  local initVal = sliderValue ~= 0 and sliderValue or raid.size_min
-  sliderSize:SetValue(initVal)
-  
-  UpdateSliderText(sliderSize:GetValue())
-
-  if AutoLFM and AutoLFM:IsShown() then
-    sliderSizeFrame:Show()
-  end
-
-  currentSliderFrame = sliderSizeFrame
-end
-
-function HideSliderForRaid()
-  if sliderSizeFrame then
-    sliderSizeFrame:Hide()
-  end
-  sliderValue = 0
-  currentSliderFrame = nil
-end
-
--- Fonction pour gérer le changement de texte
-editBox:SetScript("OnTextChanged", function(self)
--- print("Texte saisi : " .. this:GetText())  -- Afficher le texte dans la console
-userInputMessage = this:GetText()
-    -- Vérifier si un message saisi existe
-if userInputMessage ~= "" then
-    return updateMsgFrameCombined(userInputMessage)
-end
-updateMsgFrameCombined()
-end)
-
-
--- Mettre à jour le texte chaque fois que la valeur du slider change
-sliderSize:SetScript("OnValueChanged", function()
-  local value = sliderSize:GetValue()
-  sliderValue = value
-  raidSize = value
-  UpdateSliderText(value)
-  updateMsgFrameCombined()
-end)
-
-sliderSizeEditBox:SetScript("OnTextChanged", function()
-  local value = tonumber(sliderSizeEditBox:GetText())
-  if value then
-    local minVal, maxVal = sliderSize:GetMinMaxValues()
-    if value >= minVal and value <= maxVal then
-      sliderSize:SetValue(value)
-    end
-  end
-end)
 
 
 ---------------------------------------------------------------------------------
