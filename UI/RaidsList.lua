@@ -1,7 +1,6 @@
 --------------------------------------------------
 -- Raid List UI
 --------------------------------------------------
-
 AutoLFM_RaidList = {}
 local RL = AutoLFM_RaidList
 
@@ -26,7 +25,7 @@ end
 --------------------------------------------------
 -- Checkbox Click Handler
 --------------------------------------------------
-local function OnRaidCheckboxClick(checkbox, raidAbrev)
+local function OnRaidCheckboxClick(checkbox, raidTag)
   if checkbox:GetChecked() then
     for _, otherCheckbox in pairs(RL.checkButtons) do
       if otherCheckbox ~= checkbox then
@@ -35,7 +34,7 @@ local function OnRaidCheckboxClick(checkbox, raidAbrev)
       end
     end
     if selectedRaids then
-      selectedRaids = {raidAbrev}
+      selectedRaids = {raidTag}
     end
   else
     if selectedRaids then
@@ -61,8 +60,8 @@ local function CreateRaidRow(parent, raid, index, yOffset)
   
   table.insert(RL.clickableFrames, clickableFrame)
   
-  local raidAbrev = raid.abrev
-  local raidName = raid.nom
+  local raidTag = raid.tag
+  local raidName = raid.name
   
   local checkbox = CreateFrame("CheckButton", "RaidCheckbox" .. index, clickableFrame, "UICheckButtonTemplate")
   checkbox:SetWidth(20)
@@ -71,26 +70,17 @@ local function CreateRaidRow(parent, raid, index, yOffset)
   
   local sizeLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sizeLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
-  local sizeText = raid.size_min == raid.size_max and "(" .. raid.size_min .. ")" or "(" .. raid.size_min .. " - " .. raid.size_max .. ")"
+  local sizeText = raid.sizeMin == raid.sizeMax and "(" .. raid.sizeMin .. ")" or "(" .. raid.sizeMin .. " - " .. raid.sizeMax .. ")"
   sizeLabel:SetText(sizeText)
   
   local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
   label:SetText(raidName)
   
-  RL.checkButtons[raidAbrev] = checkbox
+  RL.checkButtons[raidTag] = checkbox
   
   checkbox:SetScript("OnClick", function()
-    OnRaidCheckboxClick(checkbox, raidAbrev)
-    
-    for _, r in pairs(raids or {}) do
-      if r.abrev == raidAbrev then
-        if ShowSliderForRaid then
-          ShowSliderForRaid(r)
-        end
-        break
-      end
-    end
+    OnRaidCheckboxClick(checkbox, raidTag)
   end)
   
   clickableFrame:SetScript("OnClick", function()

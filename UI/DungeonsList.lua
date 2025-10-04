@@ -1,7 +1,6 @@
 --------------------------------------------------
 -- Dungeon List UI
 --------------------------------------------------
-
 AutoLFM_DungeonList = {}
 local DL = AutoLFM_DungeonList
 
@@ -41,7 +40,7 @@ end
 --------------------------------------------------
 -- Checkbox Click Handler
 --------------------------------------------------
-local function OnDungeonCheckboxClick(checkbox, dungeonAbrev)
+local function OnDungeonCheckboxClick(checkbox, dungeonTag)
   local isChecked = checkbox:GetChecked()
   
   if isChecked then
@@ -52,7 +51,7 @@ local function OnDungeonCheckboxClick(checkbox, dungeonAbrev)
     
     local alreadySelected = false
     for _, val in ipairs(selectedDungeons) do
-      if val == dungeonAbrev then
+      if val == dungeonTag then
         alreadySelected = true
         break
       end
@@ -67,11 +66,11 @@ local function OnDungeonCheckboxClick(checkbox, dungeonAbrev)
           DL.checkButtons[first]:GetParent():SetBackdrop(nil)
         end
       end
-      table.insert(selectedDungeons, dungeonAbrev)
+      table.insert(selectedDungeons, dungeonTag)
     end
   else
     for i, val in ipairs(selectedDungeons) do
-      if val == dungeonAbrev then
+      if val == dungeonTag then
         table.remove(selectedDungeons, i)
         break
       end
@@ -88,24 +87,24 @@ end
 -- Create Single Dungeon Row
 --------------------------------------------------
 local function CreateDungeonRow(parent, dungeon, priority, yOffset)
-  local clickableFrame = CreateFrame("Button", "ClickableDonjonFrame" .. dungeon.abrev, parent)
+  local clickableFrame = CreateFrame("Button", "ClickableDungeonFrame" .. dungeon.tag, parent)
   clickableFrame:SetHeight(20)
   clickableFrame:SetWidth(300)
   clickableFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
   
-  local checkbox = CreateFrame("CheckButton", "DonjonCheckbox" .. dungeon.abrev, clickableFrame, "UICheckButtonTemplate")
+  local checkbox = CreateFrame("CheckButton", "DungeonCheckbox" .. dungeon.tag, clickableFrame, "UICheckButtonTemplate")
   checkbox:SetWidth(20)
   checkbox:SetHeight(20)
   checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
-  DL.checkButtons[dungeon.abrev] = checkbox
+  DL.checkButtons[dungeon.tag] = checkbox
   
   local levelLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   levelLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
-  levelLabel:SetText("(" .. dungeon.lvl_min .. " - " .. dungeon.lvl_max .. ")")
+  levelLabel:SetText("(" .. dungeon.levelMin .. " - " .. dungeon.levelMax .. ")")
   
   local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
-  label:SetText(dungeon.nom)
+  label:SetText(dungeon.name)
   
   local r, g, b = GetPriorityColor(priority)
   label:SetTextColor(r, g, b)
@@ -113,7 +112,7 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   
   clickableFrame:SetScript("OnClick", function()
     checkbox:SetChecked(not checkbox:GetChecked())
-    OnDungeonCheckboxClick(checkbox, dungeon.abrev)
+    OnDungeonCheckboxClick(checkbox, dungeon.tag)
   end)
   
   clickableFrame:SetScript("OnEnter", function()
@@ -135,7 +134,7 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   end)
   
   checkbox:SetScript("OnClick", function()
-    OnDungeonCheckboxClick(checkbox, dungeon.abrev)
+    OnDungeonCheckboxClick(checkbox, dungeon.tag)
   end)
   
   table.insert(DL.clickableFrames, clickableFrame)
@@ -155,13 +154,13 @@ function DL.Display(parent)
   local yOffset = 0
   local sortedDungeons = {}
   
-  for _, donjon in pairs(donjons or {}) do
-    if table.getn(sortedDungeons) >= (maxDonjons or 100) then break end
-    local priority = calculer_priorite and calculer_priorite(playerLevel, donjon) or 4
+  for _, dungeon in pairs(dungeons or {}) do
+    if table.getn(sortedDungeons) >= (maxDungeons or 100) then break end
+    local priority = CalculatePriority and CalculatePriority(playerLevel, dungeon) or 4
     table.insert(sortedDungeons, {
-      donjon = donjon,
+      dungeon = dungeon,
       priority = priority,
-      originalIndex = donjon.originalIndex or 1
+      originalIndex = dungeon.originalIndex or 1
     })
   end
   
@@ -176,7 +175,7 @@ function DL.Display(parent)
   DL.clickableFrames = {}
   
   for _, entry in ipairs(sortedDungeons) do
-    CreateDungeonRow(parent, entry.donjon, entry.priority, yOffset)
+    CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
     yOffset = yOffset + 20
   end
 end
@@ -207,5 +206,5 @@ end
 --------------------------------------------------
 -- Expose globally
 --------------------------------------------------
-donjonCheckButtons = DL.checkButtons
-donjonClickableFrames = DL.clickableFrames
+dungeonCheckButtons = DL.checkButtons
+dungeonClickableFrames = DL.clickableFrames

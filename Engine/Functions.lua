@@ -80,21 +80,21 @@ end
 -- Priority Calculation
 --------------------------------------------------
 
-function calculer_priorite(niveau_joueur, donjon)
-  if not niveau_joueur or not donjon then return 4 end
+function CalculatePriority(playerLevel, dungeon)
+  if not playerLevel or not dungeon then return 4 end
   
-  local min = donjon.lvl_min or 1
-  local max = donjon.lvl_max or 60
+  local min = dungeon.levelMin or 1
+  local max = dungeon.levelMax or 60
   
-  if niveau_joueur < min then
+  if playerLevel < min then
     return 3
   end
   
-  if niveau_joueur <= min + 5 then
+  if playerLevel <= min + 5 then
     return 2
   end
   
-  if niveau_joueur <= max - 1 then
+  if playerLevel <= max - 1 then
     return 1
   end
   

@@ -68,48 +68,47 @@ end
 
 
 function AutoLFM_API.GetSelectedContent()
-    local groupType = AutoLFM_API.GetGroupType()
-    local content = {
-        type = groupType,
-        list = {},
-        details = {}
-    }
-
-    if groupType == "dungeon" then
-        local selectedDungeons = GetSelectedDungeons() or {}
-        for _, dungeonAbrev in ipairs(selectedDungeons) do
-            table.insert(content.list, dungeonAbrev)
-            for _, donjon in pairs(donjons) do
-                if donjon.abrev == dungeonAbrev then
-                    content.details[dungeonAbrev] = {
-                        name = donjon.nom,
-                        abrev = donjon.abrev,
-                        size = donjon.size,
-                        levelMin = donjon.lvl_min,
-                        levelMax = donjon.lvl_max
-                    }
-                    break
-                end
-            end
+  local groupType = AutoLFM_API.GetGroupType()
+  local content = {
+    type = groupType,
+    list = {},
+    details = {}
+  }
+  
+  if groupType == "dungeon" then
+    local selectedDungeons = GetSelectedDungeons() or {}
+    for _, dungeonTag in ipairs(selectedDungeons) do
+      table.insert(content.list, dungeonTag)
+      for _, dungeon in pairs(dungeons) do
+        if dungeon.tag == dungeonTag then
+          content.details[dungeonTag] = {
+            name = dungeon.name,
+            tag = dungeon.tag,
+            levelMin = dungeon.levelMin,
+            levelMax = dungeon.levelMax
+          }
+          break
         end
-    elseif groupType == "raid" then
-        local selectedRaids = GetSelectedRaids() or {}
-        for _, raidAbrev in ipairs(selectedRaids) do
-            table.insert(content.list, raidAbrev)
-            for _, raid in pairs(raids) do
-                if raid.abrev == raidAbrev then
-                    content.details[raidAbrev] = {
-                        name = raid.nom,
-                        abrev = raid.abrev,
-                        sizeMin = raid.size_min,
-                        sizeMax = raid.size_max
-                    }
-                    break
-                end
-            end
-        end
+      end
     end
-    return content
+  elseif groupType == "raid" then
+    local selectedRaids = GetSelectedRaids() or {}
+    for _, raidTag in ipairs(selectedRaids) do
+      table.insert(content.list, raidTag)
+      for _, raid in pairs(raids) do
+        if raid.tag == raidTag then
+          content.details[raidTag] = {
+            name = raid.name,
+            tag = raid.tag,
+            sizeMin = raid.sizeMin,
+            sizeMax = raid.sizeMax
+          }
+          break
+        end
+      end
+    end
+  end
+  return content
 end
 
 function AutoLFM_API.GetPlayerCount()
