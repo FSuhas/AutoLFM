@@ -2,6 +2,7 @@
 -- Variables
 --------------------------------------------------
 searchStartTime = 0
+roleChecks = {}
 local texturePath = "Interface\\AddOns\\AutoLFM\\LFMUI\\Textures\\"
 
 --------------------------------------------------
@@ -32,6 +33,44 @@ local mainTitle = AutoLFM:CreateFontString(nil, "MEDIUM", "GameFontNormal")
 local close = CreateFrame("Button", nil, AutoLFM, "UIPanelCloseButton")
   close:SetPoint("TOPRIGHT", AutoLFM, "TOPRIGHT", -27, -8)
   close:SetScript("OnClick", function() HideUIPanel(AutoLFM) end)
+
+--------------------------------------------------
+-- Roles
+--------------------------------------------------
+local function createRole(name, x, texCoordStart)
+  local btn = CreateFrame("Button", nil, AutoLFM)
+    btn:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", x, -52)
+    btn:SetWidth(54)
+    btn:SetHeight(54)
+    btn:SetHighlightTexture(texturePath .. "rolesHighlight")
+  
+  local bg = btn:CreateTexture(nil, "BACKGROUND")
+    bg:SetPoint("TOPLEFT", btn, "TOPLEFT", -12, 14)
+    bg:SetWidth(84)
+    bg:SetHeight(84)
+    bg:SetTexture(texturePath .. "rolesBackground")
+    bg:SetTexCoord(texCoordStart, texCoordStart + 0.2968, 0, 0.5937)
+    bg:SetVertexColor(1, 1, 1, 0.6)
+  
+  local icon = btn:CreateTexture(nil, "BORDER")
+    icon:SetAllPoints(btn)
+    icon:SetTexture(texturePath .. "roles" .. name)
+  
+  local check = CreateFrame("CheckButton", nil, AutoLFM, "UICheckButtonTemplate")
+    check:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 1, -5)
+    check:SetWidth(24)
+    check:SetHeight(24)
+    check:SetScript("OnClick", function() toggleRole(name) end)
+  
+  roleChecks[name] = check
+    btn:SetScript("OnClick", function() check:Click() end)
+  
+  return btn, bg, icon, check
+end
+
+createRole("Tank", 74, 0.2968)
+createRole("Heal", 172, 0)
+createRole("DPS", 270, 0.5937)
 
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
@@ -99,16 +138,6 @@ arrowTex:SetTexture("Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up")
 
 -- Créer cadre roleframe dans la frame de droite
 roleframe = CreateFrame("Frame", nil, AutoLFM_RightPanel)
-roleframe:SetBackdrop({
-    bgFile = nil,
-    -- edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",  -- Bordure visible (optionnelle)
-    edgeSize = 16,
-    insets = { left = 4, right = 2, top = 4, bottom = 4 },
-})
-roleframe:SetBackdropColor(1, 1, 1, 0.3)
-roleframe:SetBackdropBorderColor(1, 1, 1, 1)
-
--- Positionner le roleframe
 roleframe:SetWidth(AutoLFM_RightPanel:GetWidth()- 60)
 roleframe:SetHeight(AutoLFM_RightPanel:GetHeight() / 6)
 roleframe:SetPoint("TOPLEFT", AutoLFM_RightPanel, "TOPLEFT", 20, -100)
@@ -227,20 +256,6 @@ raidScrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_Raids", raidFr
 raidScrollFrame:SetPoint("TOPLEFT", raidFrame, "TOPLEFT", 20, -80)
 raidScrollFrame:SetWidth(280)
 raidScrollFrame:SetHeight(330)
-
-
----------------------------------------------------------------------------------
---                                 Roles                                       --
----------------------------------------------------------------------------------
-
-
--- Ajouter un texte au-dessus des icônes
-selectRoleText = roleframe:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-selectRoleText:SetText("Choose the role(s) you need")
-selectRoleText:SetPoint("BOTTOM", roleframe, "TOP", 0, 5)
-selectRoleText:SetJustifyH("CENTER")
-selectRoleText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
-
 
 ---------------------------------------------------------------------------------
 --                         Message Frame Donjons                               --
