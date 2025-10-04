@@ -113,31 +113,31 @@ function AutoLFM_API.GetSelectedContent()
 end
 
 function AutoLFM_API.GetPlayerCount()
-    local groupType = AutoLFM_API.GetGroupType()
-    local currentInGroup = 0
-    local desiredTotal = 0
-    local missing = 0
-
-    if GetNumRaidMembers() > 0 then
-        currentInGroup = GetNumRaidMembers()
-    else
-        currentInGroup = countGroupMembers()
-    end
-
-    if groupType == "raid" then
-        desiredTotal = sliderValue or 0
-    else
-        desiredTotal = DEFAULT_DUNGEON_SIZE
-    end
-
-    missing = desiredTotal - currentInGroup
-    if missing < 0 then missing = 0 end
-
-    return {
-        currentInGroup = currentInGroup,
-        desiredTotal = desiredTotal,
-        missing = missing
-    }
+  local groupType = AutoLFM_API.GetGroupType()
+  local currentInGroup = 0
+  local desiredTotal = 0
+  local missing = 0
+  
+  if GetNumRaidMembers() > 0 then
+    currentInGroup = GetNumRaidMembers()
+  else
+    currentInGroup = countGroupMembers and countGroupMembers() or 0
+  end
+  
+  if groupType == "raid" then
+    desiredTotal = sliderValue or 0
+  else
+    desiredTotal = DEFAULT_DUNGEON_SIZE
+  end
+  
+  missing = desiredTotal - currentInGroup
+  if missing < 0 then missing = 0 end
+  
+  return {
+    currentInGroup = currentInGroup,
+    desiredTotal = desiredTotal,
+    missing = missing
+  }
 end
 
 function AutoLFM_API.GetRolesNeeded()
@@ -261,11 +261,16 @@ function AutoLFM_API.UnregisterCallback(addonName)
 end
 
 function AutoLFM_API.NotifyDataChanged(eventType)
-    for addonName, callback in pairs(AutoLFM_API.callbacks) do
-        if type(callback) == "function" then
-            pcall(callback, AutoLFM_API.GetFullStatus(), eventType)
-        end
+  if not AutoLFM_API.callbacks then return end
+  
+  for addonName, callback in pairs(AutoLFM_API.callbacks) do
+    if type(callback) == "function" then
+      local success, err = pcall(callback, AutoLFM_API.GetFullStatus(), eventType)
+      if not success then
+        DEFAULT_CHAT_FRAME:AddMessage("[AutoLFM API] Callback error for " .. addonName .. ": " .. tostring(err))
+      end
     end
+  end
 end
 
 -- Slash command
