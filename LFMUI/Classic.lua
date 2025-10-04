@@ -92,6 +92,68 @@ msgTextRaids = msgFrameRaids:CreateFontString(nil, "MEDIUM", "GameFontHighlight"
   msgTextRaids:SetPoint("CENTER", msgFrameRaids, "CENTER", 0, 0)
   msgTextRaids:SetTextColor(1, 1, 1)
 
+--------------------------------------------------
+-- Tabs
+--------------------------------------------------
+tabs = {}
+currentTab = 1
+local function onTabClick(tabNum)
+  currentTab = tabNum
+  if insideList then insideList:SetShown(tabNum <= 2) end
+  if insideMore then insideMore:SetShown(tabNum == 3) end
+  
+  for i = 1, 3 do
+    local active = i == tabNum
+    tabs[i].bg:SetTexture(texturePath .. (active and "tabActive" or "tabInactive"))
+    tabs[i].text:SetTextColor(1, active and 1 or 0.82, active and 1 or 0)
+    if active then tabs[i].highlight:Hide() end
+  end
+end
+
+local function createTab(index, label, onClick, anchorTo)
+  local tab = CreateFrame("Button", nil, AutoLFM)
+    tab:SetPoint(anchorTo and "LEFT" or "BOTTOMLEFT", anchorTo or AutoLFM, anchorTo and "RIGHT" or "BOTTOMLEFT", anchorTo and -5 or 20, anchorTo and 0 or 46)
+    tab:SetWidth(90)
+    tab:SetHeight(32)
+  
+  local bg = tab:CreateTexture(nil, "BACKGROUND")
+    bg:SetTexture(texturePath .. (index == 1 and "tabActive" or "tabInactive"))
+    bg:SetAllPoints()
+  
+  local highlight = tab:CreateTexture(nil, "BORDER")
+    highlight:SetPoint("CENTER", tab, "CENTER", 0, 0)
+    highlight:SetWidth(70)
+    highlight:SetHeight(24)
+    highlight:SetTexture(texturePath .. "tabHighlight")
+    highlight:Hide()
+  
+  local text = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    text:SetPoint("CENTER", tab, "CENTER", 0, 0)
+    text:SetText(label)
+    text:SetTextColor(1, index == 1 and 1 or 0.82, index == 1 and 1 or 0)
+  
+  tabs[index] = {btn = tab, bg = bg, text = text, highlight = highlight}
+  
+  tab:SetScript("OnClick", function() onTabClick(index) if onClick then onClick() end end)
+  tab:SetScript("OnEnter", function() if currentTab ~= index then highlight:Show() text:SetTextColor(1, 1, 1) end end)
+  tab:SetScript("OnLeave", function() highlight:Hide() if currentTab ~= index then text:SetTextColor(1, 0.82, 0) end end)
+  
+  return tab
+end
+
+local tabActions = {
+  function() djScrollFrame:Show() raidFrame:Hide() raidContentFrame:Hide() raidScrollFrame:Hide() msgFrameDj:Show() msgFrameRaids:Hide() clearSelectedRaids() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() HideSliderForRaid() swapChannelFrame() ClearAllBackdrops(raidClickableFrames) end,
+  function() djScrollFrame:Hide() raidFrame:Show() raidContentFrame:Show() raidScrollFrame:Show() msgFrameDj:Hide() msgFrameRaids:Show() clearSelectedDungeons() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() swapChannelFrame() ClearAllBackdrops(donjonClickableFrames) end
+}
+
+local function createTabs()
+  local prevTab
+    for i, label in ipairs({"Dungeons", "Raids", "More"}) do
+      prevTab = createTab(i, label, tabActions[i], prevTab)
+    end
+end
+
+createTabs()
 
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
@@ -532,93 +594,6 @@ raidContentFrame = CreateFrame("Frame", nil, raidScrollFrame)
 raidContentFrame:SetWidth(raidFrame:GetWidth())
 raidContentFrame:SetHeight(raidFrame:GetHeight())
 raidScrollFrame:SetScrollChild(raidContentFrame)
-
-
----------------------------------------------------------------------------------
---                               Swap Bouton                                   --
----------------------------------------------------------------------------------
-
-
--- Swap View Button
-swapBtn = CreateFrame("Button", "AutoLFMSwapButton", AutoLFM, "UIPanelButtonTemplate")
-swapBtn:SetWidth(120)
-swapBtn:SetHeight(30)
-swapBtn:SetPoint("BOTTOM", -10, 40)
-swapBtn:SetText("Raids List")
-
-swapBtn:SetScript("OnClick", function()
-    if djScrollFrame:IsShown() then
-        -- Basculer en mode raids
-        djScrollFrame:Hide()
-        swapBtn:SetText("Dungeons List")
-        raidFrame:Show()
-        raidContentFrame:Show()
-        raidScrollFrame:Show()
-        msgFrameDj:Hide()
-        msgFrameRaids:Show()
-        clearSelectedDungeons()
-        clearSelectedRoles()
-        resetUserInputMessage()
-        updateMsgFrameCombined()
-        swapChannelFrame()
-        ClearAllBackdrops(donjonClickableFrames)
-    else
-        -- Basculer en mode donjons
-        swapBtn:SetText("Raids List")
-        djScrollFrame:Show()
-        raidFrame:Hide()
-        raidContentFrame:Hide()
-        raidScrollFrame:Hide()
-        msgFrameDj:Show()
-        msgFrameRaids:Hide()
-        clearSelectedRaids()
-        clearSelectedRoles()
-        resetUserInputMessage()
-        updateMsgFrameCombined()
-        HideSliderForRaid()
-        swapChannelFrame()
-        ClearAllBackdrops(raidClickableFrames)
-    end
-end)
-
-
-closeBtn:SetScript("OnClick", function()
-    rightPanel:Hide()
-    showArrowBtn:Show()
-    editBox:Hide()
-    sliderframe:Hide()
-    toggleButton:Hide()
-    msgFrameDj:Hide()
-    msgFrameRaids:Hide()
-    dashText:Hide()
-    sliderSizeFrame:Hide()
-    if selectedRaids[1] then
-        -- Si un raid est sélectionné, masquer le sliderSizeFrame
-        sliderSizeFrame:Hide()
-    end
-    UpdateChannelsFramePosition()
-    swapChannelFrame()
-end)
-
-showArrowBtn:SetScript("OnClick", function()
-    rightPanel:Show()
-    showArrowBtn:Hide()
-    editBox:Show()
-    sliderframe:Show()
-    toggleButton:Show()
-    msgFrameDj:Show()
-    msgFrameRaids:Show()
-    dashText:Show()
-    if selectedRaids[1] then
-        -- Si un raid est sélectionné, afficher le sliderSizeFrame
-        sliderSizeFrame:Show()
-    else
-        sliderSizeFrame:Hide()  -- Sinon, le cacher
-    end
-    UpdateChannelsFramePosition()
-    swapChannelFrame()
-end)
-
 
 ---------------------------------------------------------------------------------
 --                               Slider Frame                                  --
