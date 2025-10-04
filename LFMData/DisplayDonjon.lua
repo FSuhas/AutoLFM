@@ -116,7 +116,6 @@ function DisplayDungeonsByColor()
       local isChecked = checkbox:GetChecked()
 
       if isChecked then
-        rightPanel:Show()
         editBox:Show()
         sliderframe:Show()
         toggleButton:Show()
