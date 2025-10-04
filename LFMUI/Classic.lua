@@ -473,108 +473,149 @@ slider:SetMinMaxValues(40, 120)
 slider:SetValue(80)
 slider:SetValueStep(10)
 
---------------------------- SLIDER DE TAILLE ---------------------------
+--------------------------------------------------
+-- Raid Size Controls
+--------------------------------------------------
+local function createRaidSizeControls(AutoLFM)
+  local raidSizeFrame = CreateFrame("Frame", nil, AutoLFM)
+  raidSizeFrame:SetPoint("BOTTOM", AutoLFM, "BOTTOM", -16, 75)
+  raidSizeFrame:SetWidth(300)
+  raidSizeFrame:SetHeight(30)
+  raidSizeFrame:Hide()
+  
+  local raidSizeIcon = raidSizeFrame:CreateTexture(nil, "ARTWORK")
+  raidSizeIcon:SetTexture(texturePath .. "Icons\\group")
+  raidSizeIcon:SetPoint("LEFT", raidSizeFrame, "LEFT", 0, 0)
+  raidSizeIcon:SetWidth(18)
+  raidSizeIcon:SetHeight(18)
+  
+  local raidSizeEditBox = CreateFrame("EditBox", "AutoLFM_RaidSizeEditBox", raidSizeFrame)
+  raidSizeEditBox:SetPoint("LEFT", raidSizeIcon, "RIGHT", 10, 0)
+  raidSizeEditBox:SetWidth(25)
+  raidSizeEditBox:SetHeight(20)
+  raidSizeEditBox:SetFont("Fonts\\FRIZQT__.TTF", 12)
+  raidSizeEditBox:SetJustifyH("CENTER")
+  raidSizeEditBox:SetBackdrop({
+    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = true,
+    tileSize = 8,
+    edgeSize = 8,
+    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+  })
+  raidSizeEditBox:SetBackdropColor(0, 0, 0, 0.8)
+  raidSizeEditBox:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+  raidSizeEditBox:SetAutoFocus(false)
+  raidSizeEditBox:SetMaxLetters(2)
+  raidSizeEditBox:SetText("18")
+  raidSizeEditBox:SetTextInsets(2, 2, 0, 0)
+  
+  -- Bouton invisible sur l'icône pour la rendre cliquable
+  local iconButton = CreateFrame("Button", nil, raidSizeFrame)
+  iconButton:SetAllPoints(raidSizeIcon)
+  iconButton:SetScript("OnClick", function()
+    raidSizeEditBox:SetFocus()
+    raidSizeEditBox:HighlightText()
+  end)
+  
+  local raidSizeSlider = CreateFrame("Slider", "AutoLFM_RaidSizeSlider", raidSizeFrame)
+  raidSizeSlider:SetPoint("LEFT", raidSizeEditBox, "RIGHT", 10, 0)
+  raidSizeSlider:SetWidth(135)
+  raidSizeSlider:SetHeight(17)
+  raidSizeSlider:SetMinMaxValues(10, 40)
+  raidSizeSlider:SetValue(25)
+  raidSizeSlider:SetValueStep(1)
+  raidSizeSlider:SetOrientation("HORIZONTAL")
+  raidSizeSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  raidSizeSlider:SetBackdrop({
+    bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
+    edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
+    tile = true,
+    tileSize = 8,
+    edgeSize = 8,
+    insets = {left = 3, right = 3, top = 6, bottom = 6}
+  })
+  raidSizeSlider:EnableMouse(true)
+  
+  raidSizeSlider:SetScript("OnMouseDown", function()
+    this.dragging = true
+  end)
+  
+  raidSizeSlider:SetScript("OnMouseUp", function()
+    this.dragging = false
+  end)
+  
+  raidSizeSlider:SetScript("OnUpdate", function()
+    if this.dragging then
+      local x, y = GetCursorPosition()
+      local scale = this:GetEffectiveScale()
+      local left = this:GetLeft() * scale
+      local width = this:GetWidth() * scale
+      local relX = (x - left) / width
+      relX = math.max(0, math.min(1, relX))
+      local minVal, maxVal = this:GetMinMaxValues()
+      local newVal = minVal + (maxVal - minVal) * relX
+      this:SetValue(newVal)
+      
+      local top = this:GetTop() * scale
+      local bottom = this:GetBottom() * scale
+      local right = this:GetRight() * scale
+      
+      if not (x >= left and x <= right and y >= bottom and y <= top) then
+        this.dragging = false
+      end
+    end
+  end)
+  
+  return raidSizeFrame, raidSizeEditBox, raidSizeSlider
+end
 
--- Créer un cadre pour le slider
-sliderSizeFrame = CreateFrame("Frame", nil, msgFrame)
-sliderSizeFrame:SetBackdropColor(1, 1, 1, 0.3)
-sliderSizeFrame:SetBackdropBorderColor(1, 1, 1, 1)
-sliderSizeFrame:SetWidth(220)  -- Largeur du slider
-sliderSizeFrame:SetHeight(100)  -- Hauteur du cadre (augmentée pour laisser de la place au texte supplémentaire)
-sliderSizeFrame:SetPoint("CENTER", msgFrame, "CENTER", 290, 120)  -- Positionner le cadre en bas au centre du panneau principal
+sliderSizeFrame, sliderSizeEditBox, sliderSize = createRaidSizeControls(AutoLFM)
 
-sliderSizeFrame:SetBackdrop{
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-    edgeSize = 12,
-    insets = { left = 5, right = 5, top = 5, bottom = 5 },
-}
-
-sliderSizeFrame:Hide()  -- Masquer le cadre au départ
-
--- Créer le slider
-sliderSize = CreateFrame("Slider", nil, sliderSizeFrame, "OptionsSliderTemplate")
-sliderSize:SetWidth(200)
-sliderSize:SetHeight(20)
-sliderSize:SetPoint("CENTER", sliderSizeFrame, "CENTER", 0, 0)
-
--- Initialiser la valeur
-sliderSize:SetValueStep(1)  -- Pas de valeur du slider
-
--- Variable globale pour stocker la valeur du slider
 sliderValue = 0
-
--- Variable pour stocker la référence du slider
 currentSliderFrame = nil
-sliderValueText = nil  -- Texte pour afficher la plage
-sliderCurrentValueText = nil  -- Texte pour afficher la valeur actuelle
 
--- Fonction pour mettre à jour le texte en fonction de la valeur du slider
+--------------------------------------------------
+-- Slider Functions
+--------------------------------------------------
 function UpdateSliderText(value)
-    if value then  -- Vérifier que value est défini et est un nombre
-        local minValue, maxValue = sliderSize:GetMinMaxValues()
-
-        -- Afficher la plage de valeurs du slider
-        sliderValueText:SetText(value)
-
-        -- Afficher la valeur actuelle du slider
-        sliderCurrentValueText:SetText("Raid Size: " .. minValue .. " at " .. maxValue)
-    else
-        -- Afficher un message par défaut si la valeur est nil
-        sliderValueText:SetText("Raid Size: N/A")
-        sliderCurrentValueText:SetText("Valeur actuelle: N/A")
-    end
+  if value then
+    sliderSizeEditBox:SetText(tostring(value))
+  else
+    sliderSizeEditBox:SetText("")
+  end
 end
 
-
--- Fonction pour afficher le slider pour un raid sélectionné
 function ShowSliderForRaid(raid)
+  if currentSliderFrame then
+    currentSliderFrame:Hide()
+  end
 
-    if currentSliderFrame then
-        currentSliderFrame:Hide()  -- Masquer le précédent slider
-    end
+  if not raid or not raid.size_min or not raid.size_max then
+    return
+  end
 
-    -- Vérifier si les valeurs de raid sont valides
-    if not raid.size_min or not raid.size_max then
-        print("Erreur: Les valeurs size_min ou size_max ne sont pas définies correctement.")
-        return
-    end
+  sliderSize:SetMinMaxValues(raid.size_min, raid.size_max)
+  
+  local initVal = sliderValue ~= 0 and sliderValue or raid.size_min
+  sliderSize:SetValue(initVal)
+  
+  UpdateSliderText(sliderSize:GetValue())
 
-    -- Créer les textes si ils n'existent pas encore
-    if not sliderValueText then
-        sliderValueText = sliderSizeFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        sliderValueText:SetPoint("CENTER", sliderSize, "TOP", 0, 10)
-    end
+  if AutoLFM and AutoLFM:IsShown() then
+    sliderSizeFrame:Show()
+  end
 
-    if not sliderCurrentValueText then
-        sliderCurrentValueText = sliderSizeFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        sliderCurrentValueText:SetPoint("CENTER", sliderSize, "BOTTOM", 0, -10)  -- Placer sous le slider
-    end
-
-    -- Définir les valeurs min et max pour le slider en fonction du raid sélectionné
-    sliderSize:SetMinMaxValues(raid.size_min, raid.size_max)
-
-    -- **Vérification de la valeur initiale** (on la force à la valeur précédemment sauvegardée ou à la valeur par défaut)
-    local initialSliderValue = sliderValue ~= 0 and sliderValue or raid.size_min  -- Si une valeur est déjà enregistrée, on l'utilise
-    sliderSize:SetValue(initialSliderValue)  -- Définir la valeur initiale
-
-    -- Mettre à jour le texte avec la valeur actuelle
-    UpdateSliderText(sliderSize:GetValue())
-
-    -- Afficher le cadre du slider
-    if AutoLFM and AutoLFM:IsShown() then
-        sliderSizeFrame:Show()
-    end
-
-    -- Sauvegarder la référence du slider pour pouvoir le masquer plus tard
-    currentSliderFrame = sliderSizeFrame
+  currentSliderFrame = sliderSizeFrame
 end
 
--- Mettre à jour le texte chaque fois que la valeur du slider change
-sliderSize:SetScript("OnValueChanged", function(value)
-    sliderValue = value  -- Sauvegarder la nouvelle valeur du slider
-    UpdateSliderText(value)  -- Mettre à jour le texte avec la valeur actuelle
-end)
+function HideSliderForRaid()
+  if sliderSizeFrame then
+    sliderSizeFrame:Hide()
+  end
+  sliderValue = 0
+  currentSliderFrame = nil
+end
 
 -- Fonction pour gérer le changement de texte
 editBox:SetScript("OnTextChanged", function(self)
@@ -589,13 +630,23 @@ end)
 
 
 -- Mettre à jour le texte chaque fois que la valeur du slider change
-sliderSize:SetScript("OnValueChanged", function(value)
-    value = sliderSize:GetValue()  -- Obtenir la valeur actuelle du slider
-    sliderValue = value  -- Sauvegarder la nouvelle valeur du slider
-    UpdateSliderText(sliderValue)  -- Mettre à jour le texte avec la valeur actuelle
-    updateMsgFrameCombined()
+sliderSize:SetScript("OnValueChanged", function()
+  local value = sliderSize:GetValue()
+  sliderValue = value
+  raidSize = value
+  UpdateSliderText(value)
+  updateMsgFrameCombined()
 end)
 
+sliderSizeEditBox:SetScript("OnTextChanged", function()
+  local value = tonumber(sliderSizeEditBox:GetText())
+  if value then
+    local minVal, maxVal = sliderSize:GetMinMaxValues()
+    if value >= minVal and value <= maxVal then
+      sliderSize:SetValue(value)
+    end
+  end
+end)
 
 
 ---------------------------------------------------------------------------------
@@ -613,9 +664,6 @@ function SnapToStep(value)
         return roundedValue
     end
 end
-
--- Variable pour stocker la valeur du slider
-sliderValue = 80
 
 -- Créer une police pour afficher la valeur actuelle du slider (placer la valeur au-dessus du slider)
 valueText = slider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -706,7 +754,6 @@ AutoLFM:SetScript("OnEvent", function(self, event, ...)
         local raid = selectedRaids[1]  -- Récupérer le raid sélectionné
         local donjon = selectedDungeons[1]  -- Récupérer le donjon sélectionné
         if raid ~= nil then
-            raidSize = value
             local totalPlayersInRaid = countRaidMembers()  -- Récupérer le nombre total de membres du groupe
             if raidSize == totalPlayersInRaid then
                 stopMessageBroadcast()  -- Si le groupe a atteint la taille du raid, arrêter la diffusion
@@ -736,4 +783,3 @@ AutoLFM:SetScript("OnEvent", function(self, event, ...)
         end
     end
 end)
-
