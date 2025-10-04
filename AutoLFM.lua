@@ -5,11 +5,8 @@
 local msglog = CreateFrame("Frame")
 msglog:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-
-
-
 local function OnPlayerEnteringWorld(self, event)
---   local seg1 = "|cffffffff ---- Refonte de l'addon ---- "
+
   local seg2 = "|cffffffff <"
   local seg3 = "|cffffff00 Auto "
   local seg4 = "|cff0070DDL"
@@ -21,33 +18,28 @@ local function OnPlayerEnteringWorld(self, event)
   local seg10 = "|cffffff00   More information with  : "
   local seg11 = "|cff00FFFF  /lfm help"
 
-
-  -- Combine the segments and display the message
-  -- DEFAULT_CHAT_FRAME:AddMessage(seg1)
   DEFAULT_CHAT_FRAME:AddMessage(seg2 .. seg3 .. seg4 .. seg5 .. seg6 .. seg7 .. seg8 .. seg9)
   DEFAULT_CHAT_FRAME:AddMessage(seg10 .. seg11)
   
-  InitMinimapButton()
-  DisplayDungeonsByColor()
+  if InitMinimapButton then
+    InitMinimapButton()
+  end
+  
+  if AutoLFM_DungeonList and contentFrame then
+    AutoLFM_DungeonList.Display(contentFrame)
+  end
+  
+  if AutoLFM_RaidList and raidContentFrame then
+    AutoLFM_RaidList.Display(raidContentFrame)
+  end
+  
+if AutoLFM then
   AutoLFM:Hide()
+end
   msglog:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
 
 msglog:SetScript("OnEvent", OnPlayerEnteringWorld)
-
-
----------------------------------------------------------------------------------
---                           Init Donjons & Raids                              --
----------------------------------------------------------------------------------
-
-
--- Vérifier si des canaux sont sélectionnés
-if next(selectedChannels) == nil then
-    channelsFrame:Show()  -- Afficher le cadre des canaux
-else
-    LoadSelectedChannels()
-    channelsFrame:Hide()  -- Masquer le cadre des canaux si aucun canal n'est sélectionné
-end
 
 
 ---------------------------------------------------------------------------------
@@ -164,7 +156,7 @@ SlashCmdList["LFM"] = function(msg)
 
     if args[1] == "petfoireux" then
         ShowBigMessage("Fuuumiiieeeerrrr !!!!!!", 3)
-        PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\fumier.ogg")
+        PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\fumier.ogg")
         return
     end
 

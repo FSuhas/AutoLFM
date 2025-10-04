@@ -1,26 +1,24 @@
 ## Interface: 11200
 ## Title: |cffffffffAuto|r|cff0070DDL|rF|cffff0000M|r |cff00FF00- |r|cffadd8e6Gon|r|cffffffffdo|r|cffff7f7fLeon|r|cff00FF00 -|r
 ## Notes: Automated LFM Message
-## Version: 1.6.8
+## Version: 1.7.0
 ## Author: Gondoleon
 ## DefaultState: Enabled
 ## SavedVariables: AutoLFM_SavedVariables
 
 ## GitHub: https://github.com/FSuhas/AutoLFM
 
+Engine\Data.lua
+Engine\Roles.lua
+Engine\Functions.lua
+Engine\DynamicMsg.lua
+Engine\Channels.lua
+Engine\Broadcast.lua
+Engine\API.lua
 
-LFMData\Variables.lua
-
-LFMData\Function.lua
-LFMData\MinimapButon.lua
-LFMData\MsgDynamique.lua
-LFMData\Broadcast.lua
-LFMData\API.lua
-
-LFMUI\Classic.lua
+UI\DungeonsList.lua
+UI\RaidsList.lua
+UI\MinimapButton.lua
+UI\Frame.lua
 
 AutoLFM.lua
-
-LFMData\DisplayDonjon.lua
-LFMData\DisplayRaid.lua
-LFMData\Roles.lua
