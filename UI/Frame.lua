@@ -481,7 +481,7 @@ local function setupPlaceholder(editBox, placeholderText)
   end)
   
   editBox:SetScript("OnTextChanged", function()
-    userInputMessage = this:GetText()
+    userInputMessage = editBox:GetText()
     if updateMsgFrameCombined then
       updateMsgFrameCombined()
     end
@@ -489,11 +489,11 @@ local function setupPlaceholder(editBox, placeholderText)
   end)
   
   editBox:SetScript("OnEnterPressed", function()
-    this:ClearFocus()
+    editBox:ClearFocus()
   end)
   
   editBox:SetScript("OnEscapePressed", function()
-    this:ClearFocus()
+    editBox:ClearFocus()
   end)
   
   updatePlaceholder()
@@ -646,7 +646,7 @@ Original_QuestLogTitleButton_OnClick = QuestLogTitleButton_OnClick
 function QuestLogTitleButton_OnClick(button)
   Original_QuestLogTitleButton_OnClick(button)
   if button == "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
-    local questIndex = this:GetID()
+    local questIndex = getglobal(this:GetName()):GetID()
     if questIndex then
       local questLink = CreateQuestLink(questIndex)
       if questLink then
@@ -665,14 +665,13 @@ Original_ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
 function ContainerFrameItemButton_OnClick(button)
   Original_ContainerFrameItemButton_OnClick(button)
   if button == "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
-    local bag = this:GetParent():GetID()
-    local slot = this:GetID()
+    local frameButton = getglobal(this:GetName())
+    local bag = frameButton:GetParent():GetID()
+    local slot = frameButton:GetID()
     local itemLink = GetContainerItemLink(bag, slot)
     if itemLink then
-      if editBox then
-        editBox:SetText(itemLink)
-        editBox:SetFocus()
-      end
+      editBox:SetText(itemLink)
+      editBox:SetFocus()
     end
   end
 end
