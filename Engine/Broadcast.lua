@@ -48,13 +48,11 @@ function sendMessageToSelectedChannels(message)
   local allChannelsValid = true
   
   for channelName, _ in pairs(selectedChannels) do
-    if channelName ~= "Hardcore" then
-      local channelId = GetChannelName(channelName)
-      if not (channelId and channelId > 0) then
-        DEFAULT_CHAT_FRAME:AddMessage("Error: The channel " .. channelName .. " is invalid or closed.")
-        allChannelsValid = false
-        break
-      end
+    local channelId = GetChannelName(channelName)
+    if not (channelId and channelId > 0) then
+      DEFAULT_CHAT_FRAME:AddMessage("Error: The channel " .. channelName .. " is invalid or closed.")
+      allChannelsValid = false
+      break
     end
   end
   
@@ -63,16 +61,16 @@ function sendMessageToSelectedChannels(message)
     return false
   end
   
+  -- Send messages to all valid channels
   for channelName, _ in pairs(selectedChannels) do
-    if channelName == "Hardcore" then
-      SendChatMessage(message, "SAY")
-    else
-      local channelId = GetChannelName(channelName)
+    local channelId = GetChannelName(channelName)
+    if channelId and channelId > 0 then
       SendChatMessage(message, "CHANNEL", nil, channelId)
     end
   end
   
   messagesSentCount = messagesSentCount + 1
+  lastMessageSent = now
   return true
 end
 

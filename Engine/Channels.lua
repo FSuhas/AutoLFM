@@ -1,7 +1,6 @@
 --------------------------------------------------
 -- Channel Management
 --------------------------------------------------
-
 channelsToFind = {"WORLD", "LookingForGroup", "Hardcore", "testketa"}
 foundChannels = {}
 channelsFrame = nil
@@ -9,7 +8,6 @@ channelsFrame = nil
 --------------------------------------------------
 -- Save/Load
 --------------------------------------------------
-
 function SaveSelectedChannels()
   if not AutoLFM_SavedVariables or not uniqueIdentifier then return end
   AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels or {}
@@ -39,13 +37,16 @@ end
 --------------------------------------------------
 -- Find Channels
 --------------------------------------------------
-
 function findChannels()
   foundChannels = {}
   
   for _, channel in ipairs(channelsToFind) do
     if channel == "Hardcore" then
-      table.insert(foundChannels, {name = "Hardcore", id = "hardcore_channel"})
+      -- Vérifier si le joueur a accès au channel Hardcore
+      local channelId = GetChannelName(channel)
+      if channelId and channelId > 0 then
+        table.insert(foundChannels, {name = channel, id = channelId})
+      end
     else
       local channelId = GetChannelName(channel)
       if channelId and channelId > 0 then
@@ -58,7 +59,6 @@ end
 --------------------------------------------------
 -- Create Channel Buttons
 --------------------------------------------------
-
 function CreateChannelButtons()
   if not channelsFrame then return end
   if not next(foundChannels) then return end
@@ -108,7 +108,6 @@ end
 --------------------------------------------------
 -- Initialize Channel Frame
 --------------------------------------------------
-
 function InitializeChannelFrame()
   if not insideMore then return end
   if channelsFrame then return end
@@ -138,12 +137,9 @@ function InitializeChannelFrame()
   CreateChannelButtons()
 end
 
---------------------------------------------------
--- Swap Channel Frame
---------------------------------------------------
-
-function swapChannelFrame()
+function EnsureChannelFrameExists()
   if not channelsFrame then
     InitializeChannelFrame()
   end
+  return channelsFrame ~= nil
 end

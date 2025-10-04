@@ -196,7 +196,7 @@ local function onDungeonsTab()
   if resetUserInputMessage then resetUserInputMessage() end
   if updateMsgFrameCombined then updateMsgFrameCombined() end
   if HideSliderForRaid then HideSliderForRaid() end
-  if swapChannelFrame then swapChannelFrame() end
+  if EnsureChannelFrameExists then EnsureChannelFrameExists() end
   
   if AutoLFM_RaidList and AutoLFM_RaidList.ClearBackdrops then
     AutoLFM_RaidList.ClearBackdrops()
@@ -217,7 +217,7 @@ local function onRaidsTab()
   if clearSelectedRoles then clearSelectedRoles() end
   if resetUserInputMessage then resetUserInputMessage() end
   if updateMsgFrameCombined then updateMsgFrameCombined() end
-  if swapChannelFrame then swapChannelFrame() end
+  if EnsureChannelFrameExist then EnsureChannelFrameExists() end
   
   if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
     AutoLFM_DungeonList.ClearBackdrops()
@@ -600,8 +600,8 @@ toggleButton:SetScript("OnClick", function()
       PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
       searchStartTime = 0
     else
-      if swapChannelFrame then
-        swapChannelFrame()
+      if EnsureChannelFrameExists then
+        EnsureChannelFrameExists()
       end
       if startMessageBroadcast then
         startMessageBroadcast()
