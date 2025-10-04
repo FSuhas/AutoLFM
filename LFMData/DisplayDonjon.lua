@@ -49,7 +49,7 @@ function DisplayDungeonsByColor()
     -- Labels : niveau et nom
     local levelLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     levelLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
-    levelLabel:SetText(donjon.lvl_min .. "-" .. donjon.lvl_max)
+    levelLabel:SetText("(" .. donjon.lvl_min .. " - " .. donjon.lvl_max .. ")")
 
     local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)

@@ -25,7 +25,7 @@ for index, raid in pairs(raids) do
 
   local sizeLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sizeLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
-  local sizeText = raid.size_min == raid.size_max and raid.size_min or raid.size_min .. "-" .. raid.size_max
+  local sizeText = raid.size_min == raid.size_max and "(" .. raid.size_min .. ")" or "(" .. raid.size_min .. " - " .. raid.size_max .. ")"
   sizeLabel:SetText(sizeText)
 
   local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
