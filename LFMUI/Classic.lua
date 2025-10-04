@@ -206,9 +206,9 @@ end
 djframe, djScrollFrame, contentFrame = createScrollFrame("Dungeons", insideList)
 raidFrame, raidScrollFrame, raidContentFrame = createScrollFrame("raids", insideList)
 
----------------------------------------------------------------------------------
---                            Raid Size Slider                                --
----------------------------------------------------------------------------------
+--------------------------------------------------
+-- Raid Size Slider
+--------------------------------------------------
 sliderValue = 0
 currentSliderFrame = nil
 sliderSizeFrame = nil
@@ -364,9 +364,8 @@ sliderSizeEditBox:SetScript("OnTextChanged", function()
 end)
 
 --------------------------------------------------
--- Inside More
+-- Inside More - Message Details
 --------------------------------------------------
-
 local function setupPlaceholder(editBox, placeholderText)
   local placeholder = editBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
     placeholder:SetText(placeholderText)
@@ -429,10 +428,56 @@ editBox = CreateFrame("EditBox", "AutoLFM_EditBox", insideMore)
 
 setupPlaceholder(editBox, "Add message details (optional)")
 
+--------------------------------------------------
+-- Inside More - Broadcast Interval Slider
+--------------------------------------------------
+step = 10
 
+local function SnapToStep(value)
+  if value then
+    local roundedValue = math.floor(value / step + 0.5) * step
+    return roundedValue
+  end
+end
 
+sliderframe = CreateFrame("Frame", nil, insideMore)
+  sliderframe:SetPoint("TOP", editBox, "BOTTOM", 0, -30)
+  sliderframe:SetWidth(250)
+  sliderframe:SetHeight(50)
+  sliderframe:SetBackdrop({
+    bgFile = nil,
+    edgeSize = 16,
+    insets = { left = 4, right = 2, top = 4, bottom = 4 },
+  })
+  sliderframe:SetBackdropColor(1, 1, 1, 0.3)
+  sliderframe:SetBackdropBorderColor(1, 1, 1, 1)
 
+slider = CreateFrame("Slider", nil, sliderframe, "OptionsSliderTemplate")
+  slider:SetWidth(200)
+  slider:SetHeight(20)
+  slider:SetPoint("CENTER", sliderframe, "CENTER", 0, 0)
+  slider:SetMinMaxValues(40, 120)
+  slider:SetValue(80)
+  slider:SetValueStep(10)
 
+valueText = slider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  valueText:SetPoint("BOTTOM", slider, "TOP", 0, 5)
+  valueText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+  valueText:SetText("Dispense every 80 seconds")
+
+slider:SetScript("OnValueChanged", function()
+  local value = slider:GetValue()
+  valueText:SetText("Dispense every " .. value .. " seconds")
+end)
+
+sliderframe:SetScript("OnUpdate", function()
+  local currentValue = slider:GetValue()
+  local snappedValue = SnapToStep(currentValue)
+  if currentValue ~= snappedValue then
+    slider:SetValue(snappedValue)
+  end
+  valueText:SetText("Dispense every " .. slider:GetValue() .. " seconds")
+end)
 
 --------------------------------------------------
 -- Start/Stop Button
@@ -478,15 +523,14 @@ toggleButton:SetScript("OnClick", function()
   end
 end)
 
-
-
-
+--------------------------------------------------
 -- Right Panel
+--------------------------------------------------
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
 rightPanel:SetWidth(384)
 rightPanel:SetHeight(512)
 rightPanel:SetPoint("TOPLEFT", AutoLFM, "TOPRIGHT", -46, 0)
-rightPanel:Hide() -- Hide the right panel by default
+rightPanel:Hide()
 
 rt_tl = rightPanel:CreateTexture(nil, "ARTWORK")
 rt_tl:SetTexture("Interface\\Spellbook\\UI-SpellbookPanel-BotLeft")
@@ -514,17 +558,9 @@ rt_br:SetWidth(128)
 rt_br:SetHeight(256)
 rt_br:SetPoint("BOTTOMRIGHT", rightPanel, "BOTTOMRIGHT")
 
---eyeOpen = true
---eye = AutoLFM:CreateTexture(nil, "OVERLAY")
---eye:SetWidth(52)
---eye:SetHeight(52)
---eye:SetPoint("TOPLEFT", 13, -11)
---eye:SetTexture(openTexture)
-
 showArrowBtn = nil
 closeArrowTex = nil
 
--- Bouton flèche pour fermer rightPanel (flèche vers la gauche)
 closeBtn = CreateFrame("Button", "AutoLFMCloseButton", rightPanel)
 closeBtn:SetWidth(20)
 closeBtn:SetHeight(60)
@@ -532,9 +568,8 @@ closeBtn:SetPoint("TOPRIGHT", rightPanel, "TOPRIGHT", -15, -225)
 
 closeArrowTex = closeBtn:CreateTexture(nil, "OVERLAY")
 closeArrowTex:SetAllPoints()
-closeArrowTex:SetTexture("Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up") -- flèche vers la gauche
+closeArrowTex:SetTexture("Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up")
 
--- Maintenant création du bouton flèche
 showArrowBtn = CreateFrame("Button", nil, AutoLFM)
 showArrowBtn:SetWidth(20)
 showArrowBtn:SetHeight(60)
@@ -545,236 +580,134 @@ arrowTex = showArrowBtn:CreateTexture(nil, "OVERLAY")
 arrowTex:SetAllPoints()
 arrowTex:SetTexture("Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up")
 
--- Créer cadre roleframe dans la frame de droite
 roleframe = CreateFrame("Frame", nil, AutoLFM_RightPanel)
 roleframe:SetWidth(AutoLFM_RightPanel:GetWidth()- 60)
 roleframe:SetHeight(AutoLFM_RightPanel:GetHeight() / 6)
 roleframe:SetPoint("TOPLEFT", AutoLFM_RightPanel, "TOPLEFT", 20, -100)
 
-
-
-
-
-
-AutoLFM:SetScript("OnShow", function(self)
-    nextChange = GetTime() + math.random(1, 3) -- init timer
-    this:SetScript("OnUpdate", OnUpdateHandler)
+--------------------------------------------------
+-- OnShow/OnHide
+--------------------------------------------------
+AutoLFM:SetScript("OnShow", function()
+  nextChange = GetTime() + math.random(1, 3)
+  this:SetScript("OnUpdate", OnUpdateHandler)
 end)
 
-AutoLFM:SetScript("OnHide", function(self)
-    this:SetScript("OnUpdate", nil) -- stop OnUpdate quand caché
+AutoLFM:SetScript("OnHide", function()
+  this:SetScript("OnUpdate", nil)
 end)
 
----------------------------------------------------------------------------------
-
----------------------------------------------------------------------------------
---                                EditBox                                      --
----------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
+--------------------------------------------------
+-- Quest Link
+--------------------------------------------------
 function CreateQuestLink(questIndex)
-    if not AutoLFM or not AutoLFM:IsVisible() then
-        return -- autoLFM fermé, ne fait rien
-    end
-    local title, level, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
-    if not title or title == "" then return nil end
-    if not questID then
-        -- En 1.12, questID est souvent nil, mais on peut essayer d'extraire autrement (limité)
-        questID = 0
-    end
-    -- Construire le lien (format 1.12)
-    local color = "|cffffff00"  -- jaune, couleur des quêtes
-    local link = string.format("%s|Hquest:%d:%d|h[%s]|h|r", color, questID, level or 0, title)
-    return link
+  if not AutoLFM or not AutoLFM:IsVisible() then
+    return
+  end
+  local title, level, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
+  if not title or title == "" then return nil end
+  if not questID then
+    questID = 0
+  end
+  local color = "|cffffff00"
+  local link = string.format("%s|Hquest:%d:%d|h[%s]|h|r", color, questID, level or 0, title)
+  return link
 end
 
-
-
-
--- Sauvegarder la fonction d'origine
 Original_QuestLogTitleButton_OnClick = QuestLogTitleButton_OnClick
 
--- Surcharge de QuestLogTitleButton_OnClick
 function QuestLogTitleButton_OnClick(self, button)
-
-    Original_QuestLogTitleButton_OnClick(self, button)
-
-    if "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
-        local questIndex = this:GetID()
-        if questIndex then
-            local questLink = CreateQuestLink(questIndex)
-            if questLink then
-                editBox:SetText(questLink)
-                editBox:SetFocus()
-            end
-        end
+  Original_QuestLogTitleButton_OnClick(self, button)
+  if "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
+    local questIndex = this:GetID()
+    if questIndex then
+      local questLink = CreateQuestLink(questIndex)
+      if questLink then
+        editBox:SetText(questLink)
+        editBox:SetFocus()
+      end
     end
+  end
 end
 
--- On sauvegarde la fonction d'origine OnClick des boutons d'item du sac
+--------------------------------------------------
+-- Item Link
+--------------------------------------------------
 Original_ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
 
 function ContainerFrameItemButton_OnClick(self, button)
-    -- Appeler la fonction originale (ouvrir tooltip, etc.)
-    Original_ContainerFrameItemButton_OnClick(self, button)
-
-    if "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
-        local bag = this:GetParent():GetID()
-        local slot = this:GetID()
-        local itemLink = GetContainerItemLink(bag, slot)
-        if itemLink then
-            if editBox then
-                editBox:SetText(itemLink)
-                editBox:SetFocus()
-            end
-        end
+  Original_ContainerFrameItemButton_OnClick(self, button)
+  if "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
+    local bag = this:GetParent():GetID()
+    local slot = this:GetID()
+    local itemLink = GetContainerItemLink(bag, slot)
+    if itemLink then
+      if editBox then
+        editBox:SetText(itemLink)
+        editBox:SetFocus()
+      end
     end
+  end
 end
 
--- Sauvegarder la fonction d'origine
 Original_SetItemRef = SetItemRef
 
--- Nouvelle fonction pour intercepter les clics sur les liens
 function SetItemRef(link, text, button, chatFrame)
-
-    Original_SetItemRef(link, text, button, chatFrame)
-
-    -- Vérifier clic gauche + Shift + lien d'item
-    if "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
-        -- En 1.12, les liens d'item commencent souvent par "item:"
-        if link and string.find(link, "^item:") then
-            if editBox then
-                editBox:SetText(text)
-                editBox:SetFocus()
-            end
-        end
+  Original_SetItemRef(link, text, button, chatFrame)
+  if "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
+    if link and string.find(link, "^item:") then
+      if editBox then
+        editBox:SetText(text)
+        editBox:SetFocus()
+      end
     end
+  end
 end
 
-
----------------------------------------------------------------------------------
---                                 Slider                                      --
----------------------------------------------------------------------------------
-
-
--- Créer cadre sliderframe
-sliderframe = CreateFrame("Frame", nil, AutoLFM)
-sliderframe:SetBackdrop({
-    bgFile = nil,
-    edgeSize = 16,  -- Taille de la bordure
-    insets = { left = 4, right = 2, top = 4, bottom = 4 },
-})
-sliderframe:SetBackdropColor(1, 1, 1, 0.3)
-sliderframe:SetBackdropBorderColor(1, 1, 1, 1)
-
--- Positionner le nouveau cadre juste en dessous de roleframe
-sliderframe:SetWidth(roleframe:GetWidth())
-sliderframe:SetHeight(roleframe:GetHeight() + 50)
-sliderframe:SetPoint("TOPRIGHT", msgFrame, "BOTTOMRIGHT", 0, -40)
-
--- Créer la barre de glissement (Slider)
-slider = CreateFrame("Slider", nil, sliderframe, "OptionsSliderTemplate")
-slider:SetWidth(200)
-slider:SetHeight(20)
-slider:SetPoint("CENTER", sliderframe, "CENTER", 0, 0)
-slider:SetMinMaxValues(40, 120)
-slider:SetValue(80)
-slider:SetValueStep(10)
-
-
-
-
----------------------------------------------------------------------------------
---                               Slider Frame                                  --
----------------------------------------------------------------------------------
-
-
--- Valeur de pas fixe pour arrondir
-step = 10
-
--- Fonction pour arrondir la valeur du slider à l'étape la plus proche
-function SnapToStep(value)
-    if value then
-        local roundedValue = math.floor(value / step + 0.5) * step
-        return roundedValue
-    end
-end
-
--- Créer une police pour afficher la valeur actuelle du slider (placer la valeur au-dessus du slider)
-valueText = slider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-valueText:SetPoint("BOTTOM", slider, "TOP", 0, 5)
-valueText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
-
--- Mettre à jour la valeur du slider
-sliderframe:SetScript("OnUpdate", function(self, elapsed)
--- Récupérer la valeur actuelle du slider
-local currentValue = slider:GetValue()
-
--- Arrondir la valeur à l'étape la plus proche
-local snappedValue = SnapToStep(currentValue)
-
--- Appliquer la valeur arrondie au slider si nécessaire (au cas où la valeur serait flottante)
-if currentValue ~= snappedValue then
-    slider:SetValue(snappedValue)
-end
-
--- Mettre à jour dynamiquement le texte pour refléter la nouvelle valeur en temps réel
-valueText:SetText("Dispense every " .. slider:GetValue() .. " seconds")
-end)
-
-
+--------------------------------------------------
+-- Events
+--------------------------------------------------
 AutoLFM:RegisterEvent("PARTY_MEMBERS_CHANGED")
 AutoLFM:RegisterEvent("GROUP_ROSTER_UPDATE")
 AutoLFM:RegisterEvent("RAID_ROSTER_UPDATE")
 
-
-AutoLFM:SetScript("OnEvent", function(self, event, ...)
-    if "RAID_ROSTER_UPDATE" then
-        OnRaidRosterUpdate()
-    end
+AutoLFM:SetScript("OnEvent", function()
+  if "RAID_ROSTER_UPDATE" then
+    OnRaidRosterUpdate()
+  end
 end)
 
-AutoLFM:SetScript("OnEvent", function(self, event, ...)
-    if "GROUP_ROSTER_UPDATE" then
-        local raid = selectedRaids[1]  -- Récupérer le raid sélectionné
-        local donjon = selectedDungeons[1]  -- Récupérer le donjon sélectionné
-        if raid ~= nil then
-            local totalPlayersInRaid = countRaidMembers()  -- Récupérer le nombre total de membres du groupe
-            if raidSize == totalPlayersInRaid then
-                stopMessageBroadcast()  -- Si le groupe a atteint la taille du raid, arrêter la diffusion
-                clearSelectedRaids() -- Effacer les donjons sélectionnés
-                clearSelectedRoles()  -- Effacer les rôles sélectionnés
-                resetUserInputMessage()  -- Réinitialiser le message d'entrée utilisateur
-                updateMsgFrameCombined()  -- Mettre à jour le message combiné
-                toggleButton:SetText("Start")  -- Réinitialiser le texte du bouton à "Start"
-                PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_Denied.ogg")  -- Jouer le son d'arrêt
-            else
-                OnGroupUpdate()  -- Mettre à jour le groupe
-            end
-        elseif donjon ~= nil then
-            donjonSize = 5
-            local totalPlayersInRaid = countGroupMembers()  -- Récupérer le nombre total de membres du groupe
-            if donjonSize == totalPlayersInRaid then
-                stopMessageBroadcast()  -- Si le groupe a atteint la taille du donjon, arrêter la diffusion
-                clearSelectedDungeons()  -- Effacer les donjons sélectionnés
-                clearSelectedRoles()  -- Effacer les rôles sélectionnés
-                resetUserInputMessage()  -- Réinitialiser le message d'entrée utilisateur
-                updateMsgFrameCombined()  -- Mettre à jour le message combiné
-                toggleButton:SetText("Start")  -- Réinitialiser le texte du bouton à "Start"
-                PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_Denied.ogg")  -- Jouer le son d'arrêt
-            else
-                OnGroupUpdate()  -- Mettre à jour le groupe
-            end
-        end
+AutoLFM:SetScript("OnEvent", function()
+  if "GROUP_ROSTER_UPDATE" then
+    local raid = selectedRaids[1]
+    local donjon = selectedDungeons[1]
+    if raid ~= nil then
+      local totalPlayersInRaid = countRaidMembers()
+      if raidSize == totalPlayersInRaid then
+        stopMessageBroadcast()
+        clearSelectedRaids()
+        clearSelectedRoles()
+        resetUserInputMessage()
+        updateMsgFrameCombined()
+        toggleButton:SetText("Start")
+        PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_Denied.ogg")
+      else
+        OnGroupUpdate()
+      end
+    elseif donjon ~= nil then
+      donjonSize = 5
+      local totalPlayersInRaid = countGroupMembers()
+      if donjonSize == totalPlayersInRaid then
+        stopMessageBroadcast()
+        clearSelectedDungeons()
+        clearSelectedRoles()
+        resetUserInputMessage()
+        updateMsgFrameCombined()
+        toggleButton:SetText("Start")
+        PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_Denied.ogg")
+      else
+        OnGroupUpdate()
+      end
     end
+  end
 end)
