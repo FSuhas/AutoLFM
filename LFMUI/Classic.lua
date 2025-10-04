@@ -147,7 +147,7 @@ end
 local tabActions = {
   function() djScrollFrame:Show() raidFrame:Hide() raidContentFrame:Hide() raidScrollFrame:Hide() msgFrameDj:Show() msgFrameRaids:Hide() clearSelectedRaids() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() HideSliderForRaid() swapChannelFrame() ClearAllBackdrops(raidClickableFrames) end,
   function() djScrollFrame:Hide() raidFrame:Show() raidContentFrame:Show() raidScrollFrame:Show() msgFrameDj:Hide() msgFrameRaids:Show() clearSelectedDungeons() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() swapChannelFrame() ClearAllBackdrops(donjonClickableFrames) end,
-  function() if djScrollFrame then djScrollFrame:Hide() end if raidFrame then raidFrame:Hide() end if raidContentFrame then raidContentFrame:Hide() end if raidScrollFrame then raidScrollFrame:Hide() end if msgFrameDj then msgFrameDj:Hide() end if msgFrameRaids then msgFrameRaids:Hide() end end
+  function() if djScrollFrame then djScrollFrame:Hide() end if raidFrame then raidFrame:Hide() end if raidContentFrame then raidContentFrame:Hide() end if raidScrollFrame then raidScrollFrame:Hide() end end
 }
 
 local function createTabs()
@@ -162,16 +162,16 @@ end
 --------------------------------------------------
 local function createInsideFrames()
   insideList = CreateFrame("Frame", nil, AutoLFM)
-    insideList:SetPoint("TOP", AutoLFM, "TOP", -5, -157)
+    insideList:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
     insideList:SetWidth(323)
     insideList:SetHeight(253)
     insideList:SetFrameStrata("HIGH")
     insideList:Show()
 
   insideMore = CreateFrame("Frame", nil, AutoLFM)
-    insideMore:SetPoint("TOP", AutoLFM, "TOP", 0, -158)
-    insideMore:SetWidth(330)
-    insideMore:SetHeight(270)
+    insideMore:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
+    insideMore:SetWidth(295)
+    insideMore:SetHeight(253)
     insideMore:SetFrameStrata("HIGH")
     insideMore:Hide()
 end
@@ -363,6 +363,123 @@ sliderSizeEditBox:SetScript("OnTextChanged", function()
   end
 end)
 
+--------------------------------------------------
+-- Inside More
+--------------------------------------------------
+
+local function setupPlaceholder(editBox, placeholderText)
+  local placeholder = editBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    placeholder:SetText(placeholderText)
+    placeholder:SetPoint("CENTER", editBox, "CENTER", 0, 0)
+
+  local function updatePlaceholder()
+    if editBox:GetText() == "" then
+      placeholder:Show()
+    else
+      placeholder:Hide()
+    end
+  end
+  editBox:SetScript("OnEditFocusGained", function()
+    placeholder:Hide()
+    editBoxHasFocus = true
+  end)
+  editBox:SetScript("OnEditFocusLost", function()
+    editBoxHasFocus = false
+    updatePlaceholder()
+  end)
+  editBox:SetScript("OnTextChanged", function()
+    userInputMessage = this:GetText()
+    if userInputMessage ~= "" then
+      updateMsgFrameCombined(userInputMessage)
+    else
+      updateMsgFrameCombined()
+    end
+    updatePlaceholder()
+  end)
+  editBox:SetScript("OnEnterPressed", function()
+    this:ClearFocus()
+  end)
+  editBox:SetScript("OnEscapePressed", function()
+    this:ClearFocus()
+  end)
+  updatePlaceholder()
+end
+
+editBox = CreateFrame("EditBox", "AutoLFM_EditBox", insideMore)
+  editBox:SetPoint("TOP", insideMore, "TOP", 0, -10)
+  editBox:SetWidth(270)
+  editBox:SetHeight(30)
+  editBox:SetAutoFocus(false)
+  editBox:SetFont("Fonts\\FRIZQT__.TTF", 14)
+  editBox:SetMaxLetters(150)
+  editBox:SetText("")
+  editBox:SetTextColor(1, 1, 1)
+  editBox:SetBackdrop({
+    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = true,
+    tileSize = 8,
+    edgeSize = 16,
+    insets = { left = 8, right = 2, top = 2, bottom = 2 }
+  })
+  editBox:SetBackdropColor(0, 0, 0, 0.8)
+  editBox:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+  editBox:SetJustifyH("CENTER")
+  editBox:SetTextInsets(10, 10, 5, 5)
+
+setupPlaceholder(editBox, "Add message details (optional)")
+
+
+
+
+
+
+--------------------------------------------------
+-- Start/Stop Button
+--------------------------------------------------
+toggleButton = CreateFrame("Button", "ToggleButton", AutoLFM, "UIPanelButtonTemplate")
+toggleButton:SetPoint("BOTTOM", AutoLFM, "BOTTOM", 97, 80)
+toggleButton:SetWidth(110)
+toggleButton:SetHeight(21)
+toggleButton:SetText("Start")
+
+toggleButton:SetScript("OnClick", function()
+  if combinedMessage == " " or combinedMessage == "" then
+    if not isBroadcasting then
+      print("The message is empty. The broadcast cannot begin.")
+      return
+    end
+  end
+  local allChannelsValid = true
+  for channelName, _ in pairs(selectedChannels) do
+    if channelName ~= "Hardcore" then
+      local channelId = GetChannelName(channelName)
+      if not (channelId and channelId > 0) then
+        allChannelsValid = false
+        break
+      end
+    end
+  end
+  if allChannelsValid then
+    if isBroadcasting then
+      stopMessageBroadcast()
+      toggleButton:SetText("Start")
+      PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_Denied.ogg")
+      searchStartTime = 0
+    else
+      swapChannelFrame()
+      startMessageBroadcast()
+      toggleButton:SetText("Stop")
+      PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_RoleCheck.ogg")
+      searchStartTime = GetTime()
+    end
+  else
+    DEFAULT_CHAT_FRAME:AddMessage("2112 : Broadcast has not started because one or more channels are invalid.")
+  end
+end)
+
+
+
 
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
@@ -434,23 +551,9 @@ roleframe:SetWidth(AutoLFM_RightPanel:GetWidth()- 60)
 roleframe:SetHeight(AutoLFM_RightPanel:GetHeight() / 6)
 roleframe:SetPoint("TOPLEFT", AutoLFM_RightPanel, "TOPLEFT", 20, -100)
 
-msgFrame = CreateFrame("Frame", nil, AutoLFM)
 
--- Positionner le cadre msgFrame juste en dessous de roleframe
-msgFrame:SetWidth(roleframe:GetWidth())
-msgFrame:SetHeight(roleframe:GetHeight() + 20)
-msgFrame:SetPoint("TOPRIGHT", roleframe, "BOTTOMRIGHT", 0, -5)
 
--- Créer un bouton Toggle en dessous de msgFrame, centré par rapport à AutoLFM
-toggleButton = CreateFrame("Button", "ToggleButton", msgFrame, "UIPanelButtonTemplate")
-toggleButton:SetWidth(120)
-toggleButton:SetHeight(30)
 
--- Positionner le bouton en bas centré, sous roleframe et msgFrame par rapport à AutoLFM
-toggleButton:SetPoint("CENTER", msgFrame, "CENTER", 0, -10)  -- Placer 10 pixels sous msgFrame
-toggleButton:SetPoint("BOTTOM", AutoLFM, -10, 40)
-
-toggleButton:SetText("Start")
 
 
 AutoLFM:SetScript("OnShow", function(self)
@@ -469,58 +572,15 @@ end)
 ---------------------------------------------------------------------------------
 
 
--- Créer une zone de saisie de texte en bas de msgFrame
-editBox = CreateFrame("EditBox", "MonAddonEditBox", msgFrame)
-editBox:SetPoint("BOTTOM", msgFrame, "BOTTOM", 0, -60)  -- Positionner en bas, avec un écart de 10 pixels du bas du cadre
 
--- Définir les propriétés de la zone de texte sans spécifier la taille
-editBox:SetAutoFocus(false)  -- Empêcher le focus automatique
-editBox:SetFont("Fonts\\FRIZQT__.TTF", 16)  -- Police de texte normale
-editBox:SetMaxLetters(150)  -- Limiter le nombre de caractères
-editBox:SetText("")  -- Texte initial (vide)
-editBox:SetTextInsets(10, 10, 10, 10)  -- Marge interne de 10 pixels
 
--- Adapter la largeur de la zone de texte à la largeur de msgFrame moins une marge (pour éviter que le texte soit collé aux bords)
-editBox:SetWidth(msgFrame:GetWidth() - 30)  -- Largeur légèrement réduite par rapport à msgFrame
 
--- Définir une hauteur fixe pour la zone de saisie (sans SetSize)
-editBox:SetHeight(30)  -- Hauteur fixe de la zone de saisie
 
--- Fonction pour gérer l'appui sur "Entrée"
-editBox:SetScript("OnEnterPressed", function(self)
-this:ClearFocus()  -- Retirer le focus de la zone de texte
-end)
 
-editBox:SetScript("OnEscapePressed", function(self)
-this:ClearFocus()  -- Retirer le focus de la zone de texte
-end)
 
--- Créer un texte pour afficher un tiret centré au-dessus de la zone de saisie
-dashText = msgFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-dashText:SetPoint("BOTTOM", editBox, "TOP", 0, 8)  -- Placer au-dessus de editBox avec un écart de 5 pixels
-dashText:SetText("Add details (optional)")  -- Le texte du tiret
 
--- Personnaliser l'apparence du tiret (par exemple, couleur et taille de police)
-dashText:SetFontObject(GameFontNormal)  -- Utiliser la police de texte normale
-dashText:SetTextColor(1, 1, 1, 1)  -- Couleur blanche pour le tiret
 
--- Optionnel : ajouter un fond à la zone de saisie pour la rendre plus visible
-editBox:SetBackdrop({
-bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-edgeSize = 12,
-insets = { left = 5, right = 5, top = 5, bottom = 5 },
-})
-editBox:SetTextColor(1, 1, 1)  -- Couleur du texte blanc
 
--- Script pour gérer le changement de texte dans editBox
-editBox:SetScript("OnTextChanged", function(self)
-  userInputMessage = this:GetText()
-  if userInputMessage ~= "" then
-    return updateMsgFrameCombined(userInputMessage)
-  end
-  updateMsgFrameCombined()
-end)
 
 function CreateQuestLink(questIndex)
     if not AutoLFM or not AutoLFM:IsVisible() then
@@ -538,15 +598,7 @@ function CreateQuestLink(questIndex)
     return link
 end
 
-local editBoxHasFocus = false
 
-editBox:SetScript("OnEditFocusGained", function(self)
-    editBoxHasFocus = true
-end)
-
-editBox:SetScript("OnEditFocusLost", function(self)
-    editBoxHasFocus = false
-end)
 
 
 -- Sauvegarder la fonction d'origine
@@ -678,56 +730,6 @@ end
 
 -- Mettre à jour dynamiquement le texte pour refléter la nouvelle valeur en temps réel
 valueText:SetText("Dispense every " .. slider:GetValue() .. " seconds")
-end)
-
-
----------------------------------------------------------------------------------
---                              Toggle Bouton                                  --
----------------------------------------------------------------------------------
-
-
--- Fonction pour gérer le changement d'état du bouton et démarrer/arrêter la diffusion
-toggleButton:SetScript("OnClick", function()
-    -- Vérifier si le message combiné est vide ou ne contient que des espaces
-    if combinedMessage == " " or combinedMessage == "" then
-        -- Si le message est vide, ne pas démarrer la diffusion
-        if not isBroadcasting then
-            print("The message is empty. The broadcast cannot begin.")
-            -- Ne pas changer le texte du bouton si la diffusion ne commence pas
-            return
-        end
-    end
-
-    -- Vérifier la validité des canaux avant de commencer la diffusion
-    local allChannelsValid = true  -- Indicateur pour vérifier si tous les canaux sont valides
-    for channelName, _ in pairs(selectedChannels) do
-        -- Ignorer "Hardcore" lors de la vérification
-        if channelName ~= "Hardcore" then
-            local channelId = GetChannelName(channelName)
-            if not (channelId and channelId > 0) then
-                allChannelsValid = false
-                break  -- Arrêter dès qu'un canal invalide est trouvé
-            end
-        end
-    end
-
-    -- Si tous les canaux sont valides (en ignorant "Hardcore"), démarrer la diffusion
-    if allChannelsValid then
-        if isBroadcasting then
-            stopMessageBroadcast()
-            toggleButton:SetText("Start")  -- Réinitialiser le texte à "Start" si on arrête
-            PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_Denied.ogg")
-            searchStartTime = 0  -- AJOUT : Réinitialiser quand on arrête
-        else
-            swapChannelFrame()
-            startMessageBroadcast()
-            toggleButton:SetText("Stop")  -- Changer le texte à "Stop" lorsqu'on commence
-            PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\LFG_RoleCheck.ogg")
-            searchStartTime = GetTime()  -- AJOUT : Enregistrer le début de la recherche
-        end
-    else
-        DEFAULT_CHAT_FRAME:AddMessage("2112 : Broadcast has not started because one or more channels are invalid.")
-    end
 end)
 
 
