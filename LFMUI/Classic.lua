@@ -72,6 +72,27 @@ createRole("Tank", 74, 0.2968)
 createRole("Heal", 172, 0)
 createRole("DPS", 270, 0.5937)
 
+--------------------------------------------------
+-- Dynamic Message
+--------------------------------------------------
+msgFrameDj = CreateFrame("Frame", nil, AutoLFM)
+  msgFrameDj:SetPoint("TOP", AutoLFM, "TOP", -10, -125)
+  msgFrameDj:SetWidth(330)
+  msgFrameDj:SetHeight(30)
+
+msgTextDj = msgFrameDj:CreateFontString(nil, "MEDIUM", "GameFontHighlight")
+  msgTextDj:SetPoint("CENTER", msgFrameDj, "CENTER", 0, 0)
+
+msgFrameRaids = CreateFrame("Frame", nil, AutoLFM)
+  msgFrameRaids:SetPoint("TOP", AutoLFM, "TOP", -10, -125)
+  msgFrameRaids:SetWidth(330)
+  msgFrameRaids:SetHeight(30)
+
+msgTextRaids = msgFrameRaids:CreateFontString(nil, "MEDIUM", "GameFontHighlight")
+  msgTextRaids:SetPoint("CENTER", msgFrameRaids, "CENTER", 0, 0)
+  msgTextRaids:SetTextColor(1, 1, 1)
+
+
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
 rightPanel:SetWidth(384)
@@ -216,51 +237,6 @@ raidScrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_Raids", raidFr
 raidScrollFrame:SetPoint("TOPLEFT", raidFrame, "TOPLEFT", 20, -80)
 raidScrollFrame:SetWidth(280)
 raidScrollFrame:SetHeight(330)
-
----------------------------------------------------------------------------------
---                         Message Frame Donjons                               --
----------------------------------------------------------------------------------
-
-
-msgFrameDj = CreateFrame("Frame", nil, AutoLFM)
-
--- Positionner le cadre msgFrameDj juste en dessous de roleframe
-msgFrameDj:SetWidth(roleframe:GetWidth())
-msgFrameDj:SetHeight(roleframe:GetHeight() + 20)
-msgFrameDj:SetPoint("TOPRIGHT", roleframe, "BOTTOMRIGHT", 0, 0)
-
-
--- Créer un FontString dans msgFrameDj pour afficher le message
-msgTextDj = msgFrameDj:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-msgTextDj:SetPoint("CENTER", msgFrameDj, "CENTER")
-msgTextDj:SetTextColor(1, 1, 1)
-msgTextDj:SetJustifyH("CENTER")
-msgTextDj:SetJustifyV("CENTER")
-msgTextDj:SetWidth(msgFrameDj:GetWidth())
-
-
----------------------------------------------------------------------------------
---                          Message Frame Raids                                --
----------------------------------------------------------------------------------
-
-
-msgFrameRaids = CreateFrame("Frame", nil, AutoLFM)
-
--- Positionner le cadre msgFrameRaids juste en dessous de roleframe
-msgFrameRaids:SetWidth(roleframe:GetWidth())
-msgFrameRaids:SetHeight(roleframe:GetHeight() + 20)
-msgFrameRaids:SetPoint("TOPRIGHT", roleframe, "BOTTOMRIGHT", 0, 0)
-
-msgFrameRaids:Hide()
-
--- Créer un FontString dans msgFrame pour afficher le message
-msgTextRaids = msgFrameRaids:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-msgTextRaids:SetPoint("CENTER", msgFrameRaids, "CENTER")
-msgTextRaids:SetTextColor(1, 1, 1)
-msgTextRaids:SetJustifyH("CENTER")
-msgTextRaids:SetJustifyV("CENTER")
-msgTextRaids:SetWidth(msgFrameRaids:GetWidth())
-
 
 ---------------------------------------------------------------------------------
 --                                EditBox                                      --
