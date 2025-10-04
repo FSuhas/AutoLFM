@@ -179,6 +179,34 @@ end
 createInsideFrames()
 createTabs()
 
+--------------------------------------------------
+-- Dungeons & Raids ScrollFrames
+--------------------------------------------------
+local function createScrollFrame(name, parent)
+  local frame = CreateFrame("Frame", nil, parent)
+  frame:SetAllPoints(parent)
+  if name == "raids" then frame:Hide() end
+  
+  local scrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_" .. name, parent, "UIPanelScrollFrameTemplate")
+  scrollFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", -1, 0)
+  scrollFrame:SetWidth(295)
+  scrollFrame:SetHeight(253)
+  scrollFrame:SetFrameLevel(parent:GetFrameLevel() + 1)
+  scrollFrame:EnableMouse(true)
+  scrollFrame:EnableMouseWheel(true)
+  if name == "raids" then scrollFrame:Hide() end
+  
+  local contentFrame = CreateFrame("Frame", nil, scrollFrame)
+  contentFrame:SetWidth(scrollFrame:GetWidth() - 20)
+  contentFrame:SetHeight(1)
+  scrollFrame:SetScrollChild(contentFrame)
+  
+  return frame, scrollFrame, contentFrame
+end
+
+djframe, djScrollFrame, contentFrame = createScrollFrame("Dungeons", insideList)
+raidFrame, raidScrollFrame, raidContentFrame = createScrollFrame("raids", insideList)
+
 
 -- Right Panel
 rightPanel = CreateFrame("Frame", "AutoLFM_RightPanel", AutoLFM)
@@ -279,51 +307,6 @@ AutoLFM:SetScript("OnHide", function(self)
 end)
 
 ---------------------------------------------------------------------------------
---                                Donjons                                      --
----------------------------------------------------------------------------------
-
-
--- Créer cadre djframe
-djframe = CreateFrame("Frame", nil, AutoLFM)
-djframe:SetWidth(265)
-djframe:SetHeight(380)
-djframe:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 10, -10)
-djframe:SetBackdrop({
-    edgeFile = "Interface\\PVPFrame\\UI-Character-PVP-Highlight", edgeSize = 16,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 }
-})
-
-djScrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_Dungeons", djframe, "UIPanelScrollFrameTemplate")
-djScrollFrame:SetPoint("TOPLEFT", djframe, "TOPLEFT", 20, -80)
-djScrollFrame:SetWidth(280)
-djScrollFrame:SetHeight(330)
-
--- Créer le contenu du ScrollFrame pour les donjons
-contentFrame = CreateFrame("Frame", nil, djScrollFrame)
-contentFrame:SetWidth(250)
-contentFrame:SetHeight(donjonCount * 30)  -- Hauteur dynamique basée sur le nombre de donjons
-djScrollFrame:SetScrollChild(contentFrame)
-
-
----------------------------------------------------------------------------------
---                                  Raids                                      --
----------------------------------------------------------------------------------
-
-
--- Créer cadre raidFrame
-raidFrame = CreateFrame("Frame", nil, AutoLFM)
-raidFrame:SetWidth(265)
-raidFrame:SetHeight(380)
-raidFrame:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 10, -10)
-raidFrame:SetBackdrop({
-    edgeFile = "Interface\\PVPFrame\\UI-Character-PVP-Highlight", edgeSize = 16,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 }
-})
-
-raidScrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_Raids", raidFrame, "UIPanelScrollFrameTemplate")
-raidScrollFrame:SetPoint("TOPLEFT", raidFrame, "TOPLEFT", 20, -80)
-raidScrollFrame:SetWidth(280)
-raidScrollFrame:SetHeight(330)
 
 ---------------------------------------------------------------------------------
 --                                EditBox                                      --
@@ -614,11 +597,7 @@ sliderSize:SetScript("OnValueChanged", function(value)
     updateMsgFrameCombined()
 end)
 
--- Créer le contenu du ScrollFrame pour les raids
-raidContentFrame = CreateFrame("Frame", nil, raidScrollFrame)
-raidContentFrame:SetWidth(raidFrame:GetWidth())
-raidContentFrame:SetHeight(raidFrame:GetHeight())
-raidScrollFrame:SetScrollChild(raidContentFrame)
+
 
 ---------------------------------------------------------------------------------
 --                               Slider Frame                                  --
