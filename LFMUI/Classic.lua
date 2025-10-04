@@ -66,20 +66,12 @@ rt_br:SetWidth(128)
 rt_br:SetHeight(256)
 rt_br:SetPoint("BOTTOMRIGHT", rightPanel, "BOTTOMRIGHT")
 
-
 --eyeOpen = true
 --eye = AutoLFM:CreateTexture(nil, "OVERLAY")
 --eye:SetWidth(52)
 --eye:SetHeight(52)
 --eye:SetPoint("TOPLEFT", 13, -11)
 --eye:SetTexture(openTexture)
-
-
--- Close Button
-closeBtn = CreateFrame("Button", "AutoLFMCloseButton", AutoLFM, "UIPanelCloseButton")
-closeBtn:SetWidth(32)
-closeBtn:SetHeight(32)
-closeBtn:SetPoint("TOPRIGHT", -28, -9)
 
 showArrowBtn = nil
 closeArrowTex = nil
