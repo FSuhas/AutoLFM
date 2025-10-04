@@ -20,4 +20,8 @@ UI\RaidsList.lua
 UI\MinimapButton.lua
 UI\Frame.lua
 
+Misc\FPSDisplay.lua
+Misc\GuildSpam.lua
+Misc\RestedXP.lua
+
 AutoLFM.lua
