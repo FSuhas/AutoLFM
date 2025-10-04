@@ -307,11 +307,11 @@ MyFPSFrame:EnableMouse(true)
 MyFPSFrame:SetMovable(true)
 MyFPSFrame:SetScript("OnMouseDown", function()
     if IsAltKeyDown() then
-        this:StartMoving()
+        MyFPSFrame:StartMoving()
     end
 end)
 MyFPSFrame:SetScript("OnMouseUp", function()
-    this:StopMovingOrSizing()
+    MyFPSFrame:StopMovingOrSizing()
 end)
 
 -- Initialisation du timer
