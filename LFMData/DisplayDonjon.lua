@@ -119,11 +119,8 @@ function DisplayDungeonsByColor()
         rightPanel:Show()
         editBox:Show()
         sliderframe:Show()
-        dashText:Show()
         toggleButton:Show()
         msgFrameDj:Show()
-        UpdateChannelsFramePosition()
-        swapChannelFrame()
         -- Ne pas dupliquer dans la liste selectedDungeons
         local alreadySelected = false
         for _, val in ipairs(selectedDungeons) do

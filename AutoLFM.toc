@@ -13,7 +13,6 @@ LFMData\Variables.lua
 
 LFMData\Function.lua
 LFMData\MinimapButon.lua
-LFMData\Channel.lua
 LFMData\MsgDynamique.lua
 LFMData\Broadcast.lua
 LFMData\API.lua

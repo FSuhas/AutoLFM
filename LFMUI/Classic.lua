@@ -145,9 +145,9 @@ local function createTab(index, label, onClick, anchorTo)
 end
 
 local tabActions = {
-  function() djScrollFrame:Show() raidFrame:Hide() raidContentFrame:Hide() raidScrollFrame:Hide() msgFrameDj:Show() msgFrameRaids:Hide() clearSelectedRaids() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() HideSliderForRaid() swapChannelFrame() ClearAllBackdrops(raidClickableFrames) end,
-  function() djScrollFrame:Hide() raidFrame:Show() raidContentFrame:Show() raidScrollFrame:Show() msgFrameDj:Hide() msgFrameRaids:Show() clearSelectedDungeons() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() swapChannelFrame() ClearAllBackdrops(donjonClickableFrames) end,
-  function() if djScrollFrame then djScrollFrame:Hide() end if raidFrame then raidFrame:Hide() end if raidContentFrame then raidContentFrame:Hide() end if raidScrollFrame then raidScrollFrame:Hide() end end
+  function() djScrollFrame:Show() raidFrame:Hide() raidContentFrame:Hide() raidScrollFrame:Hide() msgFrameDj:Show() msgFrameRaids:Hide() clearSelectedRaids() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() HideSliderForRaid() swapChannelFrame() ClearAllBackdrops(raidClickableFrames) channelsFrame:Hide() end,
+  function() djScrollFrame:Hide() raidFrame:Show() raidContentFrame:Show() raidScrollFrame:Show() msgFrameDj:Hide() msgFrameRaids:Show() clearSelectedDungeons() clearSelectedRoles() resetUserInputMessage() updateMsgFrameCombined() swapChannelFrame() ClearAllBackdrops(donjonClickableFrames) channelsFrame:Hide() end,
+  function() if djScrollFrame then djScrollFrame:Hide() end if raidFrame then raidFrame:Hide() end if raidContentFrame then raidContentFrame:Hide() end if raidScrollFrame then raidScrollFrame:Hide() end InitializeChannelFrame() channelsFrame:Show() end
 }
 
 local function createTabs()
@@ -478,6 +478,128 @@ sliderframe:SetScript("OnUpdate", function()
   end
   valueText:SetText("Dispense every " .. slider:GetValue() .. " seconds")
 end)
+
+--------------------------------------------------
+-- Inside More - Channels Selection
+--------------------------------------------------
+channelsToFind = {"WORLD", "LookingForGroup", "Hardcore", "testketa"}
+foundChannels = {}
+
+function OnHardcoreChatMessage(self, event, msg, author, _, _, _, _, _, _, _, channelId, channelName)
+  if "CHAT_MSG_HARDCORE" then
+  end
+end
+
+frame = CreateFrame("Frame")
+frame:RegisterEvent("CHAT_MSG_HARDCORE")
+frame:SetScript("OnEvent", OnHardcoreChatMessage)
+
+function SaveSelectedChannels()
+  AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels
+end
+
+function LoadSelectedChannels()
+  if AutoLFM_SavedVariables[uniqueIdentifier] and AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels then
+    selectedChannels = AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels
+  else
+    selectedChannels = {}
+    AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels
+  end
+end
+
+function ToggleChannelSelection(channelName, isSelected)
+  if isSelected then
+    selectedChannels[channelName] = true
+  else
+    selectedChannels[channelName] = nil
+  end
+  SaveSelectedChannels()
+end
+
+function findChannels()
+  foundChannels = {}
+  for _, channel in ipairs(channelsToFind) do
+    if channel == "Hardcore" then
+      table.insert(foundChannels, {name = "Hardcore", id = "hardcore_channel"})
+    else
+      channelId = GetChannelName(channel)
+      if channelId and channelId > 0 then
+        table.insert(foundChannels, {name = channel, id = channelId})
+      end
+    end
+  end
+end
+
+channelsFrame = CreateFrame("Frame", nil, insideMore)
+  channelsFrame:SetPoint("TOP", sliderframe, "BOTTOM", 0, -20)
+  channelsFrame:SetWidth(250)
+  channelsFrame:SetHeight(90)
+  channelsFrame:SetBackdrop({
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+    edgeSize = 12,
+    insets = { left = 5, right = 5, top = 5, bottom = 5 },
+  })
+
+titleText = channelsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  titleText:SetPoint("TOP", channelsFrame, "TOP", 0, -10)
+  titleText:SetText("Select Channel Broadcast")
+  titleText:SetTextColor(1, 1, 0)
+  titleText:SetJustifyH("CENTER")
+  titleText:SetFont("Fonts\\FRIZQT__.TTF", 9, "OUTLINE")
+
+buttonFrame = CreateFrame("Frame", nil, channelsFrame)
+  buttonFrame:SetPoint("TOP", titleText, "BOTTOM", 0, -10)
+  buttonFrame:SetWidth(channelsFrame:GetWidth() - 20)
+  buttonFrame:SetHeight(channelsFrame:GetHeight() - 50)
+
+function CreateChannelButtons()
+  if not next(foundChannels) then
+    return
+  end
+  for _, button in ipairs(channelsFrame.buttons or {}) do
+    button:Hide()
+  end
+  channelsFrame.buttons = {}
+  lastButton = nil
+  for _, channel in ipairs(foundChannels) do
+    if channel and channel.name then
+      local button = CreateFrame("CheckButton", nil, channelsFrame, "UICheckButtonTemplate")
+        button:SetWidth(14)
+        button:SetHeight(14)
+      if lastButton then
+        button:SetPoint("TOP", lastButton, "BOTTOM", 0, -5)
+      else
+        button:SetPoint("TOPLEFT", buttonFrame, "TOPLEFT", 10, -5)
+      end
+      channelText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        channelText:SetPoint("LEFT", button, "RIGHT", 5, 0)
+        channelText:SetText(channel.name)
+        channelText:SetFont("Fonts\\FRIZQT__.TTF", 9, "MONOCHROME")
+      button:SetChecked(selectedChannels[channel.name])
+      local currentChannel = channel
+      button:SetScript("OnClick", function()
+        if currentChannel and currentChannel.name then
+          ToggleChannelSelection(currentChannel.name, button:GetChecked())
+        end
+      end)
+      table.insert(channelsFrame.buttons, button)
+      lastButton = button
+    end
+  end
+end
+
+function InitializeChannelFrame()
+  LoadSelectedChannels()
+  if not channelsFrame.buttons or table.getn(channelsFrame.buttons) == 0 then
+    findChannels()
+    CreateChannelButtons()
+  end
+end
+
+function swapChannelFrame()
+  InitializeChannelFrame()
+end
 
 --------------------------------------------------
 -- Start/Stop Button
