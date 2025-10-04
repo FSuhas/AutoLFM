@@ -9,7 +9,6 @@
 ## GitHub: https://github.com/FSuhas/AutoLFM
 
 Engine\Data.lua
-Engine\Roles.lua
 Engine\Functions.lua
 Engine\DynamicMsg.lua
 Engine\Channels.lua
