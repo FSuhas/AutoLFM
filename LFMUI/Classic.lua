@@ -184,22 +184,21 @@ createTabs()
 --------------------------------------------------
 local function createScrollFrame(name, parent)
   local frame = CreateFrame("Frame", nil, parent)
-  frame:SetAllPoints(parent)
-  if name == "raids" then frame:Hide() end
+    frame:SetAllPoints(parent)
+    if name == "raids" then frame:Hide() end
   
   local scrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_" .. name, parent, "UIPanelScrollFrameTemplate")
-  scrollFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", -1, 0)
-  scrollFrame:SetWidth(295)
-  scrollFrame:SetHeight(253)
-  scrollFrame:SetFrameLevel(parent:GetFrameLevel() + 1)
-  scrollFrame:EnableMouse(true)
-  scrollFrame:EnableMouseWheel(true)
+    scrollFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", -1, 0)
+    scrollFrame:SetWidth(295)
+    scrollFrame:SetHeight(253)
+    scrollFrame:EnableMouse(true)
+    scrollFrame:EnableMouseWheel(true)
   if name == "raids" then scrollFrame:Hide() end
   
   local contentFrame = CreateFrame("Frame", nil, scrollFrame)
-  contentFrame:SetWidth(scrollFrame:GetWidth() - 20)
-  contentFrame:SetHeight(1)
-  scrollFrame:SetScrollChild(contentFrame)
+    contentFrame:SetWidth(scrollFrame:GetWidth() - 20)
+    contentFrame:SetHeight(1)
+    scrollFrame:SetScrollChild(contentFrame)
   
   return frame, scrollFrame, contentFrame
 end

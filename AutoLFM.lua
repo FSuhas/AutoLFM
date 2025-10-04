@@ -5,19 +5,8 @@
 local msglog = CreateFrame("Frame")
 msglog:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-function ShowDungeonUI()
-    raidFrame:Hide()
-    raidScrollFrame:Hide()
-    editBox:Hide()
-    sliderframe:Hide()
-    toggleButton:Hide()
-    msgFrameDj:Hide()
-    msgFrameRaids:Hide()
-    dashText:Hide()
-    if AutoLFM:IsVisible() then
-        AutoLFM:Hide()
-    end
-end
+
+
 
 local function OnPlayerEnteringWorld(self, event)
 --   local seg1 = "|cffffffff ---- Refonte de l'addon ---- "
@@ -40,7 +29,7 @@ local function OnPlayerEnteringWorld(self, event)
   
   InitMinimapButton()
   DisplayDungeonsByColor()
-  ShowDungeonUI()
+  AutoLFM:Hide()
   msglog:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
 
