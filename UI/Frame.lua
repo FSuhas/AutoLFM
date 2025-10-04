@@ -550,13 +550,17 @@ slider:SetScript("OnValueChanged", function()
   valueText:SetText("Dispense every " .. value .. " seconds")
 end)
 
+local lastSliderUpdate = 0
 sliderframe:SetScript("OnUpdate", function()
+  local now = GetTime()
+  if now - lastSliderUpdate < 0.1 then return end
+  lastSliderUpdate = now
+  
   local currentValue = slider:GetValue()
   local snappedValue = SnapToStep(currentValue)
   if currentValue ~= snappedValue then
     slider:SetValue(snappedValue)
   end
-  valueText:SetText("Dispense every " .. slider:GetValue() .. " seconds")
 end)
 
 --------------------------------------------------
