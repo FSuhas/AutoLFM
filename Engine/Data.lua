@@ -1,26 +1,55 @@
 --------------------------------------------------
--- Core Variables
+-- Global Variables Declaration
 --------------------------------------------------
-
-texturePath = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
-
+broadcastFrame = nil
+broadcastedHalf = false
+broadcastedOneSecBefore = false
+channelsFrame = nil
+contentFrame = nil
+currentSliderFrame = nil
+currentTab = 1
+djScrollFrame = nil
+djframe = nil
+editBox = nil
+editBoxHasFocus = false
+iconUpdateFrame = nil
+insideList = nil
+insideMore = nil
+isBroadcasting = false
+msgFrameDj = nil
+msgFrameRaids = nil
+msgTextDj = nil
+msgTextRaids = nil
+raidContentFrame = nil
+raidFrame = nil
+raidScrollFrame = nil
+slider = nil
+sliderSize = nil
+sliderSizeEditBox = nil
+sliderSizeFrame = nil
+sliderframe = nil
+toggleButton = nil
+broadcastStartTime = 0
+lastBroadcastTime = 0
+messagesSentCount = 0
+searchStartTime = 0
+sliderValue = 0
+donjonCheckButtons = {}
+donjonClickableFrames = {}
+raidCheckButtons = {}
+raidClickableFrames = {}
+roleChecks = {}
 selectedDungeons = {}
 selectedRaids = {}
 selectedRoles = {}
-
-donjonCheckButtons = {}
-raidCheckButtons = {}
-
-donjonClickableFrames = {}
-raidClickableFrames = {}
-
-userInputMessage = ""
+tabs = {}
 combinedMessage = ""
+userInputMessage = ""
+texturePath = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
 
 --------------------------------------------------
 -- Dungeons Data
 --------------------------------------------------
-
 donjons = {
   { nom = "Ragefire Chasm", abrev = "RFC", size = 5, lvl = "13-19", lvl_min = 13, lvl_max = 19, originalIndex = 1 },
   { nom = "Wailing Caverns", abrev = "WC", size = 5, lvl = "16-25", lvl_min = 16, lvl_max = 25, originalIndex = 2 },
@@ -62,13 +91,11 @@ donjons = {
   { nom = "Karazhan Crypt", abrev = "Kara Crypt", size = 5, lvl = "60", lvl_min = 60, lvl_max = 60, originalIndex = 38 },
   { nom = "Caverns of Time. Black Morass", abrev = "Black Morass", size = 5, lvl = "60", lvl_min = 60, lvl_max = 60, originalIndex = 39 },
 }
-
 maxDonjons = 100
 
 --------------------------------------------------
 -- Raids Data
 --------------------------------------------------
-
 raids = {
   { nom = "Scholomance 10", abrev = "Scholo 10", size_min = 10, size_max = 10},
   { nom = "Stratholme Live 10", abrev = "Strat Live 10", size_min = 10, size_max = 10},
@@ -84,13 +111,11 @@ raids = {
   { nom = "Temple of Ahn'Qiraj", abrev = "AQ40", size_min = 20, size_max = 40},
   { nom = "Naxxramas", abrev = "Naxx", size_min = 30, size_max = 40},
 }
-
 maxRaids = 100
 
 --------------------------------------------------
 -- Saved Variables Initialization
 --------------------------------------------------
-
 if not AutoLFM_SavedVariables then
   AutoLFM_SavedVariables = {}
 end
