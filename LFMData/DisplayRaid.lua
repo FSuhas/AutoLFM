@@ -1,8 +1,6 @@
 ---------------------------------------------------------------------------------
 --                               Raid Fonction                                 --
 ---------------------------------------------------------------------------------
-
-
 for index, raid in pairs(raids) do
   raidCount = raidCount + 1
   if raidCount >= maxRaids then
@@ -10,9 +8,9 @@ for index, raid in pairs(raids) do
   end
 
   local clickableFrame = CreateFrame("Button", "ClickableRaidFrame" .. index, raidContentFrame)
-  clickableFrame:SetHeight(30)
-  clickableFrame:SetWidth(raidContentFrame:GetWidth() + 20)
-  clickableFrame:SetPoint("TOPLEFT", raidContentFrame, "TOPLEFT", 0, -(30 * (index - 1)))
+  clickableFrame:SetHeight(20)
+  clickableFrame:SetWidth(300)
+  clickableFrame:SetPoint("TOPLEFT", raidContentFrame, "TOPLEFT", 0, -(20 * (index - 1)))
 
   -- Ajouter le clickableFrame dans la table globale pour pouvoir le manipuler ensuite
   table.insert(raidClickableFrames, clickableFrame)
@@ -25,8 +23,13 @@ for index, raid in pairs(raids) do
   checkbox:SetHeight(20)
   checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
 
+  local sizeLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sizeLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
+  local sizeText = raid.size_min == raid.size_max and raid.size_min or raid.size_min .. "-" .. raid.size_max
+  sizeLabel:SetText(sizeText)
+
   local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  label:SetPoint("LEFT", checkbox, "RIGHT", 5, 0)
+  label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
   label:SetText(raidName)
 
   raidCheckButtons[raidAbrev] = checkbox
@@ -45,15 +48,6 @@ for index, raid in pairs(raids) do
 
   checkbox:SetScript("OnClick", function()
     if checkbox:GetChecked() then
-        rightPanel:Show()
-        showArrowBtn:Hide()
-        editBox:Show()
-        sliderframe:Show()
-        dashText:Show()
-        toggleButton:Show()
-        msgFrameDj:Show()
-        UpdateChannelsFramePosition()
-        swapChannelFrame()
       -- Décocher toutes les autres cases et enlever leur backdrop
       for _, otherCheckbox in pairs(raidCheckButtons) do
         if otherCheckbox ~= checkbox then
@@ -64,8 +58,6 @@ for index, raid in pairs(raids) do
       selectedRaids = {raidAbrev}
     else
       selectedRaids = {}
-      sliderSizeFrame:Hide()
-        
     end
     UpdateBackdrop()
     updateMsgFrameCombined()
@@ -82,6 +74,7 @@ for index, raid in pairs(raids) do
       insets = {left = 1, right = 1, top = 1, bottom = 1},
     })
     clickableFrame:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
+    checkbox:LockHighlight()
   end)
 
   clickableFrame:SetScript("OnLeave", function()
@@ -90,5 +83,6 @@ for index, raid in pairs(raids) do
     else
       UpdateBackdrop()
     end
+    checkbox:UnlockHighlight()
   end)
 end

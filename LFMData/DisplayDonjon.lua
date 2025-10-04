@@ -1,8 +1,6 @@
 ---------------------------------------------------------------------------------
 --                               Donjon Fonction                               --
 ---------------------------------------------------------------------------------
-
-
 function DisplayDungeonsByColor()
   -- Cacher les anciens donjons affichés
   for _, child in ipairs({contentFrame:GetChildren()}) do
@@ -37,7 +35,7 @@ function DisplayDungeonsByColor()
     local priority = entry.priority
 
     local clickableFrame = CreateFrame("Button", "ClickableDonjonFrame" .. donjon.abrev, contentFrame)
-    clickableFrame:SetHeight(30)
+    clickableFrame:SetHeight(20)
     clickableFrame:SetWidth(300)
     clickableFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 0, -yOffset)
 
@@ -50,22 +48,26 @@ function DisplayDungeonsByColor()
 
     -- Labels : niveau et nom
     local levelLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    levelLabel:SetPoint("LEFT", checkbox, "RIGHT", 5, 0)
+    levelLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
     levelLabel:SetText(donjon.lvl_min .. "-" .. donjon.lvl_max)
 
     local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    label:SetPoint("LEFT", levelLabel, "RIGHT", 10, 0)
+    label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
     label:SetText(donjon.nom)
 
     -- Couleur selon priorité
     if priority == 4 then
       label:SetTextColor(0.5, 0.5, 0.5)
+      levelLabel:SetTextColor(0.5, 0.5, 0.5)
     elseif priority == 1 then
       label:SetTextColor(0, 1, 0)
+      levelLabel:SetTextColor(0, 1, 0)
     elseif priority == 2 then
       label:SetTextColor(1, 0.5, 0)
+      levelLabel:SetTextColor(1, 0.5, 0)
     else
       label:SetTextColor(1, 0, 0)
+      levelLabel:SetTextColor(1, 0, 0)
     end
 
     -- Mise à jour du fond selon état de la checkbox
@@ -96,6 +98,7 @@ function DisplayDungeonsByColor()
         insets = {left = 1, right = 1, top = 1, bottom = 1},
       })
       clickableFrame:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
+      checkbox:LockHighlight()
     end)
 
     -- Quitte le hover : remet le fond selon checkbox
@@ -105,6 +108,7 @@ function DisplayDungeonsByColor()
       else
         UpdateBackdrop()
       end
+      checkbox:UnlockHighlight()
     end)
 
     -- Script checkbox : gérer sélection max 4 et mise à jour liste
@@ -113,7 +117,6 @@ function DisplayDungeonsByColor()
 
       if isChecked then
         rightPanel:Show()
-        showArrowBtn:Hide()
         editBox:Show()
         sliderframe:Show()
         dashText:Show()
@@ -161,6 +164,6 @@ function DisplayDungeonsByColor()
     table.insert(donjonClickableFrames, clickableFrame)
 
     -- Décalage pour la prochaine ligne
-    yOffset = yOffset + 30
+    yOffset = yOffset + 20
   end
 end
