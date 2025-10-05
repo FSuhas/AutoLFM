@@ -77,19 +77,36 @@ end
 -- Priority Calculation
 --------------------------------------------------
 function CalculatePriority(playerLevel, dungeon)
-  if not playerLevel or not dungeon then return 4 end
+  if not playerLevel or not dungeon then return 5 end
   local min = dungeon.levelMin or 1
   local max = dungeon.levelMax or 60
-  if playerLevel < min then
+  local avg = math.floor((min + max) / 2)
+  local diff = avg - playerLevel
+  local greenThreshold
+  if playerLevel <= 9 then
+    greenThreshold = 4
+  elseif playerLevel <= 19 then
+    greenThreshold = 5
+  elseif playerLevel <= 29 then
+    greenThreshold = 6
+  elseif playerLevel <= 39 then
+    greenThreshold = 7
+  else
+    greenThreshold = 8
+  end
+  if diff >= 5 then
+    return 4
+  end
+  if diff >= 3 and diff <= 4 then
     return 3
   end
-  if playerLevel >= min and playerLevel <= min + 5 then
+  if diff >= -2 and diff <= 2 then
     return 2
   end
-  if playerLevel > min + 5 and playerLevel <= max then
+  if diff < -2 and diff >= -(greenThreshold) then
     return 1
   end
-  return 4
+  return 5
 end
 
 --------------------------------------------------

@@ -65,7 +65,7 @@ dungeons = {
   { name = "Stormwrought Castle", tag = "SC", levelMin = 32, levelMax = 40, originalIndex = 12 },
   { name = "The Crescent Grove", tag = "Crescent", levelMin = 33, levelMax = 39, originalIndex = 13 },
   { name = "Scarlet Monastery Armory", tag = "SM Armo", levelMin = 34, levelMax = 42, originalIndex = 14 },
-  { name = "Razorfen Downs", tag = "RFD", levelMin = 35, levelMax = 45, originalIndex = 15 },
+  { name = "Razorfen Downs", tag = "RFD", levelMin = 35, levelMax = 44, originalIndex = 15 },
   { name = "Stormwrought Descent", tag = "SD", levelMin = 35, levelMax = 44, originalIndex = 16 },
   { name = "Scarlet Monastery Cathedral", tag = "SM Cath", levelMin = 35, levelMax = 45, originalIndex = 17 },
   { name = "Uldaman", tag = "Ulda", levelMin = 41, levelMax = 50, originalIndex = 18 },
