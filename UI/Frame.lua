@@ -26,6 +26,7 @@ mainIcon:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 7, -4)
 mainIcon:SetWidth(64)
 mainIcon:SetHeight(64)
 mainIcon:SetTexture(texturePath .. "Eyes\\eye01")
+AutoLFMMainIcon = mainIcon
 
 local mainTitle = AutoLFM:CreateFontString(nil, "MEDIUM", "GameFontNormal")
 mainTitle:SetPoint("TOP", AutoLFM, "TOP", 0, -18)

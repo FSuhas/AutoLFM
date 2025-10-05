@@ -78,14 +78,17 @@ end
 --------------------------------------------------
 function CalculatePriority(playerLevel, dungeon)
   if not playerLevel or not dungeon then return 4 end
-  
   local min = dungeon.levelMin or 1
   local max = dungeon.levelMax or 60
-  
-  if playerLevel < min then return 3 end
-  if playerLevel <= min + 5 then return 2 end
-  if playerLevel <= max - 1 then return 1 end
-  
+  if playerLevel < min then
+    return 3
+  end
+  if playerLevel >= min and playerLevel <= min + 5 then
+    return 2
+  end
+  if playerLevel > min + 5 and playerLevel <= max then
+    return 1
+  end
   return 4
 end
 

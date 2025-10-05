@@ -1,36 +1,11 @@
 --------------------------------------------------
--- Broadcast Functions
---------------------------------------------------
-local lastMessageSent = 0
-local MIN_INTERVAL = 30
-
---------------------------------------------------
--- Icon Toggle
---------------------------------------------------
-function toggleMinimapButtonIcon()
-  if not AutoLFMMinimapBtn then return end
-  
-  local icon = math.random(1, 2) == 1 and "eye01" or "eye04"
-  local pushed = icon == "eye01" and "eye04" or "eye01"
-  AutoLFMMinimapBtn:SetNormalTexture(texturePath .. "Eyes\\" .. icon)
-  AutoLFMMinimapBtn:SetPushedTexture(texturePath .. "Eyes\\" .. pushed)
-end
-
---------------------------------------------------
 -- Stop Broadcast
 --------------------------------------------------
 function stopMessageBroadcast()
   isBroadcasting = false
   DEFAULT_CHAT_FRAME:AddMessage("Broadcast stopped")
   
-  if AutoLFMMinimapBtn then
-    AutoLFMMinimapBtn:SetNormalTexture(texturePath .. "Eyes\\eye01")
-    AutoLFMMinimapBtn:SetPushedTexture(texturePath .. "Eyes\\eye04")
-  end
-  
-  if iconUpdateFrame then
-    iconUpdateFrame:SetScript("OnUpdate", nil)
-  end
+  StopIconAnimation()
   messagesSentCount = 0
 end
 
@@ -40,13 +15,6 @@ end
 function sendMessageToSelectedChannels(message)
   if not next(selectedChannels) then
     DEFAULT_CHAT_FRAME:AddMessage("Error: No channel selected.")
-    return false
-  end
-  
-  local now = GetTime()
-  if now - lastMessageSent < MIN_INTERVAL then
-    local remaining = math.ceil(MIN_INTERVAL - (now - lastMessageSent))
-    DEFAULT_CHAT_FRAME:AddMessage("Anti-spam: wait " .. remaining .. "s before next broadcast.", 1, 0.5, 0)
     return false
   end
   
@@ -67,7 +35,6 @@ function sendMessageToSelectedChannels(message)
   end
   
   messagesSentCount = messagesSentCount + 1
-  lastMessageSent = now
   return true
 end
 
@@ -86,24 +53,7 @@ function startMessageBroadcast()
   DEFAULT_CHAT_FRAME:AddMessage("Broadcast started.")
   
   sendMessageToSelectedChannels(combinedMessage)
-  
-  if not iconUpdateFrame then
-    iconUpdateFrame = CreateFrame("Frame")
-  end
-  
-  local lastIconUpdate = GetTime()
-  iconUpdateFrame:SetScript("OnUpdate", function()
-    if not isBroadcasting then
-      iconUpdateFrame:SetScript("OnUpdate", nil)
-      return
-    end
-    
-    local now = GetTime()
-    if now - lastIconUpdate >= 0.3 then
-      toggleMinimapButtonIcon()
-      lastIconUpdate = now
-    end
-  end)
+  StartIconAnimation()
 end
 
 --------------------------------------------------

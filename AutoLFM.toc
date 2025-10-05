@@ -8,6 +8,8 @@
 
 ## GitHub: https://github.com/FSuhas/AutoLFM
 
+UI\IconAnimation.lua
+
 Engine\Data.lua
 Engine\Functions.lua
 Engine\DynamicMsg.lua
