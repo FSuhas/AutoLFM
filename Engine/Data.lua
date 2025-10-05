@@ -10,6 +10,7 @@ currentSliderFrame = nil
 currentTab = 1
 djScrollFrame = nil
 djframe = nil
+dungeonFilterFrame = nil
 editBox = nil
 editBoxHasFocus = false
 iconUpdateFrame = nil

@@ -89,6 +89,9 @@ end
 -- Create Single Dungeon Row
 --------------------------------------------------
 local function CreateDungeonRow(parent, dungeon, priority, yOffset)
+  if ShouldDisplayPriority and not ShouldDisplayPriority(priority) then
+    return nil
+  end
   local clickableFrame = CreateFrame("Button", "ClickableDungeonFrame" .. dungeon.tag, parent)
   clickableFrame:SetHeight(20)
   clickableFrame:SetWidth(300)
@@ -177,8 +180,10 @@ function DL.Display(parent)
   DL.clickableFrames = {}
   
   for _, entry in ipairs(sortedDungeons) do
-    CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
-    yOffset = yOffset + 20
+    local frame = CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
+    if frame then
+      yOffset = yOffset + 20
+    end
   end
 end
 

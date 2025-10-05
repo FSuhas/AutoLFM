@@ -12,19 +12,19 @@ local initSteps = {
 
 local function TryInitStep1()
   if initSteps.step1 then return true end
-  
   if LoadSelectedChannels then
     LoadSelectedChannels()
-    initSteps.step1 = true
-    return true
   end
-  return false
+  if LoadDungeonFilters then
+    LoadDungeonFilters()
+  end
+  initSteps.step1 = true
+  return true
 end
 
 local function TryInitStep2()
   if initSteps.step2 then return true end
   if not initSteps.step1 then return false end
-  
   if InitMinimapButton then
     InitMinimapButton()
     initSteps.step2 = true
@@ -36,11 +36,9 @@ end
 local function TryInitStep3()
   if initSteps.step3 then return true end
   if not initSteps.step2 then return false end
-  
   if AutoLFM then
     AutoLFM:Hide()
   end
-  
   initSteps.step3 = true
   return true
 end

@@ -17,6 +17,7 @@ Engine\Channels.lua
 Engine\Broadcast.lua
 Engine\API.lua
 
+UI\DungeonFilters.lua
 UI\DungeonsList.lua
 UI\RaidsList.lua
 UI\MinimapButton.lua

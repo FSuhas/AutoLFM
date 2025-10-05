@@ -191,7 +191,7 @@ local function onDungeonsTab()
   if raidScrollFrame then raidScrollFrame:Hide() end
   if msgFrameDj then msgFrameDj:Show() end
   if msgFrameRaids then msgFrameRaids:Hide() end
-  
+  if dungeonFilterFrame then dungeonFilterFrame:Show() end
   if clearSelectedRaids then clearSelectedRaids() end
   if clearSelectedRoles then clearSelectedRoles() end
   if resetUserInputMessage then resetUserInputMessage() end
@@ -213,7 +213,7 @@ local function onRaidsTab()
   if raidScrollFrame then raidScrollFrame:Show() end
   if msgFrameDj then msgFrameDj:Hide() end
   if msgFrameRaids then msgFrameRaids:Show() end
-  
+  if dungeonFilterFrame then dungeonFilterFrame:Hide() end
   if clearSelectedDungeons then clearSelectedDungeons() end
   if clearSelectedRoles then clearSelectedRoles() end
   if resetUserInputMessage then resetUserInputMessage() end
@@ -398,6 +398,12 @@ end
 
 sliderSizeFrame, sliderSizeEditBox, sliderSize = createRaidSizeControls(AutoLFM)
 
+if CreateDungeonFilterCheckboxes then
+  dungeonFilterFrame = CreateDungeonFilterCheckboxes(AutoLFM)
+  if dungeonFilterFrame then
+    dungeonFilterFrame:Show()
+  end
+end
 function UpdateSliderText(value)
   if value then
     sliderSizeEditBox:SetText(tostring(value))
