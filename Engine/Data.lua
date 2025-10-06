@@ -115,6 +115,17 @@ raids = {
 maxRaids = 100
 
 --------------------------------------------------
+-- Priority Colors
+--------------------------------------------------
+priorityColors = {
+  {priority = 1, key = "green", r = 0.25, g = 0.75, b = 0.25, hex = "#40BF40"},
+  {priority = 2, key = "yellow", r = 1.0, g = 1.0, b = 0.0, hex = "#FEFE00"},
+  {priority = 3, key = "orange", r = 1.0, g = 0.50, b = 0.25, hex = "#FF8040"},
+  {priority = 4, key = "red", r = 1.0, g = 0.0, b = 0.0, hex = "#FF0000"},
+  {priority = 5, key = "gray", r = 0.5, g = 0.5, b = 0.5, hex = "#808080"}
+}
+
+--------------------------------------------------
 -- Saved Variables Initialization
 --------------------------------------------------
 if not AutoLFM_SavedVariables then

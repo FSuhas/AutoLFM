@@ -11,17 +11,12 @@ DL.checkButtons = {}
 -- Priority Color
 --------------------------------------------------
 local function GetPriorityColor(priority)
-  if priority == 1 then
-    return 0.25, 0.75, 0.25
-  elseif priority == 2 then
-    return 1.0, 1.0, 0
-  elseif priority == 3 then
-    return 1.0, 0.49, 0.04
-  elseif priority == 4 then
-    return 0.9, 0.1, 0.1
-  else
-    return 0.5, 0.5, 0.5
+  for _, color in ipairs(priorityColors or {}) do
+    if color.priority == priority then
+      return color.r, color.g, color.b
+    end
   end
+  return 0.5, 0.5, 0.5
 end
 
 --------------------------------------------------
