@@ -363,35 +363,8 @@ local function createRaidSizeControls(parent)
     edgeSize = 8,
     insets = {left = 3, right = 3, top = 6, bottom = 6}
   })
+  
   raidSizeSlider:EnableMouse(true)
-  
-  raidSizeSlider:SetScript("OnMouseDown", function()
-    raidSizeSlider.dragging = true
-  end)
-  
-  raidSizeSlider:SetScript("OnMouseUp", function()
-    raidSizeSlider.dragging = false
-  end)
-  
-  raidSizeSlider:SetScript("OnUpdate", function()
-    if raidSizeSlider.dragging then
-      local x, y = GetCursorPosition()
-      local scale = this:GetEffectiveScale()
-      local left = this:GetLeft() * scale
-      local width = this:GetWidth() * scale
-      local relX = (x - left) / width
-      relX = math.max(0, math.min(1, relX))
-      local minVal, maxVal = this:GetMinMaxValues()
-      local newVal = minVal + (maxVal - minVal) * relX
-      raidSizeSlider:SetValue(newVal)
-      local top = this:GetTop() * scale
-      local bottom = this:GetBottom() * scale
-      local right = this:GetRight() * scale
-      if not (x >= left and x <= right and y >= bottom and y <= top) then
-        raidSizeSlider.dragging = false
-      end
-    end
-  end)
   
   return raidSizeFrame, raidSizeEditBox, raidSizeSlider
 end
