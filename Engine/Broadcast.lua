@@ -2,8 +2,6 @@
 -- Broadcast Management
 --------------------------------------------------
 local broadcastFrame = nil
-local broadcastedHalf = false
-local broadcastedOneSecBefore = false
 
 --------------------------------------------------
 -- Send Message to Selected Channels
@@ -69,20 +67,6 @@ broadcastFrame:SetScript("OnUpdate", function()
   local sliderValue = slider and slider:GetValue() or 80
   local currentTime = GetTime()
   local timeElapsed = currentTime - lastBroadcastTime
-  local halfSliderValue = sliderValue * 0.5
-  local oneSecondBefore = sliderValue - 1
-  
-  -- Notification at half interval
-  if not broadcastedHalf and timeElapsed >= halfSliderValue and timeElapsed < halfSliderValue + 1 then
-    AutoLFM_PrintInfo("Rediffusion in " .. math.floor(halfSliderValue) .. " seconds", 0, 1, 1)
-    broadcastedHalf = true
-  end
-  
-  -- Notification 1 second before broadcast
-  if not broadcastedOneSecBefore and timeElapsed >= oneSecondBefore and timeElapsed < oneSecondBefore + 1 then
-    AutoLFM_PrintInfo("Rediffusion of Message", 0, 1, 1)
-    broadcastedOneSecBefore = true
-  end
   
   -- Send message at interval
   if timeElapsed >= sliderValue then
@@ -91,8 +75,6 @@ broadcastFrame:SetScript("OnUpdate", function()
     end
     
     lastBroadcastTime = GetTime()
-    broadcastedHalf = false
-    broadcastedOneSecBefore = false
   end
 end)
 
@@ -105,6 +87,4 @@ function stopMessageBroadcast()
   
   StopIconAnimation()
   messagesSentCount = 0
-  broadcastedHalf = false
-  broadcastedOneSecBefore = false
 end
