@@ -4,6 +4,67 @@
 local broadcastFrame = nil
 
 --------------------------------------------------
+-- Validate Broadcast Setup
+--------------------------------------------------
+function ValidateBroadcastSetup()
+  local errors = {}
+  
+  -- Check message
+  if not combinedMessage or combinedMessage == "" or combinedMessage == " " then
+    table.insert(errors, "The LFM message is empty")
+  end
+  
+  -- Check channels
+  if not selectedChannels or not next(selectedChannels) then
+    table.insert(errors, "No channel selected")
+  else
+    -- Validate each channel
+    local invalidChannels = {}
+    for channelName, _ in pairs(selectedChannels) do
+      local channelId = GetChannelName(channelName)
+      if not (channelId and channelId > 0) then
+        table.insert(invalidChannels, channelName)
+      end
+    end
+    
+    if table.getn(invalidChannels) > 0 then
+      for _, channelName in ipairs(invalidChannels) do
+        table.insert(errors, "Channel '" .. channelName .. "' is invalid or closed")
+      end
+    end
+  end
+  
+  -- Check if content is selected
+  local selectedRaidsLocal = GetSelectedRaids and GetSelectedRaids() or {}
+  local selectedDungeonsLocal = GetSelectedDungeons and GetSelectedDungeons() or {}
+  
+  if table.getn(selectedRaidsLocal) == 0 and table.getn(selectedDungeonsLocal) == 0 then
+    table.insert(errors, "No dungeon or raid selected")
+  end
+  
+  -- Check dungeon group size (but allow raid at any size)
+  if table.getn(selectedDungeonsLocal) > 0 then
+    local groupSize = 1
+    if countGroupMembers and type(countGroupMembers) == "function" then
+      groupSize = countGroupMembers()
+    else
+      groupSize = GetNumPartyMembers() + 1
+    end
+    
+    if groupSize >= 5 then
+      table.insert(errors, "Your dungeon group is already full (5/5)")
+    end
+  end
+  
+  -- Return validation result
+  if table.getn(errors) > 0 then
+    return false, errors
+  end
+  
+  return true, nil
+end
+
+--------------------------------------------------
 -- Send Message to Selected Channels
 --------------------------------------------------
 function sendMessageToSelectedChannels(message)
@@ -55,9 +116,15 @@ end
 -- Start Broadcast
 --------------------------------------------------
 function startMessageBroadcast()
-  if not combinedMessage or combinedMessage == "" or combinedMessage == " " then
-    AutoLFM_PrintError("The LFM message is empty. The broadcast cannot begin")
-    return
+  -- Use centralized validation
+  local isValid, errors = ValidateBroadcastSetup()
+  
+  if not isValid then
+    AutoLFM_PrintError("Broadcast cannot start:")
+    for _, error in ipairs(errors) do
+      AutoLFM_PrintError("  - " .. error)
+    end
+    return false
   end
   
   isBroadcasting = true
@@ -67,6 +134,8 @@ function startMessageBroadcast()
   
   sendMessageToSelectedChannels(combinedMessage)
   StartIconAnimation()
+  
+  return true
 end
 
 --------------------------------------------------
@@ -77,7 +146,7 @@ if not broadcastFrame then
 end
 
 local lastUpdateCheck = 0
-local UPDATE_THROTTLE = 1.0  -- Check only once per second
+local UPDATE_THROTTLE = 1.0
 
 broadcastFrame:SetScript("OnUpdate", function()
   if not isBroadcasting then return end

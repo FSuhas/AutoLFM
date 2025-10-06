@@ -13,23 +13,69 @@ local function ShowHelp()
 end
 
 --------------------------------------------------
+-- Safe String Split
+--------------------------------------------------
+local function SafeSplit(delimiter, text)
+  if not text or text == "" then
+    return {}
+  end
+  
+  local result = {}
+  local start = 1
+  local i = 1
+  
+  while true do
+    local s, e = string.find(text, delimiter, start, true)  -- true = plain text search
+    
+    if not s then
+      local remaining = string.sub(text, start)
+      if remaining ~= "" then
+        result[i] = remaining
+      end
+      break
+    end
+    
+    local part = string.sub(text, start, s - 1)
+    if part ~= "" then
+      result[i] = part
+      i = i + 1
+    end
+    start = e + 1
+  end
+  
+  return result
+end
+
+--------------------------------------------------
 -- Command Handlers
 --------------------------------------------------
 local function HandleWindowCommand()
-  if AutoLFM then
-    if AutoLFM:IsVisible() then
-      HideUIPanel(AutoLFM)
-    else
-      ShowUIPanel(AutoLFM)
-    end
+  if not AutoLFM then return end
+  
+  if AutoLFM:IsVisible() then
+    HideUIPanel(AutoLFM)
+  else
+    ShowUIPanel(AutoLFM)
   end
 end
 
 local function HandleMinimapCommand(args)
+  if not args or not args[2] then
+    AutoLFM_PrintError("Missing parameter. Use: /lfm minimap [show|hide|reset]")
+    return
+  end
+  
   if args[2] == "show" then
-    if AutoLFMMinimapBtn and not AutoLFMMinimapBtn:IsShown() then
+    if not AutoLFMMinimapBtn then
+      AutoLFM_PrintError("Minimap button not initialized")
+      return
+    end
+    
+    if not AutoLFMMinimapBtn:IsShown() then
       AutoLFMMinimapBtn:Show()
-      AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = false
+      if AutoLFM_SavedVariables and uniqueIdentifier and AutoLFM_SavedVariables[uniqueIdentifier] then
+        AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = false
+      end
       AutoLFM_PrintSuccess("Minimap button displayed")
     else
       AutoLFM_PrintError("Minimap button already visible")
@@ -38,9 +84,16 @@ local function HandleMinimapCommand(args)
   end
   
   if args[2] == "hide" then
-    if AutoLFMMinimapBtn and AutoLFMMinimapBtn:IsShown() then
+    if not AutoLFMMinimapBtn then
+      AutoLFM_PrintError("Minimap button not initialized")
+      return
+    end
+    
+    if AutoLFMMinimapBtn:IsShown() then
       AutoLFMMinimapBtn:Hide()
-      AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = true
+      if AutoLFM_SavedVariables and uniqueIdentifier and AutoLFM_SavedVariables[uniqueIdentifier] then
+        AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = true
+      end
       AutoLFM_PrintSuccess("Minimap button hidden")
     else
       AutoLFM_PrintError("Minimap button already hidden")
@@ -49,6 +102,15 @@ local function HandleMinimapCommand(args)
   end
   
   if args[2] == "reset" then
+    if not AutoLFM_SavedVariables or not uniqueIdentifier then
+      AutoLFM_PrintError("SavedVariables not initialized")
+      return
+    end
+    
+    if not AutoLFM_SavedVariables[uniqueIdentifier] then
+      AutoLFM_SavedVariables[uniqueIdentifier] = {}
+    end
+    
     AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnX = -10
     AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY = -10
     
@@ -62,14 +124,22 @@ local function HandleMinimapCommand(args)
     return
   end
   
-  AutoLFM_PrintError("Unknown command")
-  ShowHelp()
+  AutoLFM_PrintError("Unknown parameter: " .. args[2])
+  AutoLFM_PrintInfo("Use: /lfm minimap [show|hide|reset]")
 end
 
 local function HandleAPICommand(args)
+  if not args or not args[2] then
+    AutoLFM_PrintError("Missing parameter. Use: /lfm api [status|debug]")
+    return
+  end
+  
   if args[2] == "status" then
     if AutoLFM_API and AutoLFM_API.IsAvailable and AutoLFM_API.IsAvailable() then
       AutoLFM_PrintSuccess("API available and functional")
+      if AutoLFM_API.GetVersion then
+        AutoLFM_PrintInfo("API Version: " .. AutoLFM_API.GetVersion())
+      end
     else
       AutoLFM_PrintError("API not available")
     end
@@ -85,8 +155,8 @@ local function HandleAPICommand(args)
     return
   end
   
-  AutoLFM_PrintError("Unknown command")
-  ShowHelp()
+  AutoLFM_PrintError("Unknown parameter: " .. args[2])
+  AutoLFM_PrintInfo("Use: /lfm api [status|debug]")
 end
 
 --------------------------------------------------
@@ -95,43 +165,46 @@ end
 SLASH_LFM1 = "/lfm"
 
 SlashCmdList["LFM"] = function(msg)
-  local args = {}
-  if strsplit then
-    args = strsplit(" ", msg)
-  else
-    -- Fallback if strsplit not loaded yet
-    for word in string.gfind(msg, "[^ ]+") do
-      table.insert(args, word)
-    end
-  end
+  if not msg then msg = "" end
   
-  if not args[1] or args[1] == "help" then
+  -- Use SafeSplit instead of strsplit
+  local args = SafeSplit(" ", msg)
+  
+  -- Empty command or help
+  if not args[1] or args[1] == "" or args[1] == "help" then
     ShowHelp()
     return
   end
   
-  if args[1] == "" or args[1] == "open" then
+  -- Window toggle
+  if args[1] == "open" then
     HandleWindowCommand()
     return
   end
   
+  -- Minimap commands
   if args[1] == "minimap" then
     HandleMinimapCommand(args)
     return
   end
   
+  -- API commands
   if args[1] == "api" then
     HandleAPICommand(args)
     return
   end
   
+  -- Easter egg
   if args[1] == "petfoireux" then
     if HandleEasterEggCommand then
       HandleEasterEggCommand()
+    else
+      AutoLFM_PrintInfo("Easter egg not loaded")
     end
     return
   end
   
-  AutoLFM_PrintError("Unknown command")
+  -- Unknown command
+  AutoLFM_PrintError("Unknown command: " .. args[1])
   ShowHelp()
 end

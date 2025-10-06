@@ -537,45 +537,29 @@ toggleButton:SetHeight(21)
 toggleButton:SetText("Start")
 
 toggleButton:SetScript("OnClick", function()
-  if combinedMessage == " " or combinedMessage == "" then
-    if not isBroadcasting then
-      AutoLFM_PrintError("The message is empty. The broadcast cannot begin")
-      return
+  if isBroadcasting then
+    -- Stop broadcast
+    if stopMessageBroadcast then
+      stopMessageBroadcast()
     end
-  end
-  
-  local allChannelsValid = true
-  for channelName, _ in pairs(selectedChannels or {}) do
-    if channelName ~= "Hardcore" then
-      local channelId = GetChannelName(channelName)
-      if not (channelId and channelId > 0) then
-        allChannelsValid = false
-        break
-      end
+    toggleButton:SetText("Start")
+    PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
+    searchStartTime = 0
+  else
+    -- Ensure channel frame exists
+    if EnsureChannelFrameExists then
+      EnsureChannelFrameExists()
     end
-  end
-  
-  if allChannelsValid then
-    if isBroadcasting then
-      if stopMessageBroadcast then
-        stopMessageBroadcast()
-      end
-      toggleButton:SetText("Start")
-      PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
-      searchStartTime = 0
-    else
-      if EnsureChannelFrameExists then
-        EnsureChannelFrameExists()
-      end
-      if startMessageBroadcast then
-        startMessageBroadcast()
-      end
+    
+    -- Start broadcast (validation is done inside)
+    local success = startMessageBroadcast()
+    
+    if success then
       toggleButton:SetText("Stop")
       PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_RoleCheck.ogg")
       searchStartTime = GetTime()
     end
-  else
-    AutoLFM_PrintError("Broadcast has not started because one or more channels are invalid")
+    -- If failed, startMessageBroadcast already printed errors
   end
 end)
 
