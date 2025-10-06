@@ -7,6 +7,11 @@ local broadcastFrame = nil
 -- Send Message to Selected Channels
 --------------------------------------------------
 function sendMessageToSelectedChannels(message)
+  if not message or message == "" then
+    AutoLFM_PrintError("Message is empty")
+    return false
+  end
+  
   if not selectedChannels then
     selectedChannels = {}
   end
@@ -16,20 +21,30 @@ function sendMessageToSelectedChannels(message)
     return false
   end
   
-  -- Validate all channels before sending
+  -- Send to all channels and track success
+  local sentCount = 0
+  local invalidChannels = {}
+  
   for channelName, _ in pairs(selectedChannels) do
     local channelId = GetChannelName(channelName)
-    if not (channelId and channelId > 0) then
-      AutoLFM_PrintError("The channel " .. channelName .. " is invalid or closed")
-      AutoLFM_PrintError("Message not sent: one or more channels are invalid")
-      return false
+    if channelId and channelId > 0 then
+      SendChatMessage(message, "CHANNEL", nil, channelId)
+      sentCount = sentCount + 1
+    else
+      table.insert(invalidChannels, channelName)
     end
   end
   
-  -- Send to all valid channels
-  for channelName, _ in pairs(selectedChannels) do
-    local channelId = GetChannelName(channelName)
-    SendChatMessage(message, "CHANNEL", nil, channelId)
+  -- Report invalid channels if any
+  if table.getn(invalidChannels) > 0 then
+    for _, channelName in ipairs(invalidChannels) do
+      AutoLFM_PrintError("The channel " .. channelName .. " is invalid or closed")
+    end
+    -- Only fail if ALL channels were invalid
+    if sentCount == 0 then
+      AutoLFM_PrintError("Message not sent: all channels are invalid")
+      return false
+    end
   end
   
   messagesSentCount = (messagesSentCount or 0) + 1
