@@ -107,18 +107,28 @@ function AutoLFM_API.GetPlayerCount()
   local desiredTotal = 0
   local missing = 0
   
+  -- Check raid first
   if GetNumRaidMembers() > 0 then
     currentInGroup = GetNumRaidMembers()
   else
-    if countGroupMembers then
+    -- Use countGroupMembers if available, otherwise fallback
+    if countGroupMembers and type(countGroupMembers) == "function" then
       currentInGroup = countGroupMembers()
     else
       currentInGroup = GetNumPartyMembers() + 1
     end
   end
   
+  -- Ensure valid number
+  if not currentInGroup or currentInGroup < 1 then
+    currentInGroup = 1
+  end
+  
   if groupType == "raid" then
     desiredTotal = sliderValue or 0
+    if desiredTotal < 1 then
+      desiredTotal = 10  -- Minimum raid size
+    end
   else
     desiredTotal = DEFAULT_DUNGEON_SIZE
   end
