@@ -2,10 +2,8 @@
 -- Dungeon List UI
 --------------------------------------------------
 AutoLFM_DungeonList = {}
-local DL = AutoLFM_DungeonList
-
-DL.clickableFrames = {}
-DL.checkButtons = {}
+AutoLFM_DungeonList.clickableFrames = {}
+AutoLFM_DungeonList.checkButtons = {}
 
 --------------------------------------------------
 -- Get Priority Color
@@ -61,9 +59,9 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
       if table.getn(selectedDungeons) >= 4 then
         local first = selectedDungeons[1]
         table.remove(selectedDungeons, 1)
-        if DL.checkButtons[first] then
-          DL.checkButtons[first]:SetChecked(false)
-          DL.checkButtons[first]:GetParent():SetBackdrop(nil)
+        if AutoLFM_DungeonList.checkButtons[first] then
+          AutoLFM_DungeonList.checkButtons[first]:SetChecked(false)
+          AutoLFM_DungeonList.checkButtons[first]:GetParent():SetBackdrop(nil)
         end
       end
       table.insert(selectedDungeons, dungeonTag)
@@ -101,7 +99,7 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   checkbox:SetWidth(20)
   checkbox:SetHeight(20)
   checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
-  DL.checkButtons[dungeon.tag] = checkbox
+  AutoLFM_DungeonList.checkButtons[dungeon.tag] = checkbox
   
   local levelLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   levelLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
@@ -142,7 +140,7 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
     OnDungeonCheckboxClick(checkbox, dungeon.tag)
   end)
   
-  table.insert(DL.clickableFrames, clickableFrame)
+  table.insert(AutoLFM_DungeonList.clickableFrames, clickableFrame)
   
   return clickableFrame
 end
@@ -150,7 +148,7 @@ end
 --------------------------------------------------
 -- Display All Dungeons
 --------------------------------------------------
-function DL.Display(parent)
+function AutoLFM_DungeonList.Display(parent)
   -- Hide all existing children
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
@@ -161,13 +159,12 @@ function DL.Display(parent)
   local sortedDungeons = {}
   
   -- Build sorted list with priorities
-  for _, dungeon in pairs(dungeons or {}) do
-    if table.getn(sortedDungeons) >= (maxDungeons or 100) then break end
+  for index, dungeon in ipairs(dungeons or {}) do
     local priority = CalculatePriority and CalculatePriority(playerLevel, dungeon) or 4
     table.insert(sortedDungeons, {
       dungeon = dungeon,
       priority = priority,
-      originalIndex = dungeon.originalIndex or 1
+      originalIndex = index
     })
   end
   
@@ -180,7 +177,7 @@ function DL.Display(parent)
     end
   end)
   
-  DL.clickableFrames = {}
+  AutoLFM_DungeonList.clickableFrames = {}
   
   -- Create rows
   for _, entry in ipairs(sortedDungeons) do
@@ -194,8 +191,8 @@ end
 --------------------------------------------------
 -- Clear Selection
 --------------------------------------------------
-function DL.ClearSelection()
-  for _, checkbox in pairs(DL.checkButtons) do
+function AutoLFM_DungeonList.ClearSelection()
+  for _, checkbox in pairs(AutoLFM_DungeonList.checkButtons) do
     checkbox:SetChecked(false)
   end
   if selectedDungeons then
@@ -206,16 +203,10 @@ end
 --------------------------------------------------
 -- Clear Backdrops
 --------------------------------------------------
-function DL.ClearBackdrops()
-  for _, frame in pairs(DL.clickableFrames) do
+function AutoLFM_DungeonList.ClearBackdrops()
+  for _, frame in pairs(AutoLFM_DungeonList.clickableFrames) do
     if frame and frame.SetBackdrop then
       frame:SetBackdrop(nil)
     end
   end
 end
-
---------------------------------------------------
--- Expose Globally (for backward compatibility)
---------------------------------------------------
-dungeonCheckButtons = DL.checkButtons
-dungeonClickableFrames = DL.clickableFrames

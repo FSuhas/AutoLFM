@@ -2,10 +2,8 @@
 -- Raid List UI
 --------------------------------------------------
 AutoLFM_RaidList = {}
-local RL = AutoLFM_RaidList
-
-RL.clickableFrames = {}
-RL.checkButtons = {}
+AutoLFM_RaidList.clickableFrames = {}
+AutoLFM_RaidList.checkButtons = {}
 
 --------------------------------------------------
 -- Update Backdrop
@@ -28,7 +26,7 @@ end
 local function OnRaidCheckboxClick(checkbox, raidTag)
   if checkbox:GetChecked() then
     -- Uncheck all other raid checkboxes (only one raid at a time)
-    for _, otherCheckbox in pairs(RL.checkButtons) do
+    for _, otherCheckbox in pairs(AutoLFM_RaidList.checkButtons) do
       if otherCheckbox ~= checkbox then
         otherCheckbox:SetChecked(false)
         otherCheckbox:GetParent():SetBackdrop(nil)
@@ -59,7 +57,7 @@ local function CreateRaidRow(parent, raid, index, yOffset)
   clickableFrame:SetWidth(300)
   clickableFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
   
-  table.insert(RL.clickableFrames, clickableFrame)
+  table.insert(AutoLFM_RaidList.clickableFrames, clickableFrame)
   
   local raidTag = raid.tag
   local raidName = raid.name
@@ -78,7 +76,7 @@ local function CreateRaidRow(parent, raid, index, yOffset)
   label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
   label:SetText(raidName)
   
-  RL.checkButtons[raidTag] = checkbox
+  AutoLFM_RaidList.checkButtons[raidTag] = checkbox
   
   checkbox:SetScript("OnClick", function()
     OnRaidCheckboxClick(checkbox, raidTag)
@@ -113,21 +111,15 @@ end
 --------------------------------------------------
 -- Display All Raids
 --------------------------------------------------
-function RL.Display(parent)
+function AutoLFM_RaidList.Display(parent)
   -- Hide all existing children
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
   
-  local raidCount = 0
   local yOffset = 0
   
-  for index, raid in pairs(raids or {}) do
-    raidCount = raidCount + 1
-    if raidCount >= (maxRaids or 100) then
-      break
-    end
-    
+  for index, raid in ipairs(raids or {}) do
     CreateRaidRow(parent, raid, index, yOffset)
     yOffset = yOffset + 20
   end
@@ -136,8 +128,8 @@ end
 --------------------------------------------------
 -- Clear Selection
 --------------------------------------------------
-function RL.ClearSelection()
-  for _, checkbox in pairs(RL.checkButtons) do
+function AutoLFM_RaidList.ClearSelection()
+  for _, checkbox in pairs(AutoLFM_RaidList.checkButtons) do
     checkbox:SetChecked(false)
   end
   if selectedRaids then
@@ -148,16 +140,10 @@ end
 --------------------------------------------------
 -- Clear Backdrops
 --------------------------------------------------
-function RL.ClearBackdrops()
-  for _, frame in pairs(RL.clickableFrames) do
+function AutoLFM_RaidList.ClearBackdrops()
+  for _, frame in pairs(AutoLFM_RaidList.clickableFrames) do
     if frame and frame.SetBackdrop then
       frame:SetBackdrop(nil)
     end
   end
 end
-
---------------------------------------------------
--- Expose Globally (for backward compatibility)
---------------------------------------------------
-raidCheckButtons = RL.checkButtons
-raidClickableFrames = RL.clickableFrames
