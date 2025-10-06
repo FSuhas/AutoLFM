@@ -44,8 +44,9 @@ local function TryInitStep3()
 end
 
 local function OnPlayerEnteringWorld()
-  AutoLFM_PrintSuccess("Loaded successfully!")
-  AutoLFM_PrintInfo("|cffffff00More information: |cff00FFFF/lfm help")
+  if AutoLFM_PrintSuccess then
+    AutoLFM_PrintSuccess("Loaded successfully! " .. ColorText("More information: ", "gray") .. "/lfm help")
+  end
   
   TryInitStep1()
   TryInitStep2()

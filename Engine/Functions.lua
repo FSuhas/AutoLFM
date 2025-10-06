@@ -1,15 +1,25 @@
 --------------------------------------------------
 -- Chat Message Utilities
 --------------------------------------------------
-function AutoLFM_Print(message, r, g, b)
+local function GetColorByKey(key)
+  if not colors then return nil end
+  for _, color in ipairs(colors) do
+    if color and color.key == key then
+      return color.r, color.g, color.b
+    end
+  end
+  return nil
+end
+
+function AutoLFM_Print(message, colorKey)
   if not message then return end
   if not addonPrefix then
     addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
   end
   
   local coloredMessage = message
-  if r and g and b then
-    coloredMessage = string.format("|cff%02x%02x%02x%s|r", r * 255, g * 255, b * 255, message)
+  if colorKey then
+    coloredMessage = ColorText(message, colorKey)
   end
   
   if DEFAULT_CHAT_FRAME then
@@ -18,19 +28,43 @@ function AutoLFM_Print(message, r, g, b)
 end
 
 function AutoLFM_PrintSuccess(message)
-  AutoLFM_Print(message, 0, 1, 0)
+  AutoLFM_Print(message, "green")
 end
 
 function AutoLFM_PrintError(message)
-  AutoLFM_Print(message, 1, 0, 0)
+  AutoLFM_Print(message, "red")
 end
 
 function AutoLFM_PrintWarning(message)
-  AutoLFM_Print(message, 1, 1, 0)
+  AutoLFM_Print(message, "orange")
+end
+
+function AutoLFM_PrintNote(message)
+  AutoLFM_Print(message, "yellow")
 end
 
 function AutoLFM_PrintInfo(message)
-  AutoLFM_Print(message, 1, 1, 1)
+  AutoLFM_Print(message, "gray")
+end
+
+local function GetColorHex(colorKey)
+  if not colors then return "FFFFFF" end
+  for _, color in ipairs(colors) do
+    if color.key == colorKey then
+      if color.hex then
+        -- Remove the # if present
+        return string.gsub(color.hex, "#", "")
+      elseif color.r and color.g and color.b then
+        return string.format("%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
+      end
+    end
+  end
+  return "FFFFFF" -- Default white if color not found
+end
+
+function ColorText(text, colorKey)
+  local hex = GetColorHex(colorKey)
+  return "|cff" .. hex .. text .. "|r"
 end
 
 --------------------------------------------------

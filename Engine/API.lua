@@ -221,7 +221,7 @@ function AutoLFM_API.GetVersion()
   return API_VERSION
 end
 
-function AutoLFM_API.DebugPrint()
+function AutoLFM_API.DataPrint()
   if not AutoLFM_API.IsAvailable() then
     if AutoLFM_PrintError then
       AutoLFM_PrintError("API not available")
@@ -231,18 +231,18 @@ function AutoLFM_API.DebugPrint()
 
   local status = AutoLFM_API.GetFullStatus()
 
-  if AutoLFM_PrintInfo then AutoLFM_PrintInfo("[Debug]") end
+  if AutoLFM_PrintSuccess then AutoLFM_PrintSuccess("API Data:") end
   if AutoLFM_Print then
-    AutoLFM_Print("Group Type: " .. (status.groupType or "unknown"))
-    AutoLFM_Print("Content: " .. table.getn(status.selectedContent.list) .. " items")
-    AutoLFM_Print("Players: " .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
-    AutoLFM_Print("Roles: " .. table.concat(status.rolesNeeded, ", "))
-    AutoLFM_Print("Message: " .. (status.dynamicMessage.combined or ""))
-    AutoLFM_Print("Channels: " .. table.concat(status.selectedChannels, ", "))
-    AutoLFM_Print("Broadcasting: " .. (status.broadcastStats.isActive and "Yes" or "No"))
-    AutoLFM_Print("Messages sent: " .. status.broadcastStats.messagesSent)
-    AutoLFM_Print("Search duration: " .. math.floor(status.broadcastStats.searchDuration) .. "s")
-    AutoLFM_Print("Next broadcast in: " .. math.floor(status.timing.timeUntilNext) .. "s")
+    AutoLFM_Print(ColorText("Group Type: ","gray") .. (status.groupType or "unknown"))
+    AutoLFM_Print(ColorText("Content: ","gray") .. table.getn(status.selectedContent.list) .. " items")
+    AutoLFM_Print(ColorText("Players: ","gray") .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
+    AutoLFM_Print(ColorText("Roles: ","gray") .. table.concat(status.rolesNeeded, ", "))
+    AutoLFM_Print(ColorText("Message: ","gray") .. (status.dynamicMessage.combined or ""))
+    AutoLFM_Print(ColorText("Channels: ","gray") .. table.concat(status.selectedChannels, ", "))
+    AutoLFM_Print(ColorText("Broadcasting: ","gray") .. (status.broadcastStats.isActive and "Yes" or "No"))
+    AutoLFM_Print(ColorText("Messages sent: ","gray") .. status.broadcastStats.messagesSent)
+    AutoLFM_Print(ColorText("Search duration: ","gray") .. math.floor(status.broadcastStats.searchDuration) .. "s")
+    AutoLFM_Print(ColorText("Next broadcast in: ","gray") .. math.floor(status.timing.timeUntilNext) .. "s")
   end
 end
 

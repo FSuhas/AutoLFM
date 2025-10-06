@@ -10,8 +10,8 @@ local filterStates = {}
 local function InitializeFilterStates()
   if not filterStates or table.getn(filterStates) == 0 then
     filterStates = {}
-    if priorityColors then
-      for _, color in ipairs(priorityColors) do
+    if colors then
+      for _, color in ipairs(colors) do
         if color and color.key then
           filterStates[color.key] = true
         end
@@ -57,9 +57,9 @@ end
 --------------------------------------------------
 function ShouldDisplayPriority(priority)
   if not priority then return true end
-  if not priorityColors then return true end
+  if not colors then return true end
   
-  for _, color in ipairs(priorityColors) do
+  for _, color in ipairs(colors) do
     if color and color.priority == priority and color.key then
       return filterStates[color.key] or false
     end
@@ -91,9 +91,9 @@ function CreateDungeonFilterCheckboxes(parent)
   filterFrame:SetWidth(300)
   filterFrame:SetHeight(30)
   
-  if not priorityColors then return filterFrame end
+  if not colors then return filterFrame end
   
-  for i, colorData in ipairs(priorityColors) do
+  for i, colorData in ipairs(colors) do
     if colorData and colorData.key then
       local button = CreateFrame("Button", "DungeonFilter_"..colorData.key, filterFrame)
       button:SetWidth(20)

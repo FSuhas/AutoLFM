@@ -12,7 +12,7 @@ end
 -- Get Priority Color
 --------------------------------------------------
 local function GetPriorityColor(priority)
-  for _, color in ipairs(priorityColors or {}) do
+  for _, color in ipairs(colors or {}) do
     if color.priority == priority then
       return color.r, color.g, color.b
     end
