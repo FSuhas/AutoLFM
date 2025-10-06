@@ -95,7 +95,15 @@ end
 SLASH_LFM1 = "/lfm"
 
 SlashCmdList["LFM"] = function(msg)
-  local args = strsplit(" ", msg)
+  local args = {}
+  if strsplit then
+    args = strsplit(" ", msg)
+  else
+    -- Fallback if strsplit not loaded yet
+    for word in string.gfind(msg, "[^ ]+") do
+      table.insert(args, word)
+    end
+  end
   
   if not args[1] or args[1] == "help" then
     ShowHelp()
