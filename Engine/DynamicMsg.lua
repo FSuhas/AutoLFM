@@ -124,7 +124,7 @@ function updateMsgFrameCombined()
   if msgTextDj then msgTextDj:SetText(combinedMessage) end
   if msgTextRaids then msgTextRaids:SetText(combinedMessage) end
   
-  if AutoLFM_API and AutoLFM_API.NotifyDataChanged then
+  if AutoLFM_API and type(AutoLFM_API.NotifyDataChanged) == "function" then
     AutoLFM_API.NotifyDataChanged()
   end
 end
