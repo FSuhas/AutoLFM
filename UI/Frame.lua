@@ -582,7 +582,7 @@ toggleButton:SetText("Start")
 toggleButton:SetScript("OnClick", function()
   if combinedMessage == " " or combinedMessage == "" then
     if not isBroadcasting then
-      print("The message is empty. The broadcast cannot begin.")
+      AutoLFM_PrintError("The message is empty. The broadcast cannot begin")
       return
     end
   end
@@ -618,7 +618,7 @@ toggleButton:SetScript("OnClick", function()
       searchStartTime = GetTime()
     end
   else
-    DEFAULT_CHAT_FRAME:AddMessage("2112 : Broadcast has not started because one or more channels are invalid.")
+   AutoLFM_PrintError("Broadcast has not started because one or more channels are invalid")
   end
 end)
 

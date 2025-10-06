@@ -1,4 +1,36 @@
 --------------------------------------------------
+-- Chat Message Utilities
+--------------------------------------------------
+function AutoLFM_Print(message, r, g, b)
+  if not addonPrefix then
+    addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+  end
+  
+  local coloredMessage = message
+  if r and g and b then
+    coloredMessage = string.format("|cff%02x%02x%02x%s|r", r * 255, g * 255, b * 255, message)
+  end
+  
+  DEFAULT_CHAT_FRAME:AddMessage(addonPrefix .. coloredMessage)
+end
+
+function AutoLFM_PrintSuccess(message)
+  AutoLFM_Print(message, 0, 1, 0)
+end
+
+function AutoLFM_PrintError(message)
+  AutoLFM_Print(message, 1, 0, 0)
+end
+
+function AutoLFM_PrintWarning(message)
+  AutoLFM_Print(message, 1, 1, 0)
+end
+
+function AutoLFM_PrintInfo(message)
+  AutoLFM_Print(message, 1, 1, 1)
+end
+
+--------------------------------------------------
 -- String Utilities
 --------------------------------------------------
 function strsplit(delim, text)

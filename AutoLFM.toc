@@ -16,6 +16,7 @@ Engine\DynamicMsg.lua
 Engine\Channels.lua
 Engine\Broadcast.lua
 Engine\API.lua
+Engine\Commands.lua
 
 UI\DungeonFilters.lua
 UI\DungeonsList.lua
@@ -23,6 +24,7 @@ UI\RaidsList.lua
 UI\MinimapButton.lua
 UI\Frame.lua
 
+Misc\EasterEgg.lua
 Misc\FPSDisplay.lua
 Misc\GuildSpam.lua
 Misc\RestedXP.lua

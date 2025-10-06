@@ -47,6 +47,7 @@ tabs = {}
 combinedMessage = ""
 userInputMessage = ""
 texturePath = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
+addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
 
 --------------------------------------------------
 -- Dungeons Data

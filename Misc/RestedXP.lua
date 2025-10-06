@@ -13,7 +13,7 @@ function CheckFullRested()
   
   if restXP and restXP >= (maxXP * 1.5) then
     if not hasAnnouncedFull then
-      DEFAULT_CHAT_FRAME:AddMessage("✨ Your rested XP is FULL!", 0, 1, 0)
+      AutoLFM_PrintSuccess("Your rested XP is FULL!")
       PlaySound("LEVELUP")
       hasAnnouncedFull = true
     end
@@ -33,7 +33,7 @@ SLASH_RESTEDXP1 = "/rested"
 SlashCmdList["RESTEDXP"] = function()
   local level = UnitLevel("player")
   if level >= 60 then
-    DEFAULT_CHAT_FRAME:AddMessage("You are level 60, rested XP does not apply.", 1, 0, 0)
+    AutoLFM_PrintError("You are level 60, rested XP does not apply")
     return
   end
   
@@ -41,8 +41,7 @@ SlashCmdList["RESTEDXP"] = function()
   local maxXP = UnitXPMax("player")
   local percent = math.floor((restXP / (maxXP * 1.5)) * 100)
   
-  DEFAULT_CHAT_FRAME:AddMessage(
-    string.format("💤 Current rested XP: %d / %d (≈%d%%)", restXP, maxXP * 1.5, percent),
-    0.5, 0.8, 1
+  AutoLFM_PrintInfo(
+    string.format("Current rested XP: %d / %d (~%d%%)", restXP, maxXP * 1.5, percent)
   )
 end
