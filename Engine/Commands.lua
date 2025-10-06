@@ -169,7 +169,13 @@ SlashCmdList["LFM"] = function(msg)
   
   local args = SafeSplit(" ", msg)
   
-  if not args[1] or args[1] == "" or args[1] == "help" then
+  -- Empty command or help
+  if not args[1] or args[1] == "" then
+    HandleWindowCommand()
+    return
+  end
+  
+  if args[1] == "help" then
     ShowHelp()
     return
   end
@@ -179,12 +185,24 @@ SlashCmdList["LFM"] = function(msg)
     return
   end
   
+  -- Minimap commands (require parameter)
   if args[1] == "minimap" then
+    if not args[2] then
+      AutoLFM_PrintError("Unknown command: minimap")
+      ShowHelp()
+      return
+    end
     HandleMinimapCommand(args)
     return
   end
   
+  -- API commands (require parameter)
   if args[1] == "api" then
+    if not args[2] then
+      AutoLFM_PrintError("Unknown command: api")
+      ShowHelp()
+      return
+    end
     HandleAPICommand(args)
     return
   end
