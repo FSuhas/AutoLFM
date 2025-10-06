@@ -76,20 +76,47 @@ if not broadcastFrame then
   broadcastFrame = CreateFrame("Frame")
 end
 
+local lastUpdateCheck = 0
+local UPDATE_THROTTLE = 1.0  -- Check only once per second
+
 broadcastFrame:SetScript("OnUpdate", function()
   if not isBroadcasting then return end
   
-  local sliderValue = slider and slider:GetValue() or 80
   local currentTime = GetTime()
+  
+  -- Throttle: only check once per second
+  if currentTime - lastUpdateCheck < UPDATE_THROTTLE then
+    return
+  end
+  lastUpdateCheck = currentTime
+  
+  if not slider then return end
+  if not lastBroadcastTime then
+    lastBroadcastTime = currentTime
+    return
+  end
+  
+  local sliderValue = slider:GetValue()
+  if not sliderValue or sliderValue < 1 then
+    sliderValue = 80
+  end
+  
   local timeElapsed = currentTime - lastBroadcastTime
   
   -- Send message at interval
   if timeElapsed >= sliderValue then
-    if combinedMessage and combinedMessage ~= "" then
-      sendMessageToSelectedChannels(combinedMessage)
+    if combinedMessage and combinedMessage ~= "" and combinedMessage ~= " " then
+      local success = sendMessageToSelectedChannels(combinedMessage)
+      if success then
+        lastBroadcastTime = currentTime
+      else
+        -- Stop broadcast if sending failed
+        stopMessageBroadcast()
+        if toggleButton then
+          toggleButton:SetText("Start")
+        end
+      end
     end
-    
-    lastBroadcastTime = GetTime()
   end
 end)
 
