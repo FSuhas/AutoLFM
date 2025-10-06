@@ -254,10 +254,6 @@ end
 --------------------------------------------------
 -- Slider Management
 --------------------------------------------------
-function ShowSliderForRaid(raid)
-  -- Handled in updateMsgFrameCombined
-end
-
 function HideSliderForRaid()
   if sliderSizeFrame then
     sliderSizeFrame:Hide()

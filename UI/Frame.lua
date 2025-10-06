@@ -385,21 +385,16 @@ function UpdateSliderText(value)
   end
 end
 
-  function ShowSliderForRaid(raid)
-    -- Cette fonction est maintenant gérée directement dans updateMsgFrameCombined
-    -- On la garde vide pour compatibilité mais elle n'est plus appelée
+function HideSliderForRaid()
+  if sliderSizeFrame then
+    sliderSizeFrame:Hide()
   end
-
-  function HideSliderForRaid()
-    if sliderSizeFrame then
-      sliderSizeFrame:Hide()
-    end
-    if currentSliderFrame then
-      currentSliderFrame:Hide()
-      currentSliderFrame = nil
-    end
-    sliderValue = 0
+  if currentSliderFrame then
+    currentSliderFrame:Hide()
+    currentSliderFrame = nil
   end
+  sliderValue = 0
+end
 
 sliderSize:SetScript("OnValueChanged", function()
   local value = sliderSize:GetValue()
