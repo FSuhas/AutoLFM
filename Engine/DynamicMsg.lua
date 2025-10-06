@@ -40,12 +40,14 @@ function updateMsgFrameCombined()
             local initVal = sliderValue ~= 0 and sliderValue or raid.sizeMin
             sliderSize:SetValue(initVal)
             if UpdateSliderText then UpdateSliderText(initVal) end
+            raidSize = initVal
+          else
+            raidSize = sliderValue ~= 0 and sliderValue or raid.sizeMin
           end
           if AutoLFM and AutoLFM:IsShown() and sliderSizeFrame then
             sliderSizeFrame:Show()
             currentSliderFrame = sliderSizeFrame
           end
-          raidSize = sliderValue
         end
         
         isRaidSelected = true
