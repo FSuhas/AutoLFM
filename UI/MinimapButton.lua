@@ -90,9 +90,7 @@ end
 
 minimapEventFrame:RegisterEvent("ADDON_LOADED")
 minimapEventFrame:SetScript("OnEvent", function()
-  local currentEvent = event
-  local currentArg = arg1
-  if currentEvent == "ADDON_LOADED" and currentArg == "AutoLFM" then
+  if event == "ADDON_LOADED" and arg1 == "AutoLFM" then
     InitMinimapButton()
   end
 end)

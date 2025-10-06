@@ -8,12 +8,6 @@ local currentSliderFrame = nil
 local step = 10
 
 --------------------------------------------------
--- Global Variables (referenced in Frame.lua)
---------------------------------------------------
-searchStartTime = 0
-roleChecks = {}
-
---------------------------------------------------
 -- Main Frame
 --------------------------------------------------
 AutoLFM = CreateFrame("Frame", "AutoLFM", UIParent)
@@ -550,7 +544,6 @@ toggleButton:SetScript("OnClick", function()
     end
   end
   
-  -- Validate all channels
   local allChannelsValid = true
   for channelName, _ in pairs(selectedChannels or {}) do
     if channelName ~= "Hardcore" then
@@ -603,48 +596,107 @@ function CreateQuestLink(questIndex)
   return link
 end
 
-Original_QuestLogTitleButton_OnClick = QuestLogTitleButton_OnClick
+local hookedQuestButtons = {}
 
-function QuestLogTitleButton_OnClick(button)
-  Original_QuestLogTitleButton_OnClick(button)
-  if button == "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
-    local questIndex = getglobal(this:GetName()):GetID()
-    if questIndex then
-      local questLink = CreateQuestLink(questIndex)
-      if questLink then
-        editBox:SetText(questLink)
-        editBox:SetFocus()
+local function HookQuestButton(button)
+  if not button then return end
+  local buttonName = button:GetName()
+  if not buttonName then return end
+  if hookedQuestButtons[buttonName] then return end
+  hookedQuestButtons[buttonName] = true
+  
+  local originalOnClick = button:GetScript("OnClick")
+  button:SetScript("OnClick", function()
+    if originalOnClick then
+      originalOnClick()
+    end
+    
+    if arg1 == "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
+      local questIndex = button:GetID()
+      if questIndex then
+        local questLink = CreateQuestLink(questIndex)
+        if questLink then
+          editBox:SetText(questLink)
+          editBox:SetFocus()
+        end
       end
     end
-  end
+  end)
 end
+
+local questHookFrame = CreateFrame("Frame")
+questHookFrame:RegisterEvent("QUEST_LOG_UPDATE")
+questHookFrame:SetScript("OnEvent", function()
+  if QuestLogFrame and QuestLogFrame:IsVisible() then
+    local i = 1
+    while true do
+      local button = getglobal("QuestLogTitle" .. i)
+      if not button then break end
+      HookQuestButton(button)
+      i = i + 1
+    end
+  end
+end)
 
 --------------------------------------------------
 -- Item Link Support
 --------------------------------------------------
-Original_ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
+local hookedBagButtons = {}
 
-function ContainerFrameItemButton_OnClick(button)
-  Original_ContainerFrameItemButton_OnClick(button)
-  if button == "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
-    local frameButton = getglobal(this:GetName())
-    local bag = frameButton:GetParent():GetID()
-    local slot = frameButton:GetID()
-    local itemLink = GetContainerItemLink(bag, slot)
-    if itemLink then
-      editBox:SetText(itemLink)
-      editBox:SetFocus()
+local function HookBagButton(button, bagID, slotID)
+  if not button then return end
+  local key = bagID .. "_" .. slotID
+  if hookedBagButtons[key] then return end
+  hookedBagButtons[key] = true
+  
+  local originalOnClick = button:GetScript("OnClick")
+  button:SetScript("OnClick", function()
+    if originalOnClick then
+      originalOnClick()
+    end
+    
+    if arg1 == "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
+      local itemLink = GetContainerItemLink(bagID, slotID)
+      if itemLink then
+        editBox:SetText(itemLink)
+        editBox:SetFocus()
+      end
+    end
+  end)
+end
+
+local bagHookFrame = CreateFrame("Frame")
+bagHookFrame:RegisterEvent("BAG_UPDATE")
+bagHookFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")
+bagHookFrame:SetScript("OnEvent", function()
+  for bagID = 0, 4 do
+    local bagName = "ContainerFrame" .. (bagID + 1)
+    local bagFrame = getglobal(bagName)
+    if bagFrame and bagFrame:IsVisible() then
+      local numSlots = GetContainerNumSlots(bagID)
+      if numSlots then
+        for slotID = 1, numSlots do
+          local buttonName = bagName .. "Item" .. slotID
+          local button = getglobal(buttonName)
+          if button then
+            HookBagButton(button, bagID, slotID)
+          end
+        end
+      end
     end
   end
-end
+end)
 
 Original_SetItemRef = SetItemRef
 
-function SetItemRef(link, text, button, chatFrame)
-  Original_SetItemRef(link, text, button, chatFrame)
+function SetItemRef(link, text, button)
+  if Original_SetItemRef then
+    Original_SetItemRef(link, text, button)
+  end
+  
   if button == "LeftButton" and IsShiftKeyDown() and editBox and editBoxHasFocus then
     if link and string.find(link, "^item:") then
-      if editBox then
+      if text then
         editBox:SetText(text)
         editBox:SetFocus()
       end
@@ -660,12 +712,11 @@ AutoLFM:RegisterEvent("GROUP_ROSTER_UPDATE")
 AutoLFM:RegisterEvent("RAID_ROSTER_UPDATE")
 
 AutoLFM:SetScript("OnEvent", function()
-  local currentEvent = event
-  if currentEvent == "RAID_ROSTER_UPDATE" then
+  if event == "RAID_ROSTER_UPDATE" then
     if OnRaidRosterUpdate then
       OnRaidRosterUpdate()
     end
-  elseif currentEvent == "GROUP_ROSTER_UPDATE" or currentEvent == "PARTY_MEMBERS_CHANGED" then
+  elseif event == "GROUP_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
     local raid = selectedRaids and selectedRaids[1]
     local donjon = selectedDungeons and selectedDungeons[1]
     
