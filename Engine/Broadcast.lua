@@ -9,6 +9,10 @@ local broadcastedOneSecBefore = false
 -- Send Message to Selected Channels
 --------------------------------------------------
 function sendMessageToSelectedChannels(message)
+  if not selectedChannels then
+    selectedChannels = {}
+  end
+  
   if not next(selectedChannels) then
     AutoLFM_PrintError("No channel selected")
     return false
@@ -30,7 +34,7 @@ function sendMessageToSelectedChannels(message)
     SendChatMessage(message, "CHANNEL", nil, channelId)
   end
   
-  messagesSentCount = messagesSentCount + 1
+  messagesSentCount = (messagesSentCount or 0) + 1
   return true
 end
 
