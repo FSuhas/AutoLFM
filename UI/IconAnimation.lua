@@ -95,17 +95,23 @@ function StartIconAnimation()
     animationFrame = CreateFrame("Frame")
   end
   
-  local lastUpdate = GetTime()
+  animationFrame.lastUpdate = GetTime()
+  
   animationFrame:SetScript("OnUpdate", function()
     if not isBroadcasting then
       StopIconAnimation()
       return
     end
     
+    if not animationFrame.lastUpdate then
+      animationFrame.lastUpdate = GetTime()
+      return
+    end
+    
     local now = GetTime()
-    if now - lastUpdate >= animationSpeed then
+    if now - animationFrame.lastUpdate >= animationSpeed then
       AnimateIcons()
-      lastUpdate = now
+      animationFrame.lastUpdate = now
     end
   end)
 end
