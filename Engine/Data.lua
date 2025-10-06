@@ -133,24 +133,58 @@ charName = UnitName("player") or "Unknown"
 realmName = GetRealmName() or "Unknown"
 uniqueIdentifier = charName .. "-" .. realmName
 
-if not AutoLFM_SavedVariables[uniqueIdentifier] then
-  AutoLFM_SavedVariables[uniqueIdentifier] = {}
+--------------------------------------------------
+-- Initialize Character SavedVariables
+--------------------------------------------------
+function InitializeCharacterSavedVariables()
+  if not AutoLFM_SavedVariables then
+    AutoLFM_SavedVariables = {}
+  end
+  
+  if not uniqueIdentifier or uniqueIdentifier == "" then
+    AutoLFM_PrintError("Cannot initialize SavedVariables: invalid character identifier")
+    return false
+  end
+  
+  if not AutoLFM_SavedVariables[uniqueIdentifier] then
+    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  end
+  
+  local char = AutoLFM_SavedVariables[uniqueIdentifier]
+  
+  -- Initialize all default values
+  if not char.selectedChannels then
+    char.selectedChannels = {}
+  end
+  
+  if not char.minimapBtnX then
+    char.minimapBtnX = -10
+  end
+  
+  if not char.minimapBtnY then
+    char.minimapBtnY = -10
+  end
+  
+  if not char.minimapBtnHidden then
+    char.minimapBtnHidden = false
+  end
+  
+  if not char.dungeonFilters then
+    char.dungeonFilters = {}
+    -- Initialize with all filters enabled by default
+    for _, color in ipairs(priorityColors or {}) do
+      char.dungeonFilters[color.key] = true
+    end
+  end
+  
+  -- Set global reference for easy access
+  selectedChannels = char.selectedChannels
+  
+  return true
 end
 
-if not AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels then
-  AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = {}
+-- Initialize immediately
+local initSuccess = InitializeCharacterSavedVariables()
+if not initSuccess then
+  AutoLFM_PrintError("Failed to initialize SavedVariables")
 end
-
-if not AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnX then
-  AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnX = -10
-end
-
-if not AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY then
-  AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY = -10
-end
-
-if not AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden then
-  AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = false
-end
-
-selectedChannels = AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels
