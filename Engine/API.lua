@@ -134,10 +134,16 @@ function AutoLFM_API.GetPlayerCount()
 end
 
 function AutoLFM_API.GetRolesNeeded()
-  local selectedRoles = GetSelectedRoles and GetSelectedRoles() or {}
+  local selectedRolesData = {}
+  
+  if GetSelectedRoles then
+    selectedRolesData = GetSelectedRoles()
+  elseif selectedRoles then
+    selectedRolesData = selectedRoles
+  end
+  
   local rolesList = {}
-
-  for _, role in ipairs(selectedRoles) do
+  for _, role in ipairs(selectedRolesData) do
     table.insert(rolesList, role)
   end
 
