@@ -1,6 +1,8 @@
 --------------------------------------------------
 -- Minimap Button
 --------------------------------------------------
+local minimapEventFrame = CreateFrame("Frame")
+
 AutoLFMMinimapBtn = nil
 
 function InitMinimapButton()
@@ -19,7 +21,6 @@ function InitMinimapButton()
   local posY = AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY or -10
   AutoLFMMinimapBtn:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", posX, posY)
   
-  -- Icône
   local icon = AutoLFMMinimapBtn:CreateTexture(nil, "BACKGROUND")
   icon:SetWidth(20)
   icon:SetHeight(20)
@@ -29,7 +30,6 @@ function InitMinimapButton()
   
   AutoLFMMinimapBtn.icon = icon
   
-  -- Bordure
   local overlay = AutoLFMMinimapBtn:CreateTexture(nil, "OVERLAY")
   overlay:SetWidth(53)
   overlay:SetHeight(53)
@@ -86,10 +86,11 @@ function InitMinimapButton()
   end
 end
 
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function()
-  if event == "ADDON_LOADED" and arg1 == "AutoLFM" then
+minimapEventFrame:RegisterEvent("ADDON_LOADED")
+minimapEventFrame:SetScript("OnEvent", function()
+  local currentEvent = event
+  local currentArg = arg1
+  if currentEvent == "ADDON_LOADED" and currentArg == "AutoLFM" then
     InitMinimapButton()
   end
 end)
