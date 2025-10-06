@@ -63,7 +63,8 @@ broadcastFrame:SetScript("OnUpdate", function()
   if not isBroadcasting then return end
   
   local sliderValue = slider and slider:GetValue() or 80
-  local timeElapsed = GetTime() - lastBroadcastTime
+  local currentTime = GetTime()
+  local timeElapsed = currentTime - lastBroadcastTime
   local halfSliderValue = sliderValue * 0.5
   local oneSecondBefore = sliderValue - 1
   
