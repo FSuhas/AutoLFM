@@ -110,7 +110,11 @@ function AutoLFM_API.GetPlayerCount()
   if GetNumRaidMembers() > 0 then
     currentInGroup = GetNumRaidMembers()
   else
-    currentInGroup = countGroupMembers and countGroupMembers() or 0
+    if countGroupMembers then
+      currentInGroup = countGroupMembers()
+    else
+      currentInGroup = GetNumPartyMembers() + 1
+    end
   end
   
   if groupType == "raid" then
