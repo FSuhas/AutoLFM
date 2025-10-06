@@ -25,7 +25,7 @@ local function SafeSplit(delimiter, text)
   local i = 1
   
   while true do
-    local s, e = string.find(text, delimiter, start, true)  -- true = plain text search
+    local s, e = string.find(text, delimiter, start, true)
     
     if not s then
       local remaining = string.sub(text, start)
@@ -167,34 +167,28 @@ SLASH_LFM1 = "/lfm"
 SlashCmdList["LFM"] = function(msg)
   if not msg then msg = "" end
   
-  -- Use SafeSplit instead of strsplit
   local args = SafeSplit(" ", msg)
   
-  -- Empty command or help
   if not args[1] or args[1] == "" or args[1] == "help" then
     ShowHelp()
     return
   end
   
-  -- Window toggle
   if args[1] == "open" then
     HandleWindowCommand()
     return
   end
   
-  -- Minimap commands
   if args[1] == "minimap" then
     HandleMinimapCommand(args)
     return
   end
   
-  -- API commands
   if args[1] == "api" then
     HandleAPICommand(args)
     return
   end
   
-  -- Easter egg
   if args[1] == "petfoireux" then
     if HandleEasterEggCommand then
       HandleEasterEggCommand()
@@ -204,7 +198,6 @@ SlashCmdList["LFM"] = function(msg)
     return
   end
   
-  -- Unknown command
   AutoLFM_PrintError("Unknown command: " .. args[1])
   ShowHelp()
 end

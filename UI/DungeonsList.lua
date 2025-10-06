@@ -1,9 +1,12 @@
 --------------------------------------------------
 -- Dungeon List UI
 --------------------------------------------------
-AutoLFM_DungeonList = {}
-AutoLFM_DungeonList.clickableFrames = {}
-AutoLFM_DungeonList.checkButtons = {}
+if not AutoLFM_DungeonList then
+  AutoLFM_DungeonList = {
+    clickableFrames = {},
+    checkButtons = {}
+  }
+end
 
 --------------------------------------------------
 -- Get Priority Color
@@ -39,13 +42,11 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
   local isChecked = checkbox:GetChecked()
   
   if isChecked then
-    -- Show UI elements
     if editBox then editBox:Show() end
     if sliderframe then sliderframe:Show() end
     if toggleButton then toggleButton:Show() end
     if msgFrameDj then msgFrameDj:Show() end
     
-    -- Check if already selected
     local alreadySelected = false
     for _, val in ipairs(selectedDungeons) do
       if val == dungeonTag then
@@ -55,7 +56,6 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
     end
     
     if not alreadySelected then
-      -- Limit to 4 dungeons max
       if table.getn(selectedDungeons) >= 4 then
         local first = selectedDungeons[1]
         table.remove(selectedDungeons, 1)
@@ -67,7 +67,6 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
       table.insert(selectedDungeons, dungeonTag)
     end
   else
-    -- Remove from selection
     for i, val in ipairs(selectedDungeons) do
       if val == dungeonTag then
         table.remove(selectedDungeons, i)
@@ -149,7 +148,6 @@ end
 -- Display All Dungeons
 --------------------------------------------------
 function AutoLFM_DungeonList.Display(parent)
-  -- Hide all existing children
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
@@ -158,7 +156,6 @@ function AutoLFM_DungeonList.Display(parent)
   local yOffset = 0
   local sortedDungeons = {}
   
-  -- Build sorted list with priorities
   for index, dungeon in ipairs(dungeons or {}) do
     local priority = CalculatePriority and CalculatePriority(playerLevel, dungeon) or 4
     table.insert(sortedDungeons, {
@@ -168,7 +165,6 @@ function AutoLFM_DungeonList.Display(parent)
     })
   end
   
-  -- Sort by priority then original index
   table.sort(sortedDungeons, function(a, b)
     if a.priority == b.priority then
       return a.originalIndex < b.originalIndex
@@ -179,7 +175,6 @@ function AutoLFM_DungeonList.Display(parent)
   
   AutoLFM_DungeonList.clickableFrames = {}
   
-  -- Create rows
   for _, entry in ipairs(sortedDungeons) do
     local frame = CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
     if frame then

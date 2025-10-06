@@ -1,7 +1,7 @@
 --------------------------------------------------
 -- Global Variables Declaration
 --------------------------------------------------
--- Frame
+-- Frame references
 contentFrame = nil
 djScrollFrame = nil
 djframe = nil
@@ -22,28 +22,69 @@ sliderSizeEditBox = nil
 sliderSizeFrame = nil
 sliderframe = nil
 toggleButton = nil
+currentSliderFrame = nil
 
--- Broadcast
+-- Broadcast state
 isBroadcasting = false
 broadcastStartTime = 0
 lastBroadcastTime = 0
 messagesSentCount = 0
 searchStartTime = 0
 
--- Selection
+-- Selection state
 selectedDungeons = {}
 selectedRaids = {}
 selectedRoles = {}
 roleChecks = {}
+selectedChannels = {}
 
--- Message
+-- Message state
 combinedMessage = ""
 userInputMessage = ""
 sliderValue = 0
+raidSize = 0
 
 -- Configuration
 texturePath = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
 addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+charName = nil
+realmName = nil
+uniqueIdentifier = nil
+
+-- Global tables (initialized in their respective files)
+AutoLFM_DungeonList = nil
+AutoLFM_RaidList = nil
+AutoLFM_API = nil
+AutoLFM = nil
+AutoLFMMinimapBtn = nil
+AutoLFMMainIcon = nil
+
+-- Global functions (defined in other files)
+-- Functions.lua:
+--   AutoLFM_Print, AutoLFM_PrintSuccess, AutoLFM_PrintError, AutoLFM_PrintWarning, AutoLFM_PrintInfo
+--   strsplit, tableContains, tableCount
+--   countGroupMembers, countRaidMembers, CheckRaidStatus, OnRaidRosterUpdate, OnGroupUpdate
+--   CalculatePriority
+--   toggleRole, clearSelectedRoles, getSelectedRoles, isRoleSelected
+--   clearSelectedDungeons, clearSelectedRaids, resetUserInputMessage
+--   ClearAllBackdrops
+--   GetCombinedMessage, GetSelectedRoles, GetSelectedDungeons, GetSelectedRaids
+--   HideSliderForRaid
+-- DynamicMsg.lua:
+--   updateMsgFrameCombined
+-- Channels.lua:
+--   SaveSelectedChannels, LoadSelectedChannels, ToggleChannelSelection
+--   findChannels, CreateChannelButtons, InitializeChannelFrame, EnsureChannelFrameExists
+-- Broadcast.lua:
+--   ValidateBroadcastSetup, sendMessageToSelectedChannels, startMessageBroadcast, stopMessageBroadcast
+-- DungeonFilters.lua:
+--   SaveDungeonFilters, LoadDungeonFilters, ShouldDisplayPriority, RefreshDungeonList, CreateDungeonFilterCheckboxes
+-- Frame.lua:
+--   CreateQuestLink, UpdateSliderText
+-- IconAnimation.lua:
+--   AnimateIcons, ResetIcons, StartIconAnimation, StopIconAnimation
+-- MinimapButton.lua:
+--   InitMinimapButton
 
 --------------------------------------------------
 -- Dungeons Data
@@ -140,7 +181,9 @@ function InitializeCharacterSavedVariables()
   end
   
   if not uniqueIdentifier or uniqueIdentifier == "" then
-    AutoLFM_PrintError("Cannot initialize SavedVariables: invalid character identifier")
+    if AutoLFM_PrintError then
+      AutoLFM_PrintError("Cannot initialize SavedVariables: invalid character identifier")
+    end
     return false
   end
   
@@ -150,7 +193,6 @@ function InitializeCharacterSavedVariables()
   
   local char = AutoLFM_SavedVariables[uniqueIdentifier]
   
-  -- Initialize all default values
   if not char.selectedChannels then
     char.selectedChannels = {}
   end
@@ -169,20 +211,19 @@ function InitializeCharacterSavedVariables()
   
   if not char.dungeonFilters then
     char.dungeonFilters = {}
-    -- Initialize with all filters enabled by default
     for _, color in ipairs(priorityColors or {}) do
       char.dungeonFilters[color.key] = true
     end
   end
   
-  -- Set global reference for easy access
   selectedChannels = char.selectedChannels
   
   return true
 end
 
--- Initialize immediately
 local initSuccess = InitializeCharacterSavedVariables()
 if not initSuccess then
-  AutoLFM_PrintError("Failed to initialize SavedVariables")
+  if AutoLFM_PrintError then
+    AutoLFM_PrintError("Failed to initialize SavedVariables")
+  end
 end

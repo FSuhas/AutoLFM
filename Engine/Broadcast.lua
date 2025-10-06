@@ -9,16 +9,13 @@ local broadcastFrame = nil
 function ValidateBroadcastSetup()
   local errors = {}
   
-  -- Check message
   if not combinedMessage or combinedMessage == "" or combinedMessage == " " then
     table.insert(errors, "The LFM message is empty")
   end
   
-  -- Check channels
   if not selectedChannels or not next(selectedChannels) then
     table.insert(errors, "No channel selected")
   else
-    -- Validate each channel
     local invalidChannels = {}
     for channelName, _ in pairs(selectedChannels) do
       local channelId = GetChannelName(channelName)
@@ -34,7 +31,6 @@ function ValidateBroadcastSetup()
     end
   end
   
-  -- Check if content is selected
   local selectedRaidsLocal = GetSelectedRaids and GetSelectedRaids() or {}
   local selectedDungeonsLocal = GetSelectedDungeons and GetSelectedDungeons() or {}
   
@@ -42,7 +38,6 @@ function ValidateBroadcastSetup()
     table.insert(errors, "No dungeon or raid selected")
   end
   
-  -- Check dungeon group size (but allow raid at any size)
   if table.getn(selectedDungeonsLocal) > 0 then
     local groupSize = 1
     if countGroupMembers and type(countGroupMembers) == "function" then
@@ -56,7 +51,6 @@ function ValidateBroadcastSetup()
     end
   end
   
-  -- Return validation result
   if table.getn(errors) > 0 then
     return false, errors
   end
@@ -82,7 +76,6 @@ function sendMessageToSelectedChannels(message)
     return false
   end
   
-  -- Send to all channels and track success
   local sentCount = 0
   local invalidChannels = {}
   
@@ -96,12 +89,10 @@ function sendMessageToSelectedChannels(message)
     end
   end
   
-  -- Report invalid channels if any
   if table.getn(invalidChannels) > 0 then
     for _, channelName in ipairs(invalidChannels) do
       AutoLFM_PrintError("The channel " .. channelName .. " is invalid or closed")
     end
-    -- Only fail if ALL channels were invalid
     if sentCount == 0 then
       AutoLFM_PrintError("Message not sent: all channels are invalid")
       return false
@@ -116,7 +107,6 @@ end
 -- Start Broadcast
 --------------------------------------------------
 function startMessageBroadcast()
-  -- Use centralized validation
   local isValid, errors = ValidateBroadcastSetup()
   
   if not isValid then
@@ -153,7 +143,6 @@ broadcastFrame:SetScript("OnUpdate", function()
   
   local currentTime = GetTime()
   
-  -- Throttle: only check once per second
   if currentTime - lastUpdateCheck < UPDATE_THROTTLE then
     return
   end
@@ -172,14 +161,12 @@ broadcastFrame:SetScript("OnUpdate", function()
   
   local timeElapsed = currentTime - lastBroadcastTime
   
-  -- Send message at interval
   if timeElapsed >= sliderValue then
     if combinedMessage and combinedMessage ~= "" and combinedMessage ~= " " then
       local success = sendMessageToSelectedChannels(combinedMessage)
       if success then
         lastBroadcastTime = currentTime
       else
-        -- Stop broadcast if sending failed
         stopMessageBroadcast()
         if toggleButton then
           toggleButton:SetText("Start")

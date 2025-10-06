@@ -1,4 +1,8 @@
 --------------------------------------------------
+-- Dynamic Message Generation
+--------------------------------------------------
+
+--------------------------------------------------
 -- Helper: Get Current Player Counts
 --------------------------------------------------
 local function GetPlayerCounts()
@@ -36,7 +40,6 @@ local function ProcessRaidSelection(selectedRaidsLocal)
       local isFixedSize = raid.sizeMin == raid.sizeMax
       
       if isFixedSize then
-        -- Hide slider for fixed size raids
         if currentSliderFrame then
           currentSliderFrame:Hide()
           currentSliderFrame = nil
@@ -47,7 +50,6 @@ local function ProcessRaidSelection(selectedRaidsLocal)
         raidSize = raid.sizeMin
         sliderValue = raid.sizeMin
       else
-        -- Show slider for variable size raids
         if sliderSize then
           sliderSize:SetMinMaxValues(raid.sizeMin, raid.sizeMax)
           local initVal = sliderValue ~= 0 and sliderValue or raid.sizeMin
@@ -107,7 +109,6 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
   local contentCount = table.getn(selectedContent)
   local rolesCount = table.getn(selectedRoles or {})
   
-  -- Early exit if nothing selected
   if contentCount == 0 and rolesCount == 0 and userInputMessage == "" then
     return ""
   end
@@ -123,7 +124,6 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
   
   local message = ""
   
-  -- Build message based on what's selected
   if contentCount == 0 and rolesCount == 0 then
     message = userInputMessage
   elseif contentCount == 0 and rolesCount > 0 then
@@ -142,7 +142,6 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
     end
   end
   
-  -- Add user input if present
   if userInputMessage ~= "" and message ~= "" then
     message = message .. " " .. userInputMessage
   end
@@ -154,7 +153,6 @@ end
 -- Main Update Function
 --------------------------------------------------
 function updateMsgFrameCombined()
-  -- Initialize globals if not exist
   if not selectedDungeons then selectedDungeons = {} end
   if not selectedRaids then selectedRaids = {} end
   if not selectedRoles then selectedRoles = {} end
@@ -165,7 +163,6 @@ function updateMsgFrameCombined()
   local selectedContent = {}
   local rolesList = table.concat(selectedRoles, " & ")
   
-  -- Process Raids
   local selectedRaidsLocal = GetSelectedRaids and GetSelectedRaids() or {}
   local raidTag, raidSize = ProcessRaidSelection(selectedRaidsLocal)
   local isRaidSelected = raidTag ~= nil
@@ -173,11 +170,9 @@ function updateMsgFrameCombined()
   if isRaidSelected then
     table.insert(selectedContent, raidTag)
   else
-    -- Process Dungeons if no raid selected
     selectedContent = ProcessDungeonSelection(totalGroupSize, totalPlayersInGroup)
   end
   
-  -- Calculate missing players
   local mate = 0
   local raidPlayerCountText = ""
   
@@ -191,14 +186,11 @@ function updateMsgFrameCombined()
     if mate < 0 then mate = 0 end
   end
   
-  -- Build final message
   combinedMessage = BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelected, raidPlayerCountText)
   
-  -- Update UI
   if msgTextDj then msgTextDj:SetText(combinedMessage) end
   if msgTextRaids then msgTextRaids:SetText(combinedMessage) end
   
-  -- Notify API
   if AutoLFM_API and type(AutoLFM_API.NotifyDataChanged) == "function" then
     AutoLFM_API.NotifyDataChanged()
   end

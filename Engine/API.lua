@@ -1,28 +1,6 @@
 ---------------------------------------------------------------------------------
 --                               AutoLFM API                                   --
 ---------------------------------------------------------------------------------
---   AutoLFM_API.GetFullStatus() :
---   {
---       groupType = "dungeon|raid|other",
---       selectedContent = { type, list[], details{} },
---       playerCount = { currentInGroup, desiredTotal, missing },
---       rolesNeeded = { "tank", "heal", "dps" },
---       dynamicMessage = { combined, userInput, hasUserInput },
---       selectedChannels = { "LookingForGroup", "World", ... },
---       broadcastStats = { isActive, messagesSent, searchDuration },
---       timing = { intervalSeconds, timeUntilNext }
---   }
---
---   AutoLFM_API.GetGroupType()          - string
---   AutoLFM_API.GetSelectedContent()    - table
---   AutoLFM_API.GetPlayerCount()        - table
---   AutoLFM_API.GetRolesNeeded()        - array
---   AutoLFM_API.GetDynamicMessage()     - table
---   AutoLFM_API.GetSelectedChannels()   - array
---   AutoLFM_API.GetBroadcastStats()     - table
---   AutoLFM_API.GetTiming()             - table
----------------------------------------------------------------------------------
-
 if not AutoLFM_API then
   AutoLFM_API = {}
 end
@@ -66,34 +44,38 @@ function AutoLFM_API.GetSelectedContent()
   }
   
   if groupType == "dungeon" then
-    local selectedDungeons = GetSelectedDungeons() or {}
+    local selectedDungeons = GetSelectedDungeons and GetSelectedDungeons() or {}
     for _, dungeonTag in ipairs(selectedDungeons) do
       table.insert(content.list, dungeonTag)
-      for _, dungeon in pairs(dungeons) do
-        if dungeon.tag == dungeonTag then
-          content.details[dungeonTag] = {
-            name = dungeon.name,
-            tag = dungeon.tag,
-            levelMin = dungeon.levelMin,
-            levelMax = dungeon.levelMax
-          }
-          break
+      if dungeons then
+        for _, dungeon in pairs(dungeons) do
+          if dungeon and dungeon.tag == dungeonTag then
+            content.details[dungeonTag] = {
+              name = dungeon.name or "",
+              tag = dungeon.tag or "",
+              levelMin = dungeon.levelMin or 1,
+              levelMax = dungeon.levelMax or 60
+            }
+            break
+          end
         end
       end
     end
   elseif groupType == "raid" then
-    local selectedRaids = GetSelectedRaids() or {}
+    local selectedRaids = GetSelectedRaids and GetSelectedRaids() or {}
     for _, raidTag in ipairs(selectedRaids) do
       table.insert(content.list, raidTag)
-      for _, raid in pairs(raids) do
-        if raid.tag == raidTag then
-          content.details[raidTag] = {
-            name = raid.name,
-            tag = raid.tag,
-            sizeMin = raid.sizeMin,
-            sizeMax = raid.sizeMax
-          }
-          break
+      if raids then
+        for _, raid in pairs(raids) do
+          if raid and raid.tag == raidTag then
+            content.details[raidTag] = {
+              name = raid.name or "",
+              tag = raid.tag or "",
+              sizeMin = raid.sizeMin or 10,
+              sizeMax = raid.sizeMax or 40
+            }
+            break
+          end
         end
       end
     end
@@ -107,11 +89,9 @@ function AutoLFM_API.GetPlayerCount()
   local desiredTotal = 0
   local missing = 0
   
-  -- Check raid first
   if GetNumRaidMembers() > 0 then
     currentInGroup = GetNumRaidMembers()
   else
-    -- Use countGroupMembers if available, otherwise fallback
     if countGroupMembers and type(countGroupMembers) == "function" then
       currentInGroup = countGroupMembers()
     else
@@ -119,7 +99,6 @@ function AutoLFM_API.GetPlayerCount()
     end
   end
   
-  -- Ensure valid number
   if not currentInGroup or currentInGroup < 1 then
     currentInGroup = 1
   end
@@ -127,7 +106,7 @@ function AutoLFM_API.GetPlayerCount()
   if groupType == "raid" then
     desiredTotal = sliderValue or 0
     if desiredTotal < 1 then
-      desiredTotal = 10  -- Minimum raid size
+      desiredTotal = 10
     end
   else
     desiredTotal = DEFAULT_DUNGEON_SIZE
@@ -153,8 +132,10 @@ function AutoLFM_API.GetRolesNeeded()
   end
   
   local rolesList = {}
-  for _, role in ipairs(selectedRolesData) do
-    table.insert(rolesList, role)
+  if selectedRolesData then
+    for _, role in ipairs(selectedRolesData) do
+      table.insert(rolesList, role)
+    end
   end
 
   return rolesList
@@ -181,8 +162,10 @@ function AutoLFM_API.GetSelectedChannels()
   local channels = selectedChannels or {}
   local channelList = {}
 
-  for channelName, _ in pairs(channels) do
-    table.insert(channelList, channelName)
+  if channels then
+    for channelName, _ in pairs(channels) do
+      table.insert(channelList, channelName)
+    end
   end
 
   return channelList
@@ -203,7 +186,7 @@ function AutoLFM_API.GetBroadcastStats()
 
   local currentTime = GetTime()
 
-  if searchStart > 0 then
+  if searchStart and searchStart > 0 then
     stats.searchDuration = currentTime - searchStart
   end
 
@@ -240,32 +223,38 @@ end
 
 function AutoLFM_API.DebugPrint()
   if not AutoLFM_API.IsAvailable() then
-    AutoLFM_PrintError("API not available")
+    if AutoLFM_PrintError then
+      AutoLFM_PrintError("API not available")
+    end
     return
   end
 
   local status = AutoLFM_API.GetFullStatus()
 
-  AutoLFM_PrintInfo("[Debug]")
-  AutoLFM_Print("Group Type: " .. status.groupType)
-  AutoLFM_Print("Content: " .. table.getn(status.selectedContent.list) .. " items")
-  AutoLFM_Print("Players: " .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
-  AutoLFM_Print("Roles: " .. table.concat(status.rolesNeeded, ", "))
-  AutoLFM_Print("Message: " .. status.dynamicMessage.combined)
-  AutoLFM_Print("Channels: " .. table.concat(status.selectedChannels, ", "))
-  AutoLFM_Print("Broadcasting: " .. (status.broadcastStats.isActive and "Yes" or "No"))
-  AutoLFM_Print("Messages sent: " .. status.broadcastStats.messagesSent)
-  AutoLFM_Print("Search duration: " .. math.floor(status.broadcastStats.searchDuration) .. "s")
-  AutoLFM_Print("Next broadcast in: " .. math.floor(status.timing.timeUntilNext) .. "s")
+  if AutoLFM_PrintInfo then AutoLFM_PrintInfo("[Debug]") end
+  if AutoLFM_Print then
+    AutoLFM_Print("Group Type: " .. (status.groupType or "unknown"))
+    AutoLFM_Print("Content: " .. table.getn(status.selectedContent.list) .. " items")
+    AutoLFM_Print("Players: " .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
+    AutoLFM_Print("Roles: " .. table.concat(status.rolesNeeded, ", "))
+    AutoLFM_Print("Message: " .. (status.dynamicMessage.combined or ""))
+    AutoLFM_Print("Channels: " .. table.concat(status.selectedChannels, ", "))
+    AutoLFM_Print("Broadcasting: " .. (status.broadcastStats.isActive and "Yes" or "No"))
+    AutoLFM_Print("Messages sent: " .. status.broadcastStats.messagesSent)
+    AutoLFM_Print("Search duration: " .. math.floor(status.broadcastStats.searchDuration) .. "s")
+    AutoLFM_Print("Next broadcast in: " .. math.floor(status.timing.timeUntilNext) .. "s")
+  end
 end
 
 AutoLFM_API.callbacks = AutoLFM_API.callbacks or {}
 
 function AutoLFM_API.RegisterCallback(addonName, callback)
+  if not addonName or not callback then return end
   AutoLFM_API.callbacks[addonName] = callback
 end
 
 function AutoLFM_API.UnregisterCallback(addonName)
+  if not addonName then return end
   AutoLFM_API.callbacks[addonName] = nil
 end
 
@@ -275,8 +264,8 @@ function AutoLFM_API.NotifyDataChanged(eventType)
   for addonName, callback in pairs(AutoLFM_API.callbacks) do
     if type(callback) == "function" then
       local success, err = pcall(callback, AutoLFM_API.GetFullStatus(), eventType)
-      if not success then
-        AutoLFM_PrintError("Callback error for " .. addonName .. ": " .. tostring(err))
+      if not success and AutoLFM_PrintError then
+        AutoLFM_PrintError("Callback error for " .. tostring(addonName) .. ": " .. tostring(err))
       end
     end
   end

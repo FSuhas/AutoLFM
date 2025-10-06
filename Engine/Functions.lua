@@ -2,6 +2,7 @@
 -- Chat Message Utilities
 --------------------------------------------------
 function AutoLFM_Print(message, r, g, b)
+  if not message then return end
   if not addonPrefix then
     addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
   end
@@ -11,7 +12,9 @@ function AutoLFM_Print(message, r, g, b)
     coloredMessage = string.format("|cff%02x%02x%02x%s|r", r * 255, g * 255, b * 255, message)
   end
   
-  DEFAULT_CHAT_FRAME:AddMessage(addonPrefix .. coloredMessage)
+  if DEFAULT_CHAT_FRAME then
+    DEFAULT_CHAT_FRAME:AddMessage(addonPrefix .. coloredMessage)
+  end
 end
 
 function AutoLFM_PrintSuccess(message)
@@ -34,6 +37,8 @@ end
 -- String Utilities
 --------------------------------------------------
 function strsplit(delim, text)
+  if not text or not delim then return {} end
+  
   local result = {}
   local start = 1
   local i = 1
@@ -110,10 +115,12 @@ end
 --------------------------------------------------
 function CalculatePriority(playerLevel, dungeon)
   if not playerLevel or not dungeon then return 5 end
+  
   local min = dungeon.levelMin or 1
   local max = dungeon.levelMax or 60
   local avg = math.floor((min + max) / 2)
   local diff = avg - playerLevel
+  
   local greenThreshold
   if playerLevel <= 9 then
     greenThreshold = 4
@@ -126,6 +133,7 @@ function CalculatePriority(playerLevel, dungeon)
   else
     greenThreshold = 8
   end
+  
   if diff >= 5 then
     return 4
   end
@@ -145,15 +153,19 @@ end
 -- Role Functions
 --------------------------------------------------
 function toggleRole(role)
+  if not role then return end
   if not roleChecks or not roleChecks[role] then return end
   
   if roleChecks[role]:GetChecked() then
+    if not selectedRoles then selectedRoles = {} end
     table.insert(selectedRoles, role)
   else
-    for i, v in ipairs(selectedRoles) do
-      if v == role then
-        table.remove(selectedRoles, i)
-        break
+    if selectedRoles then
+      for i, v in ipairs(selectedRoles) do
+        if v == role then
+          table.remove(selectedRoles, i)
+          break
+        end
       end
     end
   end
@@ -167,7 +179,9 @@ function clearSelectedRoles()
   selectedRoles = {}
   if roleChecks then
     for role, check in pairs(roleChecks) do
-      check:SetChecked(false)
+      if check and check.SetChecked then
+        check:SetChecked(false)
+      end
     end
   end
 end
@@ -177,7 +191,10 @@ function getSelectedRoles()
 end
 
 function isRoleSelected(role)
-  for _, selectedRole in ipairs(selectedRoles or {}) do
+  if not role then return false end
+  if not selectedRoles then return false end
+  
+  for _, selectedRole in ipairs(selectedRoles) do
     if selectedRole == role then
       return true
     end
@@ -191,12 +208,9 @@ end
 function clearSelectedDungeons()
   if not selectedDungeons then selectedDungeons = {} end
   
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearSelection then
+  if AutoLFM_DungeonList and type(AutoLFM_DungeonList.ClearSelection) == "function" then
     AutoLFM_DungeonList.ClearSelection()
   else
-    for _, dungeonCheckbox in pairs(dungeonCheckButtons or {}) do
-      dungeonCheckbox:SetChecked(false)
-    end
     selectedDungeons = {}
   end
 end
@@ -204,19 +218,16 @@ end
 function clearSelectedRaids()
   if not selectedRaids then selectedRaids = {} end
   
-  if AutoLFM_RaidList and AutoLFM_RaidList.ClearSelection then
+  if AutoLFM_RaidList and type(AutoLFM_RaidList.ClearSelection) == "function" then
     AutoLFM_RaidList.ClearSelection()
   else
-    for _, raidCheckbox in pairs(raidCheckButtons or {}) do
-      raidCheckbox:SetChecked(false)
-    end
     selectedRaids = {}
   end
 end
 
 function resetUserInputMessage()
   userInputMessage = ""
-  if editBox then
+  if editBox and editBox.SetText then
     editBox:SetText("")
   end
   if updateMsgFrameCombined then
@@ -259,10 +270,10 @@ end
 -- Slider Management
 --------------------------------------------------
 function HideSliderForRaid()
-  if sliderSizeFrame then
+  if sliderSizeFrame and sliderSizeFrame.Hide then
     sliderSizeFrame:Hide()
   end
-  if currentSliderFrame then
+  if currentSliderFrame and currentSliderFrame.Hide then
     currentSliderFrame:Hide()
     currentSliderFrame = nil
   end

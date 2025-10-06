@@ -51,17 +51,9 @@ function findChannels()
   foundChannels = {}
   
   for _, channel in ipairs(channelsToFind) do
-    if channel == "Hardcore" then
-      -- Check if player has access to Hardcore channel
-      local channelId = GetChannelName(channel)
-      if channelId and channelId > 0 then
-        table.insert(foundChannels, {name = channel, id = channelId})
-      end
-    else
-      local channelId = GetChannelName(channel)
-      if channelId and channelId > 0 then
-        table.insert(foundChannels, {name = channel, id = channelId})
-      end
+    local channelId = GetChannelName(channel)
+    if channelId and channelId > 0 then
+      table.insert(foundChannels, {name = channel, id = channelId})
     end
   end
 end
@@ -73,7 +65,6 @@ function CreateChannelButtons()
   if not channelsFrame then return end
   if not next(foundChannels) then return end
   
-  -- Hide existing buttons
   for _, button in ipairs(channelsFrame.buttons or {}) do
     button:Hide()
   end
