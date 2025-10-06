@@ -189,6 +189,8 @@ end
 -- Selection Management
 --------------------------------------------------
 function clearSelectedDungeons()
+  if not selectedDungeons then selectedDungeons = {} end
+  
   if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearSelection then
     AutoLFM_DungeonList.ClearSelection()
   else
@@ -200,6 +202,8 @@ function clearSelectedDungeons()
 end
 
 function clearSelectedRaids()
+  if not selectedRaids then selectedRaids = {} end
+  
   if AutoLFM_RaidList and AutoLFM_RaidList.ClearSelection then
     AutoLFM_RaidList.ClearSelection()
   else

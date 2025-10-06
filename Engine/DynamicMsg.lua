@@ -2,6 +2,11 @@
 -- Dynamic Message Generation
 --------------------------------------------------
 function updateMsgFrameCombined()
+  -- Initialize globals if not exist
+  if not selectedDungeons then selectedDungeons = {} end
+  if not selectedRaids then selectedRaids = {} end
+  if not selectedRoles then selectedRoles = {} end
+  
   local totalPlayersInGroup = countGroupMembers()
   local totalPlayersInRaid = countRaidMembers()
   local totalGroupSize = 5
