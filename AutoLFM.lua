@@ -55,8 +55,7 @@ local function OnPlayerEnteringWorld()
 end
 
 msglog:SetScript("OnEvent", function()
-  local currentEvent = event
-  if currentEvent == "PLAYER_ENTERING_WORLD" then
+  if event == "PLAYER_ENTERING_WORLD" then
     OnPlayerEnteringWorld()
   end
 end)
