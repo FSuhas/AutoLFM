@@ -728,7 +728,7 @@ AutoLFM:SetScript("OnEvent", function()
         if clearSelectedRoles then clearSelectedRoles() end
         if resetUserInputMessage then resetUserInputMessage() end
         if updateMsgFrameCombined then updateMsgFrameCombined() end
-        toggleButton:SetText("Start")
+        if toggleButton then toggleButton:SetText("Start") end
         PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
       else
         if OnGroupUpdate then OnGroupUpdate() end
@@ -742,7 +742,7 @@ AutoLFM:SetScript("OnEvent", function()
         if clearSelectedRoles then clearSelectedRoles() end
         if resetUserInputMessage then resetUserInputMessage() end
         if updateMsgFrameCombined then updateMsgFrameCombined() end
-        toggleButton:SetText("Start")
+        if toggleButton then toggleButton:SetText("Start") end
         PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
       else
         if OnGroupUpdate then OnGroupUpdate() end
