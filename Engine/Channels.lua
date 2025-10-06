@@ -9,23 +9,33 @@ local channelsFrame = nil
 -- Save/Load Selected Channels
 --------------------------------------------------
 function SaveSelectedChannels()
-  if not AutoLFM_SavedVariables or not uniqueIdentifier then return end
+  if not AutoLFM_SavedVariables then return end
+  if not uniqueIdentifier then return end
+  if not AutoLFM_SavedVariables[uniqueIdentifier] then
+    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  end
   AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels or {}
 end
 
 function LoadSelectedChannels()
-  if AutoLFM_SavedVariables[uniqueIdentifier] and AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels then
+  if not AutoLFM_SavedVariables then return end
+  if not uniqueIdentifier then return end
+  if not AutoLFM_SavedVariables[uniqueIdentifier] then
+    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  end
+  
+  if AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels then
     selectedChannels = AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels
   else
     selectedChannels = {}
-    if AutoLFM_SavedVariables[uniqueIdentifier] then
-      AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels
-    end
+    AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels
   end
 end
 
 function ToggleChannelSelection(channelName, isSelected)
   if not selectedChannels then selectedChannels = {} end
+  if not channelName then return end
+  
   if isSelected then
     selectedChannels[channelName] = true
   else
