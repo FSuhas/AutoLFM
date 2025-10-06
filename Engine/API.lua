@@ -151,7 +151,13 @@ function AutoLFM_API.GetRolesNeeded()
 end
 
 function AutoLFM_API.GetDynamicMessage()
-  local combined = GetCombinedMessage and GetCombinedMessage() or ""
+  local combined = ""
+  if GetCombinedMessage then
+    combined = GetCombinedMessage()
+  elseif combinedMessage then
+    combined = combinedMessage
+  end
+  
   local userInput = userInputMessage or ""
 
   return {
