@@ -1,7 +1,8 @@
 --------------------------------------------------
 -- Easter Egg - Big Message Animation
 --------------------------------------------------
-local bigMessageFrame, bigMessageText
+local bigMessageFrame = nil
+local bigMessageText = nil
 
 local function ShowBigMessage(text, duration)
   if not bigMessageFrame then

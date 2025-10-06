@@ -27,6 +27,7 @@ end
 --------------------------------------------------
 local function OnRaidCheckboxClick(checkbox, raidTag)
   if checkbox:GetChecked() then
+    -- Uncheck all other raid checkboxes (only one raid at a time)
     for _, otherCheckbox in pairs(RL.checkButtons) do
       if otherCheckbox ~= checkbox then
         otherCheckbox:SetChecked(false)
@@ -113,6 +114,7 @@ end
 -- Display All Raids
 --------------------------------------------------
 function RL.Display(parent)
+  -- Hide all existing children
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
@@ -155,7 +157,7 @@ function RL.ClearBackdrops()
 end
 
 --------------------------------------------------
--- Expose globally
+-- Expose Globally (for backward compatibility)
 --------------------------------------------------
 raidCheckButtons = RL.checkButtons
 raidClickableFrames = RL.clickableFrames

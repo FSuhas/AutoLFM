@@ -1,22 +1,14 @@
 --------------------------------------------------
 -- Global Variables Declaration
 --------------------------------------------------
-broadcastFrame = nil
-broadcastedHalf = false
-broadcastedOneSecBefore = false
-channelsFrame = nil
+-- Frame
 contentFrame = nil
-currentSliderFrame = nil
-currentTab = 1
 djScrollFrame = nil
 djframe = nil
 dungeonFilterFrame = nil
 editBox = nil
-editBoxHasFocus = false
-iconUpdateFrame = nil
 insideList = nil
 insideMore = nil
-isBroadcasting = false
 msgFrameDj = nil
 msgFrameRaids = nil
 msgTextDj = nil
@@ -30,22 +22,26 @@ sliderSizeEditBox = nil
 sliderSizeFrame = nil
 sliderframe = nil
 toggleButton = nil
+
+-- Broadcast
+isBroadcasting = false
 broadcastStartTime = 0
 lastBroadcastTime = 0
 messagesSentCount = 0
 searchStartTime = 0
-sliderValue = 0
-donjonCheckButtons = {}
-donjonClickableFrames = {}
-raidCheckButtons = {}
-raidClickableFrames = {}
-roleChecks = {}
+
+-- Selection
 selectedDungeons = {}
 selectedRaids = {}
 selectedRoles = {}
-tabs = {}
+roleChecks = {}
+
+-- Message
 combinedMessage = ""
 userInputMessage = ""
+sliderValue = 0
+
+-- Configuration
 texturePath = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
 addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
 

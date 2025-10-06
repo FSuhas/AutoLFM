@@ -8,7 +8,7 @@ DL.clickableFrames = {}
 DL.checkButtons = {}
 
 --------------------------------------------------
--- Priority Color
+-- Get Priority Color
 --------------------------------------------------
 local function GetPriorityColor(priority)
   for _, color in ipairs(priorityColors or {}) do
@@ -41,11 +41,13 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
   local isChecked = checkbox:GetChecked()
   
   if isChecked then
+    -- Show UI elements
     if editBox then editBox:Show() end
     if sliderframe then sliderframe:Show() end
     if toggleButton then toggleButton:Show() end
     if msgFrameDj then msgFrameDj:Show() end
     
+    -- Check if already selected
     local alreadySelected = false
     for _, val in ipairs(selectedDungeons) do
       if val == dungeonTag then
@@ -55,6 +57,7 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
     end
     
     if not alreadySelected then
+      -- Limit to 4 dungeons max
       if table.getn(selectedDungeons) >= 4 then
         local first = selectedDungeons[1]
         table.remove(selectedDungeons, 1)
@@ -66,6 +69,7 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
       table.insert(selectedDungeons, dungeonTag)
     end
   else
+    -- Remove from selection
     for i, val in ipairs(selectedDungeons) do
       if val == dungeonTag then
         table.remove(selectedDungeons, i)
@@ -87,6 +91,7 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   if ShouldDisplayPriority and not ShouldDisplayPriority(priority) then
     return nil
   end
+  
   local clickableFrame = CreateFrame("Button", "ClickableDungeonFrame" .. dungeon.tag, parent)
   clickableFrame:SetHeight(20)
   clickableFrame:SetWidth(300)
@@ -146,6 +151,7 @@ end
 -- Display All Dungeons
 --------------------------------------------------
 function DL.Display(parent)
+  -- Hide all existing children
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
@@ -154,6 +160,7 @@ function DL.Display(parent)
   local yOffset = 0
   local sortedDungeons = {}
   
+  -- Build sorted list with priorities
   for _, dungeon in pairs(dungeons or {}) do
     if table.getn(sortedDungeons) >= (maxDungeons or 100) then break end
     local priority = CalculatePriority and CalculatePriority(playerLevel, dungeon) or 4
@@ -164,6 +171,7 @@ function DL.Display(parent)
     })
   end
   
+  -- Sort by priority then original index
   table.sort(sortedDungeons, function(a, b)
     if a.priority == b.priority then
       return a.originalIndex < b.originalIndex
@@ -174,6 +182,7 @@ function DL.Display(parent)
   
   DL.clickableFrames = {}
   
+  -- Create rows
   for _, entry in ipairs(sortedDungeons) do
     local frame = CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
     if frame then
@@ -206,7 +215,7 @@ function DL.ClearBackdrops()
 end
 
 --------------------------------------------------
--- Expose globally
+-- Expose Globally (for backward compatibility)
 --------------------------------------------------
 dungeonCheckButtons = DL.checkButtons
 dungeonClickableFrames = DL.clickableFrames

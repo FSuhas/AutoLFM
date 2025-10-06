@@ -1,10 +1,17 @@
 --------------------------------------------------
--- Variables
+-- Local Variables
+--------------------------------------------------
+local currentTab = 1
+local tabs = {}
+local editBoxHasFocus = false
+local currentSliderFrame = nil
+local step = 10
+
+--------------------------------------------------
+-- Global Variables (referenced in Frame.lua)
 --------------------------------------------------
 searchStartTime = 0
 roleChecks = {}
-editBoxHasFocus = false
-local step = 10
 
 --------------------------------------------------
 -- Main Frame
@@ -101,9 +108,6 @@ msgTextRaids:SetTextColor(1, 1, 1)
 --------------------------------------------------
 -- Tab System
 --------------------------------------------------
-tabs = {}
-currentTab = 1
-
 local function onTabClick(tabNum)
   currentTab = tabNum
   
@@ -202,8 +206,6 @@ local function onDungeonsTab()
   if AutoLFM_RaidList and AutoLFM_RaidList.ClearBackdrops then
     AutoLFM_RaidList.ClearBackdrops()
   end
-  
-  if channelsFrame then channelsFrame:Hide() end
 end
 
 local function onRaidsTab()
@@ -218,13 +220,11 @@ local function onRaidsTab()
   if clearSelectedRoles then clearSelectedRoles() end
   if resetUserInputMessage then resetUserInputMessage() end
   if updateMsgFrameCombined then updateMsgFrameCombined() end
-  if EnsureChannelFrameExist then EnsureChannelFrameExists() end
+  if EnsureChannelFrameExists then EnsureChannelFrameExists() end
   
   if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
     AutoLFM_DungeonList.ClearBackdrops()
   end
-  
-  if channelsFrame then channelsFrame:Hide() end
 end
 
 local function onMoreTab()
@@ -234,7 +234,6 @@ local function onMoreTab()
   if raidScrollFrame then raidScrollFrame:Hide() end
   
   if InitializeChannelFrame then InitializeChannelFrame() end
-  if channelsFrame then channelsFrame:Show() end
 end
 
 --------------------------------------------------
@@ -300,10 +299,6 @@ raidFrame, raidScrollFrame, raidContentFrame = createScrollFrame("raids", inside
 -- Raid Size Slider
 --------------------------------------------------
 sliderValue = 0
-currentSliderFrame = nil
-sliderSizeFrame = nil
-sliderSizeEditBox = nil
-sliderSize = nil
 
 local function createRaidSizeControls(parent)
   local raidSizeFrame = CreateFrame("Frame", nil, parent)
@@ -363,7 +358,6 @@ local function createRaidSizeControls(parent)
     edgeSize = 8,
     insets = {left = 3, right = 3, top = 6, bottom = 6}
   })
-  
   raidSizeSlider:EnableMouse(true)
   
   return raidSizeFrame, raidSizeEditBox, raidSizeSlider
@@ -377,6 +371,7 @@ if CreateDungeonFilterCheckboxes then
     dungeonFilterFrame:Show()
   end
 end
+
 function UpdateSliderText(value)
   if value then
     sliderSizeEditBox:SetText(tostring(value))
@@ -417,7 +412,7 @@ sliderSizeEditBox:SetScript("OnTextChanged", function()
 end)
 
 --------------------------------------------------
--- Inside More - Message Details
+-- Inside More - Message Details EditBox
 --------------------------------------------------
 local function setupPlaceholder(editBox, placeholderText)
   local placeholder = editBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
@@ -515,7 +510,7 @@ slider:SetMinMaxValues(40, 120)
 slider:SetValue(80)
 slider:SetValueStep(10)
 
-valueText = slider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+local valueText = slider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 valueText:SetPoint("BOTTOM", slider, "TOP", 0, 5)
 valueText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
 valueText:SetText("Dispense every 80 seconds")
@@ -555,6 +550,7 @@ toggleButton:SetScript("OnClick", function()
     end
   end
   
+  -- Validate all channels
   local allChannelsValid = true
   for channelName, _ in pairs(selectedChannels or {}) do
     if channelName ~= "Hardcore" then
@@ -586,7 +582,7 @@ toggleButton:SetScript("OnClick", function()
       searchStartTime = GetTime()
     end
   else
-   AutoLFM_PrintError("Broadcast has not started because one or more channels are invalid")
+    AutoLFM_PrintError("Broadcast has not started because one or more channels are invalid")
   end
 end)
 
@@ -664,11 +660,12 @@ AutoLFM:RegisterEvent("GROUP_ROSTER_UPDATE")
 AutoLFM:RegisterEvent("RAID_ROSTER_UPDATE")
 
 AutoLFM:SetScript("OnEvent", function()
-  if event == "RAID_ROSTER_UPDATE" then
+  local currentEvent = event
+  if currentEvent == "RAID_ROSTER_UPDATE" then
     if OnRaidRosterUpdate then
       OnRaidRosterUpdate()
     end
-  elseif event == "GROUP_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
+  elseif currentEvent == "GROUP_ROSTER_UPDATE" or currentEvent == "PARTY_MEMBERS_CHANGED" then
     local raid = selectedRaids and selectedRaids[1]
     local donjon = selectedDungeons and selectedDungeons[1]
     

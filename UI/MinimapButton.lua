@@ -21,6 +21,7 @@ function InitMinimapButton()
   local posY = AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY or -10
   AutoLFMMinimapBtn:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", posX, posY)
   
+  -- Icon
   local icon = AutoLFMMinimapBtn:CreateTexture(nil, "BACKGROUND")
   icon:SetWidth(20)
   icon:SetHeight(20)
@@ -30,6 +31,7 @@ function InitMinimapButton()
   
   AutoLFMMinimapBtn.icon = icon
   
+  -- Border
   local overlay = AutoLFMMinimapBtn:CreateTexture(nil, "OVERLAY")
   overlay:SetWidth(53)
   overlay:SetHeight(53)

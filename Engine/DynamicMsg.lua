@@ -12,13 +12,13 @@ function updateMsgFrameCombined()
   local rolesList = table.concat(selectedRoles, " & ")
   local finalRolesSegment = selectedCountRoles == 3 and "Need All" or (selectedCountRoles > 0 and "Need " .. rolesList or "")
   
-  local selectedRaids = GetSelectedRaids()
+  local selectedRaidsLocal = GetSelectedRaids()
   local isRaidSelected = false
   local raidSize = 0
   
   -- Process raids
-  if table.getn(selectedRaids) > 0 then
-    local raidTag = selectedRaids[1]
+  if table.getn(selectedRaidsLocal) > 0 then
+    local raidTag = selectedRaidsLocal[1]
     for _, raid in pairs(raids) do
       if raid.tag == raidTag then
         table.insert(selectedContent, raid.tag)

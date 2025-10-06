@@ -91,6 +91,7 @@ function CreateDungeonFilterCheckboxes(parent)
       filterStates[colorData.key] = true
     end
     
+    -- Set initial texture based on filter state
     if filterStates[colorData.key] then
       icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
     else

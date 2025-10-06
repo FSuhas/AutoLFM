@@ -1,12 +1,12 @@
 --------------------------------------------------
 -- Channel Management
 --------------------------------------------------
-channelsToFind = {"WORLD", "LookingForGroup", "Hardcore", "testketa"}
-foundChannels = {}
-channelsFrame = nil
+local channelsToFind = {"WORLD", "LookingForGroup", "Hardcore", "testketa"}
+local foundChannels = {}
+local channelsFrame = nil
 
 --------------------------------------------------
--- Save/Load
+-- Save/Load Selected Channels
 --------------------------------------------------
 function SaveSelectedChannels()
   if not AutoLFM_SavedVariables or not uniqueIdentifier then return end
@@ -35,14 +35,14 @@ function ToggleChannelSelection(channelName, isSelected)
 end
 
 --------------------------------------------------
--- Find Channels
+-- Find Available Channels
 --------------------------------------------------
 function findChannels()
   foundChannels = {}
   
   for _, channel in ipairs(channelsToFind) do
     if channel == "Hardcore" then
-      -- Vérifier si le joueur a accès au channel Hardcore
+      -- Check if player has access to Hardcore channel
       local channelId = GetChannelName(channel)
       if channelId and channelId > 0 then
         table.insert(foundChannels, {name = channel, id = channelId})
@@ -63,6 +63,7 @@ function CreateChannelButtons()
   if not channelsFrame then return end
   if not next(foundChannels) then return end
   
+  -- Hide existing buttons
   for _, button in ipairs(channelsFrame.buttons or {}) do
     button:Hide()
   end

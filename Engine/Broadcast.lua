@@ -1,16 +1,12 @@
 --------------------------------------------------
--- Stop Broadcast
+-- Broadcast Management
 --------------------------------------------------
-function stopMessageBroadcast()
-  isBroadcasting = false
-  AutoLFM_PrintInfo("Broadcast stopped")
-  
-  StopIconAnimation()
-  messagesSentCount = 0
-end
+local broadcastFrame = nil
+local broadcastedHalf = false
+local broadcastedOneSecBefore = false
 
 --------------------------------------------------
--- Send Message
+-- Send Message to Selected Channels
 --------------------------------------------------
 function sendMessageToSelectedChannels(message)
   if not next(selectedChannels) then
@@ -18,6 +14,7 @@ function sendMessageToSelectedChannels(message)
     return false
   end
   
+  -- Validate all channels before sending
   for channelName, _ in pairs(selectedChannels) do
     local channelId = GetChannelName(channelName)
     if not (channelId and channelId > 0) then
@@ -27,6 +24,7 @@ function sendMessageToSelectedChannels(message)
     end
   end
   
+  -- Send to all valid channels
   for channelName, _ in pairs(selectedChannels) do
     local channelId = GetChannelName(channelName)
     SendChatMessage(message, "CHANNEL", nil, channelId)
@@ -69,16 +67,19 @@ broadcastFrame:SetScript("OnUpdate", function()
   local halfSliderValue = sliderValue * 0.5
   local oneSecondBefore = sliderValue - 1
   
+  -- Notification at half interval
   if not broadcastedHalf and timeElapsed >= halfSliderValue and timeElapsed < halfSliderValue + 1 then
     AutoLFM_PrintInfo("Rediffusion in " .. math.floor(halfSliderValue) .. " seconds", 0, 1, 1)
     broadcastedHalf = true
   end
   
+  -- Notification 1 second before broadcast
   if not broadcastedOneSecBefore and timeElapsed >= oneSecondBefore and timeElapsed < oneSecondBefore + 1 then
     AutoLFM_PrintInfo("Rediffusion of Message", 0, 1, 1)
     broadcastedOneSecBefore = true
   end
   
+  -- Send message at interval
   if timeElapsed >= sliderValue then
     if combinedMessage and combinedMessage ~= "" then
       sendMessageToSelectedChannels(combinedMessage)
@@ -89,3 +90,16 @@ broadcastFrame:SetScript("OnUpdate", function()
     broadcastedOneSecBefore = false
   end
 end)
+
+--------------------------------------------------
+-- Stop Broadcast
+--------------------------------------------------
+function stopMessageBroadcast()
+  isBroadcasting = false
+  AutoLFM_PrintInfo("Broadcast stopped")
+  
+  StopIconAnimation()
+  messagesSentCount = 0
+  broadcastedHalf = false
+  broadcastedOneSecBefore = false
+end

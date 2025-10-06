@@ -1,5 +1,5 @@
 --------------------------------------------------
--- AutoLFM
+-- Log Message
 --------------------------------------------------
 local msglog = CreateFrame("Frame")
 msglog:RegisterEvent("PLAYER_ENTERING_WORLD")

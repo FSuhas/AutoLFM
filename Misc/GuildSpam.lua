@@ -33,8 +33,8 @@ SlashCmdList["MG"] = function(msg)
   
   if args[1] == "msg" then
     if mgMessage then
-      local etat = mgRunning and "|cff55ff55Active|r" or "|cffff5555Inactive|r"
-      AutoLFM_PrintInfo("[MG] Message: " .. mgMessage .. " | Interval: " .. mgInterval .. "s | State: " .. etat)
+      local state = mgRunning and "|cff55ff55Active|r" or "|cffff5555Inactive|r"
+      AutoLFM_PrintInfo("[MG] Message: " .. mgMessage .. " | Interval: " .. mgInterval .. "s | State: " .. state)
     else
       AutoLFM_PrintError("[MG] No message defined")
     end
