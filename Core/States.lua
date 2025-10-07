@@ -5,8 +5,6 @@
 --------------------------------------------------
 -- Character Information
 --------------------------------------------------
-playerCharacterName = nil
-playerRealmName = nil
 characterUniqueID = nil
 
 --------------------------------------------------

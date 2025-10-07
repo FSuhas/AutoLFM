@@ -13,8 +13,8 @@ end
 -- Initialize Character Info
 --------------------------------------------------
 function InitializeCharacterInfo()
-  playerCharacterName = UnitName("player") or "Unknown"
-  playerRealmName = GetRealmName() or "Unknown"
+  local playerCharacterName = UnitName("player") or "Unknown"
+  local playerRealmName = GetRealmName() or "Unknown"
   characterUniqueID = playerCharacterName .. "-" .. playerRealmName
 end
 
