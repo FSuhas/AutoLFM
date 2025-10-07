@@ -1,12 +1,30 @@
 --------------------------------------------------
 -- Role Manager - Role Logic
 --------------------------------------------------
+local function IsValidRole(role)
+  if not role or not AVAILABLE_ROLES then return false end
+  
+  for _, validRole in ipairs(AVAILABLE_ROLES) do
+    if validRole == role then
+      return true
+    end
+  end
+  
+  return false
+end
 
 --------------------------------------------------
 -- Toggle Role Selection
 --------------------------------------------------
 function ToggleRoleSelection(role)
   if not role then return end
+  if not IsValidRole(role) then
+    if AutoLFM_PrintWarning then
+      AutoLFM_PrintWarning("Invalid role: " .. tostring(role))
+    end
+    return
+  end
+  
   if not selectedRolesList then selectedRolesList = {} end
   
   -- Check if role is already selected
