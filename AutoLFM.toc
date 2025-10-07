@@ -58,6 +58,7 @@ UI\MainFrame.lua
 #--------------------------------------------------
 # Misc - Optional Modules
 #--------------------------------------------------
+Misc\QuestListPanel.lua
 Misc\EasterEgg.lua
 Misc\FPSDisplay.lua
 Misc\GuildSpam.lua

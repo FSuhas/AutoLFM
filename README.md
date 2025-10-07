@@ -14,7 +14,7 @@ Or
 - `/lfm` - Open AutoLFM window
 - `/lfm help` - Show all commands
 - Click minimap button to toggle interface
-- Select dungeons/raids, (roles,) channels → click Start
+- Select dungeons/raids, or custom message, (roles,) channels → click Start
 
 ## Architecture
 ```

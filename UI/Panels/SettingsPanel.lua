@@ -92,7 +92,7 @@ local function CreateCustomMessageEditBox(parentFrame)
   
   -- Setup placeholder
   local placeholder = customMessageEditBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-  placeholder:SetText("(optional)")
+  placeholder:SetText("(optional if instance selected)")
   placeholder:SetPoint("CENTER", customMessageEditBox, "CENTER", 0, 0)
   
   local function updatePlaceholder()

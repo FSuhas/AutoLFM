@@ -174,3 +174,17 @@ end
 --------------------------------------------------
 SLASH_LFM1 = "/lfm"
 SlashCmdList["LFM"] = HandleSlashCommand
+
+--------------------------------------------------
+-- Slash Command: /questlist
+--------------------------------------------------
+SLASH_QUESTLIST1 = "/questlist"
+SLASH_QUESTLIST2 = "/ql"
+
+SlashCmdList["QUESTLIST"] = function(msg)
+  if ToggleQuestList then
+    ToggleQuestList()
+  else
+    DEFAULT_CHAT_FRAME:AddMessage("|cffff0000[AutoLFM] Quest list not loaded!|r")
+  end
+end
