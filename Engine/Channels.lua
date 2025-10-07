@@ -50,14 +50,21 @@ end
 function findChannels()
   foundChannels = {}
   
+  if not channelsToFind or table.getn(channelsToFind) == 0 then
+    return false
+  end
+  
   for _, channel in ipairs(channelsToFind) do
-    local channelId = GetChannelName(channel)
-    if channelId and channelId > 0 then
-      table.insert(foundChannels, {name = channel, id = channelId})
+    if channel then
+      local channelId = GetChannelName(channel)
+      if channelId and channelId > 0 then
+        table.insert(foundChannels, {name = channel, id = channelId})
+      end
     end
   end
+  
+  return table.getn(foundChannels) > 0
 end
-
 --------------------------------------------------
 -- Create Channel Buttons
 --------------------------------------------------
