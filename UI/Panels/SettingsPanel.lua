@@ -327,6 +327,13 @@ function HideSettingsPanel()
 end
 
 --------------------------------------------------
+-- Set Broadcast Toggle Button
+--------------------------------------------------
+function SetBroadcastToggleButton(button)
+  broadcastToggleButton = button
+end
+
+--------------------------------------------------
 -- Getters
 --------------------------------------------------
 function GetSettingsPanelFrame()
@@ -334,7 +341,7 @@ function GetSettingsPanelFrame()
 end
 
 function GetBroadcastToggleButton()
-  return _G["AutoLFM_BroadcastToggleButton"]
+  return broadcastToggleButton
 end
 
 function GetBroadcastIntervalSlider()

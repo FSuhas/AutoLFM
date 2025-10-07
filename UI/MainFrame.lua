@@ -1,7 +1,6 @@
 --------------------------------------------------
 -- Main Frame - UI Assembly & Event Handling
 --------------------------------------------------
-
 AutoLFM_MainFrame = nil
 AutoLFM_MainIconTexture = nil
 
@@ -107,10 +106,10 @@ local function InitializeComponents()
     end
   end)
 
--- Stocker la référence globalement pour y accéder depuis d'autres modules
-_G["AutoLFM_BroadcastToggleButton"] = broadcastButton
+  if SetBroadcastToggleButton then
+    SetBroadcastToggleButton(broadcastButton)
+  end
   
-  -- Raid size slider (created in RaidsList but attached to MainFrame)
   if AutoLFM_RaidList and AutoLFM_RaidList.CreateSizeSlider then
     AutoLFM_RaidList.CreateSizeSlider(AutoLFM_MainFrame)
   end
