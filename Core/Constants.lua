@@ -18,7 +18,7 @@ SOUND_BROADCAST_STOP = "LFG_Denied.ogg"
 --------------------------------------------------
 -- Channels
 --------------------------------------------------
-AVAILABLE_CHANNELS = {"WORLD", "LookingForGroup", "Hardcore", "testketa"}
+AVAILABLE_CHANNELS = {"LookingForGroup", "World", "Hardcore", "testketa"}
 
 --------------------------------------------------
 -- Roles

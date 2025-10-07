@@ -9,7 +9,6 @@ local channelButtons = {}
 -- Check if player is in Hardcore mode
 --------------------------------------------------
 local function IsHardcoreMode()
-  -- Method 1: Check for Hardcore buff/debuff
   local i = 1
   while UnitBuff("player", i) do
     local name = UnitBuff("player", i)
@@ -19,7 +18,6 @@ local function IsHardcoreMode()
     i = i + 1
   end
   
-  -- Method 2: Check if Hardcore channel exists
   local channelId = GetChannelName("Hardcore")
   if channelId and channelId > 0 then
     return true
@@ -29,19 +27,49 @@ local function IsHardcoreMode()
 end
 
 --------------------------------------------------
+-- Create Channel Selector Frame
+--------------------------------------------------
+function CreateChannelSelector(parentFrame)
+  if not parentFrame then return nil end
+  if channelsFrame then
+    channelsFrame:SetParent(parentFrame)
+    channelsFrame:Show()
+    return channelsFrame
+  end
+  
+  channelsFrame = CreateFrame("Frame", "AutoLFM_ChannelSelector", parentFrame)
+  channelsFrame:SetWidth(292)
+  channelsFrame:SetHeight(100)
+  channelsFrame:Show()
+  
+  local channelIcon = channelsFrame:CreateTexture(nil, "OVERLAY")
+  channelIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\channel")
+  channelIcon:SetWidth(16)
+  channelIcon:SetHeight(16)
+  channelIcon:SetPoint("TOPLEFT", channelsFrame, "TOPLEFT", 0, 0)
+  
+  local titleText = channelsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  titleText:SetText("Channels:")
+  titleText:SetPoint("LEFT", channelIcon, "RIGHT", 3, 0)
+  
+  
+  return channelsFrame
+end
+
+--------------------------------------------------
 -- Create Single Channel Checkbox
 --------------------------------------------------
 local function CreateChannelCheckbox(parentFrame, channel, lastButton)
   if not parentFrame or not channel then return nil end
   
   local button = CreateFrame("CheckButton", nil, parentFrame, "UICheckButtonTemplate")
-  button:SetWidth(14)
-  button:SetHeight(14)
+  button:SetWidth(16)
+  button:SetHeight(16)
   
   if lastButton then
-    button:SetPoint("TOP", lastButton, "BOTTOM", 0, -5)
+    button:SetPoint("TOPLEFT", lastButton, "TOPLEFT", 0, -20)
   else
-    button:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -5)
+    button:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 19, -20)
   end
   
   -- Check if player has access to this channel
@@ -63,7 +91,6 @@ local function CreateChannelCheckbox(parentFrame, channel, lastButton)
   local channelText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   channelText:SetPoint("LEFT", button, "RIGHT", 5, 0)
   channelText:SetText(channel.name)
-  channelText:SetFont("Fonts\\FRIZQT__.TTF", 9, "MONOCHROME")
   
   -- Dim label if no access
   if not hasAccess then
@@ -123,31 +150,6 @@ local function CreateChannelCheckboxes()
 end
 
 --------------------------------------------------
--- Create Channel Selector Frame
---------------------------------------------------
-function CreateChannelSelector(parentFrame)
-  if not parentFrame then return nil end
-  if channelsFrame then return channelsFrame end
-  
-  channelsFrame = CreateFrame("Frame", nil, parentFrame)
-  channelsFrame:SetPoint("TOP", parentFrame, "TOP", 0, -100)
-  channelsFrame:SetWidth(250)
-  channelsFrame:SetHeight(120)
-  
-  -- Title
-  local titleText = channelsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  titleText:SetPoint("TOP", channelsFrame, "TOP", 0, -10)
-  titleText:SetText("Select Channel Broadcast")
-  titleText:SetTextColor(1, 1, 0)
-  titleText:SetJustifyH("CENTER")
-  titleText:SetFont("Fonts\\FRIZQT__.TTF", 9, "OUTLINE")
-  
-  CreateChannelCheckboxes()
-  
-  return channelsFrame
-end
-
---------------------------------------------------
 -- Refresh Channel Checkboxes
 --------------------------------------------------
 function RefreshChannelCheckboxes()
@@ -175,13 +177,8 @@ function GetChannelSelectorFrame()
 end
 
 --------------------------------------------------
--- Ensure Channel UI Exists (legacy compatibility)
+-- Ensure Channel UI Exists
 --------------------------------------------------
 function EnsureChannelUIExists()
   return channelsFrame ~= nil
-end
-
-function InitializeChannelSelectionUI()
-  -- Legacy function - does nothing now
-  -- Channels are created in SettingsPanel
 end

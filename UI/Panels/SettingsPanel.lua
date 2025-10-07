@@ -4,56 +4,21 @@
 
 local settingsPanelFrame = nil
 local customMessageEditBox = nil
-local broadcastIntervalFrame = nil
 local broadcastIntervalSlider = nil
-local broadcastToggleButton = nil
+
+-- UI Elements for stats
+local durationLabel = nil
+local sentLabel = nil
+local nextLabel = nil
 
 --------------------------------------------------
--- Setup Placeholder for EditBox
+-- Utility: Set Size
 --------------------------------------------------
-local function SetupPlaceholder(editBox, placeholderText)
-  if not editBox or not placeholderText then return end
-  
-  local placeholder = editBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-  placeholder:SetText(placeholderText)
-  placeholder:SetPoint("CENTER", editBox, "CENTER", 0, 0)
-  
-  local function updatePlaceholder()
-    if editBox:GetText() == "" then
-      placeholder:Show()
-    else
-      placeholder:Hide()
-    end
+local function setSize(frame, width, height)
+  if frame then
+    frame:SetWidth(width)
+    frame:SetHeight(height)
   end
-  
-  editBox:SetScript("OnEditFocusGained", function()
-    placeholder:Hide()
-    if UpdateEditBoxFocusState then
-      UpdateEditBoxFocusState(true)
-    end
-  end)
-  
-  editBox:SetScript("OnEditFocusLost", function()
-    if UpdateEditBoxFocusState then
-      UpdateEditBoxFocusState(false)
-    end
-    updatePlaceholder()
-  end)
-  
-  editBox:SetScript("OnTextChanged", function()
-    SetCustomUserMessage(editBox:GetText())
-    updatePlaceholder()
-  end)
-  
-  editBox:SetScript("OnEnterPressed", function()
-    editBox:ClearFocus()
-  end)
-  
-  editBox:SetScript("OnEscapePressed", function()
-    editBox:ClearFocus()
-  end)
-  
-  updatePlaceholder()
 end
 
 --------------------------------------------------
@@ -66,17 +31,61 @@ local function SnapToStep(value)
 end
 
 --------------------------------------------------
+-- Update Stats Display
+--------------------------------------------------
+local function UpdateStatsDisplay()
+  if not durationLabel or not sentLabel or not nextLabel then return end
+  
+  -- Update duration
+  local stats = GetBroadcastStats()
+  if stats and stats.isActive and stats.searchStartTimestamp and stats.searchStartTimestamp > 0 then
+    local duration = GetTime() - stats.searchStartTimestamp
+    local minutes = math.floor(duration / 60)
+    local seconds = math.floor(mod(duration, 60))
+    durationLabel:SetText(string.format("Duration: %02d:%02d", minutes, seconds))
+  else
+    durationLabel:SetText("Duration: 00:00")
+  end
+  
+  -- Update sent count
+  if stats and stats.messageCount then
+    sentLabel:SetText("Sent: " .. stats.messageCount)
+  else
+    sentLabel:SetText("Sent: 0")
+  end
+  
+  -- Update next broadcast
+  local timing = AutoLFM_API and AutoLFM_API.GetTiming()
+  if timing and timing.timeUntilNext then
+    local seconds = math.floor(timing.timeUntilNext)
+    nextLabel:SetText("Next: " .. seconds .. "s")
+  else
+    nextLabel:SetText("Next: --")
+  end
+end
+
+--------------------------------------------------
 -- Create Custom Message EditBox
 --------------------------------------------------
 local function CreateCustomMessageEditBox(parentFrame)
   if not parentFrame then return nil end
   
+  editboxIcon = parentFrame:CreateTexture(nil, "OVERLAY")
+  editboxIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\send")
+  editboxIcon:SetWidth(16)
+  editboxIcon:SetHeight(16)
+  editboxIcon:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 5, -10)
+  
+  editboxLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  editboxLabel:SetText("Add details to your message:")
+  editboxLabel:SetPoint("LEFT", editboxIcon, "RIGHT", 3, 0)
+
   customMessageEditBox = CreateFrame("EditBox", "AutoLFM_EditBox", parentFrame)
-  customMessageEditBox:SetPoint("TOP", parentFrame, "TOP", 0, -10)
-  customMessageEditBox:SetWidth(270)
-  customMessageEditBox:SetHeight(30)
+  customMessageEditBox:SetPoint("TOPLEFT", editboxIcon, "BOTTOMRIGHT", 0, -5)
+  customMessageEditBox:SetWidth(250)
+  customMessageEditBox:SetHeight(25)
   customMessageEditBox:SetAutoFocus(false)
-  customMessageEditBox:SetFont("Fonts\\FRIZQT__.TTF", 14)
+  customMessageEditBox:SetFont("Fonts\\FRIZQT__.TTF", 12)
   customMessageEditBox:SetMaxLetters(MAX_CUSTOM_MESSAGE_LENGTH)
   customMessageEditBox:SetText("")
   customMessageEditBox:SetTextColor(1, 1, 1)
@@ -93,7 +102,47 @@ local function CreateCustomMessageEditBox(parentFrame)
   customMessageEditBox:SetJustifyH("CENTER")
   customMessageEditBox:SetTextInsets(10, 10, 5, 5)
   
-  SetupPlaceholder(customMessageEditBox, "Add message details (optional)")
+  -- Setup placeholder
+  local placeholder = customMessageEditBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+  placeholder:SetText("(optional)")
+  placeholder:SetPoint("CENTER", customMessageEditBox, "CENTER", 0, 0)
+  
+  local function updatePlaceholder()
+    if customMessageEditBox:GetText() == "" then
+      placeholder:Show()
+    else
+      placeholder:Hide()
+    end
+  end
+  
+  customMessageEditBox:SetScript("OnEditFocusGained", function()
+    placeholder:Hide()
+    if UpdateEditBoxFocusState then
+      UpdateEditBoxFocusState(true)
+    end
+  end)
+  
+  customMessageEditBox:SetScript("OnEditFocusLost", function()
+    if UpdateEditBoxFocusState then
+      UpdateEditBoxFocusState(false)
+    end
+    updatePlaceholder()
+  end)
+  
+  customMessageEditBox:SetScript("OnTextChanged", function()
+    SetCustomUserMessage(customMessageEditBox:GetText())
+    updatePlaceholder()
+  end)
+  
+  customMessageEditBox:SetScript("OnEnterPressed", function()
+    customMessageEditBox:ClearFocus()
+  end)
+  
+  customMessageEditBox:SetScript("OnEscapePressed", function()
+    customMessageEditBox:ClearFocus()
+  end)
+  
+  updatePlaceholder()
   
   return customMessageEditBox
 end
@@ -102,97 +151,108 @@ end
 -- Create Broadcast Interval Slider
 --------------------------------------------------
 local function CreateBroadcastIntervalSlider(parentFrame)
-  if not parentFrame then return nil end
+  if not parentFrame or not customMessageEditBox then return nil end
   
-  broadcastIntervalFrame = CreateFrame("Frame", nil, parentFrame)
-  broadcastIntervalFrame:SetPoint("TOP", customMessageEditBox, "BOTTOM", 0, -30)
-  broadcastIntervalFrame:SetWidth(250)
-  broadcastIntervalFrame:SetHeight(50)
-  broadcastIntervalFrame:SetBackdrop({
-    bgFile = nil,
-    edgeSize = 16,
-    insets = { left = 4, right = 2, top = 4, bottom = 4 },
-  })
-  broadcastIntervalFrame:SetBackdropColor(1, 1, 1, 0.3)
-  broadcastIntervalFrame:SetBackdropBorderColor(1, 1, 1, 1)
+  local sliderIcon = parentFrame:CreateTexture(nil, "OVERLAY")
+  sliderIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\tool")
+  sliderIcon:SetWidth(16)
+  sliderIcon:SetHeight(16)
+  sliderIcon:SetPoint("TOPRIGHT", customMessageEditBox, "BOTTOMLEFT", 0, -10)
   
-  broadcastIntervalSlider = CreateFrame("Slider", nil, broadcastIntervalFrame, "OptionsSliderTemplate")
-  broadcastIntervalSlider:SetWidth(200)
-  broadcastIntervalSlider:SetHeight(20)
-  broadcastIntervalSlider:SetPoint("CENTER", broadcastIntervalFrame, "CENTER", 0, 0)
+  local sliderLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sliderLabel:SetText("Interval:")
+  sliderLabel:SetPoint("LEFT", sliderIcon, "RIGHT", 3, 0)
+  
+  broadcastIntervalSlider = CreateFrame("Slider", nil, parentFrame)
+  setSize(broadcastIntervalSlider, 145, 17)
+  broadcastIntervalSlider:SetPoint("LEFT", sliderLabel, "RIGHT", 10, 0)
   broadcastIntervalSlider:SetMinMaxValues(BROADCAST_INTERVAL_MIN, BROADCAST_INTERVAL_MAX)
   broadcastIntervalSlider:SetValue(DEFAULT_BROADCAST_INTERVAL)
   broadcastIntervalSlider:SetValueStep(BROADCAST_INTERVAL_STEP)
+  broadcastIntervalSlider:SetOrientation("HORIZONTAL")
+  broadcastIntervalSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  broadcastIntervalSlider:SetBackdrop({
+    bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
+    edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
+    tile = true,
+    tileSize = 8,
+    edgeSize = 8,
+    insets = {left = 3, right = 3, top = 6, bottom = 6}
+  })
   
-  local valueText = broadcastIntervalSlider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-  valueText:SetPoint("BOTTOM", broadcastIntervalSlider, "TOP", 0, 5)
-  valueText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
-  valueText:SetText("Dispense every " .. DEFAULT_BROADCAST_INTERVAL .. " seconds")
+  local sliderValue = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sliderValue:SetText(DEFAULT_BROADCAST_INTERVAL .. " secs")
+  sliderValue:SetPoint("LEFT", broadcastIntervalSlider, "RIGHT", 10, 0)
   
   broadcastIntervalSlider:SetScript("OnValueChanged", function()
     local value = broadcastIntervalSlider:GetValue()
     if value then
-      valueText:SetText("Dispense every " .. value .. " seconds")
+      sliderValue:SetText(math.floor(value) .. " secs")
     end
   end)
   
-  -- Throttled snap to step
-  local lastSliderUpdate = 0
-  broadcastIntervalFrame:SetScript("OnUpdate", function()
-    local now = GetTime()
-    if now - lastSliderUpdate < UPDATE_THROTTLE_SLIDER then return end
-    lastSliderUpdate = now
-    
-    local currentValue = broadcastIntervalSlider:GetValue()
-    if currentValue then
-      local snappedValue = SnapToStep(currentValue)
-      if currentValue ~= snappedValue then
-        broadcastIntervalSlider:SetValue(snappedValue)
-      end
-    end
-  end)
-  
-  return broadcastIntervalFrame
+  return sliderIcon
 end
 
 --------------------------------------------------
--- Create Broadcast Toggle Button
+-- Create Channel Section
 --------------------------------------------------
-local function CreateBroadcastToggleButton(parentFrame)
+local function CreateChannelSection(parentFrame)
   if not parentFrame then return nil end
   
-  broadcastToggleButton = CreateFrame("Button", "ToggleButton", parentFrame, "UIPanelButtonTemplate")
-  broadcastToggleButton:SetPoint("BOTTOM", parentFrame, "BOTTOM", 97, 80)
-  broadcastToggleButton:SetWidth(110)
-  broadcastToggleButton:SetHeight(21)
-  broadcastToggleButton:SetText("Start")
-  
-  broadcastToggleButton:SetScript("OnClick", function()
-    if IsBroadcastActive() then
-      -- Stop broadcast
-      StopBroadcast()
-      broadcastToggleButton:SetText("Start")
-      PlaySoundFile(SOUND_BASE_PATH .. SOUND_BROADCAST_STOP)
-    else
-      -- Start broadcast
-      if EnsureChannelUIExists then
-        EnsureChannelUIExists()
-      end
-      
-      local success = StartBroadcast()
-      
-      if success then
-        broadcastToggleButton:SetText("Stop")
-        PlaySoundFile(SOUND_BASE_PATH .. SOUND_BROADCAST_START)
-      end
+  -- Create channel selector (managed by ChannelSelector.lua)
+  if CreateChannelSelector then
+    local channelFrame = CreateChannelSelector(parentFrame)
+    if channelFrame then
+      channelFrame:ClearAllPoints()
+      channelFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 5, -95)
     end
-  end)
+  end
   
-  return broadcastToggleButton
+  return channelIcon
 end
 
 --------------------------------------------------
--- Create Settings Panel
+-- Create Stats Section
+--------------------------------------------------
+local function CreateStatsSection(parentFrame)
+  if not parentFrame then return nil end
+  
+  local durationIcon = parentFrame:CreateTexture(nil, "OVERLAY")
+  durationIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\bag")
+  durationIcon:SetWidth(16)
+  durationIcon:SetHeight(16)
+  durationIcon:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 5, -180)
+  
+  durationLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  durationLabel:SetText("Duration: 00:00")
+  durationLabel:SetPoint("LEFT", durationIcon, "RIGHT", 3, 0)
+  
+  local sentIcon = parentFrame:CreateTexture(nil, "OVERLAY")
+  sentIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\book")
+  sentIcon:SetWidth(16)
+  sentIcon:SetHeight(16)
+  sentIcon:SetPoint("TOPLEFT", durationIcon, "BOTTOMLEFT", 0, -10)
+  
+  sentLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sentLabel:SetText("Sent: 0")
+  sentLabel:SetPoint("LEFT", sentIcon, "RIGHT", 3, 0)
+  
+  local nextIcon = parentFrame:CreateTexture(nil, "OVERLAY")
+  nextIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\chat")
+  nextIcon:SetWidth(16)
+  nextIcon:SetHeight(16)
+  nextIcon:SetPoint("TOPLEFT", sentIcon, "BOTTOMLEFT", 0, -10)
+  
+  nextLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  nextLabel:SetText("Next: --")
+  nextLabel:SetPoint("LEFT", nextIcon, "RIGHT", 3, 0)
+  
+  return durationIcon
+end
+
+--------------------------------------------------
+-- Create Settings Panel (MAIN FRAME)
 --------------------------------------------------
 function CreateSettingsPanel(parentFrame)
   if not parentFrame then return nil end
@@ -201,19 +261,36 @@ function CreateSettingsPanel(parentFrame)
   -- Main panel frame
   settingsPanelFrame = CreateFrame("Frame", nil, parentFrame)
   settingsPanelFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 25, -157)
-  settingsPanelFrame:SetWidth(295)
+  settingsPanelFrame:SetWidth(292)
   settingsPanelFrame:SetHeight(253)
   settingsPanelFrame:SetFrameStrata("HIGH")
   settingsPanelFrame:Hide()
   
-  -- Create components
+  -- Create child components
   CreateCustomMessageEditBox(settingsPanelFrame)
   CreateBroadcastIntervalSlider(settingsPanelFrame)
+  CreateChannelSection(settingsPanelFrame)
+  CreateStatsSection(settingsPanelFrame)
   
-  -- Create channel selector
-  if CreateChannelSelector then
-    CreateChannelSelector(settingsPanelFrame)
-  end
+  -- Update loop for stats + slider snap
+  local lastSliderUpdate = 0
+  settingsPanelFrame:SetScript("OnUpdate", function()
+    UpdateStatsDisplay()
+    
+    local now = GetTime()
+    if now - lastSliderUpdate < UPDATE_THROTTLE_SLIDER then return end
+    lastSliderUpdate = now
+    
+    if broadcastIntervalSlider then
+      local currentValue = broadcastIntervalSlider:GetValue()
+      if currentValue then
+        local snappedValue = SnapToStep(currentValue)
+        if currentValue ~= snappedValue then
+          broadcastIntervalSlider:SetValue(snappedValue)
+        end
+      end
+    end
+  end)
   
   return settingsPanelFrame
 end
@@ -226,7 +303,6 @@ function ShowSettingsPanel()
     settingsPanelFrame:Show()
   end
   
-  -- Ensure channel UI exists
   if RefreshChannelCheckboxes then
     RefreshChannelCheckboxes()
   end
@@ -242,29 +318,20 @@ function HideSettingsPanel()
 end
 
 --------------------------------------------------
--- Get Settings Panel Frame
+-- Getters
 --------------------------------------------------
 function GetSettingsPanelFrame()
   return settingsPanelFrame
 end
 
---------------------------------------------------
--- Get Broadcast Toggle Button (for external access)
---------------------------------------------------
 function GetBroadcastToggleButton()
-  return broadcastToggleButton
+  return nil
 end
 
---------------------------------------------------
--- Get Broadcast Interval Slider (for external access)
---------------------------------------------------
 function GetBroadcastIntervalSlider()
   return broadcastIntervalSlider
 end
 
---------------------------------------------------
--- Get Custom Message EditBox (for external access)
---------------------------------------------------
 function GetCustomMessageEditBox()
   return customMessageEditBox
 end

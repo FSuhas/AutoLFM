@@ -38,7 +38,7 @@ function ValidateBroadcastConfiguration()
   
   if not hasUserMessage then
     if table.getn(selectedRaids) == 0 and table.getn(selectedDungeons) == 0 then
-      table.insert(errors, "No dungeon or raid selected")
+      table.insert(errors, "No dungeon/raid selected or no custom message set")
     end
   end
   
