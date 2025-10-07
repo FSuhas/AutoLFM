@@ -131,10 +131,3 @@ end
 function GetCurrentTab()
   return currentTab
 end
-
---------------------------------------------------
--- Force Tab Update (for external state changes)
---------------------------------------------------
-function UpdateTabVisuals()
-  SwitchToTab(currentTab)
-end

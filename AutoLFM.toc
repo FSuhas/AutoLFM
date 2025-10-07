@@ -19,7 +19,6 @@ Core\SavedVariables.lua
 # Utils - Utilities
 #--------------------------------------------------
 Utils\Strings.lua
-Utils\Tables.lua
 Utils\Groups.lua
 
 #--------------------------------------------------
