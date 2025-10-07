@@ -5,16 +5,13 @@ local currentTab = 1
 local tabs = {}
 local step = 10
 
--- Inside frames (local to Frame.lua)
 local insideDungeons = nil
 local insideRaids = nil
 
--- Scroll frames (local to Frame.lua)
 local djScrollFrame = nil
 local raidScrollFrame = nil
 local raidListContentFrame = nil
 
--- Dungeon filter frame (local to Frame.lua)
 local dungeonFilterFrame = nil
 
 --------------------------------------------------
@@ -115,14 +112,12 @@ raidMessageText:SetTextColor(1, 1, 1)
 local function onTabClick(tabNum)
   currentTab = tabNum
   
-  -- Hide all inside frames and scroll frames
   if insideDungeons then insideDungeons:Hide() end
   if insideRaids then insideRaids:Hide() end
   if moreTabContentFrame then moreTabContentFrame:Hide() end
   if djScrollFrame then djScrollFrame:Hide() end
   if raidScrollFrame then raidScrollFrame:Hide() end
   
-  -- Show corresponding frame
   if tabNum == 1 then
     if insideDungeons then 
       insideDungeons:Show()
@@ -145,7 +140,6 @@ local function onTabClick(tabNum)
     end
   end
   
-  -- Update tab visuals
   for i = 1, 3 do
     local active = i == tabNum
     tabs[i].bg:SetTexture(TEXTURE_BASE_PATH .. (active and "tabActive" or "tabInactive"))
@@ -220,7 +214,10 @@ local function onDungeonsTab()
   if dungeonFilterFrame then dungeonFilterFrame:Show() end
   
   if ClearRaidSelection then ClearRaidSelection() end
-  if HideRaidSizeControls then HideRaidSizeControls() end
+  
+  if AutoLFM_RaidList and AutoLFM_RaidList.HideSizeControls then
+    AutoLFM_RaidList.HideSizeControls()
+  end
   
   if AutoLFM_RaidList and AutoLFM_RaidList.ClearBackdrops then
     AutoLFM_RaidList.ClearBackdrops()
@@ -235,6 +232,10 @@ local function onRaidsTab()
   if dungeonFilterFrame then dungeonFilterFrame:Hide() end
   
   if ClearDungeonSelection then ClearDungeonSelection() end
+  
+  if AutoLFM_RaidList and AutoLFM_RaidList.ShowSizeControls then
+    AutoLFM_RaidList.ShowSizeControls()
+  end
   
   if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
     AutoLFM_DungeonList.ClearBackdrops()
@@ -305,119 +306,21 @@ local function createScrollFrame(name, parent)
   return scrollFrame, contentFrame
 end
 
--- Dungeons scroll in insideDungeons frame
 djScrollFrame, dungeonListContentFrame = createScrollFrame("Dungeons", insideDungeons)
-
--- Raids scroll in insideRaids frame  
 raidScrollFrame, raidListContentFrame = createScrollFrame("Raids", insideRaids)
 
--- Force initial visibility for tab 1
 djScrollFrame:Show()
 raidScrollFrame:Hide()
 
 --------------------------------------------------
--- Raid Size Slider
+-- Color Filter UI
 --------------------------------------------------
-raidGroupSize = 0
-
-local function createRaidSizeControls(parent)
-  local raidSizeFrame = CreateFrame("Frame", nil, parent)
-  raidSizeFrame:SetPoint("BOTTOM", parent, "BOTTOM", -16, 75)
-  raidSizeFrame:SetWidth(300)
-  raidSizeFrame:SetHeight(30)
-  raidSizeFrame:Hide()
-  
-  local raidSizeIcon = raidSizeFrame:CreateTexture(nil, "ARTWORK")
-  raidSizeIcon:SetPoint("LEFT", raidSizeFrame, "LEFT", 0, 0)
-  raidSizeIcon:SetWidth(18)
-  raidSizeIcon:SetHeight(18)
-  raidSizeIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\group")
-  
-  local raidSizeEditBox = CreateFrame("EditBox", "AutoLFM_RaidSizeEditBox", raidSizeFrame)
-  raidSizeEditBox:SetPoint("LEFT", raidSizeIcon, "RIGHT", 10, 0)
-  raidSizeEditBox:SetWidth(25)
-  raidSizeEditBox:SetHeight(20)
-  raidSizeEditBox:SetFont("Fonts\\FRIZQT__.TTF", 12)
-  raidSizeEditBox:SetJustifyH("CENTER")
-  raidSizeEditBox:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 }
-  })
-  raidSizeEditBox:SetBackdropColor(0, 0, 0, 0.8)
-  raidSizeEditBox:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
-  raidSizeEditBox:SetAutoFocus(false)
-  raidSizeEditBox:SetMaxLetters(2)
-  raidSizeEditBox:SetText("18")
-  raidSizeEditBox:SetTextInsets(2, 2, 0, 0)
-  
-  local iconButton = CreateFrame("Button", nil, raidSizeFrame)
-  iconButton:SetAllPoints(raidSizeIcon)
-  iconButton:SetScript("OnClick", function()
-    raidSizeEditBox:SetFocus()
-    raidSizeEditBox:HighlightText()
-  end)
-  
-  local raidSizeSlider = CreateFrame("Slider", "AutoLFM_RaidSizeSlider", raidSizeFrame)
-  raidSizeSlider:SetPoint("LEFT", raidSizeEditBox, "RIGHT", 10, 0)
-  raidSizeSlider:SetWidth(135)
-  raidSizeSlider:SetHeight(17)
-  raidSizeSlider:SetMinMaxValues(10, 40)
-  raidSizeSlider:SetValue(25)
-  raidSizeSlider:SetValueStep(1)
-  raidSizeSlider:SetOrientation("HORIZONTAL")
-  raidSizeSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
-  raidSizeSlider:SetBackdrop({
-    bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
-    edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = {left = 3, right = 3, top = 6, bottom = 6}
-  })
-  raidSizeSlider:EnableMouse(true)
-  
-  return raidSizeFrame, raidSizeEditBox, raidSizeSlider
-end
-
-raidSizeControlFrame, raidSizeValueEditBox, raidSizeSlider = createRaidSizeControls(AutoLFM_MainFrame)
-
 if CreateColorFilterUI then
   dungeonFilterFrame = CreateColorFilterUI(AutoLFM_MainFrame)
   if dungeonFilterFrame then
     dungeonFilterFrame:Show()
   end
 end
-
-function UpdateRaidSizeDisplay(value)
-  if value then
-    raidSizeValueEditBox:SetText(tostring(value))
-  else
-    raidSizeValueEditBox:SetText("")
-  end
-end
-
-raidSizeSlider:SetScript("OnValueChanged", function()
-  local value = raidSizeSlider:GetValue()
-  raidGroupSize = value
-  UpdateRaidSizeDisplay(value)
-  if UpdateDynamicMessage then
-    UpdateDynamicMessage()
-  end
-end)
-
-raidSizeValueEditBox:SetScript("OnTextChanged", function()
-  local value = tonumber(raidSizeValueEditBox:GetText())
-  if value then
-    local minVal, maxVal = raidSizeSlider:GetMinMaxValues()
-    if value >= minVal and value <= maxVal then
-      raidSizeSlider:SetValue(value)
-    end
-  end
-end)
 
 --------------------------------------------------
 -- Inside More - Message Details EditBox
@@ -613,8 +516,10 @@ AutoLFM_MainFrame:SetScript("OnEvent", function()
     
     if hasRaid then
       local totalPlayersInRaid = GetRaidMemberCount and GetRaidMemberCount() or 0
-      if raidGroupSize == totalPlayersInRaid then
-        HandleGroupFull("raid", raidGroupSize)
+      local raidSize = AutoLFM_RaidList and AutoLFM_RaidList.GetSize() or raidGroupSize or 40
+      
+      if raidSize == totalPlayersInRaid then
+        HandleGroupFull("raid", raidSize)
       else
         if HandlePartyUpdate then HandlePartyUpdate() end
       end
@@ -643,11 +548,11 @@ displayFrame:SetScript("OnEvent", function()
     
     if AutoLFM_RaidList and raidListContentFrame then
       AutoLFM_RaidList.Display(raidListContentFrame)
+      AutoLFM_RaidList.CreateSizeSlider(AutoLFM_MainFrame)
     end
     
     displayFrame:UnregisterEvent("PLAYER_LOGIN")
   end
 end)
 
--- Backward compatibility alias
 AutoLFM = AutoLFM_MainFrame
