@@ -20,7 +20,7 @@ end
 -- Check if Player is in Raid
 --------------------------------------------------
 function IsPlayerInRaid()
-  return UnitInRaid("player")
+  return GetNumRaidMembers() > 0
 end
 
 --------------------------------------------------
