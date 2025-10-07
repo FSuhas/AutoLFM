@@ -38,7 +38,7 @@ raidGroupSize = 0
 
 -- Configuration
 TEXTURE_BASE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
-CHAT_MESSAGE_PREFIX = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+CHAT_MESSAGE_PREFIX = "|cffffffff[|cffFEFE00Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
 playerCharacterName = nil
 playerRealmName = nil
 characterUniqueID = nil

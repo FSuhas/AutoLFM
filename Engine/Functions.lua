@@ -23,7 +23,7 @@ end
 function AutoLFM_PrintMessage(message, colorKey)
   if not message then return end
   if not CHAT_MESSAGE_PREFIX then
-    CHAT_MESSAGE_PREFIX = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+    CHAT_MESSAGE_PREFIX = "|cffffffff[|cffFEFE00Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
   end
   
   local coloredMessage = message

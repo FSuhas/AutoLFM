@@ -8,8 +8,6 @@
 
 ## GitHub: https://github.com/FSuhas/AutoLFM
 
-UI\IconAnimation.lua
-
 Engine\Data.lua
 Engine\Functions.lua
 Engine\DynamicMsg.lua
@@ -18,12 +16,13 @@ Engine\Broadcast.lua
 Engine\API.lua
 Engine\Commands.lua
 
+UI\IconAnimation.lua
 UI\DungeonFilters.lua
 UI\DungeonsList.lua
 UI\RaidsList.lua
 UI\MinimapButton.lua
 UI\Frame.lua
-# UI\QuestItemLinks.lua (To implement/debug)
+# UI\QuestItemLinks.lua -- Implement/debug
 
 Misc\EasterEgg.lua
 Misc\FPSDisplay.lua
