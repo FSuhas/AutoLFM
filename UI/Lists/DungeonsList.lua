@@ -8,6 +8,7 @@ end
 
 local clickableFrames = {}
 local checkButtons = {}
+local dungeonRows = {}  -- NOUVEAU : stocke toutes les lignes créées
 
 --------------------------------------------------
 -- Get Priority Color
@@ -58,11 +59,6 @@ end
 --------------------------------------------------
 local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   if not parent or not dungeon then return nil end
-  
-  -- Check if should be displayed based on filter
-  if not ShouldShowPriorityLevel(priority) then
-    return nil
-  end
   
   local clickableFrame = CreateFrame("Button", "ClickableDungeonFrame" .. dungeon.tag, parent)
   clickableFrame:SetHeight(20)
@@ -125,9 +121,42 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
     OnDungeonCheckboxClick(checkbox, dungeon.tag)
   end)
   
+  -- Store row data
+  clickableFrame.dungeonTag = dungeon.tag
+  clickableFrame.priority = priority
+  
   table.insert(clickableFrames, clickableFrame)
+  dungeonRows[dungeon.tag] = clickableFrame  -- NOUVEAU : indexer par tag
   
   return clickableFrame
+end
+
+--------------------------------------------------
+-- Update Row Visibility Based on Filters
+--------------------------------------------------
+local function UpdateRowVisibility()
+  if not dungeonRows then return end
+  
+  local yOffset = 0
+  
+  for _, entry in ipairs(GetSortedDungeonsByPriority(UnitLevel("player"))) do
+    if entry and entry.dungeon then
+      local dungeonTag = entry.dungeon.tag
+      local priority = entry.priority
+      local frame = dungeonRows[dungeonTag]
+      
+      if frame then
+        -- Check if this priority should be shown
+        if ShouldShowPriorityLevel(priority) then
+          frame:Show()
+          frame:SetPoint("TOPLEFT", frame:GetParent(), "TOPLEFT", 0, -yOffset)
+          yOffset = yOffset + 20
+        else
+          frame:Hide()
+        end
+      end
+    end
+  end
 end
 
 --------------------------------------------------
@@ -143,6 +172,7 @@ function AutoLFM_DungeonList.Display(parent)
   
   clickableFrames = {}
   checkButtons = {}
+  dungeonRows = {}  -- NOUVEAU : réinitialiser
   
   local playerLevel = UnitLevel("player")
   if not playerLevel or playerLevel < 1 then
@@ -154,23 +184,28 @@ function AutoLFM_DungeonList.Display(parent)
   
   local yOffset = 0
   
+  -- Create ALL rows (even hidden ones)
   for _, entry in ipairs(sortedDungeons) do
     if entry and entry.dungeon then
       local frame = CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
       if frame then
-        yOffset = yOffset + 20
+        -- Check if should be visible initially
+        if ShouldShowPriorityLevel(entry.priority) then
+          yOffset = yOffset + 20
+        else
+          frame:Hide()
+        end
       end
     end
   end
 end
 
 --------------------------------------------------
--- Refresh Display (for filters)
+-- Refresh Display (for filters) - MODIFIÉ
 --------------------------------------------------
 function AutoLFM_DungeonList.Refresh()
-  if dungeonListContentFrame then
-    AutoLFM_DungeonList.Display(dungeonListContentFrame)
-  end
+  -- Instead of recreating everything, just update visibility
+  UpdateRowVisibility()
 end
 
 --------------------------------------------------

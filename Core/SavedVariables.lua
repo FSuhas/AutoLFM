@@ -146,9 +146,12 @@ function SaveColorFilterSettings()
     AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  -- filterStates is defined in DungeonFilters.lua but we save it here
+  -- Save current filter states
   if filterStates then
-    AutoLFM_SavedVariables[characterUniqueID].dungeonFilters = filterStates
+    AutoLFM_SavedVariables[characterUniqueID].dungeonFilters = {}
+    for key, value in pairs(filterStates) do
+      AutoLFM_SavedVariables[characterUniqueID].dungeonFilters[key] = value
+    end
   end
 end
 
@@ -159,11 +162,20 @@ function LoadColorFilterSettings()
     AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
+  -- Load saved filter states
   if AutoLFM_SavedVariables[characterUniqueID].dungeonFilters then
-    -- filterStates is defined in DungeonFilters.lua
-    if filterStates then
-      for key, value in pairs(AutoLFM_SavedVariables[characterUniqueID].dungeonFilters) do
-        filterStates[key] = value
+    filterStates = {}
+    for key, value in pairs(AutoLFM_SavedVariables[characterUniqueID].dungeonFilters) do
+      filterStates[key] = value
+    end
+  else
+    -- Initialize with defaults if no saved data
+    filterStates = {}
+    if PRIORITY_COLOR_SCHEME then
+      for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
+        if color and color.key then
+          filterStates[color.key] = true
+        end
       end
     end
   end

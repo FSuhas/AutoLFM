@@ -5,6 +5,8 @@
 local filterCheckboxes = {}
 filterStates = {}
 local filtersInitialized = false
+local filterFrameLabelFrame = nil
+local filterFrameLabelText = nil
 
 --------------------------------------------------
 -- Initialize Filter States
@@ -12,11 +14,17 @@ local filtersInitialized = false
 local function InitializeFilterStates()
   if filtersInitialized then return end
   
-  filterStates = {}
-  if PRIORITY_COLOR_SCHEME then
-    for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
-      if color and color.key then
-        filterStates[color.key] = true
+  -- Load saved filters first
+  LoadColorFilterSettings()
+  
+  -- If still empty, set defaults
+  if not filterStates or not next(filterStates) then
+    filterStates = {}
+    if PRIORITY_COLOR_SCHEME then
+      for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
+        if color and color.key then
+          filterStates[color.key] = true
+        end
       end
     end
   end
@@ -30,6 +38,11 @@ end
 function ShouldShowPriorityLevel(priority)
   if not priority then return true end
   if not PRIORITY_COLOR_SCHEME then return true end
+  
+  -- Ensure filters are initialized
+  if not filtersInitialized then
+    InitializeFilterStates()
+  end
   
   for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
     if color and color.priority == priority and color.key then
@@ -50,69 +63,55 @@ function RefreshDungeonDisplay()
 end
 
 --------------------------------------------------
--- Create Filter Button
+-- Create Filter Checkbox
 --------------------------------------------------
-local function CreateFilterButton(parentFrame, colorData, index)
+local function CreateFilterCheckbox(parentFrame, colorData, index, xOffset)
   if not parentFrame or not colorData then return nil end
   
-  local button = CreateFrame("Button", "DungeonFilter_" .. colorData.key, parentFrame)
-  button:SetWidth(20)
-  button:SetHeight(20)
-  button:SetPoint("LEFT", parentFrame, "LEFT", (index - 1) * 40, 0)
+  -- Create checkbox
+  local checkbox = CreateFrame("CheckButton", "DungeonFilter_" .. colorData.key, parentFrame, "UICheckButtonTemplate")
+  checkbox:SetWidth(20)
+  checkbox:SetHeight(20)
+  checkbox:SetPoint("LEFT", parentFrame, "LEFT", xOffset, 0)
   
-  -- Icon
-  local icon = button:CreateTexture(nil, "ARTWORK")
-  icon:SetWidth(20)
-  icon:SetHeight(20)
-  icon:SetPoint("CENTER", button, "CENTER", 0, 0)
+  -- Apply color to checkbox textures
+  local normalTexture = checkbox:GetNormalTexture()
+  local checkedTexture = checkbox:GetCheckedTexture()
+  local disabledCheckedTexture = checkbox:GetDisabledCheckedTexture()
   
-  if colorData.r and colorData.g and colorData.b then
-    icon:SetVertexColor(colorData.r, colorData.g, colorData.b)
+  if normalTexture then
+    normalTexture:SetVertexColor(colorData.r, colorData.g, colorData.b)
   end
   
-  -- Initialize state
+  if checkedTexture then
+    checkedTexture:SetVertexColor(colorData.r, colorData.g, colorData.b)
+  end
+  
+  if disabledCheckedTexture then
+    disabledCheckedTexture:SetVertexColor(colorData.r, colorData.g, colorData.b)
+  end
+  
+  -- Initialize state from saved settings
   if filterStates[colorData.key] == nil then
     filterStates[colorData.key] = true
   end
   
-  -- Set initial texture
-  if filterStates[colorData.key] then
-    icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
-  else
-    icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check-Disabled")
-  end
-  
-  button.icon = icon
-  button.colorKey = colorData.key
-  
-  -- Highlight
-  local highlight = button:CreateTexture(nil, "HIGHLIGHT")
-  highlight:SetWidth(24)
-  highlight:SetHeight(24)
-  highlight:SetPoint("CENTER", button, "CENTER", 0, 0)
-  highlight:SetTexture("Interface\\Buttons\\UI-Common-MouseHilight")
-  highlight:SetBlendMode("ADD")
+  -- Set checked state
+  checkbox:SetChecked(filterStates[colorData.key])
   
   -- Click handler
-  button:SetScript("OnClick", function()
-    InitializeFilterStates()
+  checkbox:SetScript("OnClick", function()
+    local currentKey = colorData.key
+    filterStates[currentKey] = checkbox:GetChecked()
     
-    local currentKey = button.colorKey
-    filterStates[currentKey] = not filterStates[currentKey]
-    
-    if filterStates[currentKey] then
-      button.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
-    else
-      button.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check-Disabled")
-    end
-    
+    -- Save and refresh
     SaveColorFilterSettings()
     RefreshDungeonDisplay()
   end)
   
-  filterCheckboxes[colorData.key] = button
+  filterCheckboxes[colorData.key] = checkbox
   
-  return button
+  return checkbox
 end
 
 --------------------------------------------------
@@ -127,12 +126,41 @@ function CreateColorFilterUI(parentFrame)
   filterFrame:SetPoint("BOTTOM", parentFrame, "BOTTOM", -16, 75)
   filterFrame:SetWidth(300)
   filterFrame:SetHeight(30)
+
+  -- Label "Filters:"
+  filterFrameLabelFrame = CreateFrame("Button", nil, filterFrame)
+  filterFrameLabelFrame:SetWidth(50)
+  filterFrameLabelFrame:SetHeight(20)
+  filterFrameLabelFrame:SetPoint("LEFT", filterFrame, "LEFT", 0, 0)
+  
+  filterFrameLabelText = filterFrameLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  filterFrameLabelText:SetPoint("LEFT", filterFrameLabelFrame, "LEFT", 0, 0)
+  filterFrameLabelText:SetText("Filters:")
+  filterFrameLabelText:SetTextColor(1, 1, 1)
   
   if not PRIORITY_COLOR_SCHEME then return filterFrame end
   
-  for i, colorData in ipairs(PRIORITY_COLOR_SCHEME) do
+  -- Calculer la largeur du label pour décaler les boutons
+  local labelWidth = filterFrameLabelText:GetStringWidth() + 15
+  
+  -- Ordre personnalisé : gris, vert, jaune, orange, rouge
+  local customOrder = {"gray", "green", "yellow", "orange", "red"}
+  local orderedColors = {}
+  
+  for _, key in ipairs(customOrder) do
+    for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
+      if color.key == key then
+        table.insert(orderedColors, color)
+        break
+      end
+    end
+  end
+  
+  -- Créer les checkboxes dans l'ordre personnalisé
+  for i, colorData in ipairs(orderedColors) do
     if colorData and colorData.key then
-      CreateFilterButton(filterFrame, colorData, i)
+      local xOffset = labelWidth + (i - 1) * 30
+      CreateFilterCheckbox(filterFrame, colorData, i, xOffset)
     end
   end
   
@@ -145,13 +173,9 @@ end
 function UpdateFilterUI()
   if not filterCheckboxes then return end
   
-  for colorKey, button in pairs(filterCheckboxes) do
-    if button and button.icon and filterStates[colorKey] ~= nil then
-      if filterStates[colorKey] then
-        button.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
-      else
-        button.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check-Disabled")
-      end
+  for colorKey, checkbox in pairs(filterCheckboxes) do
+    if checkbox and checkbox.SetChecked and filterStates[colorKey] ~= nil then
+      checkbox:SetChecked(filterStates[colorKey])
     end
   end
 end

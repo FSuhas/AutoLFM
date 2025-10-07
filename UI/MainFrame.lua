@@ -256,6 +256,11 @@ displayFrame:SetScript("OnEvent", function()
       AutoLFM_RaidList.Display(raidContentFrame)
     end
     
+    -- Update filter UI
+    if UpdateFilterUI then
+      UpdateFilterUI()
+    end
+
     displayFrame:UnregisterEvent("PLAYER_LOGIN")
   end
 end)
