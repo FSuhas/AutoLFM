@@ -9,18 +9,21 @@ local channelButtons = {}
 -- Check if player is in Hardcore mode
 --------------------------------------------------
 local function IsHardcoreMode()
-  local i = 1
-  while UnitBuff("player", i) do
-    local name = UnitBuff("player", i)
-    if name and string.find(string.lower(name), "hardcore") then
-      return true
-    end
-    i = i + 1
-  end
-  
   local channelId = GetChannelName("Hardcore")
   if channelId and channelId > 0 then
     return true
+  end
+  
+  local i = 1
+  while UnitBuff("player", i) do
+    local buffName = UnitBuff("player", i)
+    if buffName then
+      local lowerName = string.lower(buffName)
+      if lowerName == "hardcore" or string.find(lowerName, "^hardcore ") or string.find(lowerName, " hardcore$") then
+        return true
+      end
+    end
+    i = i + 1
   end
   
   return false
