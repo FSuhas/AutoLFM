@@ -262,8 +262,3 @@ displayFrame:SetScript("OnEvent", function()
     displayFrame:UnregisterEvent("PLAYER_LOGIN")
   end
 end)
-
---------------------------------------------------
--- Legacy Global Reference
---------------------------------------------------
-AutoLFM = AutoLFM_MainFrame
