@@ -14,8 +14,8 @@ function InitializeMinimapButton()
   
   AutoLFM_MinimapButton = CreateFrame("Button", "AutoLFM_MinimapButton", Minimap)
   AutoLFM_MinimapButton:SetFrameStrata("LOW")
-  AutoLFM_MinimapButton:SetWidth(31)
-  AutoLFM_MinimapButton:SetHeight(31)
+  AutoLFM_MinimapButton:SetWidth(30)
+  AutoLFM_MinimapButton:SetHeight(30)
   
   local posX = AutoLFM_SavedVariables[characterUniqueID].minimapBtnX or -10
   local posY = AutoLFM_SavedVariables[characterUniqueID].minimapBtnY or -10
@@ -23,18 +23,18 @@ function InitializeMinimapButton()
   
   -- Icon
   local icon = AutoLFM_MinimapButton:CreateTexture(nil, "BACKGROUND")
-  icon:SetWidth(20)
-  icon:SetHeight(20)
+  icon:SetWidth(30)
+  icon:SetHeight(30)
   icon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
   icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
-  icon:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", 7, -5)
+  icon:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", -1, 1)
   
   AutoLFM_MinimapButton.icon = icon
   
   -- Border
   local overlay = AutoLFM_MinimapButton:CreateTexture(nil, "OVERLAY")
-  overlay:SetWidth(53)
-  overlay:SetHeight(53)
+  overlay:SetWidth(50)
+  overlay:SetHeight(50)
   overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
   overlay:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", 0, 0)
   
