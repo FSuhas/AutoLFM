@@ -101,8 +101,11 @@ end
 -- Helper: Build Final Message
 --------------------------------------------------
 local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelected, raidPlayerCountText)
+  if not selectedContent then selectedContent = {} end
+  if not selectedRolesList then selectedRolesList = {} end
+
   local contentCount = table.getn(selectedContent)
-  local rolesCount = table.getn(selectedRolesList or {})
+  local rolesCount = table.getn(selectedRolesList)
   
   if contentCount == 0 and rolesCount == 0 and customUserMessage == "" then
     return ""
