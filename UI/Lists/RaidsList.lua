@@ -35,9 +35,9 @@ local function UpdateRaidBackdrop(frame, checkbox)
 end
 
 --------------------------------------------------
--- Reset Size Controls to Default (10, disabled)
+-- Set Fixed Size State (10 players, disabled)
 --------------------------------------------------
-local function ResetToDefaultState()
+local function SetFixedSizeState()
   if not raidSizeSlider or not raidSizeValueEditBox or not raidSizeValueText then return end
   
   raidSizeSlider:Hide()
@@ -51,48 +51,49 @@ local function ResetToDefaultState()
 end
 
 --------------------------------------------------
+-- Set Variable Size State (slider + editbox)
+--------------------------------------------------
+local function SetVariableSizeState(raidTag)
+  if not raidTag or not raidSizeSlider or not raidSizeValueEditBox or not raidSizeValueText then return end
+  
+  local minSize, maxSize = GetRaidSizeRange(raidTag)
+  local currentSize = InitializeRaidSizeForTag(raidTag)
+  
+  raidSizeValueText:Hide()
+  
+  raidSizeSlider:SetMinMaxValues(minSize, maxSize)
+  raidSizeSlider:SetValue(currentSize)
+  raidSizeSlider:Show()
+  
+  raidSizeValueEditBox:SetText(tostring(currentSize))
+  raidSizeValueEditBox:SetTextColor(1, 1, 0)
+  raidSizeValueEditBox:Show()
+  raidSizeValueEditBox:SetFocus()
+  raidSizeValueEditBox:HighlightText()
+end
+
+--------------------------------------------------
 -- Update Size Controls for Raid
 --------------------------------------------------
 local function UpdateSizeControlsForRaid(raidTag)
   if not raidTag then
-    ResetToDefaultState()
+    SetFixedSizeState()
     return
   end
   
   local raid = GetRaidByTag(raidTag)
   if not raid then
-    ResetToDefaultState()
+    SetFixedSizeState()
     return
   end
   
   local minSize, maxSize = GetRaidSizeRange(raidTag)
-  local isFixed = IsRaidFixedSize(raidTag)
+  local isFixed = (minSize == maxSize)
   
   if isFixed then
-    -- Fixed size: show gray text only
-    raidSizeSlider:Hide()
-    raidSizeValueEditBox:Hide()
-    
-    raidSizeValueText:SetText(tostring(minSize))
-    raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
-    raidSizeValueText:Show()
-    
-    SetRaidGroupSize(minSize)
+    SetFixedSizeState()
   else
-    -- Variable size: show editbox + slider
-    raidSizeValueText:Hide()
-    
-    local currentSize = InitializeRaidSizeForTag(raidTag)
-    
-    raidSizeSlider:SetMinMaxValues(minSize, maxSize)
-    raidSizeSlider:SetValue(currentSize)
-    raidSizeSlider:Show()
-    
-    raidSizeValueEditBox:SetText(tostring(currentSize))
-    raidSizeValueEditBox:SetTextColor(1, 1, 0)
-    raidSizeValueEditBox:Show()
-    raidSizeValueEditBox:SetFocus()
-    raidSizeValueEditBox:HighlightText()
+    SetVariableSizeState(raidTag)
   end
 end
 
@@ -117,7 +118,7 @@ local function OnRaidCheckboxClick(checkbox, raidTag)
     UpdateSizeControlsForRaid(raidTag)
   else
     ToggleRaidSelection(raidTag, false)
-    ResetToDefaultState()
+    SetFixedSizeState()
   end
   
   UpdateRaidBackdrop(checkbox:GetParent(), checkbox)
@@ -227,7 +228,7 @@ function AutoLFM_RaidList.ClearSelection()
     end
   end
   
-  ResetToDefaultState()
+  SetFixedSizeState()
 end
 
 --------------------------------------------------
@@ -265,7 +266,7 @@ function AutoLFM_RaidList.ShowSizeControls()
   if selectedRaids and table.getn(selectedRaids) > 0 then
     UpdateSizeControlsForRaid(selectedRaids[1])
   else
-    ResetToDefaultState()
+    SetFixedSizeState()
   end
 end
 
@@ -381,5 +382,5 @@ function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
     end
   end)
   
-  ResetToDefaultState()
+  SetFixedSizeState()
 end
