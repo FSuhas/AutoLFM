@@ -4,6 +4,7 @@
 local settingsPanelFrame = nil
 local customMessageEditBox = nil
 local broadcastIntervalSlider = nil
+local broadcastToggleButton = nil
 local durationLabel = nil
 local sentLabel = nil
 local nextLabel = nil
@@ -333,7 +334,7 @@ function GetSettingsPanelFrame()
 end
 
 function GetBroadcastToggleButton()
-  return nil
+  return _G["AutoLFM_BroadcastToggleButton"]
 end
 
 function GetBroadcastIntervalSlider()

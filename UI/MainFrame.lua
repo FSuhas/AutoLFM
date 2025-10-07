@@ -82,35 +82,33 @@ local function InitializeComponents()
     settingsPanelFrame = CreateSettingsPanel(AutoLFM_MainFrame)
   end
   
-  -- Broadcast Toggle Button (created in SettingsPanel but accessible globally)
-  -- Create it attached to MainFrame for visibility on all tabs
-  local broadcastButton = GetBroadcastToggleButton()
-  if not broadcastButton then
-    broadcastButton = CreateFrame("Button", "ToggleButton", AutoLFM_MainFrame, "UIPanelButtonTemplate")
-    broadcastButton:SetPoint("BOTTOM", AutoLFM_MainFrame, "BOTTOM", 97, 80)
-    broadcastButton:SetWidth(110)
-    broadcastButton:SetHeight(21)
-    broadcastButton:SetText("Start")
-    
-    broadcastButton:SetScript("OnClick", function()
-      if IsBroadcastActive() then
-        StopBroadcast()
-        broadcastButton:SetText("Start")
-        PlaySoundFile(SOUND_BASE_PATH .. SOUND_BROADCAST_STOP)
-      else
-        if EnsureChannelUIExists then
-          EnsureChannelUIExists()
-        end
-        
-        local success = StartBroadcast()
-        
-        if success then
-          broadcastButton:SetText("Stop")
-          PlaySoundFile(SOUND_BASE_PATH .. SOUND_BROADCAST_START)
-        end
+  local broadcastButton = CreateFrame("Button", "AutoLFM_BroadcastToggle", AutoLFM_MainFrame, "UIPanelButtonTemplate")
+  broadcastButton:SetPoint("BOTTOM", AutoLFM_MainFrame, "BOTTOM", 97, 80)
+  broadcastButton:SetWidth(110)
+  broadcastButton:SetHeight(21)
+  broadcastButton:SetText("Start")
+
+  broadcastButton:SetScript("OnClick", function()
+    if IsBroadcastActive() then
+      StopBroadcast()
+      broadcastButton:SetText("Start")
+      PlaySoundFile(SOUND_BASE_PATH .. SOUND_BROADCAST_STOP)
+    else
+      if EnsureChannelUIExists then
+        EnsureChannelUIExists()
       end
-    end)
-  end
+      
+      local success = StartBroadcast()
+      
+      if success then
+        broadcastButton:SetText("Stop")
+        PlaySoundFile(SOUND_BASE_PATH .. SOUND_BROADCAST_START)
+      end
+    end
+  end)
+
+-- Stocker la référence globalement pour y accéder depuis d'autres modules
+_G["AutoLFM_BroadcastToggleButton"] = broadcastButton
   
   -- Raid size slider (created in RaidsList but attached to MainFrame)
   if AutoLFM_RaidList and AutoLFM_RaidList.CreateSizeSlider then
