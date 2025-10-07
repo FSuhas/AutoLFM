@@ -1,14 +1,23 @@
 --------------------------------------------------
 -- Chat Message Utilities
 --------------------------------------------------
-local function GetColorByKey(key)
-  if not colors then return nil end
+local function GetColorHex(colorKey)
+  if not colors then return "FFFFFF" end
   for _, color in ipairs(colors) do
-    if color and color.key == key then
-      return color.r, color.g, color.b
+    if color.key == colorKey then
+      if color.hex then
+        return string.gsub(color.hex, "#", "")
+      elseif color.r and color.g and color.b then
+        return string.format("%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
+      end
     end
   end
-  return nil
+  return "FFFFFF"
+end
+
+function ColorText(text, colorKey)
+  local hex = GetColorHex(colorKey)
+  return "|cff" .. hex .. text .. "|r"
 end
 
 function AutoLFM_Print(message, colorKey)
@@ -45,26 +54,6 @@ end
 
 function AutoLFM_PrintInfo(message)
   AutoLFM_Print(message, "gray")
-end
-
-local function GetColorHex(colorKey)
-  if not colors then return "FFFFFF" end
-  for _, color in ipairs(colors) do
-    if color.key == colorKey then
-      if color.hex then
-        -- Remove the # if present
-        return string.gsub(color.hex, "#", "")
-      elseif color.r and color.g and color.b then
-        return string.format("%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
-      end
-    end
-  end
-  return "FFFFFF" -- Default white if color not found
-end
-
-function ColorText(text, colorKey)
-  local hex = GetColorHex(colorKey)
-  return "|cff" .. hex .. text .. "|r"
 end
 
 --------------------------------------------------
