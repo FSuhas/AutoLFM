@@ -14,40 +14,6 @@ local function ShowHelp()
 end
 
 --------------------------------------------------
--- Safe String Split
---------------------------------------------------
-local function SafeSplit(delimiter, text)
-  if not text or text == "" then
-    return {}
-  end
-  
-  local result = {}
-  local start = 1
-  local i = 1
-  
-  while true do
-    local s, e = string.find(text, delimiter, start, true)
-    
-    if not s then
-      local remaining = string.sub(text, start)
-      if remaining ~= "" then
-        result[i] = remaining
-      end
-      break
-    end
-    
-    local part = string.sub(text, start, s - 1)
-    if part ~= "" then
-      result[i] = part
-      i = i + 1
-    end
-    start = e + 1
-  end
-  
-  return result
-end
-
---------------------------------------------------
 -- Command Handlers
 --------------------------------------------------
 local function HandleWindowCommand()
@@ -169,7 +135,7 @@ SLASH_LFM1 = "/lfm"
 SlashCmdList["LFM"] = function(msg)
   if not msg then msg = "" end
   
-  local args = SafeSplit(" ", msg)
+  local args = strsplit(" ", msg)
   local command = args[1] or ""
   local subCommand = args[2]
   local handler = commandHandlers[command]
