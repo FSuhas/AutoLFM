@@ -14,19 +14,27 @@ function FindAvailableChannels()
   
   for _, channelName in ipairs(AVAILABLE_CHANNELS) do
     if channelName then
-      local channelId = GetChannelName(channelName)
-      if channelId and channelId > 0 then
+      -- Special case: Always show Hardcore even if not a real channel
+      if channelName == "Hardcore" then
         table.insert(foundChannels, {
           name = channelName,
-          id = channelId
+          id = 0  -- Dummy ID for Hardcore
         })
+      else
+        -- Regular channel check
+        local channelId = GetChannelName(channelName)
+        if channelId and channelId > 0 then
+          table.insert(foundChannels, {
+            name = channelName,
+            id = channelId
+          })
+        end
       end
     end
   end
   
   return foundChannels
 end
-
 --------------------------------------------------
 -- Toggle Channel Selection
 --------------------------------------------------

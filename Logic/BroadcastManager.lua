@@ -84,12 +84,15 @@ function SendMessageToChannels(message)
   local invalidChannels = {}
   
   for channelName, _ in pairs(selectedChannelsList) do
-    local channelId = GetChannelIdByName(channelName)
-    if channelId then
-      SendChatMessage(message, "CHANNEL", nil, channelId)
-      sentCount = sentCount + 1
-    else
-      table.insert(invalidChannels, channelName)
+    -- Skip Hardcore channel (it's not a real broadcast channel)
+    if channelName ~= "Hardcore" then
+      local channelId = GetChannelIdByName(channelName)
+      if channelId then
+        SendChatMessage(message, "CHANNEL", nil, channelId)
+        sentCount = sentCount + 1
+      else
+        table.insert(invalidChannels, channelName)
+      end
     end
   end
   
@@ -108,10 +111,11 @@ function SendMessageToChannels(message)
   end
   
   broadcastMessageCount = (broadcastMessageCount or 0) + 1
-  lastBroadcastTimestamp = GetTime()  -- ← AJOUTER CETTE LIGNE
+  lastBroadcastTimestamp = GetTime()
   
   return true
 end
+
 --------------------------------------------------
 -- Start Broadcast
 --------------------------------------------------

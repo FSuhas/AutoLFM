@@ -6,6 +6,29 @@ local channelsFrame = nil
 local channelButtons = {}
 
 --------------------------------------------------
+-- Check if player is in Hardcore mode
+--------------------------------------------------
+local function IsHardcoreMode()
+  -- Method 1: Check for Hardcore buff/debuff
+  local i = 1
+  while UnitBuff("player", i) do
+    local name = UnitBuff("player", i)
+    if name and string.find(string.lower(name), "hardcore") then
+      return true
+    end
+    i = i + 1
+  end
+  
+  -- Method 2: Check if Hardcore channel exists
+  local channelId = GetChannelName("Hardcore")
+  if channelId and channelId > 0 then
+    return true
+  end
+  
+  return false
+end
+
+--------------------------------------------------
 -- Create Single Channel Checkbox
 --------------------------------------------------
 local function CreateChannelCheckbox(parentFrame, channel, lastButton)
@@ -21,17 +44,47 @@ local function CreateChannelCheckbox(parentFrame, channel, lastButton)
     button:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -5)
   end
   
+  -- Check if player has access to this channel
+  local hasAccess = true
+  if channel.name == "Hardcore" then
+    hasAccess = IsHardcoreMode()
+  end
+  
+  -- Disable checkbox if no access
+  if not hasAccess then
+    button:Disable()
+    button:SetAlpha(0.5)
+  else
+    button:Enable()
+    button:SetAlpha(1.0)
+  end
+  
   -- Channel label
   local channelText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   channelText:SetPoint("LEFT", button, "RIGHT", 5, 0)
   channelText:SetText(channel.name)
   channelText:SetFont("Fonts\\FRIZQT__.TTF", 9, "MONOCHROME")
   
-  -- Set checked state from manager
-  button:SetChecked(IsChannelSelected(channel.name))
+  -- Dim label if no access
+  if not hasAccess then
+    channelText:SetTextColor(0.5, 0.5, 0.5)
+  else
+    channelText:SetTextColor(1, 1, 1)
+  end
+  
+  -- Set checked state from manager (false if no access)
+  if hasAccess then
+    button:SetChecked(IsChannelSelected(channel.name))
+  else
+    button:SetChecked(false)
+  end
   
   -- Click handler
   button:SetScript("OnClick", function()
+    if not hasAccess then
+      button:SetChecked(false)
+      return
+    end
     ToggleChannelSelection(channel.name, button:GetChecked())
   end)
   
