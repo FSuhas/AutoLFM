@@ -1,7 +1,6 @@
 --------------------------------------------------
 -- AutoLFM - Initialization & Orchestration
 --------------------------------------------------
-
 local initFrame = CreateFrame("Frame")
 initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -9,12 +8,10 @@ initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 -- Initialize Core Systems
 --------------------------------------------------
 local function InitializeCoreSystems()
-  -- Initialize character info (needed for SavedVariables)
   if InitializeCharacterInfo then
     InitializeCharacterInfo()
   end
   
-  -- Initialize SavedVariables
   if InitializeCharacterSavedVariables then
     local success = InitializeCharacterSavedVariables()
     if not success then
@@ -32,12 +29,10 @@ end
 -- Load Saved Settings
 --------------------------------------------------
 local function LoadSavedSettings()
-  -- Load channel selection
   if LoadChannelSelection then
     LoadChannelSelection()
   end
   
-  -- Load color filter settings
   if LoadColorFilterSettings then
     LoadColorFilterSettings()
   end
@@ -47,22 +42,18 @@ end
 -- Initialize UI Components
 --------------------------------------------------
 local function InitializeUI()
-  -- Initialize main frame
   if InitializeMainFrame then
     InitializeMainFrame()
   end
   
-  -- Initialize minimap button
   if InitializeMinimapButton then
     InitializeMinimapButton()
   end
   
-  -- Initialize quest item links
   if InitializeQuestItemLinks then
     InitializeQuestItemLinks()
   end
   
-  -- Hide main frame initially
   if AutoLFM_MainFrame then
     AutoLFM_MainFrame:Hide()
   end
@@ -90,7 +81,6 @@ local function SetupBroadcastLoop()
       return
     end
     
-    -- Get slider value via getter function
     local sliderValue = DEFAULT_BROADCAST_INTERVAL
     local broadcastSlider = GetBroadcastIntervalSlider()
     if broadcastSlider and broadcastSlider.GetValue then
@@ -135,25 +125,19 @@ initFrame:SetScript("OnEvent", function()
   local currentEvent = event
   
   if currentEvent == "PLAYER_ENTERING_WORLD" then
-    -- Initialize core systems
     local coreSuccess = InitializeCoreSystems()
     if not coreSuccess then
       return
     end
     
-    -- Load saved settings
     LoadSavedSettings()
     
-    -- Initialize UI
     InitializeUI()
     
-    -- Setup broadcast loop
     SetupBroadcastLoop()
     
-    -- Print welcome message
     PrintWelcomeMessage()
     
-    -- Unregister event (only run once)
     initFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
   end
 end)

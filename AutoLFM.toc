@@ -45,7 +45,7 @@ UI\Components\MinimapButton.lua
 UI\Components\RoleSelector.lua
 UI\Components\TabSystem.lua
 UI\Components\MessagePreview.lua
-# UI\Components\QuestItemLinks.lua -- Need fixing
+UI\Components\QuestItemLinks.lua
 UI\Components\ChannelSelector.lua
 UI\Lists\DungeonFilters.lua
 UI\Lists\DungeonsList.lua

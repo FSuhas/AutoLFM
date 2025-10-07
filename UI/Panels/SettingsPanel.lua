@@ -105,13 +105,13 @@ local function CreateCustomMessageEditBox(parentFrame)
   
   customMessageEditBox:SetScript("OnEditFocusGained", function()
     placeholder:Hide()
-    if UpdateEditBoxFocusState then
+    if UpdateEditBoxFocusState and type(UpdateEditBoxFocusState) == "function" then
       UpdateEditBoxFocusState(true)
     end
   end)
   
   customMessageEditBox:SetScript("OnEditFocusLost", function()
-    if UpdateEditBoxFocusState then
+    if UpdateEditBoxFocusState and type(UpdateEditBoxFocusState) == "function" then
       UpdateEditBoxFocusState(false)
     end
     updatePlaceholder()
@@ -247,7 +247,7 @@ local function CreateQuestlogSection(parentFrame)
   if not parentFrame then return nil end
   
   local questlogLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  questlogLabel:SetText("QuestLog " .. ColorizeText("(WIP)", "gray"))
+  questlogLabel:SetText("Shift+Click Quest/Item to link")
   questlogLabel:SetPoint("BOTTOMRIGHT", parentFrame, "BOTTOMRIGHT", -5, 7)
 
   local questlogIcon = parentFrame:CreateTexture(nil, "OVERLAY")
