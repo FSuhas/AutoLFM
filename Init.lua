@@ -90,10 +90,13 @@ local function SetupBroadcastLoop()
       return
     end
     
+    -- Get slider value via getter function
+    local sliderValue = DEFAULT_BROADCAST_INTERVAL
     local broadcastSlider = GetBroadcastIntervalSlider()
-    if not broadcastSlider then return end
+    if broadcastSlider and broadcastSlider.GetValue then
+      sliderValue = broadcastSlider:GetValue() or DEFAULT_BROADCAST_INTERVAL
+    end
     
-    local sliderValue = broadcastSlider:GetValue()
     if not sliderValue or sliderValue < 1 then
       sliderValue = DEFAULT_BROADCAST_INTERVAL
     end

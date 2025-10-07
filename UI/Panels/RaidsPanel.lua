@@ -56,19 +56,12 @@ function ShowRaidsPanel()
     raidScrollFrame:SetVerticalScroll(0)
   end
   
-  -- Show message preview
-  ShowMessagePreview()
-  
   -- Show raid size controls
   if AutoLFM_RaidList and AutoLFM_RaidList.ShowSizeControls then
     AutoLFM_RaidList.ShowSizeControls()
   end
   
-  -- Clear dungeon selection and hide dungeon backdrops
-  if ClearDungeonSelection then
-    ClearDungeonSelection()
-  end
-  
+  -- Hide dungeon backdrops (but don't clear selection)
   if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
     AutoLFM_DungeonList.ClearBackdrops()
   end

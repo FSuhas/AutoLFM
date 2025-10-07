@@ -137,13 +137,7 @@ local function OnTabChange(tabIndex)
   elseif tabIndex == 3 then
     if ShowSettingsPanel then ShowSettingsPanel() end
   end
-  
-  -- Clear roles and custom message
-  if ClearAllRoles then ClearAllRoles() end
-  if ResetCustomMessage then ResetCustomMessage() end
-  
-  -- Update message
-  if UpdateDynamicMessage then UpdateDynamicMessage() end
+
 end
 
 --------------------------------------------------

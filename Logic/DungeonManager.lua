@@ -53,6 +53,27 @@ function ToggleDungeonSelection(dungeonTag, isSelected)
   if not selectedDungeonTags then selectedDungeonTags = {} end
   
   if isSelected then
+    -- Clear raid selection when selecting dungeon
+    if ClearRaidSelection then
+      ClearRaidSelection()
+    end
+    
+    -- Clear roles and custom message
+    if ClearAllRoles then
+      ClearAllRoles()
+    end
+    if ClearRoleCheckboxesUI then
+      ClearRoleCheckboxesUI()
+    end
+    if ResetCustomMessage then
+      ResetCustomMessage()
+    end
+    
+    -- Update UI raid checkboxes
+    if AutoLFM_RaidList and AutoLFM_RaidList.UpdateCheckboxes then
+      AutoLFM_RaidList.UpdateCheckboxes()
+    end
+    
     -- Check if already selected
     local alreadySelected = false
     for _, tag in ipairs(selectedDungeonTags) do
@@ -65,7 +86,13 @@ function ToggleDungeonSelection(dungeonTag, isSelected)
     if not alreadySelected then
       -- Limit to MAX_DUNGEONS_SELECTION
       if table.getn(selectedDungeonTags) >= MAX_DUNGEONS_SELECTION then
+        local removedTag = selectedDungeonTags[1]
         table.remove(selectedDungeonTags, 1)
+        
+        -- Uncheck the removed dungeon in UI
+        if AutoLFM_DungeonList and AutoLFM_DungeonList.UncheckDungeon then
+          AutoLFM_DungeonList.UncheckDungeon(removedTag)
+        end
       end
       table.insert(selectedDungeonTags, dungeonTag)
     end

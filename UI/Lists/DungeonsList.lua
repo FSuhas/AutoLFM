@@ -208,3 +208,22 @@ function AutoLFM_DungeonList.UpdateCheckboxes()
     end
   end
 end
+
+--------------------------------------------------
+-- Uncheck Specific Dungeon
+--------------------------------------------------
+function AutoLFM_DungeonList.UncheckDungeon(dungeonTag)
+  if not dungeonTag then return end
+  if not checkButtons then return end
+  
+  local checkbox = checkButtons[dungeonTag]
+  if checkbox and checkbox.SetChecked then
+    checkbox:SetChecked(false)
+    
+    -- Clear backdrop
+    local frame = checkbox:GetParent()
+    if frame and frame.SetBackdrop then
+      frame:SetBackdrop(nil)
+    end
+  end
+end

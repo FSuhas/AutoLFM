@@ -69,14 +69,7 @@ function ShowDungeonsPanel()
     dungeonFilterFrame:Show()
   end
   
-  -- Show message preview
-  ShowMessagePreview()
-  
-  -- Clear raid selection and hide raid controls
-  if ClearRaidSelection then
-    ClearRaidSelection()
-  end
-  
+  -- Hide raid controls (but don't clear selection)
   if AutoLFM_RaidList and AutoLFM_RaidList.HideSizeControls then
     AutoLFM_RaidList.HideSizeControls()
   end

@@ -10,6 +10,27 @@ function ToggleRaidSelection(raidTag, isSelected)
   if not selectedRaidTags then selectedRaidTags = {} end
   
   if isSelected then
+    -- Clear dungeon selection when selecting raid
+    if ClearDungeonSelection then
+      ClearDungeonSelection()
+    end
+    
+    -- Clear roles and custom message
+    if ClearAllRoles then
+      ClearAllRoles()
+    end
+    if ClearRoleCheckboxesUI then
+      ClearRoleCheckboxesUI()
+    end
+    if ResetCustomMessage then
+      ResetCustomMessage()
+    end
+    
+    -- Update UI dungeon checkboxes
+    if AutoLFM_DungeonList and AutoLFM_DungeonList.UpdateCheckboxes then
+      AutoLFM_DungeonList.UpdateCheckboxes()
+    end
+    
     -- Only one raid can be selected at a time
     selectedRaidTags = {raidTag}
   else
@@ -20,7 +41,6 @@ function ToggleRaidSelection(raidTag, isSelected)
     UpdateDynamicMessage()
   end
 end
-
 --------------------------------------------------
 -- Clear All Raid Selections
 --------------------------------------------------

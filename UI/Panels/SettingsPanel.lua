@@ -226,12 +226,9 @@ function ShowSettingsPanel()
     settingsPanelFrame:Show()
   end
   
-  -- Hide message preview (not needed in settings)
-  HideMessagePreview()
-  
   -- Ensure channel UI exists
-  if EnsureChannelUIExists then
-    EnsureChannelUIExists()
+  if RefreshChannelCheckboxes then
+    RefreshChannelCheckboxes()
   end
 end
 

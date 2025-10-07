@@ -21,6 +21,9 @@ function CreateMessagePreview(parentFrame)
   messageText:SetPoint("CENTER", messagePreviewFrame, "CENTER", 0, 0)
   messageText:SetTextColor(1, 1, 1)
   
+  -- Always visible, no need to show/hide
+  messagePreviewFrame:Show()
+  
   return messagePreviewFrame
 end
 
@@ -32,29 +35,4 @@ function UpdateMessagePreview()
   
   local message = GetGeneratedLFMMessage()
   messageText:SetText(message or "")
-end
-
---------------------------------------------------
--- Show Message Preview
---------------------------------------------------
-function ShowMessagePreview()
-  if messagePreviewFrame then
-    messagePreviewFrame:Show()
-  end
-end
-
---------------------------------------------------
--- Hide Message Preview
---------------------------------------------------
-function HideMessagePreview()
-  if messagePreviewFrame then
-    messagePreviewFrame:Hide()
-  end
-end
-
---------------------------------------------------
--- Get Message Preview Frame
---------------------------------------------------
-function GetMessagePreviewFrame()
-  return messagePreviewFrame
 end

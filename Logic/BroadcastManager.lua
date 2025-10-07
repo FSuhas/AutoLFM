@@ -108,9 +108,10 @@ function SendMessageToChannels(message)
   end
   
   broadcastMessageCount = (broadcastMessageCount or 0) + 1
+  lastBroadcastTimestamp = GetTime()  -- ← AJOUTER CETTE LIGNE
+  
   return true
 end
-
 --------------------------------------------------
 -- Start Broadcast
 --------------------------------------------------
