@@ -38,7 +38,7 @@ DUNGEON_DATABASE = {
   { name = "Shadowfang Keep", tag = "SFK", levelMin = 20, levelMax = 28 },
   { name = "Blackfathom Deeps", tag = "BFD", levelMin = 22, levelMax = 31 },
   { name = "The Stockade", tag = "Stockade", levelMin = 23, levelMax = 32 },
-  { name = "Dragonnmaw Retreat", tag = "DR", levelMin = 26, levelMax = 35 },
+  { name = "Dragonmaw Retreat", tag = "DR", levelMin = 26, levelMax = 35 },
   { name = "Gnomeregan", tag = "Gnomeregan", levelMin = 28, levelMax = 37 },
   { name = "Razorfen Kraul", tag = "RFK", levelMin = 29, levelMax = 36 },
   { name = "Scarlet Monastery Graveyard", tag = "SM Grav", levelMin = 30, levelMax = 37 },
