@@ -114,18 +114,23 @@ end
 -- Display All Raids
 --------------------------------------------------
 function AutoLFM_RaidList.Display(parent)
+  if not parent then return end
+  
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
   
+  AutoLFM_RaidList.clickableFrames = {}
+  
   local yOffset = 0
   
   for index, raid in ipairs(raids or {}) do
-    CreateRaidRow(parent, raid, index, yOffset)
-    yOffset = yOffset + 20
+    if raid then
+      CreateRaidRow(parent, raid, index, yOffset)
+      yOffset = yOffset + 20
+    end
   end
 end
-
 --------------------------------------------------
 -- Clear Selection
 --------------------------------------------------
