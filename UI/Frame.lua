@@ -571,42 +571,42 @@ end)
 -- Events
 --------------------------------------------------
 AutoLFM:RegisterEvent("PARTY_MEMBERS_CHANGED")
-AutoLFM:RegisterEvent("GROUP_ROSTER_UPDATE")
 AutoLFM:RegisterEvent("RAID_ROSTER_UPDATE")
+
+local function HandleGroupFull(contentType, maxSize)
+  if stopMessageBroadcast then stopMessageBroadcast() end
+  if contentType == "raid" then
+    if clearSelectedRaids then clearSelectedRaids() end
+  else
+    if clearSelectedDungeons then clearSelectedDungeons() end
+  end
+  if clearSelectedRoles then clearSelectedRoles() end
+  if resetUserInputMessage then resetUserInputMessage() end
+  if updateMsgFrameCombined then updateMsgFrameCombined() end
+  if toggleButton then toggleButton:SetText("Start") end
+  PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
+end
 
 AutoLFM:SetScript("OnEvent", function()
   if event == "RAID_ROSTER_UPDATE" then
     if OnRaidRosterUpdate then
       OnRaidRosterUpdate()
     end
-  elseif event == "GROUP_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
-    local raid = selectedRaids and selectedRaids[1]
-    local donjon = selectedDungeons and selectedDungeons[1]
+  elseif event == "PARTY_MEMBERS_CHANGED" then
+    local hasRaid = selectedRaids and selectedRaids[1]
+    local hasDungeon = selectedDungeons and selectedDungeons[1]
     
-    if raid ~= nil then
+    if hasRaid then
       local totalPlayersInRaid = countRaidMembers and countRaidMembers() or 0
       if raidSize == totalPlayersInRaid then
-        if stopMessageBroadcast then stopMessageBroadcast() end
-        if clearSelectedRaids then clearSelectedRaids() end
-        if clearSelectedRoles then clearSelectedRoles() end
-        if resetUserInputMessage then resetUserInputMessage() end
-        if updateMsgFrameCombined then updateMsgFrameCombined() end
-        if toggleButton then toggleButton:SetText("Start") end
-        PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
+        HandleGroupFull("raid", raidSize)
       else
         if OnGroupUpdate then OnGroupUpdate() end
       end
-    elseif donjon ~= nil then
-      local donjonSize = 5
-      local totalPlayersInRaid = countGroupMembers and countGroupMembers() or 0
-      if donjonSize == totalPlayersInRaid then
-        if stopMessageBroadcast then stopMessageBroadcast() end
-        if clearSelectedDungeons then clearSelectedDungeons() end
-        if clearSelectedRoles then clearSelectedRoles() end
-        if resetUserInputMessage then resetUserInputMessage() end
-        if updateMsgFrameCombined then updateMsgFrameCombined() end
-        if toggleButton then toggleButton:SetText("Start") end
-        PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
+    elseif hasDungeon then
+      local totalPlayersInGroup = countGroupMembers and countGroupMembers() or 0
+      if totalPlayersInGroup >= 5 then
+        HandleGroupFull("dungeon", 5)
       else
         if OnGroupUpdate then OnGroupUpdate() end
       end
