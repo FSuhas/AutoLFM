@@ -138,9 +138,13 @@ end
 --------------------------------------------------
 function CalculatePriority(playerLevel, dungeon)
   if not playerLevel or not dungeon then return 5 end
+  if not dungeon.levelMin or not dungeon.levelMax then return 5 end
   
-  local min = dungeon.levelMin or 1
-  local max = dungeon.levelMax or 60
+  local min = dungeon.levelMin
+  local max = dungeon.levelMax
+  
+  if min < 1 or max < 1 or min > max then return 5 end
+  
   local avg = math.floor((min + max) / 2)
   local diff = avg - playerLevel
   
