@@ -8,7 +8,10 @@ local function GetColorHex(colorKey)
       if color.hex then
         return string.gsub(color.hex, "#", "")
       elseif color.r and color.g and color.b then
-        return string.format("%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
+        local r = color.r or 1
+        local g = color.g or 1
+        local b = color.b or 1
+        return string.format("%02x%02x%02x", r * 255, g * 255, b * 255)
       end
     end
   end
@@ -23,7 +26,7 @@ end
 function AutoLFM_PrintMessage(message, colorKey)
   if not message then return end
   if not CHAT_MESSAGE_PREFIX then
-    CHAT_MESSAGE_PREFIX = "|cffffffff[|cffFEFE00Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+    CHAT_MESSAGE_PREFIX = "|cffffffff[|r|cffFEFE00Auto|r|cff0070DDL|r|cffffffffF|r|cffff0000M|r|cffffffff]|r "
   end
   
   local coloredMessage = message
