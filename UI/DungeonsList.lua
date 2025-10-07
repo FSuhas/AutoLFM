@@ -148,21 +148,29 @@ end
 -- Display All Dungeons
 --------------------------------------------------
 function AutoLFM_DungeonList.Display(parent)
+  if not parent then return end
+  
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
   
   local playerLevel = UnitLevel("player")
+  if not playerLevel or playerLevel < 1 then
+    playerLevel = 1
+  end
+  
   local yOffset = 0
   local sortedDungeons = {}
   
   for index, dungeon in ipairs(dungeons or {}) do
-    local priority = CalculatePriority and CalculatePriority(playerLevel, dungeon) or 4
-    table.insert(sortedDungeons, {
-      dungeon = dungeon,
-      priority = priority,
-      originalIndex = index
-    })
+    if dungeon then
+      local priority = CalculatePriority and CalculatePriority(playerLevel, dungeon) or 4
+      table.insert(sortedDungeons, {
+        dungeon = dungeon,
+        priority = priority,
+        originalIndex = index
+      })
+    end
   end
   
   table.sort(sortedDungeons, function(a, b)
@@ -176,9 +184,11 @@ function AutoLFM_DungeonList.Display(parent)
   AutoLFM_DungeonList.clickableFrames = {}
   
   for _, entry in ipairs(sortedDungeons) do
-    local frame = CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
-    if frame then
-      yOffset = yOffset + 20
+    if entry and entry.dungeon then
+      local frame = CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
+      if frame then
+        yOffset = yOffset + 20
+      end
     end
   end
 end
