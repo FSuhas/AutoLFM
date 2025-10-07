@@ -28,7 +28,7 @@ local function UpdateStatsDisplay()
   if stats and stats.isActive and stats.searchStartTimestamp and stats.searchStartTimestamp > 0 then
     local duration = GetTime() - stats.searchStartTimestamp
     local minutes = math.floor(duration / 60)
-    local seconds = math.floor(mod(duration, 60))
+    local seconds = math.floor(math.mod(duration, 60))
     durationLabel:SetText(string.format("Duration: %02d:%02d", minutes, seconds))
   else
     durationLabel:SetText("Duration: 00:00")
