@@ -181,9 +181,13 @@ end
 --------------------------------------------------
 function ToggleRoleSelection(role)
   if not role then return end
-  if not roleCheckboxes or not roleCheckboxes[role] then return end
+  if not roleCheckboxes then return end
+  if not roleCheckboxes[role] then return end
   
-  if roleCheckboxes[role]:GetChecked() then
+  local isChecked = roleCheckboxes[role]:GetChecked()
+  if not isChecked then isChecked = false end
+  
+  if isChecked then
     if not selectedRolesList then selectedRolesList = {} end
     table.insert(selectedRolesList, role)
   else
