@@ -9,14 +9,17 @@ local hookedBagButtons = {}
 -- Quest Link Creation
 --------------------------------------------------
 function CreateQuestHyperlink(questIndex)
-  if not questIndex or questIndex < 1 then return nil end
-  if not AutoLFM_MainFrame or not AutoLFM_MainFrame:IsVisible() then return nil end
+  if not questIndex then return nil end
+  if questIndex < 1 then return nil end
+  if not AutoLFM_MainFrame then return nil end
+  if not AutoLFM_MainFrame:IsVisible() then return nil end
   
   local title, level, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
-  if not title or title == "" then return nil end
+  if not title then return nil end
+  if title == "" then return nil end
   
-  questID = questID or 0
-  level = level or 0
+  if not questID then questID = 0 end
+  if not level then level = 0 end
   
   local color = "|cffffff00"
   local link = string.format("%s|Hquest:%d:%d|h[%s]|h|r", color, questID, level, title)
@@ -35,19 +38,20 @@ local function HookQuestButton(button)
   
   hookedQuestButtons[buttonName] = true
   
-  local originalOnClick = button:GetScript("OnClick")
+  local originalScript = button:GetScript("OnClick")
   
-local originalOnClick = button:GetScript("OnClick")
-
   button:SetScript("OnClick", function()
-    local clickButton = arg1
-    local isShift = IsShiftKeyDown()
+    local mouseButton = arg1
+    local isShiftPressed = IsShiftKeyDown()
     
-    if originalOnClick then
-      originalOnClick()
+    if originalScript and type(originalScript) == "function" then
+      originalScript()
     end
     
-    if not (clickButton == "LeftButton" and isShift) then return end
+    -- Notre logique personnalisée
+    if not mouseButton then return end
+    if mouseButton ~= "LeftButton" then return end
+    if not isShiftPressed then return end
     if not customMessageEditBox then return end
     if not editBoxHasFocus then return end
     
@@ -55,10 +59,10 @@ local originalOnClick = button:GetScript("OnClick")
     if not questIndex then return end
     
     local questLink = CreateQuestHyperlink(questIndex)
-    if questLink then
-      customMessageEditBox:SetText(questLink)
-      customMessageEditBox:SetFocus()
-    end
+    if not questLink then return end
+    
+    customMessageEditBox:SetText(questLink)
+    customMessageEditBox:SetFocus()
   end)
 end
 
@@ -67,29 +71,35 @@ end
 --------------------------------------------------
 local function HookBagButton(button, bagID, slotID)
   if not button then return end
-  if not bagID or not slotID then return end
+  if not bagID then return end
+  if not slotID then return end
   
   local key = bagID .. "_" .. slotID
   if hookedBagButtons[key] then return end
   
   hookedBagButtons[key] = true
   
-  local originalOnClick = button:GetScript("OnClick")
+  local originalScript = button:GetScript("OnClick")
   
   button:SetScript("OnClick", function()
-    if originalOnClick then
-      originalOnClick()
+    local mouseButton = arg1
+    local isShiftPressed = IsShiftKeyDown()
+    
+    if originalScript and type(originalScript) == "function" then
+      originalScript()
     end
     
-    if not (arg1 == "LeftButton" and IsShiftKeyDown()) then return end
+    if not mouseButton then return end
+    if mouseButton ~= "LeftButton" then return end
+    if not isShiftPressed then return end
     if not customMessageEditBox then return end
     if not editBoxHasFocus then return end
     
     local itemLink = GetContainerItemLink(bagID, slotID)
-    if itemLink then
-      customMessageEditBox:SetText(itemLink)
-      customMessageEditBox:SetFocus()
-    end
+    if not itemLink then return end
+    
+    customMessageEditBox:SetText(itemLink)
+    customMessageEditBox:SetFocus()
   end)
 end
 
@@ -100,7 +110,9 @@ local questHookFrame = CreateFrame("Frame")
 questHookFrame:RegisterEvent("QUEST_LOG_UPDATE")
 
 questHookFrame:SetScript("OnEvent", function()
-  if event ~= "QUEST_LOG_UPDATE" then return end
+  local eventType = event
+  if not eventType then return end
+  if eventType ~= "QUEST_LOG_UPDATE" then return end
   if not QuestLogFrame then return end
   if not QuestLogFrame:IsVisible() then return end
   
@@ -108,8 +120,10 @@ questHookFrame:SetScript("OnEvent", function()
   local maxButtons = 50
   
   while i <= maxButtons do
-    local button = getglobal("QuestLogTitle" .. i)
+    local buttonName = "QuestLogTitle" .. i
+    local button = getglobal(buttonName)
     if not button then break end
+    
     HookQuestButton(button)
     i = i + 1
   end
@@ -123,17 +137,21 @@ bagHookFrame:RegisterEvent("BAG_UPDATE")
 bagHookFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")
 
 bagHookFrame:SetScript("OnEvent", function()
-  if not (event == "BAG_UPDATE" or event == "BAG_UPDATE_COOLDOWN") then return end
+  local eventType = event
+  if not eventType then return end
+  if eventType ~= "BAG_UPDATE" and eventType ~= "BAG_UPDATE_COOLDOWN" then return end
   
   for bagID = 0, 4 do
-    local bagName = "ContainerFrame" .. (bagID + 1)
+    local bagIndex = bagID + 1
+    local bagName = "ContainerFrame" .. bagIndex
     local bagFrame = getglobal(bagName)
     
     if not bagFrame then break end
     if not bagFrame:IsVisible() then break end
     
     local numSlots = GetContainerNumSlots(bagID)
-    if not numSlots or numSlots < 1 then break end
+    if not numSlots then break end
+    if numSlots < 1 then break end
     
     for slotID = 1, numSlots do
       local buttonName = bagName .. "Item" .. slotID
@@ -156,12 +174,15 @@ function SetItemRef(link, text, button)
     Original_SetItemRef(link, text, button)
   end
   
-  if not (button == "LeftButton" and IsShiftKeyDown()) then return end
+  if not button then return end
+  if button ~= "LeftButton" then return end
+  if not IsShiftKeyDown() then return end
   if not customMessageEditBox then return end
   if not editBoxHasFocus then return end
   if not link then return end
   
-  if string.find(link, "^item:") and text then
+  local isItemLink = string.find(link, "^item:")
+  if isItemLink and text then
     customMessageEditBox:SetText(text)
     customMessageEditBox:SetFocus()
   end
@@ -171,5 +192,9 @@ end
 -- Update EditBox Focus State
 --------------------------------------------------
 function UpdateEditBoxFocusState(hasFocus)
-  editBoxHasFocus = hasFocus
+  if hasFocus == nil then
+    editBoxHasFocus = false
+  else
+    editBoxHasFocus = hasFocus
+  end
 end
