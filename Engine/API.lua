@@ -132,7 +132,7 @@ function AutoLFM_API.GetRolesNeeded()
   end
   
   local rolesList = {}
-  if selectedRolesData then
+  if selectedRolesData and type(selectedRolesData) == "table" then
     for _, role in ipairs(selectedRolesData) do
       table.insert(rolesList, role)
     end
@@ -162,7 +162,7 @@ function AutoLFM_API.GetSelectedChannels()
   local channels = selectedChannels or {}
   local channelList = {}
 
-  if channels then
+  if channels and type(channels) == "table" then
     for channelName, _ in pairs(channels) do
       table.insert(channelList, channelName)
     end
