@@ -37,12 +37,17 @@ local function HookQuestButton(button)
   
   local originalOnClick = button:GetScript("OnClick")
   
+local originalOnClick = button:GetScript("OnClick")
+
   button:SetScript("OnClick", function()
+    local clickButton = arg1
+    local isShift = IsShiftKeyDown()
+    
     if originalOnClick then
       originalOnClick()
     end
     
-    if not (arg1 == "LeftButton" and IsShiftKeyDown()) then return end
+    if not (clickButton == "LeftButton" and isShift) then return end
     if not customMessageEditBox then return end
     if not editBoxHasFocus then return end
     
