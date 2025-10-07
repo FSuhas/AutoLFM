@@ -210,9 +210,10 @@ function AutoLFM_API.GetTiming()
   local nextBroadcast = 0
   local timeUntilNext = 0
   
-  -- This will be set by UI slider if available
-  if broadcastIntervalSlider and broadcastIntervalSlider.GetValue then
-    interval = broadcastIntervalSlider:GetValue() or DEFAULT_BROADCAST_INTERVAL
+  -- Get slider value via getter function
+  local broadcastSlider = GetBroadcastIntervalSlider()
+  if broadcastSlider and broadcastSlider.GetValue then
+    interval = broadcastSlider:GetValue() or DEFAULT_BROADCAST_INTERVAL
   end
   
   local stats = GetBroadcastStats()
