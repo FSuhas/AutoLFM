@@ -1,13 +1,31 @@
 --------------------------------------------------
--- API
+-- Public API - External Addon Interface
 --------------------------------------------------
+
 if not AutoLFM_API then
   AutoLFM_API = {}
 end
 
-local API_VERSION = "1.0.0"
-local DEFAULT_DUNGEON_SIZE = 5
+--------------------------------------------------
+-- API Version
+--------------------------------------------------
+function AutoLFM_API.GetVersion()
+  return API_VERSION
+end
 
+--------------------------------------------------
+-- Availability Check
+--------------------------------------------------
+function AutoLFM_API.IsAvailable()
+  return (AutoLFM_MainFrame ~= nil and
+          type(GetSelectedDungeonsList) == "function" and
+          type(GetSelectedRaidsList) == "function" and
+          type(GetSelectedRolesList) == "function")
+end
+
+--------------------------------------------------
+-- Get Full Status
+--------------------------------------------------
 function AutoLFM_API.GetFullStatus()
   local status = {
     groupType = AutoLFM_API.GetGroupType(),
@@ -22,9 +40,12 @@ function AutoLFM_API.GetFullStatus()
   return status
 end
 
+--------------------------------------------------
+-- Get Group Type
+--------------------------------------------------
 function AutoLFM_API.GetGroupType()
-  local selectedDungeons = GetSelectedDungeonsList and GetSelectedDungeonsList() or {}
-  local selectedRaids = GetSelectedRaidsList and GetSelectedRaidsList() or {}
+  local selectedDungeons = GetSelectedDungeonsList()
+  local selectedRaids = GetSelectedRaidsList()
 
   if table.getn(selectedRaids) > 0 then
     return "raid"
@@ -35,6 +56,9 @@ function AutoLFM_API.GetGroupType()
   end
 end
 
+--------------------------------------------------
+-- Get Selected Content
+--------------------------------------------------
 function AutoLFM_API.GetSelectedContent()
   local groupType = AutoLFM_API.GetGroupType()
   local content = {
@@ -44,45 +68,41 @@ function AutoLFM_API.GetSelectedContent()
   }
   
   if groupType == "dungeon" then
-    local selectedDungeons = GetSelectedDungeonsList and GetSelectedDungeonsList() or {}
+    local selectedDungeons = GetSelectedDungeonsList()
     for _, dungeonTag in ipairs(selectedDungeons) do
       table.insert(content.list, dungeonTag)
-      if DUNGEON_DATABASE then
-        for _, dungeon in pairs(DUNGEON_DATABASE) do
-          if dungeon and dungeon.tag == dungeonTag then
-            content.details[dungeonTag] = {
-              name = dungeon.name or "",
-              tag = dungeon.tag or "",
-              levelMin = dungeon.levelMin or 1,
-              levelMax = dungeon.levelMax or 60
-            }
-            break
-          end
-        end
+      local dungeon = GetDungeonByTag(dungeonTag)
+      if dungeon then
+        content.details[dungeonTag] = {
+          name = dungeon.name or "",
+          tag = dungeon.tag or "",
+          levelMin = dungeon.levelMin or 1,
+          levelMax = dungeon.levelMax or 60
+        }
       end
     end
   elseif groupType == "raid" then
-    local selectedRaids = GetSelectedRaidsList and GetSelectedRaidsList() or {}
+    local selectedRaids = GetSelectedRaidsList()
     for _, raidTag in ipairs(selectedRaids) do
       table.insert(content.list, raidTag)
-      if RAID_DATABASE then
-        for _, raid in pairs(RAID_DATABASE) do
-          if raid and raid.tag == raidTag then
-            content.details[raidTag] = {
-              name = raid.name or "",
-              tag = raid.tag or "",
-              sizeMin = raid.sizeMin or 10,
-              sizeMax = raid.sizeMax or 40
-            }
-            break
-          end
-        end
+      local raid = GetRaidByTag(raidTag)
+      if raid then
+        content.details[raidTag] = {
+          name = raid.name or "",
+          tag = raid.tag or "",
+          sizeMin = raid.sizeMin or 10,
+          sizeMax = raid.sizeMax or 40
+        }
       end
     end
   end
+  
   return content
 end
 
+--------------------------------------------------
+-- Get Player Count
+--------------------------------------------------
 function AutoLFM_API.GetPlayerCount()
   local groupType = AutoLFM_API.GetGroupType()
   local currentInGroup = 0
@@ -92,11 +112,7 @@ function AutoLFM_API.GetPlayerCount()
   if GetNumRaidMembers() > 0 then
     currentInGroup = GetNumRaidMembers()
   else
-    if GetPartyMemberCount and type(GetPartyMemberCount) == "function" then
-      currentInGroup = GetPartyMemberCount()
-    else
-      currentInGroup = GetNumPartyMembers() + 1
-    end
+    currentInGroup = GetPartyMemberCount()
   end
   
   if not currentInGroup or currentInGroup < 1 then
@@ -104,9 +120,9 @@ function AutoLFM_API.GetPlayerCount()
   end
   
   if groupType == "raid" then
-    desiredTotal = raidGroupSize or 0
+    desiredTotal = GetRaidGroupSize()
     if desiredTotal < 1 then
-      desiredTotal = 10
+      desiredTotal = DEFAULT_RAID_SIZE
     end
   else
     desiredTotal = DEFAULT_DUNGEON_SIZE
@@ -122,18 +138,15 @@ function AutoLFM_API.GetPlayerCount()
   }
 end
 
+--------------------------------------------------
+-- Get Roles Needed
+--------------------------------------------------
 function AutoLFM_API.GetRolesNeeded()
-  local selectedRolesData = {}
-  
-  if GetSelectedRoles then
-    selectedRolesData = GetSelectedRoles()
-  elseif selectedRolesList then
-    selectedRolesData = selectedRolesList
-  end
-  
+  local selectedRoles = GetSelectedRolesList()
   local rolesList = {}
-  if selectedRolesData and type(selectedRolesData) == "table" then
-    for _, role in ipairs(selectedRolesData) do
+  
+  if selectedRoles and type(selectedRoles) == "table" then
+    for _, role in ipairs(selectedRoles) do
       table.insert(rolesList, role)
     end
   end
@@ -141,15 +154,12 @@ function AutoLFM_API.GetRolesNeeded()
   return rolesList
 end
 
+--------------------------------------------------
+-- Get Dynamic Message
+--------------------------------------------------
 function AutoLFM_API.GetDynamicMessage()
-  local combined = ""
-  if GetGeneratedLFMMessage then
-    combined = GetGeneratedLFMMessage()
-  elseif generatedLFMMessage then
-    combined = generatedLFMMessage
-  end
-  
-  local userInput = customUserMessage or ""
+  local combined = GetGeneratedLFMMessage()
+  local userInput = GetCustomUserMessage()
 
   return {
     combined = combined,
@@ -158,8 +168,11 @@ function AutoLFM_API.GetDynamicMessage()
   }
 end
 
+--------------------------------------------------
+-- Get Selected Channels
+--------------------------------------------------
 function AutoLFM_API.GetSelectedChannels()
-  local channels = selectedChannelsList or {}
+  local channels = GetSelectedChannelsList()
   local channelList = {}
 
   if channels and type(channels) == "table" then
@@ -171,35 +184,41 @@ function AutoLFM_API.GetSelectedChannels()
   return channelList
 end
 
+--------------------------------------------------
+-- Get Broadcast Stats
+--------------------------------------------------
 function AutoLFM_API.GetBroadcastStats()
-  local broadcasting = isBroadcastActive or false
-  local startTime = broadcastStartTimestamp or 0
-  local lastTime = lastBroadcastTimestamp or 0
-  local searchStart = groupSearchStartTimestamp or 0
-  local msgCount = broadcastMessageCount or 0
-
-  local stats = {
-    isActive = broadcasting,
-    messagesSent = msgCount,
-    searchDuration = 0
-  }
-
-  local currentTime = GetTime()
-
-  if searchStart and searchStart > 0 then
-    stats.searchDuration = currentTime - searchStart
+  local stats = GetBroadcastStats()
+  
+  local searchDuration = 0
+  if stats.searchStartTimestamp and stats.searchStartTimestamp > 0 then
+    searchDuration = GetTime() - stats.searchStartTimestamp
   end
-
-  return stats
+  
+  return {
+    isActive = stats.isActive,
+    messagesSent = stats.messageCount,
+    searchDuration = searchDuration
+  }
 end
 
+--------------------------------------------------
+-- Get Timing
+--------------------------------------------------
 function AutoLFM_API.GetTiming()
-  local interval = broadcastIntervalSlider and broadcastIntervalSlider:GetValue() or 80
+  local interval = DEFAULT_BROADCAST_INTERVAL
   local nextBroadcast = 0
   local timeUntilNext = 0
-
-  if isBroadcastActive and lastBroadcastTimestamp and lastBroadcastTimestamp > 0 then
-    nextBroadcast = lastBroadcastTimestamp + interval
+  
+  -- This will be set by UI slider if available
+  if broadcastIntervalSlider and broadcastIntervalSlider.GetValue then
+    interval = broadcastIntervalSlider:GetValue() or DEFAULT_BROADCAST_INTERVAL
+  end
+  
+  local stats = GetBroadcastStats()
+  
+  if stats.isActive and stats.lastTimestamp and stats.lastTimestamp > 0 then
+    nextBroadcast = stats.lastTimestamp + interval
     timeUntilNext = nextBroadcast - GetTime()
     if timeUntilNext < 0 then timeUntilNext = 0 end
   end
@@ -210,17 +229,9 @@ function AutoLFM_API.GetTiming()
   }
 end
 
-function AutoLFM_API.IsAvailable()
-  return (AutoLFM_MainFrame ~= nil and
-          type(GetSelectedDungeonsList) == "function" and
-          type(GetSelectedRaidsList) == "function" and
-          type(GetSelectedRoles) == "function")
-end
-
-function AutoLFM_API.GetVersion()
-  return API_VERSION
-end
-
+--------------------------------------------------
+-- Print API Data (debug)
+--------------------------------------------------
 function AutoLFM_API.DataPrint()
   if not AutoLFM_API.IsAvailable() then
     if AutoLFM_PrintError then
@@ -246,6 +257,9 @@ function AutoLFM_API.DataPrint()
   end
 end
 
+--------------------------------------------------
+-- Callback System
+--------------------------------------------------
 AutoLFM_API.callbacks = AutoLFM_API.callbacks or {}
 
 function AutoLFM_API.RegisterCallback(addonName, callback)

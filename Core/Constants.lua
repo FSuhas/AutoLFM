@@ -1,52 +1,35 @@
 --------------------------------------------------
--- Global State
+-- Constants - Static Data
 --------------------------------------------------
--- UI Frames
-dungeonListContentFrame = nil
-dungeonFilterFrame = nil
-customMessageEditBox = nil
-moreTabContentFrame = nil
-dungeonMessageDisplayFrame = nil
-raidMessageDisplayFrame = nil
-dungeonMessageText = nil
-raidMessageText = nil
-broadcastIntervalSlider = nil
-raidSizeSlider = nil
-raidSizeValueEditBox = nil
-raidSizeControlFrame = nil
-broadcastIntervalFrame = nil
-broadcastToggleButton = nil
 
--- Broadcast
-isBroadcastActive = false
-broadcastStartTimestamp = 0
-lastBroadcastTimestamp = 0
-broadcastMessageCount = 0
-groupSearchStartTimestamp = 0
-
--- Selections
-selectedDungeonTags = {}
-selectedRaidTags = {}
-selectedRolesList = {}
-roleCheckboxes = {}
-selectedChannelsList = {}
-
--- Messages
-generatedLFMMessage = ""
-customUserMessage = ""
-raidGroupSize = 0
-
--- Constants
+--------------------------------------------------
+-- Paths & Prefixes
+--------------------------------------------------
 TEXTURE_BASE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
+SOUND_BASE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\"
 CHAT_MESSAGE_PREFIX = "|cffffffff[|r|cffFEFE00Auto|r|cff0070DDL|r|cffffffffF|r|cffff0000M|r|cffffffff]|r "
 
--- Character Info
-playerCharacterName = nil
-playerRealmName = nil
-characterUniqueID = nil
+--------------------------------------------------
+-- Sound Files
+--------------------------------------------------
+SOUND_BROADCAST_START = "LFG_RoleCheck.ogg"
+SOUND_BROADCAST_STOP = "LFG_Denied.ogg"
 
 --------------------------------------------------
--- Dungeons Data
+-- Channels
+--------------------------------------------------
+AVAILABLE_CHANNELS = {"WORLD", "LookingForGroup", "Hardcore", "testketa"}
+
+--------------------------------------------------
+-- Roles
+--------------------------------------------------
+ROLE_TANK = "Tank"
+ROLE_HEAL = "Heal"
+ROLE_DPS = "DPS"
+AVAILABLE_ROLES = {ROLE_TANK, ROLE_HEAL, ROLE_DPS}
+
+--------------------------------------------------
+-- Dungeons Database
 --------------------------------------------------
 DUNGEON_DATABASE = {
   { name = "Ragefire Chasm", tag = "RFC", levelMin = 13, levelMax = 19 },
@@ -91,7 +74,7 @@ DUNGEON_DATABASE = {
 }
 
 --------------------------------------------------
--- Raids Data
+-- Raids Database
 --------------------------------------------------
 RAID_DATABASE = {
   { name = "Scholomance 10", tag = "Scholo 10", sizeMin = 10, sizeMax = 10 },
@@ -110,7 +93,7 @@ RAID_DATABASE = {
 }
 
 --------------------------------------------------
--- Colors
+-- Priority Color Scheme
 --------------------------------------------------
 PRIORITY_COLOR_SCHEME = {
   {priority = 1, key = "green", r = 0.25, g = 0.75, b = 0.25, hex = "#40BF40"},
@@ -121,68 +104,38 @@ PRIORITY_COLOR_SCHEME = {
 }
 
 --------------------------------------------------
--- Saved Variables Initialization
+-- Animation
 --------------------------------------------------
-if not AutoLFM_SavedVariables then
-  AutoLFM_SavedVariables = {}
-end
-
-playerCharacterName = UnitName("player") or "Unknown"
-playerRealmName = GetRealmName() or "Unknown"
-characterUniqueID = playerCharacterName .. "-" .. playerRealmName
+ANIMATION_SEQUENCE = {
+  "eye01", "eye02", "eye03", "eye04", "eye05", "eye06", "eye05", "eye04", "eye03", "eye02",
+  "eye01", "eye07", "eye08", "eye09", "eye10", "eye11", "eye10", "eye09", "eye08", "eye07",
+  "eye01", "eye02", "eye03", "eye04", "eye05", "eye06", "eye05", "eye04", "eye03", "eye02",
+  "eye01", "eye07", "eye08", "eye09", "eye10", "eye11", "eye10", "eye09", "eye08", "eye07",
+  "eye01", "eye12", "eye13", "eye14", "eye15", "eye16", "eye15", "eye14", "eye13", "eye12"
+}
+ANIMATION_SPEED = 0.15
 
 --------------------------------------------------
--- Initialize Character SavedVariables
+-- UI Limits & Defaults
 --------------------------------------------------
-function InitializeCharacterSavedVariables()
-  if not AutoLFM_SavedVariables then
-    AutoLFM_SavedVariables = {}
-  end
-  
-  if not characterUniqueID or characterUniqueID == "" then
-    if AutoLFM_PrintError then
-      AutoLFM_PrintError("Cannot initialize SavedVariables: invalid character identifier")
-    end
-    return false
-  end
-  
-  if not AutoLFM_SavedVariables[characterUniqueID] then
-    AutoLFM_SavedVariables[characterUniqueID] = {}
-  end
-  
-  local char = AutoLFM_SavedVariables[characterUniqueID]
-  
-  if not char.selectedChannels then
-    char.selectedChannels = {}
-  end
-  
-  if not char.minimapBtnX then
-    char.minimapBtnX = -10
-  end
-  
-  if not char.minimapBtnY then
-    char.minimapBtnY = -10
-  end
-  
-  if not char.minimapBtnHidden then
-    char.minimapBtnHidden = false
-  end
-  
-  if not char.dungeonFilters then
-    char.dungeonFilters = {}
-    for _, color in ipairs(PRIORITY_COLOR_SCHEME or {}) do
-      char.dungeonFilters[color.key] = true
-    end
-  end
-  
-  selectedChannelsList = char.selectedChannels
-  
-  return true
-end
+MAX_DUNGEONS_SELECTION = 4
+MAX_CUSTOM_MESSAGE_LENGTH = 150
+DEFAULT_DUNGEON_SIZE = 5
+DEFAULT_RAID_SIZE = 10
+DEFAULT_BROADCAST_INTERVAL = 80
+BROADCAST_INTERVAL_MIN = 40
+BROADCAST_INTERVAL_MAX = 120
+BROADCAST_INTERVAL_STEP = 10
+DEFAULT_MINIMAP_X = -10
+DEFAULT_MINIMAP_Y = -10
 
-local initSuccess = InitializeCharacterSavedVariables()
-if not initSuccess then
-  if AutoLFM_PrintError then
-    AutoLFM_PrintError("Failed to initialize SavedVariables")
-  end
-end
+--------------------------------------------------
+-- Performance
+--------------------------------------------------
+UPDATE_THROTTLE_BROADCAST = 1.0
+UPDATE_THROTTLE_SLIDER = 0.1
+
+--------------------------------------------------
+-- API
+--------------------------------------------------
+API_VERSION = "1.0.0"

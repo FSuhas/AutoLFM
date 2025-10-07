@@ -8,25 +8,63 @@
 
 ## GitHub: https://github.com/FSuhas/AutoLFM
 
-Engine\Data.lua
-Engine\Functions.lua
-Engine\DynamicMsg.lua
-Engine\Channels.lua
-Engine\Broadcast.lua
-Engine\API.lua
-Engine\Commands.lua
+#--------------------------------------------------
+# Core - Foundations
+#--------------------------------------------------
+Core\Constants.lua
+Core\States.lua
+Core\SavedVariables.lua
 
-UI\IconAnimation.lua
-UI\DungeonFilters.lua
-UI\DungeonsList.lua
-UI\RaidsList.lua
-UI\MinimapButton.lua
-UI\Frame.lua
-# UI\QuestItemLinks.lua -- Implement/debug
+#--------------------------------------------------
+# Utils - Utilities
+#--------------------------------------------------
+Utils\Strings.lua
+Utils\Tables.lua
+Utils\Groups.lua
 
+#--------------------------------------------------
+# Logic - Business Logic
+#--------------------------------------------------
+Logic\DungeonManager.lua
+Logic\RaidManager.lua
+Logic\RoleManager.lua
+Logic\ChannelManager.lua
+Logic\MessageBuilder.lua
+Logic\BroadcastManager.lua
+
+#--------------------------------------------------
+# API - Public Interface
+#--------------------------------------------------
+API\PublicAPI.lua
+API\Commands.lua
+
+#--------------------------------------------------
+# UI - User Interface
+#--------------------------------------------------
+UI\Animation\IconAnimation.lua
+UI\Components\MinimapButton.lua
+UI\Components\RoleSelector.lua
+UI\Components\TabSystem.lua
+UI\Components\MessagePreview.lua
+# UI\Components\QuestItemLinks.lua -- Need fixing
+UI\Components\ChannelSelector.lua
+UI\Lists\DungeonFilters.lua
+UI\Lists\DungeonsList.lua
+UI\Lists\RaidsList.lua
+UI\Panels\DungeonsPanel.lua
+UI\Panels\RaidsPanel.lua
+UI\Panels\SettingsPanel.lua
+UI\MainFrame.lua
+
+#--------------------------------------------------
+# Misc - Optional Modules
+#--------------------------------------------------
 Misc\EasterEgg.lua
 Misc\FPSDisplay.lua
 Misc\GuildSpam.lua
 Misc\RestedXP.lua
 
-AutoLFM.lua
+#--------------------------------------------------
+# Initialization
+#--------------------------------------------------
+Init.lua

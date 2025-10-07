@@ -1,25 +1,25 @@
 --------------------------------------------------
--- Broadcast Management
+-- Broadcast Manager - Broadcast Logic
 --------------------------------------------------
-local broadcastFrame = nil
 
 --------------------------------------------------
--- Validate Broadcast Setup
+-- Validate Broadcast Configuration
 --------------------------------------------------
 function ValidateBroadcastConfiguration()
   local errors = {}
   
+  -- Check message
   if not generatedLFMMessage or generatedLFMMessage == "" or generatedLFMMessage == " " then
     table.insert(errors, "The LFM message is empty")
   end
   
+  -- Check channels
   if not selectedChannelsList or not next(selectedChannelsList) then
     table.insert(errors, "No channel selected")
   else
     local invalidChannels = {}
     for channelName, _ in pairs(selectedChannelsList) do
-      local channelId = GetChannelName(channelName)
-      if not (channelId and channelId > 0) then
+      if not IsChannelAvailable(channelName) then
         table.insert(invalidChannels, channelName)
       end
     end
@@ -31,26 +31,23 @@ function ValidateBroadcastConfiguration()
     end
   end
   
-  local selectedRaidsLocal = GetSelectedRaidsList and GetSelectedRaidsList() or {}
-  local selectedDungeonsLocal = GetSelectedDungeonsList and GetSelectedDungeonsList() or {}
+  -- Check content selection
+  local selectedRaids = GetSelectedRaidsList()
+  local selectedDungeons = GetSelectedDungeonsList()
   local hasUserMessage = customUserMessage and customUserMessage ~= ""
   
   if not hasUserMessage then
-    if table.getn(selectedRaidsLocal) == 0 and table.getn(selectedDungeonsLocal) == 0 then
+    if table.getn(selectedRaids) == 0 and table.getn(selectedDungeons) == 0 then
       table.insert(errors, "No dungeon or raid selected")
     end
   end
   
-  if table.getn(selectedDungeonsLocal) > 0 then
-    local groupSize = 1
-    if GetPartyMemberCount and type(GetPartyMemberCount) == "function" then
-      groupSize = GetPartyMemberCount()
-    else
-      groupSize = GetNumPartyMembers() + 1
-    end
+  -- Check dungeon group size
+  if table.getn(selectedDungeons) > 0 then
+    local groupSize = GetPartyMemberCount()
     
-    if groupSize >= 5 then
-      table.insert(errors, "Your dungeon group is already full (5/5)")
+    if groupSize >= DEFAULT_DUNGEON_SIZE then
+      table.insert(errors, "Your dungeon group is already full (" .. DEFAULT_DUNGEON_SIZE .. "/" .. DEFAULT_DUNGEON_SIZE .. ")")
     end
   end
   
@@ -66,7 +63,9 @@ end
 --------------------------------------------------
 function SendMessageToChannels(message)
   if not message or message == "" then
-    AutoLFM_PrintError("Message is empty")
+    if AutoLFM_PrintError then
+      AutoLFM_PrintError("Message is empty")
+    end
     return false
   end
   
@@ -75,7 +74,9 @@ function SendMessageToChannels(message)
   end
   
   if not next(selectedChannelsList) then
-    AutoLFM_PrintError("No channel selected")
+    if AutoLFM_PrintError then
+      AutoLFM_PrintError("No channel selected")
+    end
     return false
   end
   
@@ -83,8 +84,8 @@ function SendMessageToChannels(message)
   local invalidChannels = {}
   
   for channelName, _ in pairs(selectedChannelsList) do
-    local channelId = GetChannelName(channelName)
-    if channelId and channelId > 0 then
+    local channelId = GetChannelIdByName(channelName)
+    if channelId then
       SendChatMessage(message, "CHANNEL", nil, channelId)
       sentCount = sentCount + 1
     else
@@ -94,10 +95,14 @@ function SendMessageToChannels(message)
   
   if table.getn(invalidChannels) > 0 then
     for _, channelName in ipairs(invalidChannels) do
-      AutoLFM_PrintError("The channel " .. channelName .. " is invalid or closed")
+      if AutoLFM_PrintError then
+        AutoLFM_PrintError("The channel " .. channelName .. " is invalid or closed")
+      end
     end
     if sentCount == 0 then
-      AutoLFM_PrintError("Message not sent: all channels are invalid")
+      if AutoLFM_PrintError then
+        AutoLFM_PrintError("Message not sent: all channels are invalid")
+      end
       return false
     end
   end
@@ -113,9 +118,11 @@ function StartBroadcast()
   local isValid, errors = ValidateBroadcastConfiguration()
   
   if not isValid then
-    AutoLFM_PrintError("Broadcast cannot start:")
-    for _, error in ipairs(errors) do
-      AutoLFM_PrintError("  - " .. error)
+    if AutoLFM_PrintError then
+      AutoLFM_PrintError("Broadcast cannot start:")
+      for _, error in ipairs(errors) do
+        AutoLFM_PrintError("  - " .. error)
+      end
     end
     return false
   end
@@ -123,69 +130,65 @@ function StartBroadcast()
   isBroadcastActive = true
   broadcastStartTimestamp = GetTime()
   lastBroadcastTimestamp = broadcastStartTimestamp
-  AutoLFM_PrintInfo("Broadcast started")
+  groupSearchStartTimestamp = broadcastStartTimestamp
+  broadcastMessageCount = 0
+  
+  if AutoLFM_PrintInfo then
+    AutoLFM_PrintInfo("Broadcast started")
+  end
   
   SendMessageToChannels(generatedLFMMessage)
-  StartBroadcastAnimation()
+  
+  if StartBroadcastAnimation then
+    StartBroadcastAnimation()
+  end
   
   return true
 end
-
---------------------------------------------------
--- Broadcast Loop
---------------------------------------------------
-if not broadcastFrame then
-  broadcastFrame = CreateFrame("Frame")
-end
-
-local lastUpdateCheck = 0
-local UPDATE_THROTTLE = 1.0
-
-broadcastFrame:SetScript("OnUpdate", function()
-  if not isBroadcastActive then return end
-  
-  local currentTime = GetTime()
-  
-  if currentTime - lastUpdateCheck < UPDATE_THROTTLE then
-    return
-  end
-  lastUpdateCheck = currentTime
-  
-  if not broadcastIntervalSlider then return end
-  if not lastBroadcastTimestamp then
-    lastBroadcastTimestamp = currentTime
-    return
-  end
-  
-  local sliderValue = broadcastIntervalSlider:GetValue()
-  if not sliderValue or sliderValue < 1 then
-    sliderValue = 80
-  end
-  
-  local timeElapsed = currentTime - lastBroadcastTimestamp
-  
-  if timeElapsed >= sliderValue then
-    if generatedLFMMessage and generatedLFMMessage ~= "" and generatedLFMMessage ~= " " then
-      local success = SendMessageToChannels(generatedLFMMessage)
-      if success then
-        lastBroadcastTimestamp = currentTime
-      else
-        StopBroadcast()
-        if broadcastToggleButton then
-          broadcastToggleButton:SetText("Start")
-        end
-      end
-    end
-  end
-end)
 
 --------------------------------------------------
 -- Stop Broadcast
 --------------------------------------------------
 function StopBroadcast()
   isBroadcastActive = false
-  AutoLFM_PrintInfo("Broadcast stopped")
   
-  StopBroadcastAnimation()
+  if AutoLFM_PrintInfo then
+    AutoLFM_PrintInfo("Broadcast stopped")
+  end
+  
+  if StopBroadcastAnimation then
+    StopBroadcastAnimation()
+  end
+  
   broadcastMessageCount = 0
+end
+
+--------------------------------------------------
+-- Check if Broadcast is Active
+--------------------------------------------------
+function IsBroadcastActive()
+  return isBroadcastActive or false
+end
+
+--------------------------------------------------
+-- Get Broadcast Stats
+--------------------------------------------------
+function GetBroadcastStats()
+  return {
+    isActive = isBroadcastActive or false,
+    startTimestamp = broadcastStartTimestamp or 0,
+    lastTimestamp = lastBroadcastTimestamp or 0,
+    messageCount = broadcastMessageCount or 0,
+    searchStartTimestamp = groupSearchStartTimestamp or 0
+  }
+end
+
+--------------------------------------------------
+-- Reset Broadcast Stats
+--------------------------------------------------
+function ResetBroadcastStats()
+  broadcastMessageCount = 0
+  broadcastStartTimestamp = 0
+  lastBroadcastTimestamp = 0
+  groupSearchStartTimestamp = 0
 end

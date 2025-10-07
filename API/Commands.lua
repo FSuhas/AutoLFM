@@ -1,5 +1,9 @@
 --------------------------------------------------
--- Slash Commands Handler
+-- Commands - Slash Commands Handler
+--------------------------------------------------
+
+--------------------------------------------------
+-- Show Help
 --------------------------------------------------
 local function ShowHelp()
   if AutoLFM_PrintMessage then
@@ -14,7 +18,7 @@ local function ShowHelp()
 end
 
 --------------------------------------------------
--- Command Handlers
+-- Window Command
 --------------------------------------------------
 local function HandleWindowCommand()
   if not AutoLFM_MainFrame then return end
@@ -26,12 +30,9 @@ local function HandleWindowCommand()
   end
 end
 
-local function SaveMinimapState(hidden)
-  if AutoLFM_SavedVariables and characterUniqueID and AutoLFM_SavedVariables[characterUniqueID] then
-    AutoLFM_SavedVariables[characterUniqueID].minimapBtnHidden = hidden
-  end
-end
-
+--------------------------------------------------
+-- Minimap Commands
+--------------------------------------------------
 local function HandleMinimapShow()
   if not AutoLFM_MinimapButton then
     AutoLFM_PrintError("Minimap button not initialized")
@@ -40,7 +41,7 @@ local function HandleMinimapShow()
   
   if not AutoLFM_MinimapButton:IsShown() then
     AutoLFM_MinimapButton:Show()
-    SaveMinimapState(false)
+    SaveMinimapVisibility(false)
     AutoLFM_PrintSuccess("Minimap button displayed")
   else
     AutoLFM_PrintWarning("Minimap button already visible")
@@ -55,7 +56,7 @@ local function HandleMinimapHide()
   
   if AutoLFM_MinimapButton:IsShown() then
     AutoLFM_MinimapButton:Hide()
-    SaveMinimapState(true)
+    SaveMinimapVisibility(true)
     AutoLFM_PrintSuccess("Minimap button hidden")
   else
     AutoLFM_PrintWarning("Minimap button already hidden")
@@ -72,18 +73,20 @@ local function HandleMinimapReset()
     AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  AutoLFM_SavedVariables[characterUniqueID].minimapBtnX = -10
-  AutoLFM_SavedVariables[characterUniqueID].minimapBtnY = -10
+  SaveMinimapPosition(DEFAULT_MINIMAP_X, DEFAULT_MINIMAP_Y)
   
   if AutoLFM_MinimapButton then
     AutoLFM_MinimapButton:ClearAllPoints()
-    AutoLFM_MinimapButton:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", -10, -10)
+    AutoLFM_MinimapButton:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", DEFAULT_MINIMAP_X, DEFAULT_MINIMAP_Y)
     AutoLFM_MinimapButton:Show()
   end
   
   AutoLFM_PrintSuccess("Minimap button position reset")
 end
 
+--------------------------------------------------
+-- API Commands
+--------------------------------------------------
 local function HandleAPIStatus()
   if AutoLFM_API and AutoLFM_API.IsAvailable and AutoLFM_API.IsAvailable() then
     AutoLFM_PrintSuccess("API available and functional")
@@ -103,6 +106,9 @@ local function HandleAPIData()
   end
 end
 
+--------------------------------------------------
+-- Easter Egg Command
+--------------------------------------------------
 local function HandleEasterEgg()
   if HandleEasterEggCommand then
     HandleEasterEggCommand()
@@ -112,7 +118,7 @@ local function HandleEasterEgg()
 end
 
 --------------------------------------------------
--- Main Command Router
+-- Command Router
 --------------------------------------------------
 local commandHandlers = {
   [""] = HandleWindowCommand,
@@ -130,9 +136,10 @@ local commandHandlers = {
   petfoireux = HandleEasterEgg
 }
 
-SLASH_LFM1 = "/lfm"
-
-SlashCmdList["LFM"] = function(msg)
+--------------------------------------------------
+-- Main Slash Command Handler
+--------------------------------------------------
+local function HandleSlashCommand(msg)
   if not msg then msg = "" end
   
   local args = SplitString(" ", msg)
@@ -161,3 +168,9 @@ SlashCmdList["LFM"] = function(msg)
     handler(args)
   end
 end
+
+--------------------------------------------------
+-- Register Slash Commands
+--------------------------------------------------
+SLASH_LFM1 = "/lfm"
+SlashCmdList["LFM"] = HandleSlashCommand

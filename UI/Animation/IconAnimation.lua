@@ -1,73 +1,20 @@
 --------------------------------------------------
 -- Icon Animation System
 --------------------------------------------------
-local currentFrameIndex = 1
-local animationSequence = {
-  "eye01",
-  "eye02",
-  "eye03",
-  "eye04",
-  "eye05",
-  "eye06",
-  "eye05",
-  "eye04",
-  "eye03",
-  "eye02",
-  "eye01",
-  "eye07",
-  "eye08",
-  "eye09",
-  "eye10",
-  "eye11",
-  "eye10",
-  "eye09",
-  "eye08",
-  "eye07",
-  "eye01",
-  "eye02",
-  "eye03",
-  "eye04",
-  "eye05",
-  "eye06",
-  "eye05",
-  "eye04",
-  "eye03",
-  "eye02",
-  "eye01",
-  "eye07",
-  "eye08",
-  "eye09",
-  "eye10",
-  "eye11",
-  "eye10",
-  "eye09",
-  "eye08",
-  "eye07",
-  "eye01",
-  "eye12",
-  "eye13",
-  "eye14",
-  "eye15",
-  "eye16",
-  "eye15",
-  "eye14",
-  "eye13",
-  "eye12"
-}
 
+local currentFrameIndex = 1
 local animationFrame = nil
-local animationSpeed = 0.15
 
 --------------------------------------------------
--- Core Animation Functions
+-- Animate Minimap Icon
 --------------------------------------------------
 function AnimateMinimapIcon()
   currentFrameIndex = currentFrameIndex + 1
-  if currentFrameIndex > table.getn(animationSequence) then
+  if currentFrameIndex > table.getn(ANIMATION_SEQUENCE) then
     currentFrameIndex = 1
   end
   
-  local iconPath = TEXTURE_BASE_PATH .. "Eyes\\" .. animationSequence[currentFrameIndex]
+  local iconPath = TEXTURE_BASE_PATH .. "Eyes\\" .. ANIMATION_SEQUENCE[currentFrameIndex]
   
   if AutoLFM_MinimapButton and AutoLFM_MinimapButton.icon then
     AutoLFM_MinimapButton.icon:SetTexture(iconPath)
@@ -78,20 +25,25 @@ function AnimateMinimapIcon()
   end
 end
 
+--------------------------------------------------
+-- Reset Icon to Default
+--------------------------------------------------
 function ResetMinimapIcon()
   currentFrameIndex = 1
   
+  local defaultIconPath = TEXTURE_BASE_PATH .. "Eyes\\eye01"
+  
   if AutoLFM_MinimapButton and AutoLFM_MinimapButton.icon then
-    AutoLFM_MinimapButton.icon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
+    AutoLFM_MinimapButton.icon:SetTexture(defaultIconPath)
   end
   
   if AutoLFM_MainIconTexture then
-    AutoLFM_MainIconTexture:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
+    AutoLFM_MainIconTexture:SetTexture(defaultIconPath)
   end
 end
 
 --------------------------------------------------
--- Animation Control
+-- Start Animation Loop
 --------------------------------------------------
 function StartBroadcastAnimation()
   if not animationFrame then
@@ -101,7 +53,7 @@ function StartBroadcastAnimation()
   animationFrame.lastUpdate = GetTime()
   
   animationFrame:SetScript("OnUpdate", function()
-    if not isBroadcastActive then
+    if not IsBroadcastActive() then
       StopBroadcastAnimation()
       return
     end
@@ -112,13 +64,16 @@ function StartBroadcastAnimation()
     end
     
     local now = GetTime()
-    if now - animationFrame.lastUpdate >= animationSpeed then
+    if now - animationFrame.lastUpdate >= ANIMATION_SPEED then
       AnimateMinimapIcon()
       animationFrame.lastUpdate = now
     end
   end)
 end
 
+--------------------------------------------------
+-- Stop Animation Loop
+--------------------------------------------------
 function StopBroadcastAnimation()
   if animationFrame then
     animationFrame:SetScript("OnUpdate", nil)

@@ -1,25 +1,28 @@
 --------------------------------------------------
--- Raid List UI
+-- Raids List UI
 --------------------------------------------------
+
 if not AutoLFM_RaidList then
-  AutoLFM_RaidList = {
-    clickableFrames = {},
-    checkButtons = {}
-  }
+  AutoLFM_RaidList = {}
 end
 
+local clickableFrames = {}
+local checkButtons = {}
+
+-- Raid size controls
 local raidSizeControlFrame = nil
+local raidSizeSlider = nil
 local raidSizeValueEditBox = nil
 local raidSizeValueText = nil
-local raidSizeSlider = nil
-local raidSizeLabelText = nil
 local raidSizeLabelFrame = nil
-local currentRaidTag = nil
+local raidSizeLabelText = nil
 
 --------------------------------------------------
 -- Update Backdrop
 --------------------------------------------------
 local function UpdateRaidBackdrop(frame, checkbox)
+  if not frame or not checkbox then return end
+  
   if checkbox:GetChecked() then
     frame:SetBackdrop({
       bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -32,99 +35,64 @@ local function UpdateRaidBackdrop(frame, checkbox)
 end
 
 --------------------------------------------------
--- Reset To Default State (10, disabled)
+-- Reset Size Controls to Default (10, disabled)
 --------------------------------------------------
 local function ResetToDefaultState()
-  if raidSizeSlider and raidSizeValueEditBox and raidSizeValueText and raidSizeLabelText then
-    raidSizeSlider:Hide()
-    raidSizeValueEditBox:Hide()
-    
-    raidSizeValueText:SetText("10")
-    raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
-    raidSizeValueText:Show()
-    
-    raidGroupSize = 10
-  end
+  if not raidSizeSlider or not raidSizeValueEditBox or not raidSizeValueText then return end
+  
+  raidSizeSlider:Hide()
+  raidSizeValueEditBox:Hide()
+  
+  raidSizeValueText:SetText("10")
+  raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
+  raidSizeValueText:Show()
+  
+  SetRaidGroupSize(10)
 end
 
 --------------------------------------------------
--- Show/Hide Size Controls
+-- Update Size Controls for Raid
 --------------------------------------------------
-local function ShowSizeControls()
-  if raidSizeControlFrame then
-    raidSizeControlFrame:Show()
-  end
-  
-  -- Si aucun raid sélectionné, afficher valeur par défaut 10 non modifiable
-  if not currentRaidTag then
+local function UpdateSizeControlsForRaid(raidTag)
+  if not raidTag then
     ResetToDefaultState()
+    return
   end
-end
-
-local function HideSizeControls()
-  if raidSizeControlFrame then
-    raidSizeControlFrame:Hide()
+  
+  local raid = GetRaidByTag(raidTag)
+  if not raid then
+    ResetToDefaultState()
+    return
   end
-end
-
-function AutoLFM_RaidList.ShowSizeControls()
-  ShowSizeControls()
-end
-
-function AutoLFM_RaidList.HideSizeControls()
-  HideSizeControls()
-end
-
---------------------------------------------------
--- Update Size Slider Range
---------------------------------------------------
-local function UpdateSizeSliderForRaid(raid)
-  if not raid or not raidSizeSlider or not raidSizeValueEditBox or not raidSizeValueText or not raidSizeLabelText then return end
   
-  currentRaidTag = raid.tag
+  local minSize, maxSize = GetRaidSizeRange(raidTag)
+  local isFixed = IsRaidFixedSize(raidTag)
   
-  local minSize = raid.sizeMin or 10
-  local maxSize = raid.sizeMax or 40
-  
-  raidGroupSize = minSize
-  
-  if raid.fixedSize or minSize == maxSize then
-    -- Cas size fixe : texte statique gris, pas de slider ni editbox
+  if isFixed then
+    -- Fixed size: show gray text only
     raidSizeSlider:Hide()
     raidSizeValueEditBox:Hide()
     
     raidSizeValueText:SetText(tostring(minSize))
     raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
     raidSizeValueText:Show()
+    
+    SetRaidGroupSize(minSize)
   else
-    -- Cas size variable : editbox + slider jaunes
+    -- Variable size: show editbox + slider
     raidSizeValueText:Hide()
     
-    if raidSizeSlider and raidSizeSlider.SetMinMaxValues then
-      raidSizeSlider:SetMinMaxValues(minSize, maxSize)
-      raidSizeSlider:SetValue(minSize)
-      raidSizeSlider:Show()
-      if raidSizeSlider.Enable then
-        raidSizeSlider:Enable()
-      end
-    end
+    local currentSize = InitializeRaidSizeForTag(raidTag)
     
-    if raidSizeValueEditBox and raidSizeValueEditBox.SetText then
-      raidSizeValueEditBox:SetText(tostring(minSize))
-      raidSizeValueEditBox:SetTextColor(1, 1, 0)
-      raidSizeValueEditBox:Show()
-      if raidSizeValueEditBox.Enable then
-        raidSizeValueEditBox:Enable()
-      end
-      
-      -- Focus + surlignage automatique
-      raidSizeValueEditBox:SetFocus()
-      raidSizeValueEditBox:HighlightText()
-    end
-  end
-  
-  if UpdateDynamicMessage then
-    UpdateDynamicMessage()
+    raidSizeSlider:SetMinMaxValues(minSize, maxSize)
+    raidSizeSlider:SetValue(currentSize)
+    raidSizeSlider:Show()
+    
+    raidSizeValueEditBox:SetText(tostring(currentSize))
+    raidSizeValueEditBox:SetTextColor(1, 1, 0)
+    raidSizeValueEditBox:Show()
+    raidSizeValueEditBox:SetFocus()
+    raidSizeValueEditBox:HighlightText()
   end
 end
 
@@ -132,88 +100,68 @@ end
 -- Checkbox Click Handler
 --------------------------------------------------
 local function OnRaidCheckboxClick(checkbox, raidTag)
-  local raid = nil
+  if not checkbox or not raidTag then return end
   
-  if RAID_DATABASE then
-    for _, r in ipairs(RAID_DATABASE) do
-      if r and r.tag == raidTag then
-        raid = r
-        break
-      end
-    end
-  end
+  local isChecked = checkbox:GetChecked()
   
-  if checkbox:GetChecked() then
-    for _, otherCheckbox in pairs(AutoLFM_RaidList.checkButtons) do
+  if isChecked then
+    -- Uncheck all other checkboxes (only one raid at a time)
+    for tag, otherCheckbox in pairs(checkButtons) do
       if otherCheckbox ~= checkbox then
         otherCheckbox:SetChecked(false)
-        otherCheckbox:GetParent():SetBackdrop(nil)
+        UpdateRaidBackdrop(otherCheckbox:GetParent(), otherCheckbox)
       end
     end
     
-    if selectedRaidTags then
-      selectedRaidTags = {raidTag}
-    end
-    
-    if raid then
-      UpdateSizeSliderForRaid(raid)
-    end
+    ToggleRaidSelection(raidTag, true)
+    UpdateSizeControlsForRaid(raidTag)
   else
-    if selectedRaidTags then
-      selectedRaidTags = {}
-    end
-    currentRaidTag = nil
-    
-    -- Retour à l'état par défaut
+    ToggleRaidSelection(raidTag, false)
     ResetToDefaultState()
   end
   
   UpdateRaidBackdrop(checkbox:GetParent(), checkbox)
-  
-  if UpdateDynamicMessage then
-    UpdateDynamicMessage()
-  end
 end
 
 --------------------------------------------------
 -- Create Single Raid Row
 --------------------------------------------------
 local function CreateRaidRow(parent, raid, index, yOffset)
+  if not parent or not raid then return nil end
+  
   local clickableFrame = CreateFrame("Button", "ClickableRaidFrame" .. index, parent)
   clickableFrame:SetHeight(20)
   clickableFrame:SetWidth(300)
   clickableFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
   
-  table.insert(AutoLFM_RaidList.clickableFrames, clickableFrame)
-  
-  local raidTag = raid.tag
-  local raidName = raid.name
-  
+  -- Checkbox
   local checkbox = CreateFrame("CheckButton", "RaidCheckbox" .. index, clickableFrame, "UICheckButtonTemplate")
   checkbox:SetWidth(20)
   checkbox:SetHeight(20)
   checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
   
+  checkbox:SetChecked(IsRaidSelected(raid.tag))
+  
+  checkButtons[raid.tag] = checkbox
+  
+  -- Size label
   local sizeLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sizeLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
   local sizeText = raid.sizeMin == raid.sizeMax and "(" .. raid.sizeMin .. ")" or "(" .. raid.sizeMin .. " - " .. raid.sizeMax .. ")"
   sizeLabel:SetText(sizeText)
   
+  -- Name label
   local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
-  label:SetText(raidName)
+  label:SetText(raid.name)
   
-  AutoLFM_RaidList.checkButtons[raidTag] = checkbox
-  
-  checkbox:SetScript("OnClick", function()
-    OnRaidCheckboxClick(checkbox, raidTag)
-  end)
-  
+  -- Frame click handler
   clickableFrame:SetScript("OnClick", function()
     checkbox:SetChecked(not checkbox:GetChecked())
-    checkbox:GetScript("OnClick")()
+    OnRaidCheckboxClick(checkbox, raid.tag)
   end)
   
+  -- Hover handlers
   clickableFrame:SetScript("OnEnter", function()
     clickableFrame:SetBackdrop({
       bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -232,6 +180,13 @@ local function CreateRaidRow(parent, raid, index, yOffset)
     checkbox:UnlockHighlight()
   end)
   
+  -- Checkbox click handler
+  checkbox:SetScript("OnClick", function()
+    OnRaidCheckboxClick(checkbox, raid.tag)
+  end)
+  
+  table.insert(clickableFrames, clickableFrame)
+  
   return clickableFrame
 end
 
@@ -241,11 +196,13 @@ end
 function AutoLFM_RaidList.Display(parent)
   if not parent then return end
   
+  -- Hide all existing children
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
   
-  AutoLFM_RaidList.clickableFrames = {}
+  clickableFrames = {}
+  checkButtons = {}
   
   local yOffset = 0
   
@@ -258,18 +215,18 @@ function AutoLFM_RaidList.Display(parent)
 end
 
 --------------------------------------------------
--- Clear Selection
+-- Clear Selection UI
 --------------------------------------------------
 function AutoLFM_RaidList.ClearSelection()
-  for _, checkbox in pairs(AutoLFM_RaidList.checkButtons) do
-    checkbox:SetChecked(false)
-  end
-  if selectedRaidTags then
-    selectedRaidTags = {}
-  end
-  currentRaidTag = nil
+  ClearRaidSelection()
   
-  -- Retour à l'état par défaut
+  -- Update checkboxes
+  for _, checkbox in pairs(checkButtons) do
+    if checkbox and checkbox.SetChecked then
+      checkbox:SetChecked(false)
+    end
+  end
+  
   ResetToDefaultState()
 end
 
@@ -277,7 +234,7 @@ end
 -- Clear Backdrops
 --------------------------------------------------
 function AutoLFM_RaidList.ClearBackdrops()
-  for _, frame in pairs(AutoLFM_RaidList.clickableFrames) do
+  for _, frame in pairs(clickableFrames) do
     if frame and frame.SetBackdrop then
       frame:SetBackdrop(nil)
     end
@@ -285,10 +242,45 @@ function AutoLFM_RaidList.ClearBackdrops()
 end
 
 --------------------------------------------------
--- Create Raid Size Slider
+-- Update Checkboxes from State
+--------------------------------------------------
+function AutoLFM_RaidList.UpdateCheckboxes()
+  for raidTag, checkbox in pairs(checkButtons) do
+    if checkbox and checkbox.SetChecked then
+      checkbox:SetChecked(IsRaidSelected(raidTag))
+    end
+  end
+end
+
+--------------------------------------------------
+-- Show/Hide Size Controls
+--------------------------------------------------
+function AutoLFM_RaidList.ShowSizeControls()
+  if raidSizeControlFrame then
+    raidSizeControlFrame:Show()
+  end
+  
+  -- Update based on current selection
+  local selectedRaids = GetSelectedRaidsList()
+  if selectedRaids and table.getn(selectedRaids) > 0 then
+    UpdateSizeControlsForRaid(selectedRaids[1])
+  else
+    ResetToDefaultState()
+  end
+end
+
+function AutoLFM_RaidList.HideSizeControls()
+  if raidSizeControlFrame then
+    raidSizeControlFrame:Hide()
+  end
+end
+
+--------------------------------------------------
+-- Create Raid Size Controls
 --------------------------------------------------
 function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
   if not parentFrame then return end
+  if raidSizeControlFrame then return end
   
   raidSizeControlFrame = CreateFrame("Frame", nil, parentFrame)
   raidSizeControlFrame:SetPoint("BOTTOM", parentFrame, "BOTTOM", -16, 75)
@@ -296,7 +288,7 @@ function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
   raidSizeControlFrame:SetHeight(30)
   raidSizeControlFrame:Hide()
   
-  -- Label "Raid size:" (toujours blanc)
+  -- Label "Raid size:"
   raidSizeLabelFrame = CreateFrame("Button", nil, raidSizeControlFrame)
   raidSizeLabelFrame:SetWidth(65)
   raidSizeLabelFrame:SetHeight(20)
@@ -307,14 +299,14 @@ function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
   raidSizeLabelText:SetText("Raid size:")
   raidSizeLabelText:SetTextColor(1, 1, 1)
   
-  -- Texte statique pour valeur fixe (gris, collé au label)
+  -- Static text (for fixed size raids)
   raidSizeValueText = raidSizeControlFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   raidSizeValueText:SetPoint("LEFT", raidSizeLabelFrame, "RIGHT", -4, 0)
   raidSizeValueText:SetText("10")
   raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
   raidSizeValueText:Show()
   
-  -- EditBox pour valeur variable (jaune, aligné sur le texte statique)
+  -- EditBox (for variable size raids)
   raidSizeValueEditBox = CreateFrame("EditBox", "AutoLFM_RaidSizeEditBox", raidSizeControlFrame)
   raidSizeValueEditBox:SetPoint("LEFT", raidSizeLabelFrame, "RIGHT", -4, 0)
   raidSizeValueEditBox:SetWidth(25)
@@ -327,7 +319,7 @@ function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
   raidSizeValueEditBox:SetTextColor(1, 1, 0)
   raidSizeValueEditBox:Hide()
   
-  -- Slider
+  -- Slider (for variable size raids)
   raidSizeSlider = CreateFrame("Slider", "AutoLFM_RaidSizeSlider", raidSizeControlFrame)
   raidSizeSlider:SetPoint("LEFT", raidSizeValueEditBox, "RIGHT", 0, 0)
   raidSizeSlider:SetWidth(115)
@@ -348,7 +340,7 @@ function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
   raidSizeSlider:EnableMouse(true)
   raidSizeSlider:Hide()
   
-  -- Clic sur le label "Raid size:" → sélectionne l'EditBox (si visible)
+  -- Label click focuses editbox
   raidSizeLabelFrame:SetScript("OnClick", function()
     if raidSizeValueEditBox and raidSizeValueEditBox:IsShown() then
       raidSizeValueEditBox:SetFocus()
@@ -356,22 +348,9 @@ function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
     end
   end)
   
-  -- Focus sur l'EditBox → sélectionne tout le texte
+  -- EditBox handlers
   raidSizeValueEditBox:SetScript("OnEditFocusGained", function()
     raidSizeValueEditBox:HighlightText()
-  end)
-  
-  raidSizeSlider:SetScript("OnValueChanged", function()
-    local value = raidSizeSlider:GetValue()
-    raidGroupSize = value
-    
-    if raidSizeValueEditBox then
-      raidSizeValueEditBox:SetText(tostring(value))
-    end
-    
-    if UpdateDynamicMessage then
-      UpdateDynamicMessage()
-    end
   end)
   
   raidSizeValueEditBox:SetScript("OnTextChanged", function()
@@ -392,13 +371,15 @@ function AutoLFM_RaidList.CreateSizeSlider(parentFrame)
     raidSizeValueEditBox:ClearFocus()
   end)
   
-  -- Initialiser à l'état désactivé APRÈS création complète
+  -- Slider handler
+  raidSizeSlider:SetScript("OnValueChanged", function()
+    local value = raidSizeSlider:GetValue()
+    SetRaidGroupSize(value)
+    
+    if raidSizeValueEditBox then
+      raidSizeValueEditBox:SetText(tostring(value))
+    end
+  end)
+  
   ResetToDefaultState()
-end
-
---------------------------------------------------
--- Get Current Raid Size
---------------------------------------------------
-function AutoLFM_RaidList.GetSize()
-  return raidGroupSize or 40
 end
