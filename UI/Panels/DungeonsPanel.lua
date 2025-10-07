@@ -1,7 +1,6 @@
 --------------------------------------------------
 -- Dungeons Panel
 --------------------------------------------------
-
 local dungeonsPanelFrame = nil
 local dungeonScrollFrame = nil
 local dungeonListContentFrame = nil
@@ -14,7 +13,6 @@ function CreateDungeonsPanel(parentFrame)
   if not parentFrame then return nil end
   if dungeonsPanelFrame then return dungeonsPanelFrame end
   
-  -- Main panel frame
   dungeonsPanelFrame = CreateFrame("Frame", nil, parentFrame)
   dungeonsPanelFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 25, -157)
   dungeonsPanelFrame:SetWidth(323)
@@ -22,7 +20,6 @@ function CreateDungeonsPanel(parentFrame)
   dungeonsPanelFrame:SetFrameStrata("HIGH")
   dungeonsPanelFrame:Show()
   
-  -- Scroll frame
   dungeonScrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_Dungeons", dungeonsPanelFrame, "UIPanelScrollFrameTemplate")
   dungeonScrollFrame:SetPoint("TOPLEFT", dungeonsPanelFrame, "TOPLEFT", 0, 0)
   dungeonScrollFrame:SetWidth(295)
@@ -30,18 +27,19 @@ function CreateDungeonsPanel(parentFrame)
   dungeonScrollFrame:EnableMouse(true)
   dungeonScrollFrame:EnableMouseWheel(true)
   
-  -- Content frame
   dungeonListContentFrame = CreateFrame("Frame", nil, dungeonScrollFrame)
   dungeonListContentFrame:SetWidth(dungeonScrollFrame:GetWidth() - 20)
   dungeonListContentFrame:SetHeight(1)
   dungeonScrollFrame:SetScrollChild(dungeonListContentFrame)
   
-  -- Display dungeon list
   if AutoLFM_DungeonList and AutoLFM_DungeonList.Display then
     AutoLFM_DungeonList.Display(dungeonListContentFrame)
+    
+    if dungeonScrollFrame.UpdateScrollChildRect then
+      dungeonScrollFrame:UpdateScrollChildRect()
+    end
   end
   
-  -- Create filter UI (attached to parent, not panel)
   if CreateColorFilterUI then
     dungeonFilterFrame = CreateColorFilterUI(parentFrame)
     if dungeonFilterFrame then
@@ -63,13 +61,16 @@ function ShowDungeonsPanel()
   if dungeonScrollFrame then
     dungeonScrollFrame:Show()
     dungeonScrollFrame:SetVerticalScroll(0)
+    
+    if dungeonScrollFrame.UpdateScrollChildRect then
+      dungeonScrollFrame:UpdateScrollChildRect()
+    end
   end
   
   if dungeonFilterFrame then
     dungeonFilterFrame:Show()
   end
   
-  -- Hide raid controls (but don't clear selection)
   if AutoLFM_RaidList and AutoLFM_RaidList.HideSizeControls then
     AutoLFM_RaidList.HideSizeControls()
   end
@@ -108,4 +109,8 @@ end
 --------------------------------------------------
 function GetDungeonListContentFrame()
   return dungeonListContentFrame
+end
+
+function GetDungeonScrollFrame()
+  return dungeonScrollFrame
 end

@@ -1,27 +1,23 @@
 --------------------------------------------------
 -- Dungeons List UI
 --------------------------------------------------
-
 if not AutoLFM_DungeonList then
   AutoLFM_DungeonList = {}
 end
-
 local clickableFrames = {}
 local checkButtons = {}
-local dungeonRows = {}  -- NOUVEAU : stocke toutes les lignes créées
+local dungeonRows = {}
 
 --------------------------------------------------
 -- Get Priority Color
 --------------------------------------------------
 local function GetPriorityColor(priority)
   if not PRIORITY_COLOR_SCHEME then return 0.5, 0.5, 0.5 end
-  
   for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
     if color.priority == priority then
       return color.r, color.g, color.b
     end
   end
-  
   return 0.5, 0.5, 0.5
 end
 
@@ -65,39 +61,32 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   clickableFrame:SetWidth(300)
   clickableFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
   
-  -- Checkbox
   local checkbox = CreateFrame("CheckButton", "DungeonCheckbox" .. dungeon.tag, clickableFrame, "UICheckButtonTemplate")
   checkbox:SetWidth(20)
   checkbox:SetHeight(20)
   checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
   
-  -- Set checked state from manager
   checkbox:SetChecked(IsDungeonSelected(dungeon.tag))
   
   checkButtons[dungeon.tag] = checkbox
   
-  -- Level label
   local levelLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   levelLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
   levelLabel:SetText("(" .. dungeon.levelMin .. " - " .. dungeon.levelMax .. ")")
   
-  -- Name label
   local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
   label:SetText(dungeon.name)
   
-  -- Apply priority color
   local r, g, b = GetPriorityColor(priority)
   label:SetTextColor(r, g, b)
   levelLabel:SetTextColor(r, g, b)
   
-  -- Frame click handler
   clickableFrame:SetScript("OnClick", function()
     checkbox:SetChecked(not checkbox:GetChecked())
     OnDungeonCheckboxClick(checkbox, dungeon.tag)
   end)
   
-  -- Hover handlers
   clickableFrame:SetScript("OnEnter", function()
     clickableFrame:SetBackdrop({
       bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -116,17 +105,15 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
     checkbox:UnlockHighlight()
   end)
   
-  -- Checkbox click handler
   checkbox:SetScript("OnClick", function()
     OnDungeonCheckboxClick(checkbox, dungeon.tag)
   end)
   
-  -- Store row data
   clickableFrame.dungeonTag = dungeon.tag
   clickableFrame.priority = priority
   
   table.insert(clickableFrames, clickableFrame)
-  dungeonRows[dungeon.tag] = clickableFrame  -- NOUVEAU : indexer par tag
+  dungeonRows[dungeon.tag] = clickableFrame
   
   return clickableFrame
 end
@@ -138,6 +125,7 @@ local function UpdateRowVisibility()
   if not dungeonRows then return end
   
   local yOffset = 0
+  local visibleCount = 0
   
   for _, entry in ipairs(GetSortedDungeonsByPriority(UnitLevel("player"))) do
     if entry and entry.dungeon then
@@ -146,16 +134,30 @@ local function UpdateRowVisibility()
       local frame = dungeonRows[dungeonTag]
       
       if frame then
-        -- Check if this priority should be shown
         if ShouldShowPriorityLevel(priority) then
           frame:Show()
+          frame:ClearAllPoints()
           frame:SetPoint("TOPLEFT", frame:GetParent(), "TOPLEFT", 0, -yOffset)
           yOffset = yOffset + 20
+          visibleCount = visibleCount + 1
         else
           frame:Hide()
         end
       end
     end
+  end
+  
+  local parent = nil
+  for _, frame in pairs(dungeonRows) do
+    if frame then
+      parent = frame:GetParent()
+      break
+    end
+  end
+  
+  if parent and parent.SetHeight then
+    local contentHeight = visibleCount * 20
+    parent:SetHeight(math.max(contentHeight, 1))
   end
 end
 
@@ -165,47 +167,53 @@ end
 function AutoLFM_DungeonList.Display(parent)
   if not parent then return end
   
-  -- Hide all existing children
   for _, child in ipairs({parent:GetChildren()}) do
     child:Hide()
   end
   
   clickableFrames = {}
   checkButtons = {}
-  dungeonRows = {}  -- NOUVEAU : réinitialiser
+  dungeonRows = {}
   
   local playerLevel = UnitLevel("player")
   if not playerLevel or playerLevel < 1 then
     playerLevel = 1
   end
   
-  -- Get sorted dungeons from manager
   local sortedDungeons = GetSortedDungeonsByPriority(playerLevel)
-  
   local yOffset = 0
+  local visibleCount = 0
   
-  -- Create ALL rows (even hidden ones)
   for _, entry in ipairs(sortedDungeons) do
     if entry and entry.dungeon then
       local frame = CreateDungeonRow(parent, entry.dungeon, entry.priority, yOffset)
       if frame then
-        -- Check if should be visible initially
         if ShouldShowPriorityLevel(entry.priority) then
           yOffset = yOffset + 20
+          visibleCount = visibleCount + 1
         else
           frame:Hide()
         end
       end
     end
   end
+  
+  if parent and parent.SetHeight then
+    local contentHeight = visibleCount * 20
+    parent:SetHeight(math.max(contentHeight, 1))
+  end
 end
 
 --------------------------------------------------
--- Refresh Display (for filters) - MODIFIÉ
+-- Refresh Display
 --------------------------------------------------
 function AutoLFM_DungeonList.Refresh()
-  -- Instead of recreating everything, just update visibility
   UpdateRowVisibility()
+  
+  local dungeonScrollFrame = GetDungeonScrollFrame()
+  if dungeonScrollFrame and dungeonScrollFrame.UpdateScrollChildRect then
+    dungeonScrollFrame:UpdateScrollChildRect()
+  end
 end
 
 --------------------------------------------------
@@ -214,7 +222,6 @@ end
 function AutoLFM_DungeonList.ClearSelection()
   ClearDungeonSelection()
   
-  -- Update checkboxes
   for _, checkbox in pairs(checkButtons) do
     if checkbox and checkbox.SetChecked then
       checkbox:SetChecked(false)
@@ -255,7 +262,6 @@ function AutoLFM_DungeonList.UncheckDungeon(dungeonTag)
   if checkbox and checkbox.SetChecked then
     checkbox:SetChecked(false)
     
-    -- Clear backdrop
     local frame = checkbox:GetParent()
     if frame and frame.SetBackdrop then
       frame:SetBackdrop(nil)

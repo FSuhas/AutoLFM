@@ -242,19 +242,26 @@ displayFrame:SetScript("OnEvent", function()
   local currentEvent = event
   
   if currentEvent == "PLAYER_LOGIN" then
-    -- Display dungeon list
     local dungeonContentFrame = GetDungeonListContentFrame()
     if AutoLFM_DungeonList and AutoLFM_DungeonList.Display and dungeonContentFrame then
       AutoLFM_DungeonList.Display(dungeonContentFrame)
+      
+      local dungeonScrollFrame = GetDungeonScrollFrame()
+      if dungeonScrollFrame and dungeonScrollFrame.UpdateScrollChildRect then
+        dungeonScrollFrame:UpdateScrollChildRect()
+      end
     end
     
-    -- Display raid list
     local raidContentFrame = GetRaidListContentFrame()
     if AutoLFM_RaidList and AutoLFM_RaidList.Display and raidContentFrame then
       AutoLFM_RaidList.Display(raidContentFrame)
+      
+      local raidScrollFrame = GetRaidScrollFrame()
+      if raidScrollFrame and raidScrollFrame.UpdateScrollChildRect then
+        raidScrollFrame:UpdateScrollChildRect()
+      end
     end
     
-    -- Update filter UI
     if UpdateFilterUI then
       UpdateFilterUI()
     end

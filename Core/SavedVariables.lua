@@ -38,8 +38,7 @@ function InitializeCharacterSavedVariables()
   end
   
   local charData = AutoLFM_SavedVariables[characterUniqueID]
-  
-  -- Initialize with defaults if not set
+
   if not charData.selectedChannels then
     charData.selectedChannels = {}
   end
@@ -58,9 +57,12 @@ function InitializeCharacterSavedVariables()
   
   if not charData.dungeonFilters then
     charData.dungeonFilters = {}
-    if PRIORITY_COLOR_SCHEME then
-      for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
-        if color and color.key then
+  end
+  
+  if PRIORITY_COLOR_SCHEME then
+    for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
+      if color and color.key then
+        if charData.dungeonFilters[color.key] == nil then
           charData.dungeonFilters[color.key] = true
         end
       end
@@ -146,11 +148,19 @@ function SaveColorFilterSettings()
     AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  -- Save current filter states
-  if filterStates then
+  if not AutoLFM_SavedVariables[characterUniqueID].dungeonFilters then
     AutoLFM_SavedVariables[characterUniqueID].dungeonFilters = {}
-    for key, value in pairs(filterStates) do
-      AutoLFM_SavedVariables[characterUniqueID].dungeonFilters[key] = value
+  end
+  
+  if PRIORITY_COLOR_SCHEME then
+    for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
+      if color and color.key then
+        local value = true
+        if filterStates and filterStates[color.key] ~= nil then
+          value = filterStates[color.key]
+        end
+        AutoLFM_SavedVariables[characterUniqueID].dungeonFilters[color.key] = (value == true)
+      end
     end
   end
 end
@@ -162,18 +172,18 @@ function LoadColorFilterSettings()
     AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  -- Load saved filter states
-  if AutoLFM_SavedVariables[characterUniqueID].dungeonFilters then
+  if not filterStates then
     filterStates = {}
-    for key, value in pairs(AutoLFM_SavedVariables[characterUniqueID].dungeonFilters) do
-      filterStates[key] = value
-    end
-  else
-    -- Initialize with defaults if no saved data
-    filterStates = {}
-    if PRIORITY_COLOR_SCHEME then
-      for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
-        if color and color.key then
+  end
+  
+  if PRIORITY_COLOR_SCHEME then
+    for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
+      if color and color.key then
+        if AutoLFM_SavedVariables[characterUniqueID].dungeonFilters and 
+           AutoLFM_SavedVariables[characterUniqueID].dungeonFilters[color.key] ~= nil then
+          local value = AutoLFM_SavedVariables[characterUniqueID].dungeonFilters[color.key]
+          filterStates[color.key] = (value == true or value == 1)
+        else
           filterStates[color.key] = true
         end
       end
