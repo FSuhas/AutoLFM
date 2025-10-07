@@ -423,11 +423,15 @@ local function setupPlaceholder(editBox, placeholderText)
   
   editBox:SetScript("OnEditFocusGained", function()
     placeholder:Hide()
-    editBoxHasFocus = true
+    if UpdateEditBoxFocusState then
+      UpdateEditBoxFocusState(true)
+    end
   end)
   
   editBox:SetScript("OnEditFocusLost", function()
-    editBoxHasFocus = false
+    if UpdateEditBoxFocusState then
+      UpdateEditBoxFocusState(false)
+    end
     updatePlaceholder()
   end)
   
@@ -562,163 +566,6 @@ toggleButton:SetScript("OnClick", function()
     -- If failed, startMessageBroadcast already printed errors
   end
 end)
-
---------------------------------------------------
--- Quest Link Support
---------------------------------------------------
-function CreateQuestLink(questIndex)
-  if not questIndex or questIndex < 1 then return nil end
-  if not AutoLFM or not AutoLFM:IsVisible() then return nil end
-  
-  local title, level, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
-  if not title or title == "" then return nil end
-  
-  questID = questID or 0
-  level = level or 0
-  
-  local color = "|cffffff00"
-  local link = string.format("%s|Hquest:%d:%d|h[%s]|h|r", color, questID, level, title)
-  return link
-end
-
-local hookedQuestButtons = {}
-
-local function HookQuestButton(button)
-  if not button then return end
-  
-  local buttonName = button:GetName()
-  if not buttonName then return end
-  if hookedQuestButtons[buttonName] then return end
-  
-  hookedQuestButtons[buttonName] = true
-  
-  local originalOnClick = button:GetScript("OnClick")
-  
-  button:SetScript("OnClick", function()
-    -- Call original handler first
-    if originalOnClick then
-      originalOnClick()
-    end
-    
-    -- Check all conditions
-    if not (arg1 == "LeftButton" and IsShiftKeyDown()) then return end
-    if not editBox then return end
-    if not editBoxHasFocus then return end
-    
-    local questIndex = button:GetID()
-    if not questIndex then return end
-    
-    local questLink = CreateQuestLink(questIndex)
-    if questLink then
-      editBox:SetText(questLink)
-      editBox:SetFocus()
-    end
-  end)
-end
-
-local questHookFrame = CreateFrame("Frame")
-questHookFrame:RegisterEvent("QUEST_LOG_UPDATE")
-
-questHookFrame:SetScript("OnEvent", function()
-  if event ~= "QUEST_LOG_UPDATE" then return end
-  if not QuestLogFrame then return end
-  if not QuestLogFrame:IsVisible() then return end
-  
-  local i = 1
-  local maxButtons = 50  -- Safety limit
-  
-  while i <= maxButtons do
-    local button = getglobal("QuestLogTitle" .. i)
-    if not button then break end
-    HookQuestButton(button)
-    i = i + 1
-  end
-end)
-
---------------------------------------------------
--- Item Link Support
---------------------------------------------------
-local hookedBagButtons = {}
-
-local function HookBagButton(button, bagID, slotID)
-  if not button then return end
-  if not bagID or not slotID then return end
-  
-  local key = bagID .. "_" .. slotID
-  if hookedBagButtons[key] then return end
-  
-  hookedBagButtons[key] = true
-  
-  local originalOnClick = button:GetScript("OnClick")
-  
-  button:SetScript("OnClick", function()
-    -- Call original handler first
-    if originalOnClick then
-      originalOnClick()
-    end
-    
-    -- Check all conditions
-    if not (arg1 == "LeftButton" and IsShiftKeyDown()) then return end
-    if not editBox then return end
-    if not editBoxHasFocus then return end
-    
-    local itemLink = GetContainerItemLink(bagID, slotID)
-    if itemLink then
-      editBox:SetText(itemLink)
-      editBox:SetFocus()
-    end
-  end)
-end
-
-local bagHookFrame = CreateFrame("Frame")
-bagHookFrame:RegisterEvent("BAG_UPDATE")
-bagHookFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")
-
-bagHookFrame:SetScript("OnEvent", function()
-  if not (event == "BAG_UPDATE" or event == "BAG_UPDATE_COOLDOWN") then return end
-  
-  for bagID = 0, 4 do
-    local bagName = "ContainerFrame" .. (bagID + 1)
-    local bagFrame = getglobal(bagName)
-    
-    if not bagFrame then break end
-    if not bagFrame:IsVisible() then break end
-    
-    local numSlots = GetContainerNumSlots(bagID)
-    if not numSlots or numSlots < 1 then break end
-    
-    for slotID = 1, numSlots do
-      local buttonName = bagName .. "Item" .. slotID
-      local button = getglobal(buttonName)
-      
-      if button then
-        HookBagButton(button, bagID, slotID)
-      end
-    end
-  end
-end)
-
--- Secure SetItemRef override
-local Original_SetItemRef = SetItemRef
-
-function SetItemRef(link, text, button)
-  -- Call original first
-  if Original_SetItemRef then
-    Original_SetItemRef(link, text, button)
-  end
-  
-  -- Check all conditions
-  if not (button == "LeftButton" and IsShiftKeyDown()) then return end
-  if not editBox then return end
-  if not editBoxHasFocus then return end
-  if not link then return end
-  
-  -- Only handle item links
-  if string.find(link, "^item:") and text then
-    editBox:SetText(text)
-    editBox:SetFocus()
-  end
-end
 
 --------------------------------------------------
 -- Events

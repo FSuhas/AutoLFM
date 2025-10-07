@@ -33,9 +33,12 @@ function ValidateBroadcastSetup()
   
   local selectedRaidsLocal = GetSelectedRaids and GetSelectedRaids() or {}
   local selectedDungeonsLocal = GetSelectedDungeons and GetSelectedDungeons() or {}
+  local hasUserMessage = userInputMessage and userInputMessage ~= ""
   
-  if table.getn(selectedRaidsLocal) == 0 and table.getn(selectedDungeonsLocal) == 0 then
-    table.insert(errors, "No dungeon or raid selected")
+  if not hasUserMessage then
+    if table.getn(selectedRaidsLocal) == 0 and table.getn(selectedDungeonsLocal) == 0 then
+      table.insert(errors, "No dungeon or raid selected")
+    end
   end
   
   if table.getn(selectedDungeonsLocal) > 0 then

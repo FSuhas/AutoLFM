@@ -128,11 +128,17 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
     message = userInputMessage
   elseif contentCount == 0 and rolesCount > 0 then
     message = finalRolesSegment
+    if userInputMessage ~= "" then
+      message = message .. " " .. userInputMessage
+    end
   elseif contentCount > 0 and rolesCount == 0 then
     if isRaidSelected then
       message = contentMessage .. " LF" .. mate .. "M" .. raidPlayerCountText
     else
       message = "LF" .. mate .. "M for " .. contentMessage
+    end
+    if userInputMessage ~= "" then
+      message = message .. " " .. userInputMessage
     end
   else
     if isRaidSelected then
@@ -140,10 +146,9 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
     else
       message = "LF" .. mate .. "M for " .. contentMessage .. " " .. finalRolesSegment
     end
-  end
-  
-  if userInputMessage ~= "" and message ~= "" then
-    message = message .. " " .. userInputMessage
+    if userInputMessage ~= "" then
+      message = message .. " " .. userInputMessage
+    end
   end
   
   return message
