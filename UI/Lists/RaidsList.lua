@@ -18,23 +18,6 @@ local raidSizeLabelFrame = nil
 local raidSizeLabelText = nil
 
 --------------------------------------------------
--- Update Backdrop
---------------------------------------------------
-local function UpdateRaidBackdrop(frame, checkbox)
-  if not frame or not checkbox then return end
-  
-  if checkbox:GetChecked() then
-    frame:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8X8",
-      insets = {left = 1, right = 1, top = 1, bottom = 1},
-    })
-    frame:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
-  else
-    frame:SetBackdrop(nil)
-  end
-end
-
---------------------------------------------------
 -- Set Fixed Size State (10 players, disabled)
 --------------------------------------------------
 local function SetFixedSizeState()
@@ -110,7 +93,11 @@ local function OnRaidCheckboxClick(checkbox, raidTag)
     for tag, otherCheckbox in pairs(checkButtons) do
       if otherCheckbox ~= checkbox then
         otherCheckbox:SetChecked(false)
-        UpdateRaidBackdrop(otherCheckbox:GetParent(), otherCheckbox)
+        -- Remove backdrop from unselected items
+        local parentFrame = otherCheckbox:GetParent()
+        if parentFrame then
+          parentFrame:SetBackdrop(nil)
+        end
       end
     end
     
@@ -121,7 +108,8 @@ local function OnRaidCheckboxClick(checkbox, raidTag)
     SetFixedSizeState()
   end
   
-  UpdateRaidBackdrop(checkbox:GetParent(), checkbox)
+  -- No backdrop for selected state
+  checkbox:GetParent():SetBackdrop(nil)
 end
 
 --------------------------------------------------
@@ -156,6 +144,10 @@ local function CreateRaidRow(parent, raid, index, yOffset)
   label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
   label:SetText(raid.name)
   
+  -- Store original colors
+  local originalLabelR, originalLabelG, originalLabelB = label:GetTextColor()
+  local originalSizeR, originalSizeG, originalSizeB = sizeLabel:GetTextColor()
+  
   -- Frame click handler
   clickableFrame:SetScript("OnClick", function()
     checkbox:SetChecked(not checkbox:GetChecked())
@@ -168,16 +160,17 @@ local function CreateRaidRow(parent, raid, index, yOffset)
       bgFile = "Interface\\Buttons\\WHITE8X8",
       insets = {left = 1, right = 1, top = 1, bottom = 1},
     })
-    clickableFrame:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
+    clickableFrame:SetBackdropColor(1, 0.82, 0, 0.3)
+    label:SetTextColor(1, 1, 1)
+    sizeLabel:SetTextColor(1, 1, 1)
     checkbox:LockHighlight()
   end)
   
   clickableFrame:SetScript("OnLeave", function()
-    if not checkbox:GetChecked() then
-      clickableFrame:SetBackdrop(nil)
-    else
-      UpdateRaidBackdrop(clickableFrame, checkbox)
-    end
+    -- Always remove backdrop on leave (no persistent selection background)
+    clickableFrame:SetBackdrop(nil)
+    label:SetTextColor(originalLabelR, originalLabelG, originalLabelB)
+    sizeLabel:SetTextColor(originalSizeR, originalSizeG, originalSizeB)
     checkbox:UnlockHighlight()
   end)
   

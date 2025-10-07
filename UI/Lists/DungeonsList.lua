@@ -22,23 +22,6 @@ local function GetPriorityColor(priority)
 end
 
 --------------------------------------------------
--- Update Backdrop
---------------------------------------------------
-local function UpdateDungeonBackdrop(frame, checkbox)
-  if not frame or not checkbox then return end
-  
-  if checkbox:GetChecked() then
-    frame:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8X8",
-      insets = {left = 1, right = 1, top = 1, bottom = 1},
-    })
-    frame:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
-  else
-    frame:SetBackdrop(nil)
-  end
-end
-
---------------------------------------------------
 -- Checkbox Click Handler
 --------------------------------------------------
 local function OnDungeonCheckboxClick(checkbox, dungeonTag)
@@ -46,8 +29,6 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
   
   local isChecked = checkbox:GetChecked()
   ToggleDungeonSelection(dungeonTag, isChecked)
-  
-  UpdateDungeonBackdrop(checkbox:GetParent(), checkbox)
 end
 
 --------------------------------------------------
@@ -82,6 +63,10 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   label:SetTextColor(r, g, b)
   levelLabel:SetTextColor(r, g, b)
   
+  -- Store original colors
+  local originalLabelR, originalLabelG, originalLabelB = r, g, b
+  local originalSizeR, originalSizeG, originalSizeB = r, g, b
+  
   clickableFrame:SetScript("OnClick", function()
     checkbox:SetChecked(not checkbox:GetChecked())
     OnDungeonCheckboxClick(checkbox, dungeon.tag)
@@ -92,16 +77,17 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
       bgFile = "Interface\\Buttons\\WHITE8X8",
       insets = {left = 1, right = 1, top = 1, bottom = 1},
     })
-    clickableFrame:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
+    clickableFrame:SetBackdropColor(r, g, b, 0.3)
+    label:SetTextColor(1, 1, 1)
+    levelLabel:SetTextColor(1, 1, 1)
     checkbox:LockHighlight()
   end)
   
   clickableFrame:SetScript("OnLeave", function()
-    if not checkbox:GetChecked() then
-      clickableFrame:SetBackdrop(nil)
-    else
-      UpdateDungeonBackdrop(clickableFrame, checkbox)
-    end
+    -- Always remove backdrop on leave (no persistent selection background)
+    clickableFrame:SetBackdrop(nil)
+    label:SetTextColor(originalLabelR, originalLabelG, originalLabelB)
+    levelLabel:SetTextColor(originalSizeR, originalSizeG, originalSizeB)
     checkbox:UnlockHighlight()
   end)
   
