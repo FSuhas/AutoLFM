@@ -58,39 +58,39 @@ local animationSpeed = 0.15
 --------------------------------------------------
 -- Core Animation Functions
 --------------------------------------------------
-function AnimateIcons()
+function AnimateMinimapIcon()
   currentFrameIndex = currentFrameIndex + 1
   if currentFrameIndex > table.getn(animationSequence) then
     currentFrameIndex = 1
   end
   
-  local iconPath = texturePath .. "Eyes\\" .. animationSequence[currentFrameIndex]
+  local iconPath = TEXTURE_BASE_PATH .. "Eyes\\" .. animationSequence[currentFrameIndex]
   
-  if AutoLFMMinimapBtn and AutoLFMMinimapBtn.icon then
-    AutoLFMMinimapBtn.icon:SetTexture(iconPath)
+  if AutoLFM_MinimapButton and AutoLFM_MinimapButton.icon then
+    AutoLFM_MinimapButton.icon:SetTexture(iconPath)
   end
   
-  if AutoLFMMainIcon then
-    AutoLFMMainIcon:SetTexture(iconPath)
+  if AutoLFM_MainIconTexture then
+    AutoLFM_MainIconTexture:SetTexture(iconPath)
   end
 end
 
-function ResetIcons()
+function ResetMinimapIcon()
   currentFrameIndex = 1
   
-  if AutoLFMMinimapBtn and AutoLFMMinimapBtn.icon then
-    AutoLFMMinimapBtn.icon:SetTexture(texturePath .. "Eyes\\eye01")
+  if AutoLFM_MinimapButton and AutoLFM_MinimapButton.icon then
+    AutoLFM_MinimapButton.icon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
   end
   
-  if AutoLFMMainIcon then
-    AutoLFMMainIcon:SetTexture(texturePath .. "Eyes\\eye01")
+  if AutoLFM_MainIconTexture then
+    AutoLFM_MainIconTexture:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
   end
 end
 
 --------------------------------------------------
 -- Animation Control
 --------------------------------------------------
-function StartIconAnimation()
+function StartBroadcastAnimation()
   if not animationFrame then
     animationFrame = CreateFrame("Frame")
   end
@@ -98,8 +98,8 @@ function StartIconAnimation()
   animationFrame.lastUpdate = GetTime()
   
   animationFrame:SetScript("OnUpdate", function()
-    if not isBroadcasting then
-      StopIconAnimation()
+    if not isBroadcastActive then
+      StopBroadcastAnimation()
       return
     end
     
@@ -110,15 +110,15 @@ function StartIconAnimation()
     
     local now = GetTime()
     if now - animationFrame.lastUpdate >= animationSpeed then
-      AnimateIcons()
+      AnimateMinimapIcon()
       animationFrame.lastUpdate = now
     end
   end)
 end
 
-function StopIconAnimation()
+function StopBroadcastAnimation()
   if animationFrame then
     animationFrame:SetScript("OnUpdate", nil)
   end
-  ResetIcons()
+  ResetMinimapIcon()
 end

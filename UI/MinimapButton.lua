@@ -3,94 +3,94 @@
 --------------------------------------------------
 local minimapEventFrame = CreateFrame("Frame")
 
-AutoLFMMinimapBtn = nil
+AutoLFM_MinimapButton = nil
 
-function InitMinimapButton()
-  if AutoLFMMinimapBtn then
+function InitializeMinimapButton()
+  if AutoLFM_MinimapButton then
     return
   end
   
-  local isHidden = AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden
+  local isHidden = AutoLFM_SavedVariables[characterUniqueID].minimapBtnHidden
   
-  AutoLFMMinimapBtn = CreateFrame("Button", "AutoLFMMinimapBtn", Minimap)
-  AutoLFMMinimapBtn:SetFrameStrata("LOW")
-  AutoLFMMinimapBtn:SetWidth(31)
-  AutoLFMMinimapBtn:SetHeight(31)
+  AutoLFM_MinimapButton = CreateFrame("Button", "AutoLFM_MinimapButton", Minimap)
+  AutoLFM_MinimapButton:SetFrameStrata("LOW")
+  AutoLFM_MinimapButton:SetWidth(31)
+  AutoLFM_MinimapButton:SetHeight(31)
   
-  local posX = AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnX or -10
-  local posY = AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY or -10
-  AutoLFMMinimapBtn:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", posX, posY)
+  local posX = AutoLFM_SavedVariables[characterUniqueID].minimapBtnX or -10
+  local posY = AutoLFM_SavedVariables[characterUniqueID].minimapBtnY or -10
+  AutoLFM_MinimapButton:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", posX, posY)
   
   -- Icon
-  local icon = AutoLFMMinimapBtn:CreateTexture(nil, "BACKGROUND")
+  local icon = AutoLFM_MinimapButton:CreateTexture(nil, "BACKGROUND")
   icon:SetWidth(20)
   icon:SetHeight(20)
-  icon:SetTexture(texturePath .. "Eyes\\eye01")
+  icon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
   icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
-  icon:SetPoint("TOPLEFT", AutoLFMMinimapBtn, "TOPLEFT", 7, -5)
+  icon:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", 7, -5)
   
-  AutoLFMMinimapBtn.icon = icon
+  AutoLFM_MinimapButton.icon = icon
   
   -- Border
-  local overlay = AutoLFMMinimapBtn:CreateTexture(nil, "OVERLAY")
+  local overlay = AutoLFM_MinimapButton:CreateTexture(nil, "OVERLAY")
   overlay:SetWidth(53)
   overlay:SetHeight(53)
   overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-  overlay:SetPoint("TOPLEFT", AutoLFMMinimapBtn, "TOPLEFT", 0, 0)
+  overlay:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", 0, 0)
   
-  AutoLFMMinimapBtn:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+  AutoLFM_MinimapButton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
   
-  AutoLFMMinimapBtn:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(AutoLFMMinimapBtn, "ANCHOR_RIGHT")
+  AutoLFM_MinimapButton:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(AutoLFM_MinimapButton, "ANCHOR_RIGHT")
     GameTooltip:SetText("Auto|cff0070DDL|r|cffffffffF|r|cffff0000M ")
     GameTooltip:AddLine("Click to toggle AutoLFM interface.", 1, 1, 1)
     GameTooltip:AddLine("Ctrl + Click for move.", 1, 1, 1)
     GameTooltip:Show()
   end)
   
-  AutoLFMMinimapBtn:SetScript("OnLeave", function()
+  AutoLFM_MinimapButton:SetScript("OnLeave", function()
     GameTooltip:Hide()
   end)
   
-  AutoLFMMinimapBtn:SetScript("OnClick", function()
+  AutoLFM_MinimapButton:SetScript("OnClick", function()
     if IsControlKeyDown() then return end
     
-    if AutoLFM then
-      if AutoLFM:IsShown() then
-        HideUIPanel(AutoLFM)
+    if AutoLFM_MainFrame then
+      if AutoLFM_MainFrame:IsShown() then
+        HideUIPanel(AutoLFM_MainFrame)
       else
-        ShowUIPanel(AutoLFM)
+        ShowUIPanel(AutoLFM_MainFrame)
       end
     end
   end)
   
-  AutoLFMMinimapBtn:SetMovable(true)
-  AutoLFMMinimapBtn:EnableMouse(true)
-  AutoLFMMinimapBtn:RegisterForDrag("LeftButton")
+  AutoLFM_MinimapButton:SetMovable(true)
+  AutoLFM_MinimapButton:EnableMouse(true)
+  AutoLFM_MinimapButton:RegisterForDrag("LeftButton")
   
-  AutoLFMMinimapBtn:SetScript("OnMouseDown", function()
+  AutoLFM_MinimapButton:SetScript("OnMouseDown", function()
     if IsControlKeyDown() then
-      AutoLFMMinimapBtn:StartMoving()
+      AutoLFM_MinimapButton:StartMoving()
     end
   end)
   
-  AutoLFMMinimapBtn:SetScript("OnMouseUp", function()
-    AutoLFMMinimapBtn:StopMovingOrSizing()
-    local point, relativeTo, relativePoint, xOfs, yOfs = AutoLFMMinimapBtn:GetPoint()
-    AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnX = xOfs
-    AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY = yOfs
+  AutoLFM_MinimapButton:SetScript("OnMouseUp", function()
+    AutoLFM_MinimapButton:StopMovingOrSizing()
+    local point, relativeTo, relativePoint, xOfs, yOfs = AutoLFM_MinimapButton:GetPoint()
+    AutoLFM_SavedVariables[characterUniqueID].minimapBtnX = xOfs
+    AutoLFM_SavedVariables[characterUniqueID].minimapBtnY = yOfs
   end)
   
   if isHidden then
-    AutoLFMMinimapBtn:Hide()
+    AutoLFM_MinimapButton:Hide()
   else
-    AutoLFMMinimapBtn:Show()
+    AutoLFM_MinimapButton:Show()
   end
 end
 
 minimapEventFrame:RegisterEvent("ADDON_LOADED")
 minimapEventFrame:SetScript("OnEvent", function()
   if event == "ADDON_LOADED" and arg1 == "AutoLFM" then
-    InitMinimapButton()
+    InitializeMinimapButton()
   end
 end)

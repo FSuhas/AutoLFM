@@ -34,19 +34,19 @@ local function OnRaidCheckboxClick(checkbox, raidTag)
         otherCheckbox:GetParent():SetBackdrop(nil)
       end
     end
-    if selectedRaids then
-      selectedRaids = {raidTag}
+    if selectedRaidTags then
+      selectedRaidTags = {raidTag}
     end
   else
-    if selectedRaids then
-      selectedRaids = {}
+    if selectedRaidTags then
+      selectedRaidTags = {}
     end
   end
   
   UpdateRaidBackdrop(checkbox:GetParent(), checkbox)
   
-  if updateMsgFrameCombined then
-    updateMsgFrameCombined()
+  if UpdateDynamicMessage then
+    UpdateDynamicMessage()
   end
 end
 
@@ -124,13 +124,14 @@ function AutoLFM_RaidList.Display(parent)
   
   local yOffset = 0
   
-  for index, raid in ipairs(raids or {}) do
+  for index, raid in ipairs(RAID_DATABASE or {}) do
     if raid then
       CreateRaidRow(parent, raid, index, yOffset)
       yOffset = yOffset + 20
     end
   end
 end
+
 --------------------------------------------------
 -- Clear Selection
 --------------------------------------------------
@@ -138,8 +139,8 @@ function AutoLFM_RaidList.ClearSelection()
   for _, checkbox in pairs(AutoLFM_RaidList.checkButtons) do
     checkbox:SetChecked(false)
   end
-  if selectedRaids then
-    selectedRaids = {}
+  if selectedRaidTags then
+    selectedRaidTags = {}
   end
 end
 

@@ -8,9 +8,9 @@ local hookedBagButtons = {}
 --------------------------------------------------
 -- Quest Link Creation
 --------------------------------------------------
-function CreateQuestLink(questIndex)
+function CreateQuestHyperlink(questIndex)
   if not questIndex or questIndex < 1 then return nil end
-  if not AutoLFM or not AutoLFM:IsVisible() then return nil end
+  if not AutoLFM_MainFrame or not AutoLFM_MainFrame:IsVisible() then return nil end
   
   local title, level, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
   if not title or title == "" then return nil end
@@ -43,16 +43,16 @@ local function HookQuestButton(button)
     end
     
     if not (arg1 == "LeftButton" and IsShiftKeyDown()) then return end
-    if not editBox then return end
+    if not customMessageEditBox then return end
     if not editBoxHasFocus then return end
     
     local questIndex = button:GetID()
     if not questIndex then return end
     
-    local questLink = CreateQuestLink(questIndex)
+    local questLink = CreateQuestHyperlink(questIndex)
     if questLink then
-      editBox:SetText(questLink)
-      editBox:SetFocus()
+      customMessageEditBox:SetText(questLink)
+      customMessageEditBox:SetFocus()
     end
   end)
 end
@@ -77,13 +77,13 @@ local function HookBagButton(button, bagID, slotID)
     end
     
     if not (arg1 == "LeftButton" and IsShiftKeyDown()) then return end
-    if not editBox then return end
+    if not customMessageEditBox then return end
     if not editBoxHasFocus then return end
     
     local itemLink = GetContainerItemLink(bagID, slotID)
     if itemLink then
-      editBox:SetText(itemLink)
-      editBox:SetFocus()
+      customMessageEditBox:SetText(itemLink)
+      customMessageEditBox:SetFocus()
     end
   end)
 end
@@ -152,13 +152,13 @@ function SetItemRef(link, text, button)
   end
   
   if not (button == "LeftButton" and IsShiftKeyDown()) then return end
-  if not editBox then return end
+  if not customMessageEditBox then return end
   if not editBoxHasFocus then return end
   if not link then return end
   
   if string.find(link, "^item:") and text then
-    editBox:SetText(text)
-    editBox:SetFocus()
+    customMessageEditBox:SetText(text)
+    customMessageEditBox:SetFocus()
   end
 end
 

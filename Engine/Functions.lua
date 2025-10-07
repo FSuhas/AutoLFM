@@ -2,8 +2,8 @@
 -- Chat Message Utilities
 --------------------------------------------------
 local function GetColorHex(colorKey)
-  if not colors then return "FFFFFF" end
-  for _, color in ipairs(colors) do
+  if not PRIORITY_COLOR_SCHEME then return "FFFFFF" end
+  for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
     if color.key == colorKey then
       if color.hex then
         return string.gsub(color.hex, "#", "")
@@ -15,51 +15,51 @@ local function GetColorHex(colorKey)
   return "FFFFFF"
 end
 
-function ColorText(text, colorKey)
+function ColorizeText(text, colorKey)
   local hex = GetColorHex(colorKey)
   return "|cff" .. hex .. text .. "|r"
 end
 
-function AutoLFM_Print(message, colorKey)
+function AutoLFM_PrintMessage(message, colorKey)
   if not message then return end
-  if not addonPrefix then
-    addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+  if not CHAT_MESSAGE_PREFIX then
+    CHAT_MESSAGE_PREFIX = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
   end
   
   local coloredMessage = message
   if colorKey then
-    coloredMessage = ColorText(message, colorKey)
+    coloredMessage = ColorizeText(message, colorKey)
   end
   
   if DEFAULT_CHAT_FRAME then
-    DEFAULT_CHAT_FRAME:AddMessage(addonPrefix .. coloredMessage)
+    DEFAULT_CHAT_FRAME:AddMessage(CHAT_MESSAGE_PREFIX .. coloredMessage)
   end
 end
 
 function AutoLFM_PrintSuccess(message)
-  AutoLFM_Print(message, "green")
+  AutoLFM_PrintMessage(message, "green")
 end
 
 function AutoLFM_PrintError(message)
-  AutoLFM_Print(message, "red")
+  AutoLFM_PrintMessage(message, "red")
 end
 
 function AutoLFM_PrintWarning(message)
-  AutoLFM_Print(message, "orange")
+  AutoLFM_PrintMessage(message, "orange")
 end
 
 function AutoLFM_PrintNote(message)
-  AutoLFM_Print(message, "yellow")
+  AutoLFM_PrintMessage(message, "yellow")
 end
 
 function AutoLFM_PrintInfo(message)
-  AutoLFM_Print(message, "gray")
+  AutoLFM_PrintMessage(message, "gray")
 end
 
 --------------------------------------------------
 -- String Utilities
 --------------------------------------------------
-function strsplit(delim, text)
+function SplitString(delim, text)
   if not text or not delim then return {} end
   
   local result = {}
@@ -85,7 +85,7 @@ end
 --------------------------------------------------
 -- Table Utilities
 --------------------------------------------------
-function tableContains(tbl, value)
+function TableContains(tbl, value)
   if not tbl then return false end
   for _, v in pairs(tbl) do
     if v == value then
@@ -95,7 +95,7 @@ function tableContains(tbl, value)
   return false
 end
 
-function tableCount(tbl)
+function TableCount(tbl)
   if not tbl then return 0 end
   local count = 0
   for _ in pairs(tbl) do
@@ -107,36 +107,36 @@ end
 --------------------------------------------------
 -- Group Functions
 --------------------------------------------------
-function countGroupMembers()
+function GetPartyMemberCount()
   return GetNumPartyMembers() + 1
 end
 
-function countRaidMembers()
+function GetRaidMemberCount()
   return GetNumRaidMembers()
 end
 
-function CheckRaidStatus()
+function IsPlayerInRaid()
   return UnitInRaid("player")
 end
 
-function OnRaidRosterUpdate()
-  countRaidMembers()
-  if updateMsgFrameCombined then
-    updateMsgFrameCombined()
+function HandleRaidRosterUpdate()
+  GetRaidMemberCount()
+  if UpdateDynamicMessage then
+    UpdateDynamicMessage()
   end
 end
 
-function OnGroupUpdate()
-  countGroupMembers()
-  if updateMsgFrameCombined then
-    updateMsgFrameCombined()
+function HandlePartyUpdate()
+  GetPartyMemberCount()
+  if UpdateDynamicMessage then
+    UpdateDynamicMessage()
   end
 end
 
 --------------------------------------------------
 -- Priority Calculation
 --------------------------------------------------
-function CalculatePriority(playerLevel, dungeon)
+function CalculateDungeonPriority(playerLevel, dungeon)
   if not playerLevel or not dungeon then return 5 end
   if not dungeon.levelMin or not dungeon.levelMax then return 5 end
   
@@ -179,33 +179,33 @@ end
 --------------------------------------------------
 -- Role Functions
 --------------------------------------------------
-function toggleRole(role)
+function ToggleRoleSelection(role)
   if not role then return end
-  if not roleChecks or not roleChecks[role] then return end
+  if not roleCheckboxes or not roleCheckboxes[role] then return end
   
-  if roleChecks[role]:GetChecked() then
-    if not selectedRoles then selectedRoles = {} end
-    table.insert(selectedRoles, role)
+  if roleCheckboxes[role]:GetChecked() then
+    if not selectedRolesList then selectedRolesList = {} end
+    table.insert(selectedRolesList, role)
   else
-    if selectedRoles then
-      for i, v in ipairs(selectedRoles) do
+    if selectedRolesList then
+      for i, v in ipairs(selectedRolesList) do
         if v == role then
-          table.remove(selectedRoles, i)
+          table.remove(selectedRolesList, i)
           break
         end
       end
     end
   end
   
-  if updateMsgFrameCombined then
-    updateMsgFrameCombined()
+  if UpdateDynamicMessage then
+    UpdateDynamicMessage()
   end
 end
 
-function clearSelectedRoles()
-  selectedRoles = {}
-  if roleChecks then
-    for role, check in pairs(roleChecks) do
+function ClearAllRoles()
+  selectedRolesList = {}
+  if roleCheckboxes then
+    for role, check in pairs(roleCheckboxes) do
       if check and check.SetChecked then
         check:SetChecked(false)
       end
@@ -213,15 +213,15 @@ function clearSelectedRoles()
   end
 end
 
-function getSelectedRoles()
-  return selectedRoles or {}
+function GetSelectedRoles()
+  return selectedRolesList or {}
 end
 
-function isRoleSelected(role)
+function IsRoleSelected(role)
   if not role then return false end
-  if not selectedRoles then return false end
+  if not selectedRolesList then return false end
   
-  for _, selectedRole in ipairs(selectedRoles) do
+  for _, selectedRole in ipairs(selectedRolesList) do
     if selectedRole == role then
       return true
     end
@@ -232,33 +232,33 @@ end
 --------------------------------------------------
 -- Selection Management
 --------------------------------------------------
-function clearSelectedDungeons()
-  if not selectedDungeons then selectedDungeons = {} end
+function ClearDungeonSelection()
+  if not selectedDungeonTags then selectedDungeonTags = {} end
   
   if AutoLFM_DungeonList and type(AutoLFM_DungeonList.ClearSelection) == "function" then
     AutoLFM_DungeonList.ClearSelection()
   else
-    selectedDungeons = {}
+    selectedDungeonTags = {}
   end
 end
 
-function clearSelectedRaids()
-  if not selectedRaids then selectedRaids = {} end
+function ClearRaidSelection()
+  if not selectedRaidTags then selectedRaidTags = {} end
   
   if AutoLFM_RaidList and type(AutoLFM_RaidList.ClearSelection) == "function" then
     AutoLFM_RaidList.ClearSelection()
   else
-    selectedRaids = {}
+    selectedRaidTags = {}
   end
 end
 
-function resetUserInputMessage()
-  userInputMessage = ""
-  if editBox and editBox.SetText then
-    editBox:SetText("")
+function ResetCustomMessage()
+  customUserMessage = ""
+  if customMessageEditBox and customMessageEditBox.SetText then
+    customMessageEditBox:SetText("")
   end
-  if updateMsgFrameCombined then
-    updateMsgFrameCombined()
+  if UpdateDynamicMessage then
+    UpdateDynamicMessage()
   end
 end
 
@@ -277,32 +277,28 @@ end
 --------------------------------------------------
 -- Getters
 --------------------------------------------------
-function GetCombinedMessage()
-  return combinedMessage or ""
+function GetGeneratedLFMMessage()
+  return generatedLFMMessage or ""
 end
 
-function GetSelectedRoles()
-  return selectedRoles or {}
+function GetSelectedRolesList()
+  return selectedRolesList or {}
 end
 
-function GetSelectedDungeons()
-  return selectedDungeons or {}
+function GetSelectedDungeonsList()
+  return selectedDungeonTags or {}
 end
 
-function GetSelectedRaids()
-  return selectedRaids or {}
+function GetSelectedRaidsList()
+  return selectedRaidTags or {}
 end
 
 --------------------------------------------------
 -- Slider Management
 --------------------------------------------------
-function HideSliderForRaid()
-  if sliderSizeFrame and sliderSizeFrame.Hide then
-    sliderSizeFrame:Hide()
+function HideRaidSizeControls()
+  if raidSizeControlFrame and raidSizeControlFrame.Hide then
+    raidSizeControlFrame:Hide()
   end
-  if currentSliderFrame and currentSliderFrame.Hide then
-    currentSliderFrame:Hide()
-    currentSliderFrame = nil
-  end
-  sliderValue = 0
+  raidGroupSize = 0
 end

@@ -2,14 +2,14 @@
 -- Slash Commands Handler
 --------------------------------------------------
 local function ShowHelp()
-  if AutoLFM_Print then
-    AutoLFM_Print("/lfm " .. ColorText("- Opens AutoLFM window", "gray"))
-    AutoLFM_Print("/lfm help " .. ColorText("- Displays all available commands", "gray"))
-    AutoLFM_Print("/lfm minimap show " .. ColorText("- Shows minimap button", "gray"))
-    AutoLFM_Print("/lfm minimap hide " .. ColorText("- Hides minimap button", "gray"))
-    AutoLFM_Print("/lfm minimap reset " .. ColorText("- Resets minimap button position", "gray"))
-    AutoLFM_Print("/lfm api status " .. ColorText("- Tests API availability", "gray"))
-    AutoLFM_Print("/lfm api data " .. ColorText("- Shows all current API data", "gray"))
+  if AutoLFM_PrintMessage then
+    AutoLFM_PrintMessage("/lfm " .. ColorizeText("- Opens AutoLFM window", "gray"))
+    AutoLFM_PrintMessage("/lfm help " .. ColorizeText("- Displays all available commands", "gray"))
+    AutoLFM_PrintMessage("/lfm minimap show " .. ColorizeText("- Shows minimap button", "gray"))
+    AutoLFM_PrintMessage("/lfm minimap hide " .. ColorizeText("- Hides minimap button", "gray"))
+    AutoLFM_PrintMessage("/lfm minimap reset " .. ColorizeText("- Resets minimap button position", "gray"))
+    AutoLFM_PrintMessage("/lfm api status " .. ColorizeText("- Tests API availability", "gray"))
+    AutoLFM_PrintMessage("/lfm api data " .. ColorizeText("- Shows all current API data", "gray"))
   end
 end
 
@@ -17,29 +17,29 @@ end
 -- Command Handlers
 --------------------------------------------------
 local function HandleWindowCommand()
-  if not AutoLFM then return end
+  if not AutoLFM_MainFrame then return end
   
-  if AutoLFM:IsVisible() then
-    HideUIPanel(AutoLFM)
+  if AutoLFM_MainFrame:IsVisible() then
+    HideUIPanel(AutoLFM_MainFrame)
   else
-    ShowUIPanel(AutoLFM)
+    ShowUIPanel(AutoLFM_MainFrame)
   end
 end
 
 local function SaveMinimapState(hidden)
-  if AutoLFM_SavedVariables and uniqueIdentifier and AutoLFM_SavedVariables[uniqueIdentifier] then
-    AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnHidden = hidden
+  if AutoLFM_SavedVariables and characterUniqueID and AutoLFM_SavedVariables[characterUniqueID] then
+    AutoLFM_SavedVariables[characterUniqueID].minimapBtnHidden = hidden
   end
 end
 
 local function HandleMinimapShow()
-  if not AutoLFMMinimapBtn then
+  if not AutoLFM_MinimapButton then
     AutoLFM_PrintError("Minimap button not initialized")
     return
   end
   
-  if not AutoLFMMinimapBtn:IsShown() then
-    AutoLFMMinimapBtn:Show()
+  if not AutoLFM_MinimapButton:IsShown() then
+    AutoLFM_MinimapButton:Show()
     SaveMinimapState(false)
     AutoLFM_PrintSuccess("Minimap button displayed")
   else
@@ -48,13 +48,13 @@ local function HandleMinimapShow()
 end
 
 local function HandleMinimapHide()
-  if not AutoLFMMinimapBtn then
+  if not AutoLFM_MinimapButton then
     AutoLFM_PrintError("Minimap button not initialized")
     return
   end
   
-  if AutoLFMMinimapBtn:IsShown() then
-    AutoLFMMinimapBtn:Hide()
+  if AutoLFM_MinimapButton:IsShown() then
+    AutoLFM_MinimapButton:Hide()
     SaveMinimapState(true)
     AutoLFM_PrintSuccess("Minimap button hidden")
   else
@@ -63,22 +63,22 @@ local function HandleMinimapHide()
 end
 
 local function HandleMinimapReset()
-  if not AutoLFM_SavedVariables or not uniqueIdentifier then
+  if not AutoLFM_SavedVariables or not characterUniqueID then
     AutoLFM_PrintError("SavedVariables not initialized")
     return
   end
   
-  if not AutoLFM_SavedVariables[uniqueIdentifier] then
-    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  if not AutoLFM_SavedVariables[characterUniqueID] then
+    AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnX = -10
-  AutoLFM_SavedVariables[uniqueIdentifier].minimapBtnY = -10
+  AutoLFM_SavedVariables[characterUniqueID].minimapBtnX = -10
+  AutoLFM_SavedVariables[characterUniqueID].minimapBtnY = -10
   
-  if AutoLFMMinimapBtn then
-    AutoLFMMinimapBtn:ClearAllPoints()
-    AutoLFMMinimapBtn:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", -10, -10)
-    AutoLFMMinimapBtn:Show()
+  if AutoLFM_MinimapButton then
+    AutoLFM_MinimapButton:ClearAllPoints()
+    AutoLFM_MinimapButton:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", -10, -10)
+    AutoLFM_MinimapButton:Show()
   end
   
   AutoLFM_PrintSuccess("Minimap button position reset")
@@ -135,24 +135,24 @@ SLASH_LFM1 = "/lfm"
 SlashCmdList["LFM"] = function(msg)
   if not msg then msg = "" end
   
-  local args = strsplit(" ", msg)
+  local args = SplitString(" ", msg)
   local command = args[1] or ""
   local subCommand = args[2]
   local handler = commandHandlers[command]
   
   if not handler then
-    AutoLFM_PrintError("Unknown command: " .. ColorText(command, "orange"))
+    AutoLFM_PrintError("Unknown command: " .. ColorizeText(command, "orange"))
     return
   end
   
   if type(handler) == "table" then
     if not subCommand then
-      AutoLFM_PrintError("Missing argument for command: " .. ColorText(command, "orange"))
+      AutoLFM_PrintError("Missing argument for command: " .. ColorizeText(command, "orange"))
       return
     end
     handler = handler[subCommand]
     if not handler then
-      AutoLFM_PrintError("Unknown parameter: " .. ColorText(subCommand, "orange"))
+      AutoLFM_PrintError("Unknown parameter: " .. ColorizeText(subCommand, "orange"))
       return
     end
   end

@@ -12,8 +12,8 @@ local function InitializeFilterStates()
   if filtersInitialized then return end
   
   filterStates = {}
-  if colors then
-    for _, color in ipairs(colors) do
+  if PRIORITY_COLOR_SCHEME then
+    for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
       if color and color.key then
         filterStates[color.key] = true
       end
@@ -26,39 +26,41 @@ end
 --------------------------------------------------
 -- Save/Load Filter States
 --------------------------------------------------
-function SaveDungeonFilters()
+function SaveColorFilterSettings()
   if not AutoLFM_SavedVariables then return end
-  if not uniqueIdentifier then return end
-  if not AutoLFM_SavedVariables[uniqueIdentifier] then
-    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  if not characterUniqueID then return end
+  if not AutoLFM_SavedVariables[characterUniqueID] then
+    AutoLFM_SavedVariables[characterUniqueID] = {}
   end
-  AutoLFM_SavedVariables[uniqueIdentifier].dungeonFilters = filterStates
+  AutoLFM_SavedVariables[characterUniqueID].dungeonFilters = filterStates
 end
 
-function LoadDungeonFilters()
+function LoadColorFilterSettings()
+  InitializeFilterStates()
+  
   if not AutoLFM_SavedVariables then return end
-  if not uniqueIdentifier then return end
-  if not AutoLFM_SavedVariables[uniqueIdentifier] then
-    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  if not characterUniqueID then return end
+  if not AutoLFM_SavedVariables[characterUniqueID] then
+    AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  if AutoLFM_SavedVariables[uniqueIdentifier].dungeonFilters then
-    for key, value in pairs(AutoLFM_SavedVariables[uniqueIdentifier].dungeonFilters) do
+  if AutoLFM_SavedVariables[characterUniqueID].dungeonFilters then
+    for key, value in pairs(AutoLFM_SavedVariables[characterUniqueID].dungeonFilters) do
       filterStates[key] = value
     end
   else
-    AutoLFM_SavedVariables[uniqueIdentifier].dungeonFilters = filterStates
+    AutoLFM_SavedVariables[characterUniqueID].dungeonFilters = filterStates
   end
 end
 
 --------------------------------------------------
 -- Check if Priority Should Be Displayed
 --------------------------------------------------
-function ShouldDisplayPriority(priority)
+function ShouldShowPriorityLevel(priority)
   if not priority then return true end
-  if not colors then return true end
+  if not PRIORITY_COLOR_SCHEME then return true end
   
-  for _, color in ipairs(colors) do
+  for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
     if color and color.priority == priority and color.key then
       return filterStates[color.key] or false
     end
@@ -69,10 +71,10 @@ end
 --------------------------------------------------
 -- Refresh Dungeon List
 --------------------------------------------------
-function RefreshDungeonList()
-  if AutoLFM_DungeonList and contentFrame then
+function RefreshDungeonDisplay()
+  if AutoLFM_DungeonList and dungeonListContentFrame then
     if type(AutoLFM_DungeonList.Display) == "function" then
-      AutoLFM_DungeonList.Display(contentFrame)
+      AutoLFM_DungeonList.Display(dungeonListContentFrame)
     end
   end
 end
@@ -80,7 +82,7 @@ end
 --------------------------------------------------
 -- Create Filter Checkboxes
 --------------------------------------------------
-function CreateDungeonFilterCheckboxes(parent)
+function CreateColorFilterUI(parent)
   if not parent then return nil end
   
   InitializeFilterStates()
@@ -90,9 +92,9 @@ function CreateDungeonFilterCheckboxes(parent)
   filterFrame:SetWidth(300)
   filterFrame:SetHeight(30)
   
-  if not colors then return filterFrame end
+  if not PRIORITY_COLOR_SCHEME then return filterFrame end
   
-  for i, colorData in ipairs(colors) do
+  for i, colorData in ipairs(PRIORITY_COLOR_SCHEME) do
     if colorData and colorData.key then
       local button = CreateFrame("Button", "DungeonFilter_"..colorData.key, filterFrame)
       button:SetWidth(20)
@@ -139,8 +141,8 @@ function CreateDungeonFilterCheckboxes(parent)
           button.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check-Disabled")
         end
         
-        SaveDungeonFilters()
-        RefreshDungeonList()
+        SaveColorFilterSettings()
+        RefreshDungeonDisplay()
       end)
       
       filterCheckboxes[colorData.key] = button

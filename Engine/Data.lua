@@ -1,88 +1,60 @@
 --------------------------------------------------
 -- Global Variables Declaration
 --------------------------------------------------
--- Frame references
-contentFrame = nil
+-- Frame references (used across files)
+dungeonListContentFrame = nil
 dungeonFilterFrame = nil
-editBox = nil
-insideMore = nil
-msgFrameDj = nil
-msgFrameRaids = nil
-msgTextDj = nil
-msgTextRaids = nil
-slider = nil
-sliderSize = nil
-sliderSizeEditBox = nil
-sliderSizeFrame = nil
-sliderframe = nil
-toggleButton = nil
+customMessageEditBox = nil
+moreTabContentFrame = nil
+dungeonMessageDisplayFrame = nil
+raidMessageDisplayFrame = nil
+dungeonMessageText = nil
+raidMessageText = nil
+broadcastIntervalSlider = nil
+raidSizeSlider = nil
+raidSizeValueEditBox = nil
+raidSizeControlFrame = nil
+broadcastIntervalFrame = nil
+broadcastToggleButton = nil
 
 -- Broadcast state
-isBroadcasting = false
-broadcastStartTime = 0
-lastBroadcastTime = 0
-messagesSentCount = 0
-searchStartTime = 0
+isBroadcastActive = false
+broadcastStartTimestamp = 0
+lastBroadcastTimestamp = 0
+broadcastMessageCount = 0
+groupSearchStartTimestamp = 0
 
 -- Selection state
-selectedDungeons = {}
-selectedRaids = {}
-selectedRoles = {}
-roleChecks = {}
-selectedChannels = {}
+selectedDungeonTags = {}
+selectedRaidTags = {}
+selectedRolesList = {}
+roleCheckboxes = {}
+selectedChannelsList = {}
 
 -- Message state
-combinedMessage = ""
-userInputMessage = ""
-sliderValue = 0
-raidSize = 0
+generatedLFMMessage = ""
+customUserMessage = ""
+raidGroupSize = 0
 
 -- Configuration
-texturePath = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
-addonPrefix = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
-charName = nil
-realmName = nil
-uniqueIdentifier = nil
+TEXTURE_BASE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
+CHAT_MESSAGE_PREFIX = "|cffffffff[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+playerCharacterName = nil
+playerRealmName = nil
+characterUniqueID = nil
 
--- Global tables
+-- Global tables (initialized in their respective files)
 AutoLFM_DungeonList = nil
 AutoLFM_RaidList = nil
 AutoLFM_API = nil
-AutoLFM = nil
-AutoLFMMinimapBtn = nil
-AutoLFMMainIcon = nil
-
--- Global functions (defined in other files)
--- Functions.lua:
---   AutoLFM_Print, AutoLFM_PrintSuccess, AutoLFM_PrintError, AutoLFM_PrintWarning, AutoLFM_PrintInfo
---   strsplit, tableContains, tableCount
---   countGroupMembers, countRaidMembers, CheckRaidStatus, OnRaidRosterUpdate, OnGroupUpdate
---   CalculatePriority
---   toggleRole, clearSelectedRoles, getSelectedRoles, isRoleSelected
---   clearSelectedDungeons, clearSelectedRaids, resetUserInputMessage
---   ClearAllBackdrops
---   GetCombinedMessage, GetSelectedRoles, GetSelectedDungeons, GetSelectedRaids
---   HideSliderForRaid
--- DynamicMsg.lua:
---   updateMsgFrameCombined
--- Channels.lua:
---   SaveSelectedChannels, LoadSelectedChannels, ToggleChannelSelection
---   findChannels, CreateChannelButtons, InitializeChannelFrame, EnsureChannelFrameExists
--- Broadcast.lua:
---   ValidateBroadcastSetup, sendMessageToSelectedChannels, startMessageBroadcast, stopMessageBroadcast
--- DungeonFilters.lua:
---   SaveDungeonFilters, LoadDungeonFilters, ShouldDisplayPriority, RefreshDungeonList, CreateDungeonFilterCheckboxes
--- Frame.lua:
---   CreateQuestLink, UpdateSliderText
--- IconAnimation.lua:
---   AnimateIcons, ResetIcons, StartIconAnimation, StopIconAnimation
--- MinimapButton.lua:
---   InitMinimapButton
+AutoLFM_MainFrame = nil
+AutoLFM_MinimapButton = nil
+AutoLFM_MainIconTexture = nil
 
 --------------------------------------------------
 -- Dungeons Data
 --------------------------------------------------
-dungeons = {
+DUNGEON_DATABASE = {
   { name = "Ragefire Chasm", tag = "RFC", levelMin = 13, levelMax = 19 },
   { name = "Wailing Caverns", tag = "WC", levelMin = 16, levelMax = 25 },
   { name = "The Deadmines", tag = "DM", levelMin = 16, levelMax = 24 },
@@ -127,7 +99,7 @@ dungeons = {
 --------------------------------------------------
 -- Raids Data
 --------------------------------------------------
-raids = {
+RAID_DATABASE = {
   { name = "Scholomance 10", tag = "Scholo 10", sizeMin = 10, sizeMax = 10 },
   { name = "Stratholme Live 10", tag = "Strat Live 10", sizeMin = 10, sizeMax = 10 },
   { name = "Stratholme UD 10", tag = "Strat UD 10", sizeMin = 10, sizeMax = 10 },
@@ -146,7 +118,7 @@ raids = {
 --------------------------------------------------
 -- Colors
 --------------------------------------------------
-colors = {
+PRIORITY_COLOR_SCHEME = {
   {priority = 1, key = "green", r = 0.25, g = 0.75, b = 0.25, hex = "#40BF40"},
   {priority = 2, key = "yellow", r = 1.0, g = 1.0, b = 0.0, hex = "#FEFE00"},
   {priority = 3, key = "orange", r = 1.0, g = 0.50, b = 0.25, hex = "#FF8040"},
@@ -161,9 +133,9 @@ if not AutoLFM_SavedVariables then
   AutoLFM_SavedVariables = {}
 end
 
-charName = UnitName("player") or "Unknown"
-realmName = GetRealmName() or "Unknown"
-uniqueIdentifier = charName .. "-" .. realmName
+playerCharacterName = UnitName("player") or "Unknown"
+playerRealmName = GetRealmName() or "Unknown"
+characterUniqueID = playerCharacterName .. "-" .. playerRealmName
 
 --------------------------------------------------
 -- Initialize Character SavedVariables
@@ -173,18 +145,18 @@ function InitializeCharacterSavedVariables()
     AutoLFM_SavedVariables = {}
   end
   
-  if not uniqueIdentifier or uniqueIdentifier == "" then
+  if not characterUniqueID or characterUniqueID == "" then
     if AutoLFM_PrintError then
       AutoLFM_PrintError("Cannot initialize SavedVariables: invalid character identifier")
     end
     return false
   end
   
-  if not AutoLFM_SavedVariables[uniqueIdentifier] then
-    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  if not AutoLFM_SavedVariables[characterUniqueID] then
+    AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  local char = AutoLFM_SavedVariables[uniqueIdentifier]
+  local char = AutoLFM_SavedVariables[characterUniqueID]
   
   if not char.selectedChannels then
     char.selectedChannels = {}
@@ -204,12 +176,12 @@ function InitializeCharacterSavedVariables()
   
   if not char.dungeonFilters then
     char.dungeonFilters = {}
-    for _, color in ipairs(colors or {}) do
+    for _, color in ipairs(PRIORITY_COLOR_SCHEME or {}) do
       char.dungeonFilters[color.key] = true
     end
   end
   
-  selectedChannels = char.selectedChannels
+  selectedChannelsList = char.selectedChannels
   
   return true
 end

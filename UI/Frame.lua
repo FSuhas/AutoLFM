@@ -3,7 +3,6 @@
 --------------------------------------------------
 local currentTab = 1
 local tabs = {}
-local currentSliderFrame = nil
 local step = 10
 
 -- Inside frames (local to Frame.lua)
@@ -13,7 +12,7 @@ local insideRaids = nil
 -- Scroll frames (local to Frame.lua)
 local djScrollFrame = nil
 local raidScrollFrame = nil
-local raidContentFrame = nil
+local raidListContentFrame = nil
 
 -- Dungeon filter frame (local to Frame.lua)
 local dungeonFilterFrame = nil
@@ -21,66 +20,66 @@ local dungeonFilterFrame = nil
 --------------------------------------------------
 -- Main Frame
 --------------------------------------------------
-AutoLFM = CreateFrame("Frame", "AutoLFM", UIParent)
-UIPanelWindows["AutoLFM"] = { area = "left", pushable = 3 }
-AutoLFM:SetWidth(384)
-AutoLFM:SetHeight(512)
-AutoLFM:Hide()
+AutoLFM_MainFrame = CreateFrame("Frame", "AutoLFM_MainFrame", UIParent)
+UIPanelWindows["AutoLFM_MainFrame"] = { area = "left", pushable = 3 }
+AutoLFM_MainFrame:SetWidth(384)
+AutoLFM_MainFrame:SetHeight(512)
+AutoLFM_MainFrame:Hide()
 
-local mainTexture = AutoLFM:CreateTexture(nil, "BACKGROUND")
-mainTexture:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 0, 0)
+local mainTexture = AutoLFM_MainFrame:CreateTexture(nil, "BACKGROUND")
+mainTexture:SetPoint("TOPLEFT", AutoLFM_MainFrame, "TOPLEFT", 0, 0)
 mainTexture:SetWidth(512)
 mainTexture:SetHeight(512)
-mainTexture:SetTexture(texturePath .. "mainFrame")
+mainTexture:SetTexture(TEXTURE_BASE_PATH .. "mainFrame")
 
-local mainIcon = AutoLFM:CreateTexture(nil, "LOW")
-mainIcon:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 7, -4)
+local mainIcon = AutoLFM_MainFrame:CreateTexture(nil, "LOW")
+mainIcon:SetPoint("TOPLEFT", AutoLFM_MainFrame, "TOPLEFT", 7, -4)
 mainIcon:SetWidth(64)
 mainIcon:SetHeight(64)
-mainIcon:SetTexture(texturePath .. "Eyes\\eye01")
-AutoLFMMainIcon = mainIcon
+mainIcon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
+AutoLFM_MainIconTexture = mainIcon
 
-local mainTitle = AutoLFM:CreateFontString(nil, "MEDIUM", "GameFontNormal")
-mainTitle:SetPoint("TOP", AutoLFM, "TOP", 0, -18)
+local mainTitle = AutoLFM_MainFrame:CreateFontString(nil, "MEDIUM", "GameFontNormal")
+mainTitle:SetPoint("TOP", AutoLFM_MainFrame, "TOP", 0, -18)
 mainTitle:SetText("AutoLFM")
 
-local close = CreateFrame("Button", nil, AutoLFM, "UIPanelCloseButton")
-close:SetPoint("TOPRIGHT", AutoLFM, "TOPRIGHT", -27, -8)
-close:SetScript("OnClick", function() HideUIPanel(AutoLFM) end)
+local close = CreateFrame("Button", nil, AutoLFM_MainFrame, "UIPanelCloseButton")
+close:SetPoint("TOPRIGHT", AutoLFM_MainFrame, "TOPRIGHT", -27, -8)
+close:SetScript("OnClick", function() HideUIPanel(AutoLFM_MainFrame) end)
 
 --------------------------------------------------
 -- Roles
 --------------------------------------------------
 local function createRole(name, x, texCoordStart)
-  local btn = CreateFrame("Button", nil, AutoLFM)
-  btn:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", x, -52)
+  local btn = CreateFrame("Button", nil, AutoLFM_MainFrame)
+  btn:SetPoint("TOPLEFT", AutoLFM_MainFrame, "TOPLEFT", x, -52)
   btn:SetWidth(54)
   btn:SetHeight(54)
-  btn:SetHighlightTexture(texturePath .. "rolesHighlight")
+  btn:SetHighlightTexture(TEXTURE_BASE_PATH .. "rolesHighlight")
   
   local bg = btn:CreateTexture(nil, "BACKGROUND")
   bg:SetPoint("TOPLEFT", btn, "TOPLEFT", -12, 14)
   bg:SetWidth(84)
   bg:SetHeight(84)
-  bg:SetTexture(texturePath .. "rolesBackground")
+  bg:SetTexture(TEXTURE_BASE_PATH .. "rolesBackground")
   bg:SetTexCoord(texCoordStart, texCoordStart + 0.2968, 0, 0.5937)
   bg:SetVertexColor(1, 1, 1, 0.6)
   
   local icon = btn:CreateTexture(nil, "BORDER")
   icon:SetAllPoints(btn)
-  icon:SetTexture(texturePath .. "roles" .. name)
+  icon:SetTexture(TEXTURE_BASE_PATH .. "roles" .. name)
   
-  local check = CreateFrame("CheckButton", nil, AutoLFM, "UICheckButtonTemplate")
+  local check = CreateFrame("CheckButton", nil, AutoLFM_MainFrame, "UICheckButtonTemplate")
   check:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 1, -5)
   check:SetWidth(24)
   check:SetHeight(24)
   check:SetScript("OnClick", function() 
-    if toggleRole then 
-      toggleRole(name) 
+    if ToggleRoleSelection then 
+      ToggleRoleSelection(name) 
     end 
   end)
   
-  roleChecks[name] = check
+  roleCheckboxes[name] = check
   btn:SetScript("OnClick", function() check:Click() end)
   
   return btn, bg, icon, check
@@ -93,22 +92,22 @@ createRole("DPS", 270, 0.5937)
 --------------------------------------------------
 -- Dynamic Message Frames
 --------------------------------------------------
-msgFrameDj = CreateFrame("Frame", nil, AutoLFM)
-msgFrameDj:SetPoint("TOP", AutoLFM, "TOP", -10, -125)
-msgFrameDj:SetWidth(330)
-msgFrameDj:SetHeight(30)
+dungeonMessageDisplayFrame = CreateFrame("Frame", nil, AutoLFM_MainFrame)
+dungeonMessageDisplayFrame:SetPoint("TOP", AutoLFM_MainFrame, "TOP", -10, -125)
+dungeonMessageDisplayFrame:SetWidth(330)
+dungeonMessageDisplayFrame:SetHeight(30)
 
-msgTextDj = msgFrameDj:CreateFontString(nil, "MEDIUM", "GameFontHighlight")
-msgTextDj:SetPoint("CENTER", msgFrameDj, "CENTER", 0, 0)
+dungeonMessageText = dungeonMessageDisplayFrame:CreateFontString(nil, "MEDIUM", "GameFontHighlight")
+dungeonMessageText:SetPoint("CENTER", dungeonMessageDisplayFrame, "CENTER", 0, 0)
 
-msgFrameRaids = CreateFrame("Frame", nil, AutoLFM)
-msgFrameRaids:SetPoint("TOP", AutoLFM, "TOP", -10, -125)
-msgFrameRaids:SetWidth(330)
-msgFrameRaids:SetHeight(30)
+raidMessageDisplayFrame = CreateFrame("Frame", nil, AutoLFM_MainFrame)
+raidMessageDisplayFrame:SetPoint("TOP", AutoLFM_MainFrame, "TOP", -10, -125)
+raidMessageDisplayFrame:SetWidth(330)
+raidMessageDisplayFrame:SetHeight(30)
 
-msgTextRaids = msgFrameRaids:CreateFontString(nil, "MEDIUM", "GameFontHighlight")
-msgTextRaids:SetPoint("CENTER", msgFrameRaids, "CENTER", 0, 0)
-msgTextRaids:SetTextColor(1, 1, 1)
+raidMessageText = raidMessageDisplayFrame:CreateFontString(nil, "MEDIUM", "GameFontHighlight")
+raidMessageText:SetPoint("CENTER", raidMessageDisplayFrame, "CENTER", 0, 0)
+raidMessageText:SetTextColor(1, 1, 1)
 
 --------------------------------------------------
 -- Tab System
@@ -119,7 +118,7 @@ local function onTabClick(tabNum)
   -- Hide all inside frames and scroll frames
   if insideDungeons then insideDungeons:Hide() end
   if insideRaids then insideRaids:Hide() end
-  if insideMore then insideMore:Hide() end
+  if moreTabContentFrame then moreTabContentFrame:Hide() end
   if djScrollFrame then djScrollFrame:Hide() end
   if raidScrollFrame then raidScrollFrame:Hide() end
   
@@ -141,15 +140,15 @@ local function onTabClick(tabNum)
       raidScrollFrame:SetVerticalScroll(0)
     end
   elseif tabNum == 3 then
-    if insideMore then 
-      insideMore:Show()
+    if moreTabContentFrame then 
+      moreTabContentFrame:Show()
     end
   end
   
   -- Update tab visuals
   for i = 1, 3 do
     local active = i == tabNum
-    tabs[i].bg:SetTexture(texturePath .. (active and "tabActive" or "tabInactive"))
+    tabs[i].bg:SetTexture(TEXTURE_BASE_PATH .. (active and "tabActive" or "tabInactive"))
     tabs[i].text:SetTextColor(1, active and 1 or 0.82, active and 1 or 0)
     if active then 
       tabs[i].highlight:Hide() 
@@ -158,20 +157,20 @@ local function onTabClick(tabNum)
 end
 
 local function createTab(index, label, onClick, anchorTo)
-  local tab = CreateFrame("Button", nil, AutoLFM)
-  tab:SetPoint(anchorTo and "LEFT" or "BOTTOMLEFT", anchorTo or AutoLFM, anchorTo and "RIGHT" or "BOTTOMLEFT", anchorTo and -5 or 20, anchorTo and 0 or 46)
+  local tab = CreateFrame("Button", nil, AutoLFM_MainFrame)
+  tab:SetPoint(anchorTo and "LEFT" or "BOTTOMLEFT", anchorTo or AutoLFM_MainFrame, anchorTo and "RIGHT" or "BOTTOMLEFT", anchorTo and -5 or 20, anchorTo and 0 or 46)
   tab:SetWidth(90)
   tab:SetHeight(32)
   
   local bg = tab:CreateTexture(nil, "BACKGROUND")
-  bg:SetTexture(texturePath .. (index == 1 and "tabActive" or "tabInactive"))
+  bg:SetTexture(TEXTURE_BASE_PATH .. (index == 1 and "tabActive" or "tabInactive"))
   bg:SetAllPoints()
   
   local highlight = tab:CreateTexture(nil, "BORDER")
   highlight:SetPoint("CENTER", tab, "CENTER", 0, 0)
   highlight:SetWidth(70)
   highlight:SetHeight(24)
-  highlight:SetTexture(texturePath .. "tabHighlight")
+  highlight:SetTexture(TEXTURE_BASE_PATH .. "tabHighlight")
   highlight:Hide()
   
   local text = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -209,19 +208,19 @@ end
 -- Tab Actions
 --------------------------------------------------
 local function clearAllSelections()
-  if clearSelectedRoles then clearSelectedRoles() end
-  if resetUserInputMessage then resetUserInputMessage() end
-  if updateMsgFrameCombined then updateMsgFrameCombined() end
-  if EnsureChannelFrameExists then EnsureChannelFrameExists() end
+  if ClearAllRoles then ClearAllRoles() end
+  if ResetCustomMessage then ResetCustomMessage() end
+  if UpdateDynamicMessage then UpdateDynamicMessage() end
+  if EnsureChannelUIExists then EnsureChannelUIExists() end
 end
 
 local function onDungeonsTab()
-  if msgFrameDj then msgFrameDj:Show() end
-  if msgFrameRaids then msgFrameRaids:Hide() end
+  if dungeonMessageDisplayFrame then dungeonMessageDisplayFrame:Show() end
+  if raidMessageDisplayFrame then raidMessageDisplayFrame:Hide() end
   if dungeonFilterFrame then dungeonFilterFrame:Show() end
   
-  if clearSelectedRaids then clearSelectedRaids() end
-  if HideSliderForRaid then HideSliderForRaid() end
+  if ClearRaidSelection then ClearRaidSelection() end
+  if HideRaidSizeControls then HideRaidSizeControls() end
   
   if AutoLFM_RaidList and AutoLFM_RaidList.ClearBackdrops then
     AutoLFM_RaidList.ClearBackdrops()
@@ -231,11 +230,11 @@ local function onDungeonsTab()
 end
 
 local function onRaidsTab()
-  if msgFrameDj then msgFrameDj:Hide() end
-  if msgFrameRaids then msgFrameRaids:Show() end
+  if dungeonMessageDisplayFrame then dungeonMessageDisplayFrame:Hide() end
+  if raidMessageDisplayFrame then raidMessageDisplayFrame:Show() end
   if dungeonFilterFrame then dungeonFilterFrame:Hide() end
   
-  if clearSelectedDungeons then clearSelectedDungeons() end
+  if ClearDungeonSelection then ClearDungeonSelection() end
   
   if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
     AutoLFM_DungeonList.ClearBackdrops()
@@ -245,7 +244,7 @@ local function onRaidsTab()
 end
 
 local function onMoreTab()
-  if InitializeChannelFrame then InitializeChannelFrame() end
+  if InitializeChannelSelectionUI then InitializeChannelSelectionUI() end
 end
 
 --------------------------------------------------
@@ -264,26 +263,26 @@ end
 --------------------------------------------------
 -- Inside Frames
 --------------------------------------------------
-insideDungeons = CreateFrame("Frame", nil, AutoLFM)
-insideDungeons:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
+insideDungeons = CreateFrame("Frame", nil, AutoLFM_MainFrame)
+insideDungeons:SetPoint("TOPLEFT", AutoLFM_MainFrame, "TOPLEFT", 25, -157)
 insideDungeons:SetWidth(323)
 insideDungeons:SetHeight(253)
 insideDungeons:SetFrameStrata("HIGH")
 insideDungeons:Show()
 
-insideRaids = CreateFrame("Frame", nil, AutoLFM)
-insideRaids:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
+insideRaids = CreateFrame("Frame", nil, AutoLFM_MainFrame)
+insideRaids:SetPoint("TOPLEFT", AutoLFM_MainFrame, "TOPLEFT", 25, -157)
 insideRaids:SetWidth(323)
 insideRaids:SetHeight(253)
 insideRaids:SetFrameStrata("HIGH")
 insideRaids:Hide()
 
-insideMore = CreateFrame("Frame", nil, AutoLFM)
-insideMore:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
-insideMore:SetWidth(295)
-insideMore:SetHeight(253)
-insideMore:SetFrameStrata("HIGH")
-insideMore:Hide()
+moreTabContentFrame = CreateFrame("Frame", nil, AutoLFM_MainFrame)
+moreTabContentFrame:SetPoint("TOPLEFT", AutoLFM_MainFrame, "TOPLEFT", 25, -157)
+moreTabContentFrame:SetWidth(295)
+moreTabContentFrame:SetHeight(253)
+moreTabContentFrame:SetFrameStrata("HIGH")
+moreTabContentFrame:Hide()
 
 createTabs()
 
@@ -307,10 +306,10 @@ local function createScrollFrame(name, parent)
 end
 
 -- Dungeons scroll in insideDungeons frame
-djScrollFrame, contentFrame = createScrollFrame("Dungeons", insideDungeons)
+djScrollFrame, dungeonListContentFrame = createScrollFrame("Dungeons", insideDungeons)
 
 -- Raids scroll in insideRaids frame  
-raidScrollFrame, raidContentFrame = createScrollFrame("Raids", insideRaids)
+raidScrollFrame, raidListContentFrame = createScrollFrame("Raids", insideRaids)
 
 -- Force initial visibility for tab 1
 djScrollFrame:Show()
@@ -319,7 +318,7 @@ raidScrollFrame:Hide()
 --------------------------------------------------
 -- Raid Size Slider
 --------------------------------------------------
-sliderValue = 0
+raidGroupSize = 0
 
 local function createRaidSizeControls(parent)
   local raidSizeFrame = CreateFrame("Frame", nil, parent)
@@ -332,7 +331,7 @@ local function createRaidSizeControls(parent)
   raidSizeIcon:SetPoint("LEFT", raidSizeFrame, "LEFT", 0, 0)
   raidSizeIcon:SetWidth(18)
   raidSizeIcon:SetHeight(18)
-  raidSizeIcon:SetTexture(texturePath .. "Icons\\group")
+  raidSizeIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\group")
   
   local raidSizeEditBox = CreateFrame("EditBox", "AutoLFM_RaidSizeEditBox", raidSizeFrame)
   raidSizeEditBox:SetPoint("LEFT", raidSizeIcon, "RIGHT", 10, 0)
@@ -384,50 +383,38 @@ local function createRaidSizeControls(parent)
   return raidSizeFrame, raidSizeEditBox, raidSizeSlider
 end
 
-sliderSizeFrame, sliderSizeEditBox, sliderSize = createRaidSizeControls(AutoLFM)
+raidSizeControlFrame, raidSizeValueEditBox, raidSizeSlider = createRaidSizeControls(AutoLFM_MainFrame)
 
-if CreateDungeonFilterCheckboxes then
-  dungeonFilterFrame = CreateDungeonFilterCheckboxes(AutoLFM)
+if CreateColorFilterUI then
+  dungeonFilterFrame = CreateColorFilterUI(AutoLFM_MainFrame)
   if dungeonFilterFrame then
     dungeonFilterFrame:Show()
   end
 end
 
-function UpdateSliderText(value)
+function UpdateRaidSizeDisplay(value)
   if value then
-    sliderSizeEditBox:SetText(tostring(value))
+    raidSizeValueEditBox:SetText(tostring(value))
   else
-    sliderSizeEditBox:SetText("")
+    raidSizeValueEditBox:SetText("")
   end
 end
 
-function HideSliderForRaid()
-  if sliderSizeFrame then
-    sliderSizeFrame:Hide()
-  end
-  if currentSliderFrame then
-    currentSliderFrame:Hide()
-    currentSliderFrame = nil
-  end
-  sliderValue = 0
-end
-
-sliderSize:SetScript("OnValueChanged", function()
-  local value = sliderSize:GetValue()
-  sliderValue = value
-  raidSize = value
-  UpdateSliderText(value)
-  if updateMsgFrameCombined then
-    updateMsgFrameCombined()
+raidSizeSlider:SetScript("OnValueChanged", function()
+  local value = raidSizeSlider:GetValue()
+  raidGroupSize = value
+  UpdateRaidSizeDisplay(value)
+  if UpdateDynamicMessage then
+    UpdateDynamicMessage()
   end
 end)
 
-sliderSizeEditBox:SetScript("OnTextChanged", function()
-  local value = tonumber(sliderSizeEditBox:GetText())
+raidSizeValueEditBox:SetScript("OnTextChanged", function()
+  local value = tonumber(raidSizeValueEditBox:GetText())
   if value then
-    local minVal, maxVal = sliderSize:GetMinMaxValues()
+    local minVal, maxVal = raidSizeSlider:GetMinMaxValues()
     if value >= minVal and value <= maxVal then
-      sliderSize:SetValue(value)
+      raidSizeSlider:SetValue(value)
     end
   end
 end)
@@ -463,9 +450,9 @@ local function setupPlaceholder(editBox, placeholderText)
   end)
   
   editBox:SetScript("OnTextChanged", function()
-    userInputMessage = editBox:GetText()
-    if updateMsgFrameCombined then
-      updateMsgFrameCombined()
+    customUserMessage = editBox:GetText()
+    if UpdateDynamicMessage then
+      UpdateDynamicMessage()
     end
     updatePlaceholder()
   end)
@@ -481,16 +468,16 @@ local function setupPlaceholder(editBox, placeholderText)
   updatePlaceholder()
 end
 
-editBox = CreateFrame("EditBox", "AutoLFM_EditBox", insideMore)
-editBox:SetPoint("TOP", insideMore, "TOP", 0, -10)
-editBox:SetWidth(270)
-editBox:SetHeight(30)
-editBox:SetAutoFocus(false)
-editBox:SetFont("Fonts\\FRIZQT__.TTF", 14)
-editBox:SetMaxLetters(150)
-editBox:SetText("")
-editBox:SetTextColor(1, 1, 1)
-editBox:SetBackdrop({
+customMessageEditBox = CreateFrame("EditBox", "AutoLFM_EditBox", moreTabContentFrame)
+customMessageEditBox:SetPoint("TOP", moreTabContentFrame, "TOP", 0, -10)
+customMessageEditBox:SetWidth(270)
+customMessageEditBox:SetHeight(30)
+customMessageEditBox:SetAutoFocus(false)
+customMessageEditBox:SetFont("Fonts\\FRIZQT__.TTF", 14)
+customMessageEditBox:SetMaxLetters(150)
+customMessageEditBox:SetText("")
+customMessageEditBox:SetTextColor(1, 1, 1)
+customMessageEditBox:SetBackdrop({
   bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
   edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
   tile = true,
@@ -498,12 +485,12 @@ editBox:SetBackdrop({
   edgeSize = 16,
   insets = { left = 8, right = 2, top = 2, bottom = 2 }
 })
-editBox:SetBackdropColor(0, 0, 0, 0.8)
-editBox:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
-editBox:SetJustifyH("CENTER")
-editBox:SetTextInsets(10, 10, 5, 5)
+customMessageEditBox:SetBackdropColor(0, 0, 0, 0.8)
+customMessageEditBox:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+customMessageEditBox:SetJustifyH("CENTER")
+customMessageEditBox:SetTextInsets(10, 10, 5, 5)
 
-setupPlaceholder(editBox, "Add message details (optional)")
+setupPlaceholder(customMessageEditBox, "Add message details (optional)")
 
 --------------------------------------------------
 -- Inside More - Broadcast Interval Slider
@@ -514,33 +501,33 @@ local function SnapToStep(value)
   return roundedValue
 end
 
-sliderframe = CreateFrame("Frame", nil, insideMore)
-sliderframe:SetPoint("TOP", editBox, "BOTTOM", 0, -30)
-sliderframe:SetWidth(250)
-sliderframe:SetHeight(50)
-sliderframe:SetBackdrop({
+broadcastIntervalFrame = CreateFrame("Frame", nil, moreTabContentFrame)
+broadcastIntervalFrame:SetPoint("TOP", customMessageEditBox, "BOTTOM", 0, -30)
+broadcastIntervalFrame:SetWidth(250)
+broadcastIntervalFrame:SetHeight(50)
+broadcastIntervalFrame:SetBackdrop({
   bgFile = nil,
   edgeSize = 16,
   insets = { left = 4, right = 2, top = 4, bottom = 4 },
 })
-sliderframe:SetBackdropColor(1, 1, 1, 0.3)
-sliderframe:SetBackdropBorderColor(1, 1, 1, 1)
+broadcastIntervalFrame:SetBackdropColor(1, 1, 1, 0.3)
+broadcastIntervalFrame:SetBackdropBorderColor(1, 1, 1, 1)
 
-slider = CreateFrame("Slider", nil, sliderframe, "OptionsSliderTemplate")
-slider:SetWidth(200)
-slider:SetHeight(20)
-slider:SetPoint("CENTER", sliderframe, "CENTER", 0, 0)
-slider:SetMinMaxValues(40, 120)
-slider:SetValue(80)
-slider:SetValueStep(10)
+broadcastIntervalSlider = CreateFrame("Slider", nil, broadcastIntervalFrame, "OptionsSliderTemplate")
+broadcastIntervalSlider:SetWidth(200)
+broadcastIntervalSlider:SetHeight(20)
+broadcastIntervalSlider:SetPoint("CENTER", broadcastIntervalFrame, "CENTER", 0, 0)
+broadcastIntervalSlider:SetMinMaxValues(40, 120)
+broadcastIntervalSlider:SetValue(80)
+broadcastIntervalSlider:SetValueStep(10)
 
-local valueText = slider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-valueText:SetPoint("BOTTOM", slider, "TOP", 0, 5)
+local valueText = broadcastIntervalSlider:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+valueText:SetPoint("BOTTOM", broadcastIntervalSlider, "TOP", 0, 5)
 valueText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
 valueText:SetText("Dispense every 80 seconds")
 
-slider:SetScript("OnValueChanged", function()
-  local value = slider:GetValue()
+broadcastIntervalSlider:SetScript("OnValueChanged", function()
+  local value = broadcastIntervalSlider:GetValue()
   if value then
     valueText:SetText("Dispense every " .. value .. " seconds")
   end
@@ -549,16 +536,16 @@ end)
 local lastSliderUpdate = 0
 local SLIDER_UPDATE_THROTTLE = 0.1
 
-sliderframe:SetScript("OnUpdate", function()
+broadcastIntervalFrame:SetScript("OnUpdate", function()
   local now = GetTime()
   if now - lastSliderUpdate < SLIDER_UPDATE_THROTTLE then return end
   lastSliderUpdate = now
   
-  local currentValue = slider:GetValue()
+  local currentValue = broadcastIntervalSlider:GetValue()
   if currentValue then
     local snappedValue = SnapToStep(currentValue)
     if currentValue ~= snappedValue then
-      slider:SetValue(snappedValue)
+      broadcastIntervalSlider:SetValue(snappedValue)
     end
   end
 end)
@@ -566,31 +553,31 @@ end)
 --------------------------------------------------
 -- Start/Stop Button
 --------------------------------------------------
-toggleButton = CreateFrame("Button", "ToggleButton", AutoLFM, "UIPanelButtonTemplate")
-toggleButton:SetPoint("BOTTOM", AutoLFM, "BOTTOM", 97, 80)
-toggleButton:SetWidth(110)
-toggleButton:SetHeight(21)
-toggleButton:SetText("Start")
+broadcastToggleButton = CreateFrame("Button", "ToggleButton", AutoLFM_MainFrame, "UIPanelButtonTemplate")
+broadcastToggleButton:SetPoint("BOTTOM", AutoLFM_MainFrame, "BOTTOM", 97, 80)
+broadcastToggleButton:SetWidth(110)
+broadcastToggleButton:SetHeight(21)
+broadcastToggleButton:SetText("Start")
 
-toggleButton:SetScript("OnClick", function()
-  if isBroadcasting then
-    if stopMessageBroadcast then
-      stopMessageBroadcast()
+broadcastToggleButton:SetScript("OnClick", function()
+  if isBroadcastActive then
+    if StopBroadcast then
+      StopBroadcast()
     end
-    toggleButton:SetText("Start")
+    broadcastToggleButton:SetText("Start")
     PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
-    searchStartTime = 0
+    groupSearchStartTimestamp = 0
   else
-    if EnsureChannelFrameExists then
-      EnsureChannelFrameExists()
+    if EnsureChannelUIExists then
+      EnsureChannelUIExists()
     end
     
-    local success = startMessageBroadcast()
+    local success = StartBroadcast()
     
     if success then
-      toggleButton:SetText("Stop")
+      broadcastToggleButton:SetText("Stop")
       PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_RoleCheck.ogg")
-      searchStartTime = GetTime()
+      groupSearchStartTimestamp = GetTime()
     end
   end
 end)
@@ -598,45 +585,45 @@ end)
 --------------------------------------------------
 -- Events
 --------------------------------------------------
-AutoLFM:RegisterEvent("PARTY_MEMBERS_CHANGED")
-AutoLFM:RegisterEvent("RAID_ROSTER_UPDATE")
+AutoLFM_MainFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+AutoLFM_MainFrame:RegisterEvent("RAID_ROSTER_UPDATE")
 
 local function HandleGroupFull(contentType, maxSize)
-  if stopMessageBroadcast then stopMessageBroadcast() end
+  if StopBroadcast then StopBroadcast() end
   if contentType == "raid" then
-    if clearSelectedRaids then clearSelectedRaids() end
+    if ClearRaidSelection then ClearRaidSelection() end
   else
-    if clearSelectedDungeons then clearSelectedDungeons() end
+    if ClearDungeonSelection then ClearDungeonSelection() end
   end
-  if clearSelectedRoles then clearSelectedRoles() end
-  if resetUserInputMessage then resetUserInputMessage() end
-  if updateMsgFrameCombined then updateMsgFrameCombined() end
-  if toggleButton then toggleButton:SetText("Start") end
+  if ClearAllRoles then ClearAllRoles() end
+  if ResetCustomMessage then ResetCustomMessage() end
+  if UpdateDynamicMessage then UpdateDynamicMessage() end
+  if broadcastToggleButton then broadcastToggleButton:SetText("Start") end
   PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
 end
 
-AutoLFM:SetScript("OnEvent", function()
+AutoLFM_MainFrame:SetScript("OnEvent", function()
   if event == "RAID_ROSTER_UPDATE" then
-    if OnRaidRosterUpdate then
-      OnRaidRosterUpdate()
+    if HandleRaidRosterUpdate then
+      HandleRaidRosterUpdate()
     end
   elseif event == "PARTY_MEMBERS_CHANGED" then
-    local hasRaid = selectedRaids and selectedRaids[1]
-    local hasDungeon = selectedDungeons and selectedDungeons[1]
+    local hasRaid = selectedRaidTags and selectedRaidTags[1]
+    local hasDungeon = selectedDungeonTags and selectedDungeonTags[1]
     
     if hasRaid then
-      local totalPlayersInRaid = countRaidMembers and countRaidMembers() or 0
-      if raidSize == totalPlayersInRaid then
-        HandleGroupFull("raid", raidSize)
+      local totalPlayersInRaid = GetRaidMemberCount and GetRaidMemberCount() or 0
+      if raidGroupSize == totalPlayersInRaid then
+        HandleGroupFull("raid", raidGroupSize)
       else
-        if OnGroupUpdate then OnGroupUpdate() end
+        if HandlePartyUpdate then HandlePartyUpdate() end
       end
     elseif hasDungeon then
-      local totalPlayersInGroup = countGroupMembers and countGroupMembers() or 0
+      local totalPlayersInGroup = GetPartyMemberCount and GetPartyMemberCount() or 0
       if totalPlayersInGroup >= 5 then
         HandleGroupFull("dungeon", 5)
       else
-        if OnGroupUpdate then OnGroupUpdate() end
+        if HandlePartyUpdate then HandlePartyUpdate() end
       end
     end
   end
@@ -650,14 +637,17 @@ displayFrame:RegisterEvent("PLAYER_LOGIN")
 
 displayFrame:SetScript("OnEvent", function()
   if event == "PLAYER_LOGIN" then
-    if AutoLFM_DungeonList and contentFrame then
-      AutoLFM_DungeonList.Display(contentFrame)
+    if AutoLFM_DungeonList and dungeonListContentFrame then
+      AutoLFM_DungeonList.Display(dungeonListContentFrame)
     end
     
-    if AutoLFM_RaidList and raidContentFrame then
-      AutoLFM_RaidList.Display(raidContentFrame)
+    if AutoLFM_RaidList and raidListContentFrame then
+      AutoLFM_RaidList.Display(raidListContentFrame)
     end
     
     displayFrame:UnregisterEvent("PLAYER_LOGIN")
   end
 end)
+
+-- Backward compatibility alias
+AutoLFM = AutoLFM_MainFrame

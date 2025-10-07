@@ -9,14 +9,14 @@ local function GetPlayerCounts()
   local inGroup = 1
   local inRaid = 0
   
-  if countGroupMembers and type(countGroupMembers) == "function" then
-    inGroup = countGroupMembers()
+  if GetPartyMemberCount and type(GetPartyMemberCount) == "function" then
+    inGroup = GetPartyMemberCount()
   else
     inGroup = GetNumPartyMembers() + 1
   end
   
-  if countRaidMembers and type(countRaidMembers) == "function" then
-    inRaid = countRaidMembers()
+  if GetRaidMemberCount and type(GetRaidMemberCount) == "function" then
+    inRaid = GetRaidMemberCount()
   else
     inRaid = GetNumRaidMembers()
   end
@@ -33,42 +33,37 @@ local function ProcessRaidSelection(selectedRaidsLocal)
   end
   
   local raidTag = selectedRaidsLocal[1]
-  local raidSize = 0
+  local currentRaidSize = 0
   
-  for _, raid in pairs(raids) do
+  for _, raid in pairs(RAID_DATABASE) do
     if raid.tag == raidTag then
       local isFixedSize = raid.sizeMin == raid.sizeMax
       
       if isFixedSize then
-        if currentSliderFrame then
-          currentSliderFrame:Hide()
-          currentSliderFrame = nil
+        if raidSizeControlFrame then
+          raidSizeControlFrame:Hide()
         end
-        if sliderSizeFrame then 
-          sliderSizeFrame:Hide() 
-        end
-        raidSize = raid.sizeMin
-        sliderValue = raid.sizeMin
+        currentRaidSize = raid.sizeMin
+        raidGroupSize = raid.sizeMin
       else
-        if sliderSize then
-          sliderSize:SetMinMaxValues(raid.sizeMin, raid.sizeMax)
-          local initVal = sliderValue ~= 0 and sliderValue or raid.sizeMin
-          sliderSize:SetValue(initVal)
-          if UpdateSliderText then 
-            UpdateSliderText(initVal) 
+        if raidSizeSlider then
+          raidSizeSlider:SetMinMaxValues(raid.sizeMin, raid.sizeMax)
+          local initVal = raidGroupSize ~= 0 and raidGroupSize or raid.sizeMin
+          raidSizeSlider:SetValue(initVal)
+          if UpdateRaidSizeDisplay then 
+            UpdateRaidSizeDisplay(initVal) 
           end
-          raidSize = initVal
+          currentRaidSize = initVal
         else
-          raidSize = sliderValue ~= 0 and sliderValue or raid.sizeMin
+          currentRaidSize = raidGroupSize ~= 0 and raidGroupSize or raid.sizeMin
         end
         
-        if AutoLFM and AutoLFM:IsShown() and sliderSizeFrame then
-          sliderSizeFrame:Show()
-          currentSliderFrame = sliderSizeFrame
+        if AutoLFM_MainFrame and AutoLFM_MainFrame:IsShown() and raidSizeControlFrame then
+          raidSizeControlFrame:Show()
         end
       end
       
-      return raid.tag, raidSize
+      return raid.tag, currentRaidSize
     end
   end
   
@@ -81,14 +76,14 @@ end
 local function ProcessDungeonSelection(totalGroupSize, totalPlayersInGroup)
   local selectedContent = {}
   
-  for _, dungeonTag in pairs(selectedDungeons) do
-    for _, dungeon in pairs(dungeons) do
+  for _, dungeonTag in pairs(selectedDungeonTags) do
+    for _, dungeon in pairs(DUNGEON_DATABASE) do
       if dungeon.tag == dungeonTag then
         local missingPlayers = totalGroupSize - totalPlayersInGroup
         if missingPlayers < 0 then
           missingPlayers = 0
-          if stopMessageBroadcast then 
-            stopMessageBroadcast() 
+          if StopBroadcast then 
+            StopBroadcast() 
           end
         end
         if missingPlayers > 0 then
@@ -107,9 +102,9 @@ end
 --------------------------------------------------
 local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelected, raidPlayerCountText)
   local contentCount = table.getn(selectedContent)
-  local rolesCount = table.getn(selectedRoles or {})
+  local rolesCount = table.getn(selectedRolesList or {})
   
-  if contentCount == 0 and rolesCount == 0 and userInputMessage == "" then
+  if contentCount == 0 and rolesCount == 0 and customUserMessage == "" then
     return ""
   end
   
@@ -125,11 +120,11 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
   local message = ""
   
   if contentCount == 0 and rolesCount == 0 then
-    message = userInputMessage
+    message = customUserMessage
   elseif contentCount == 0 and rolesCount > 0 then
     message = finalRolesSegment
-    if userInputMessage ~= "" then
-      message = message .. " " .. userInputMessage
+    if customUserMessage ~= "" then
+      message = message .. " " .. customUserMessage
     end
   elseif contentCount > 0 and rolesCount == 0 then
     if isRaidSelected then
@@ -137,8 +132,8 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
     else
       message = "LF" .. mate .. "M for " .. contentMessage
     end
-    if userInputMessage ~= "" then
-      message = message .. " " .. userInputMessage
+    if customUserMessage ~= "" then
+      message = message .. " " .. customUserMessage
     end
   else
     if isRaidSelected then
@@ -146,8 +141,8 @@ local function BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelecte
     else
       message = "LF" .. mate .. "M for " .. contentMessage .. " " .. finalRolesSegment
     end
-    if userInputMessage ~= "" then
-      message = message .. " " .. userInputMessage
+    if customUserMessage ~= "" then
+      message = message .. " " .. customUserMessage
     end
   end
   
@@ -157,19 +152,19 @@ end
 --------------------------------------------------
 -- Main Update Function
 --------------------------------------------------
-function updateMsgFrameCombined()
-  if not selectedDungeons then selectedDungeons = {} end
-  if not selectedRaids then selectedRaids = {} end
-  if not selectedRoles then selectedRoles = {} end
+function UpdateDynamicMessage()
+  if not selectedDungeonTags then selectedDungeonTags = {} end
+  if not selectedRaidTags then selectedRaidTags = {} end
+  if not selectedRolesList then selectedRolesList = {} end
   
   local totalPlayersInGroup, totalPlayersInRaid = GetPlayerCounts()
   local totalGroupSize = 5
   
   local selectedContent = {}
-  local rolesList = table.concat(selectedRoles, " & ")
+  local rolesList = table.concat(selectedRolesList, " & ")
   
-  local selectedRaidsLocal = GetSelectedRaids and GetSelectedRaids() or {}
-  local raidTag, raidSize = ProcessRaidSelection(selectedRaidsLocal)
+  local selectedRaidsLocal = GetSelectedRaidsList and GetSelectedRaidsList() or {}
+  local raidTag, currentRaidSize = ProcessRaidSelection(selectedRaidsLocal)
   local isRaidSelected = raidTag ~= nil
   
   if isRaidSelected then
@@ -183,18 +178,18 @@ function updateMsgFrameCombined()
   
   if isRaidSelected then
     local currentCount = totalPlayersInRaid > 0 and totalPlayersInRaid or totalPlayersInGroup
-    mate = raidSize - currentCount
+    mate = currentRaidSize - currentCount
     if mate < 0 then mate = 0 end
-    raidPlayerCountText = " " .. currentCount .. "/" .. raidSize
+    raidPlayerCountText = " " .. currentCount .. "/" .. currentRaidSize
   else
     mate = totalGroupSize - totalPlayersInGroup
     if mate < 0 then mate = 0 end
   end
   
-  combinedMessage = BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelected, raidPlayerCountText)
+  generatedLFMMessage = BuildFinalMessage(selectedContent, rolesList, mate, isRaidSelected, raidPlayerCountText)
   
-  if msgTextDj then msgTextDj:SetText(combinedMessage) end
-  if msgTextRaids then msgTextRaids:SetText(combinedMessage) end
+  if dungeonMessageText then dungeonMessageText:SetText(generatedLFMMessage) end
+  if raidMessageText then raidMessageText:SetText(generatedLFMMessage) end
   
   if AutoLFM_API and type(AutoLFM_API.NotifyDataChanged) == "function" then
     AutoLFM_API.NotifyDataChanged()

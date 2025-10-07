@@ -12,7 +12,7 @@ end
 -- Get Priority Color
 --------------------------------------------------
 local function GetPriorityColor(priority)
-  for _, color in ipairs(colors or {}) do
+  for _, color in ipairs(PRIORITY_COLOR_SCHEME or {}) do
     if color.priority == priority then
       return color.r, color.g, color.b
     end
@@ -42,13 +42,13 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
   local isChecked = checkbox:GetChecked()
   
   if isChecked then
-    if editBox then editBox:Show() end
-    if sliderframe then sliderframe:Show() end
-    if toggleButton then toggleButton:Show() end
-    if msgFrameDj then msgFrameDj:Show() end
+    if customMessageEditBox then customMessageEditBox:Show() end
+    if broadcastIntervalFrame then broadcastIntervalFrame:Show() end
+    if broadcastToggleButton then broadcastToggleButton:Show() end
+    if dungeonMessageDisplayFrame then dungeonMessageDisplayFrame:Show() end
     
     local alreadySelected = false
-    for _, val in ipairs(selectedDungeons) do
+    for _, val in ipairs(selectedDungeonTags) do
       if val == dungeonTag then
         alreadySelected = true
         break
@@ -56,28 +56,28 @@ local function OnDungeonCheckboxClick(checkbox, dungeonTag)
     end
     
     if not alreadySelected then
-      if table.getn(selectedDungeons) >= 4 then
-        local first = selectedDungeons[1]
-        table.remove(selectedDungeons, 1)
+      if table.getn(selectedDungeonTags) >= 4 then
+        local first = selectedDungeonTags[1]
+        table.remove(selectedDungeonTags, 1)
         if AutoLFM_DungeonList.checkButtons[first] then
           AutoLFM_DungeonList.checkButtons[first]:SetChecked(false)
           AutoLFM_DungeonList.checkButtons[first]:GetParent():SetBackdrop(nil)
         end
       end
-      table.insert(selectedDungeons, dungeonTag)
+      table.insert(selectedDungeonTags, dungeonTag)
     end
   else
-    for i, val in ipairs(selectedDungeons) do
+    for i, val in ipairs(selectedDungeonTags) do
       if val == dungeonTag then
-        table.remove(selectedDungeons, i)
+        table.remove(selectedDungeonTags, i)
         break
       end
     end
   end
   
   UpdateDungeonBackdrop(checkbox:GetParent(), checkbox)
-  if updateMsgFrameCombined then
-    updateMsgFrameCombined()
+  if UpdateDynamicMessage then
+    UpdateDynamicMessage()
   end
 end
 
@@ -85,7 +85,7 @@ end
 -- Create Single Dungeon Row
 --------------------------------------------------
 local function CreateDungeonRow(parent, dungeon, priority, yOffset)
-  if ShouldDisplayPriority and not ShouldDisplayPriority(priority) then
+  if ShouldShowPriorityLevel and not ShouldShowPriorityLevel(priority) then
     return nil
   end
   
@@ -162,9 +162,9 @@ function AutoLFM_DungeonList.Display(parent)
   local yOffset = 0
   local sortedDungeons = {}
   
-  for index, dungeon in ipairs(dungeons or {}) do
+  for index, dungeon in ipairs(DUNGEON_DATABASE or {}) do
     if dungeon then
-      local priority = CalculatePriority and CalculatePriority(playerLevel, dungeon) or 4
+      local priority = CalculateDungeonPriority and CalculateDungeonPriority(playerLevel, dungeon) or 4
       table.insert(sortedDungeons, {
         dungeon = dungeon,
         priority = priority,
@@ -200,8 +200,8 @@ function AutoLFM_DungeonList.ClearSelection()
   for _, checkbox in pairs(AutoLFM_DungeonList.checkButtons) do
     checkbox:SetChecked(false)
   end
-  if selectedDungeons then
-    selectedDungeons = {}
+  if selectedDungeonTags then
+    selectedDungeonTags = {}
   end
 end
 

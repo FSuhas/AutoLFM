@@ -8,46 +8,46 @@ local channelsFrame = nil
 --------------------------------------------------
 -- Save/Load Selected Channels
 --------------------------------------------------
-function SaveSelectedChannels()
+function SaveChannelSelection()
   if not AutoLFM_SavedVariables then return end
-  if not uniqueIdentifier then return end
-  if not AutoLFM_SavedVariables[uniqueIdentifier] then
-    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  if not characterUniqueID then return end
+  if not AutoLFM_SavedVariables[characterUniqueID] then
+    AutoLFM_SavedVariables[characterUniqueID] = {}
   end
-  AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels or {}
+  AutoLFM_SavedVariables[characterUniqueID].selectedChannels = selectedChannelsList or {}
 end
 
-function LoadSelectedChannels()
+function LoadChannelSelection()
   if not AutoLFM_SavedVariables then return end
-  if not uniqueIdentifier then return end
-  if not AutoLFM_SavedVariables[uniqueIdentifier] then
-    AutoLFM_SavedVariables[uniqueIdentifier] = {}
+  if not characterUniqueID then return end
+  if not AutoLFM_SavedVariables[characterUniqueID] then
+    AutoLFM_SavedVariables[characterUniqueID] = {}
   end
   
-  if AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels then
-    selectedChannels = AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels
+  if AutoLFM_SavedVariables[characterUniqueID].selectedChannels then
+    selectedChannelsList = AutoLFM_SavedVariables[characterUniqueID].selectedChannels
   else
-    selectedChannels = {}
-    AutoLFM_SavedVariables[uniqueIdentifier].selectedChannels = selectedChannels
+    selectedChannelsList = {}
+    AutoLFM_SavedVariables[characterUniqueID].selectedChannels = selectedChannelsList
   end
 end
 
 function ToggleChannelSelection(channelName, isSelected)
-  if not selectedChannels then selectedChannels = {} end
+  if not selectedChannelsList then selectedChannelsList = {} end
   if not channelName then return end
   
   if isSelected then
-    selectedChannels[channelName] = true
+    selectedChannelsList[channelName] = true
   else
-    selectedChannels[channelName] = nil
+    selectedChannelsList[channelName] = nil
   end
-  SaveSelectedChannels()
+  SaveChannelSelection()
 end
 
 --------------------------------------------------
 -- Find Available Channels
 --------------------------------------------------
-function findChannels()
+function FindAvailableChannels()
   foundChannels = {}
   
   if not channelsToFind or table.getn(channelsToFind) == 0 then
@@ -65,10 +65,11 @@ function findChannels()
   
   return table.getn(foundChannels) > 0
 end
+
 --------------------------------------------------
 -- Create Channel Buttons
 --------------------------------------------------
-function CreateChannelButtons()
+function CreateChannelCheckboxes()
   if not channelsFrame then return end
   if not next(foundChannels) then return end
   
@@ -99,7 +100,7 @@ function CreateChannelButtons()
       channelText:SetText(channel.name)
       channelText:SetFont("Fonts\\FRIZQT__.TTF", 9, "MONOCHROME")
       
-      button:SetChecked(selectedChannels[channel.name])
+      button:SetChecked(selectedChannelsList[channel.name])
       
       local currentChannel = channel
       button:SetScript("OnClick", function()
@@ -117,12 +118,12 @@ end
 --------------------------------------------------
 -- Initialize Channel Frame
 --------------------------------------------------
-function InitializeChannelFrame()
-  if not insideMore then return end
+function InitializeChannelSelectionUI()
+  if not moreTabContentFrame then return end
   if channelsFrame then return end
   
-  channelsFrame = CreateFrame("Frame", nil, insideMore)
-  channelsFrame:SetPoint("TOP", sliderframe, "BOTTOM", 0, -20)
+  channelsFrame = CreateFrame("Frame", nil, moreTabContentFrame)
+  channelsFrame:SetPoint("TOP", broadcastIntervalFrame, "BOTTOM", 0, -20)
   channelsFrame:SetWidth(250)
   channelsFrame:SetHeight(90)
   
@@ -141,14 +142,14 @@ function InitializeChannelFrame()
   
   channelsFrame.buttons = {}
   
-  LoadSelectedChannels()
-  findChannels()
-  CreateChannelButtons()
+  LoadChannelSelection()
+  FindAvailableChannels()
+  CreateChannelCheckboxes()
 end
 
-function EnsureChannelFrameExists()
+function EnsureChannelUIExists()
   if not channelsFrame then
-    InitializeChannelFrame()
+    InitializeChannelSelectionUI()
   end
   return channelsFrame ~= nil
 end

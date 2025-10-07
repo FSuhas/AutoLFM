@@ -1,6 +1,6 @@
----------------------------------------------------------------------------------
---                               AutoLFM API                                   --
----------------------------------------------------------------------------------
+--------------------------------------------------
+-- API
+--------------------------------------------------
 if not AutoLFM_API then
   AutoLFM_API = {}
 end
@@ -23,8 +23,8 @@ function AutoLFM_API.GetFullStatus()
 end
 
 function AutoLFM_API.GetGroupType()
-  local selectedDungeons = GetSelectedDungeons and GetSelectedDungeons() or {}
-  local selectedRaids = GetSelectedRaids and GetSelectedRaids() or {}
+  local selectedDungeons = GetSelectedDungeonsList and GetSelectedDungeonsList() or {}
+  local selectedRaids = GetSelectedRaidsList and GetSelectedRaidsList() or {}
 
   if table.getn(selectedRaids) > 0 then
     return "raid"
@@ -44,11 +44,11 @@ function AutoLFM_API.GetSelectedContent()
   }
   
   if groupType == "dungeon" then
-    local selectedDungeons = GetSelectedDungeons and GetSelectedDungeons() or {}
+    local selectedDungeons = GetSelectedDungeonsList and GetSelectedDungeonsList() or {}
     for _, dungeonTag in ipairs(selectedDungeons) do
       table.insert(content.list, dungeonTag)
-      if dungeons then
-        for _, dungeon in pairs(dungeons) do
+      if DUNGEON_DATABASE then
+        for _, dungeon in pairs(DUNGEON_DATABASE) do
           if dungeon and dungeon.tag == dungeonTag then
             content.details[dungeonTag] = {
               name = dungeon.name or "",
@@ -62,11 +62,11 @@ function AutoLFM_API.GetSelectedContent()
       end
     end
   elseif groupType == "raid" then
-    local selectedRaids = GetSelectedRaids and GetSelectedRaids() or {}
+    local selectedRaids = GetSelectedRaidsList and GetSelectedRaidsList() or {}
     for _, raidTag in ipairs(selectedRaids) do
       table.insert(content.list, raidTag)
-      if raids then
-        for _, raid in pairs(raids) do
+      if RAID_DATABASE then
+        for _, raid in pairs(RAID_DATABASE) do
           if raid and raid.tag == raidTag then
             content.details[raidTag] = {
               name = raid.name or "",
@@ -92,8 +92,8 @@ function AutoLFM_API.GetPlayerCount()
   if GetNumRaidMembers() > 0 then
     currentInGroup = GetNumRaidMembers()
   else
-    if countGroupMembers and type(countGroupMembers) == "function" then
-      currentInGroup = countGroupMembers()
+    if GetPartyMemberCount and type(GetPartyMemberCount) == "function" then
+      currentInGroup = GetPartyMemberCount()
     else
       currentInGroup = GetNumPartyMembers() + 1
     end
@@ -104,7 +104,7 @@ function AutoLFM_API.GetPlayerCount()
   end
   
   if groupType == "raid" then
-    desiredTotal = sliderValue or 0
+    desiredTotal = raidGroupSize or 0
     if desiredTotal < 1 then
       desiredTotal = 10
     end
@@ -127,8 +127,8 @@ function AutoLFM_API.GetRolesNeeded()
   
   if GetSelectedRoles then
     selectedRolesData = GetSelectedRoles()
-  elseif selectedRoles then
-    selectedRolesData = selectedRoles
+  elseif selectedRolesList then
+    selectedRolesData = selectedRolesList
   end
   
   local rolesList = {}
@@ -143,13 +143,13 @@ end
 
 function AutoLFM_API.GetDynamicMessage()
   local combined = ""
-  if GetCombinedMessage then
-    combined = GetCombinedMessage()
-  elseif combinedMessage then
-    combined = combinedMessage
+  if GetGeneratedLFMMessage then
+    combined = GetGeneratedLFMMessage()
+  elseif generatedLFMMessage then
+    combined = generatedLFMMessage
   end
   
-  local userInput = userInputMessage or ""
+  local userInput = customUserMessage or ""
 
   return {
     combined = combined,
@@ -159,7 +159,7 @@ function AutoLFM_API.GetDynamicMessage()
 end
 
 function AutoLFM_API.GetSelectedChannels()
-  local channels = selectedChannels or {}
+  local channels = selectedChannelsList or {}
   local channelList = {}
 
   if channels and type(channels) == "table" then
@@ -172,11 +172,11 @@ function AutoLFM_API.GetSelectedChannels()
 end
 
 function AutoLFM_API.GetBroadcastStats()
-  local broadcasting = isBroadcasting or false
-  local startTime = broadcastStartTime or 0
-  local lastTime = lastBroadcastTime or 0
-  local searchStart = searchStartTime or 0
-  local msgCount = messagesSentCount or 0
+  local broadcasting = isBroadcastActive or false
+  local startTime = broadcastStartTimestamp or 0
+  local lastTime = lastBroadcastTimestamp or 0
+  local searchStart = groupSearchStartTimestamp or 0
+  local msgCount = broadcastMessageCount or 0
 
   local stats = {
     isActive = broadcasting,
@@ -194,12 +194,12 @@ function AutoLFM_API.GetBroadcastStats()
 end
 
 function AutoLFM_API.GetTiming()
-  local interval = slider and slider:GetValue() or 80
+  local interval = broadcastIntervalSlider and broadcastIntervalSlider:GetValue() or 80
   local nextBroadcast = 0
   local timeUntilNext = 0
 
-  if isBroadcasting and lastBroadcastTime and lastBroadcastTime > 0 then
-    nextBroadcast = lastBroadcastTime + interval
+  if isBroadcastActive and lastBroadcastTimestamp and lastBroadcastTimestamp > 0 then
+    nextBroadcast = lastBroadcastTimestamp + interval
     timeUntilNext = nextBroadcast - GetTime()
     if timeUntilNext < 0 then timeUntilNext = 0 end
   end
@@ -211,9 +211,9 @@ function AutoLFM_API.GetTiming()
 end
 
 function AutoLFM_API.IsAvailable()
-  return (AutoLFM ~= nil and
-          type(GetSelectedDungeons) == "function" and
-          type(GetSelectedRaids) == "function" and
+  return (AutoLFM_MainFrame ~= nil and
+          type(GetSelectedDungeonsList) == "function" and
+          type(GetSelectedRaidsList) == "function" and
           type(GetSelectedRoles) == "function")
 end
 
@@ -232,17 +232,17 @@ function AutoLFM_API.DataPrint()
   local status = AutoLFM_API.GetFullStatus()
 
   if AutoLFM_PrintSuccess then AutoLFM_PrintSuccess("API Data:") end
-  if AutoLFM_Print then
-    AutoLFM_Print(ColorText("Group Type: ","gray") .. (status.groupType or "unknown"))
-    AutoLFM_Print(ColorText("Content: ","gray") .. table.getn(status.selectedContent.list) .. " items")
-    AutoLFM_Print(ColorText("Players: ","gray") .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
-    AutoLFM_Print(ColorText("Roles: ","gray") .. table.concat(status.rolesNeeded, ", "))
-    AutoLFM_Print(ColorText("Message: ","gray") .. (status.dynamicMessage.combined or ""))
-    AutoLFM_Print(ColorText("Channels: ","gray") .. table.concat(status.selectedChannels, ", "))
-    AutoLFM_Print(ColorText("Broadcasting: ","gray") .. (status.broadcastStats.isActive and "Yes" or "No"))
-    AutoLFM_Print(ColorText("Messages sent: ","gray") .. status.broadcastStats.messagesSent)
-    AutoLFM_Print(ColorText("Search duration: ","gray") .. math.floor(status.broadcastStats.searchDuration) .. "s")
-    AutoLFM_Print(ColorText("Next broadcast in: ","gray") .. math.floor(status.timing.timeUntilNext) .. "s")
+  if AutoLFM_PrintMessage then
+    AutoLFM_PrintMessage(ColorizeText("Group Type: ","gray") .. (status.groupType or "unknown"))
+    AutoLFM_PrintMessage(ColorizeText("Content: ","gray") .. table.getn(status.selectedContent.list) .. " items")
+    AutoLFM_PrintMessage(ColorizeText("Players: ","gray") .. status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal .. " (missing: " .. status.playerCount.missing .. ")")
+    AutoLFM_PrintMessage(ColorizeText("Roles: ","gray") .. table.concat(status.rolesNeeded, ", "))
+    AutoLFM_PrintMessage(ColorizeText("Message: ","gray") .. (status.dynamicMessage.combined or ""))
+    AutoLFM_PrintMessage(ColorizeText("Channels: ","gray") .. table.concat(status.selectedChannels, ", "))
+    AutoLFM_PrintMessage(ColorizeText("Broadcasting: ","gray") .. (status.broadcastStats.isActive and "Yes" or "No"))
+    AutoLFM_PrintMessage(ColorizeText("Messages sent: ","gray") .. status.broadcastStats.messagesSent)
+    AutoLFM_PrintMessage(ColorizeText("Search duration: ","gray") .. math.floor(status.broadcastStats.searchDuration) .. "s")
+    AutoLFM_PrintMessage(ColorizeText("Next broadcast in: ","gray") .. math.floor(status.timing.timeUntilNext) .. "s")
   end
 end
 
