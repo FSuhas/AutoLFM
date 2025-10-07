@@ -60,7 +60,7 @@ local function InitializeComponents()
   
   -- Message Preview
   if CreateMessagePreview then
-    messagePreviewFrame = CreateMessagePreview(AutoLFM_MainFrame)
+    local messagePreviewFrame = CreateMessagePreview(AutoLFM_MainFrame)
   end
   
   -- Tab System
@@ -70,15 +70,15 @@ local function InitializeComponents()
   
   -- Panels
   if CreateDungeonsPanel then
-    dungeonsPanelFrame = CreateDungeonsPanel(AutoLFM_MainFrame)
+    local dungeonsPanelFrame = CreateDungeonsPanel(AutoLFM_MainFrame)
   end
   
   if CreateRaidsPanel then
-    raidsPanelFrame = CreateRaidsPanel(AutoLFM_MainFrame)
+    local raidsPanelFrame = CreateRaidsPanel(AutoLFM_MainFrame)
   end
   
   if CreateSettingsPanel then
-    settingsPanelFrame = CreateSettingsPanel(AutoLFM_MainFrame)
+    local settingsPanelFrame = CreateSettingsPanel(AutoLFM_MainFrame)
   end
   
   local broadcastButton = CreateFrame("Button", "AutoLFM_BroadcastToggle", AutoLFM_MainFrame, "UIPanelButtonTemplate")
