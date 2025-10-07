@@ -3,24 +3,25 @@
 --------------------------------------------------
 local filterCheckboxes = {}
 local filterStates = {}
+local filtersInitialized = false
 
 --------------------------------------------------
 -- Initialize Filter States
 --------------------------------------------------
 local function InitializeFilterStates()
-  if not filterStates or table.getn(filterStates) == 0 then
-    filterStates = {}
-    if colors then
-      for _, color in ipairs(colors) do
-        if color and color.key then
-          filterStates[color.key] = true
-        end
+  if filtersInitialized then return end
+  
+  filterStates = {}
+  if colors then
+    for _, color in ipairs(colors) do
+      if color and color.key then
+        filterStates[color.key] = true
       end
     end
   end
+  
+  filtersInitialized = true
 end
-
-InitializeFilterStates()
 
 --------------------------------------------------
 -- Save/Load Filter States
@@ -35,8 +36,6 @@ function SaveDungeonFilters()
 end
 
 function LoadDungeonFilters()
-  InitializeFilterStates()
-  
   if not AutoLFM_SavedVariables then return end
   if not uniqueIdentifier then return end
   if not AutoLFM_SavedVariables[uniqueIdentifier] then
