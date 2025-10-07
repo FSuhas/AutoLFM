@@ -32,7 +32,7 @@ local function CreateBaseFrame()
   mainIcon:SetPoint("TOPLEFT", AutoLFM_MainFrame, "TOPLEFT", 7, -4)
   mainIcon:SetWidth(64)
   mainIcon:SetHeight(64)
-  mainIcon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
+  mainIcon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye07")
   AutoLFM_MainIconTexture = mainIcon
   
   -- Title

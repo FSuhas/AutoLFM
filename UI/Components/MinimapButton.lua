@@ -31,7 +31,7 @@ function InitializeMinimapButton()
   local icon = AutoLFM_MinimapButton:CreateTexture(nil, "BACKGROUND")
   icon:SetWidth(30)
   icon:SetHeight(30)
-  icon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye01")
+  icon:SetTexture(TEXTURE_BASE_PATH .. "Eyes\\eye07")
   icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
   icon:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", -1, 1)
   AutoLFM_MinimapButton.icon = icon
