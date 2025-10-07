@@ -1,26 +1,34 @@
 --------------------------------------------------
 -- String Utilities
 --------------------------------------------------
+local colorHexCache = {}
 
 --------------------------------------------------
 -- Get Color Hex from Key
 --------------------------------------------------
 local function GetColorHex(colorKey)
   if not PRIORITY_COLOR_SCHEME then return "FFFFFF" end
-  
+  if colorHexCache[colorKey] then
+    return colorHexCache[colorKey]
+  end
   for _, color in ipairs(PRIORITY_COLOR_SCHEME) do
     if color.key == colorKey then
+      local hex
       if color.hex then
-        return string.gsub(color.hex, "#", "")
+        hex = string.gsub(color.hex, "#", "")
       elseif color.r and color.g and color.b then
         local r = color.r or 1
         local g = color.g or 1
         local b = color.b or 1
-        return string.format("%02x%02x%02x", r * 255, g * 255, b * 255)
+        hex = string.format("%02x%02x%02x", r * 255, g * 255, b * 255)
+      else
+        hex = "FFFFFF"
       end
+      colorHexCache[colorKey] = hex
+      return hex
     end
   end
-  
+  colorHexCache[colorKey] = "FFFFFF"
   return "FFFFFF"
 end
 
