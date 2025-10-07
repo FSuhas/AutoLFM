@@ -1,25 +1,12 @@
 --------------------------------------------------
 -- Settings Panel (More Tab)
 --------------------------------------------------
-
 local settingsPanelFrame = nil
 local customMessageEditBox = nil
 local broadcastIntervalSlider = nil
-
--- UI Elements for stats
 local durationLabel = nil
 local sentLabel = nil
 local nextLabel = nil
-
---------------------------------------------------
--- Utility: Set Size
---------------------------------------------------
-local function setSize(frame, width, height)
-  if frame then
-    frame:SetWidth(width)
-    frame:SetHeight(height)
-  end
-end
 
 --------------------------------------------------
 -- Snap Slider Value to Step
@@ -164,7 +151,8 @@ local function CreateBroadcastIntervalSlider(parentFrame)
   sliderLabel:SetPoint("LEFT", sliderIcon, "RIGHT", 3, 0)
   
   broadcastIntervalSlider = CreateFrame("Slider", nil, parentFrame)
-  setSize(broadcastIntervalSlider, 145, 17)
+  broadcastIntervalSlider:SetWidth(145)
+  broadcastIntervalSlider:SetHeight(17)
   broadcastIntervalSlider:SetPoint("LEFT", sliderLabel, "RIGHT", 10, 0)
   broadcastIntervalSlider:SetMinMaxValues(BROADCAST_INTERVAL_MIN, BROADCAST_INTERVAL_MAX)
   broadcastIntervalSlider:SetValue(DEFAULT_BROADCAST_INTERVAL)
@@ -252,6 +240,25 @@ local function CreateStatsSection(parentFrame)
 end
 
 --------------------------------------------------
+-- Create Questlog Section
+--------------------------------------------------
+local function CreateQuestlogSection(parentFrame)
+  if not parentFrame then return nil end
+  
+  questlogLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  questlogLabel:SetText("QuestLog " .. ColorizeText("(WIP)", "gray"))
+  questlogLabel:SetPoint("BOTTOMRIGHT", parentFrame, "BOTTOMRIGHT", -5, 7)
+
+  local questlogIcon = parentFrame:CreateTexture(nil, "OVERLAY")
+  questlogIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\quest1")
+  questlogIcon:SetWidth(16)
+  questlogIcon:SetHeight(16)
+  questlogIcon:SetPoint("RIGHT", questlogLabel, "LEFT", -3, 0)
+  
+  return questlogIcon
+end
+
+--------------------------------------------------
 -- Create Settings Panel (MAIN FRAME)
 --------------------------------------------------
 function CreateSettingsPanel(parentFrame)
@@ -271,6 +278,7 @@ function CreateSettingsPanel(parentFrame)
   CreateBroadcastIntervalSlider(settingsPanelFrame)
   CreateChannelSection(settingsPanelFrame)
   CreateStatsSection(settingsPanelFrame)
+  CreateQuestlogSection(settingsPanelFrame)
   
   -- Update loop for stats + slider snap
   local lastSliderUpdate = 0
