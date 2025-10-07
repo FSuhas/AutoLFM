@@ -1,7 +1,7 @@
 --------------------------------------------------
--- Global Variables Declaration
+-- Global State
 --------------------------------------------------
--- Frame references (used across files)
+-- UI Frames
 dungeonListContentFrame = nil
 dungeonFilterFrame = nil
 customMessageEditBox = nil
@@ -17,39 +17,33 @@ raidSizeControlFrame = nil
 broadcastIntervalFrame = nil
 broadcastToggleButton = nil
 
--- Broadcast state
+-- Broadcast
 isBroadcastActive = false
 broadcastStartTimestamp = 0
 lastBroadcastTimestamp = 0
 broadcastMessageCount = 0
 groupSearchStartTimestamp = 0
 
--- Selection state
+-- Selections
 selectedDungeonTags = {}
 selectedRaidTags = {}
 selectedRolesList = {}
 roleCheckboxes = {}
 selectedChannelsList = {}
 
--- Message state
+-- Messages
 generatedLFMMessage = ""
 customUserMessage = ""
 raidGroupSize = 0
 
--- Configuration
+-- Constants
 TEXTURE_BASE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
-CHAT_MESSAGE_PREFIX = "|cffffffff[|cffFEFE00Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+CHAT_MESSAGE_PREFIX = "|cffFEFE00[Auto|cff0070DDL|cffffffffF|cffff0000M|cffffffff]|r "
+
+-- Character Info
 playerCharacterName = nil
 playerRealmName = nil
 characterUniqueID = nil
-
--- Global tables (initialized in their respective files)
-AutoLFM_DungeonList = nil
-AutoLFM_RaidList = nil
-AutoLFM_API = nil
-AutoLFM_MainFrame = nil
-AutoLFM_MinimapButton = nil
-AutoLFM_MainIconTexture = nil
 
 --------------------------------------------------
 -- Dungeons Data
