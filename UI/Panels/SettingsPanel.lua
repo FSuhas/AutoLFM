@@ -57,13 +57,13 @@ end
 local function CreateCustomMessageEditBox(parentFrame)
   if not parentFrame then return nil end
   
-  editboxIcon = parentFrame:CreateTexture(nil, "OVERLAY")
+  local editboxIcon = parentFrame:CreateTexture(nil, "OVERLAY")
   editboxIcon:SetTexture(TEXTURE_BASE_PATH .. "Icons\\send")
   editboxIcon:SetWidth(16)
   editboxIcon:SetHeight(16)
   editboxIcon:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 5, -10)
   
-  editboxLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local editboxLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   editboxLabel:SetText("Add details to your message:")
   editboxLabel:SetPoint("LEFT", editboxIcon, "RIGHT", 3, 0)
 
@@ -245,7 +245,7 @@ end
 local function CreateQuestlogSection(parentFrame)
   if not parentFrame then return nil end
   
-  questlogLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local questlogLabel = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   questlogLabel:SetText("QuestLog " .. ColorizeText("(WIP)", "gray"))
   questlogLabel:SetPoint("BOTTOMRIGHT", parentFrame, "BOTTOMRIGHT", -5, 7)
 
