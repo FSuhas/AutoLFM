@@ -7,11 +7,12 @@ local mgElapsed = 0
 local mgRunning = false
 local mgFrame = CreateFrame("Frame", "MGSpamFrame")
 
-SLASH_MG1 = "/mg"
 SlashCmdList["MG"] = function(msg)
-  local args = {}
-  for word in string.gfind(msg, "[^ ]+") do
-    table.insert(args, word)
+  local args = strsplit(" ", msg)
+  
+  if not args or table.getn(args) == 0 then
+    AutoLFM_PrintError("[MG] Usage: /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
+    return
   end
   
   if args[1] == "stop" then
