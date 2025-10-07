@@ -482,10 +482,9 @@ setupPlaceholder(editBox, "Add message details (optional)")
 -- Inside More - Broadcast Interval Slider
 --------------------------------------------------
 local function SnapToStep(value)
-  if value then
-    local roundedValue = math.floor(value / step + 0.5) * step
-    return roundedValue
-  end
+  if not value then return step end
+  local roundedValue = math.floor(value / step + 0.5) * step
+  return roundedValue
 end
 
 sliderframe = CreateFrame("Frame", nil, insideMore)
@@ -515,19 +514,25 @@ valueText:SetText("Dispense every 80 seconds")
 
 slider:SetScript("OnValueChanged", function()
   local value = slider:GetValue()
-  valueText:SetText("Dispense every " .. value .. " seconds")
+  if value then
+    valueText:SetText("Dispense every " .. value .. " seconds")
+  end
 end)
 
 local lastSliderUpdate = 0
+local SLIDER_UPDATE_THROTTLE = 0.1
+
 sliderframe:SetScript("OnUpdate", function()
   local now = GetTime()
-  if now - lastSliderUpdate < 0.1 then return end
+  if now - lastSliderUpdate < SLIDER_UPDATE_THROTTLE then return end
   lastSliderUpdate = now
   
   local currentValue = slider:GetValue()
-  local snappedValue = SnapToStep(currentValue)
-  if currentValue ~= snappedValue then
-    slider:SetValue(snappedValue)
+  if currentValue then
+    local snappedValue = SnapToStep(currentValue)
+    if currentValue ~= snappedValue then
+      slider:SetValue(snappedValue)
+    end
   end
 end)
 
