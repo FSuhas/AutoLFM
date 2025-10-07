@@ -3,26 +3,19 @@
 --------------------------------------------------
 -- Frame references
 contentFrame = nil
-djScrollFrame = nil
-djframe = nil
 dungeonFilterFrame = nil
 editBox = nil
-insideList = nil
 insideMore = nil
 msgFrameDj = nil
 msgFrameRaids = nil
 msgTextDj = nil
 msgTextRaids = nil
-raidContentFrame = nil
-raidFrame = nil
-raidScrollFrame = nil
 slider = nil
 sliderSize = nil
 sliderSizeEditBox = nil
 sliderSizeFrame = nil
 sliderframe = nil
 toggleButton = nil
-currentSliderFrame = nil
 
 -- Broadcast state
 isBroadcasting = false
@@ -51,7 +44,7 @@ charName = nil
 realmName = nil
 uniqueIdentifier = nil
 
--- Global tables (initialized in their respective files)
+-- Global tables
 AutoLFM_DungeonList = nil
 AutoLFM_RaidList = nil
 AutoLFM_API = nil

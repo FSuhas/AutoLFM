@@ -3,9 +3,20 @@
 --------------------------------------------------
 local currentTab = 1
 local tabs = {}
-local editBoxHasFocus = false
 local currentSliderFrame = nil
 local step = 10
+
+-- Inside frames (local to Frame.lua)
+local insideDungeons = nil
+local insideRaids = nil
+
+-- Scroll frames (local to Frame.lua)
+local djScrollFrame = nil
+local raidScrollFrame = nil
+local raidContentFrame = nil
+
+-- Dungeon filter frame (local to Frame.lua)
+local dungeonFilterFrame = nil
 
 --------------------------------------------------
 -- Main Frame
@@ -105,22 +116,37 @@ msgTextRaids:SetTextColor(1, 1, 1)
 local function onTabClick(tabNum)
   currentTab = tabNum
   
-  if insideList then
-    if tabNum <= 2 then 
-      insideList:Show() 
-    else 
-      insideList:Hide() 
+  -- Hide all inside frames and scroll frames
+  if insideDungeons then insideDungeons:Hide() end
+  if insideRaids then insideRaids:Hide() end
+  if insideMore then insideMore:Hide() end
+  if djScrollFrame then djScrollFrame:Hide() end
+  if raidScrollFrame then raidScrollFrame:Hide() end
+  
+  -- Show corresponding frame
+  if tabNum == 1 then
+    if insideDungeons then 
+      insideDungeons:Show()
+    end
+    if djScrollFrame then 
+      djScrollFrame:Show()
+      djScrollFrame:SetVerticalScroll(0)
+    end
+  elseif tabNum == 2 then
+    if insideRaids then 
+      insideRaids:Show()
+    end
+    if raidScrollFrame then 
+      raidScrollFrame:Show()
+      raidScrollFrame:SetVerticalScroll(0)
+    end
+  elseif tabNum == 3 then
+    if insideMore then 
+      insideMore:Show()
     end
   end
   
-  if insideMore then
-    if tabNum == 3 then 
-      insideMore:Show() 
-    else 
-      insideMore:Hide() 
-    end
-  end
-  
+  -- Update tab visuals
   for i = 1, 3 do
     local active = i == tabNum
     tabs[i].bg:SetTexture(texturePath .. (active and "tabActive" or "tabInactive"))
@@ -182,51 +208,43 @@ end
 --------------------------------------------------
 -- Tab Actions
 --------------------------------------------------
-local function onDungeonsTab()
-  if djScrollFrame then djScrollFrame:Show() end
-  if raidFrame then raidFrame:Hide() end
-  if raidContentFrame then raidContentFrame:Hide() end
-  if raidScrollFrame then raidScrollFrame:Hide() end
-  if msgFrameDj then msgFrameDj:Show() end
-  if msgFrameRaids then msgFrameRaids:Hide() end
-  if dungeonFilterFrame then dungeonFilterFrame:Show() end
-  if clearSelectedRaids then clearSelectedRaids() end
+local function clearAllSelections()
   if clearSelectedRoles then clearSelectedRoles() end
   if resetUserInputMessage then resetUserInputMessage() end
   if updateMsgFrameCombined then updateMsgFrameCombined() end
-  if HideSliderForRaid then HideSliderForRaid() end
   if EnsureChannelFrameExists then EnsureChannelFrameExists() end
+end
+
+local function onDungeonsTab()
+  if msgFrameDj then msgFrameDj:Show() end
+  if msgFrameRaids then msgFrameRaids:Hide() end
+  if dungeonFilterFrame then dungeonFilterFrame:Show() end
+  
+  if clearSelectedRaids then clearSelectedRaids() end
+  if HideSliderForRaid then HideSliderForRaid() end
   
   if AutoLFM_RaidList and AutoLFM_RaidList.ClearBackdrops then
     AutoLFM_RaidList.ClearBackdrops()
   end
+  
+  clearAllSelections()
 end
 
 local function onRaidsTab()
-  if djScrollFrame then djScrollFrame:Hide() end
-  if raidFrame then raidFrame:Show() end
-  if raidContentFrame then raidContentFrame:Show() end
-  if raidScrollFrame then raidScrollFrame:Show() end
   if msgFrameDj then msgFrameDj:Hide() end
   if msgFrameRaids then msgFrameRaids:Show() end
   if dungeonFilterFrame then dungeonFilterFrame:Hide() end
+  
   if clearSelectedDungeons then clearSelectedDungeons() end
-  if clearSelectedRoles then clearSelectedRoles() end
-  if resetUserInputMessage then resetUserInputMessage() end
-  if updateMsgFrameCombined then updateMsgFrameCombined() end
-  if EnsureChannelFrameExists then EnsureChannelFrameExists() end
   
   if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
     AutoLFM_DungeonList.ClearBackdrops()
   end
+  
+  clearAllSelections()
 end
 
 local function onMoreTab()
-  if djScrollFrame then djScrollFrame:Hide() end
-  if raidFrame then raidFrame:Hide() end
-  if raidContentFrame then raidContentFrame:Hide() end
-  if raidScrollFrame then raidScrollFrame:Hide() end
-  
   if InitializeChannelFrame then InitializeChannelFrame() end
 end
 
@@ -246,12 +264,19 @@ end
 --------------------------------------------------
 -- Inside Frames
 --------------------------------------------------
-insideList = CreateFrame("Frame", nil, AutoLFM)
-insideList:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
-insideList:SetWidth(323)
-insideList:SetHeight(253)
-insideList:SetFrameStrata("HIGH")
-insideList:Show()
+insideDungeons = CreateFrame("Frame", nil, AutoLFM)
+insideDungeons:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
+insideDungeons:SetWidth(323)
+insideDungeons:SetHeight(253)
+insideDungeons:SetFrameStrata("HIGH")
+insideDungeons:Show()
+
+insideRaids = CreateFrame("Frame", nil, AutoLFM)
+insideRaids:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
+insideRaids:SetWidth(323)
+insideRaids:SetHeight(253)
+insideRaids:SetFrameStrata("HIGH")
+insideRaids:Hide()
 
 insideMore = CreateFrame("Frame", nil, AutoLFM)
 insideMore:SetPoint("TOPLEFT", AutoLFM, "TOPLEFT", 25, -157)
@@ -266,28 +291,30 @@ createTabs()
 -- Scroll Frames
 --------------------------------------------------
 local function createScrollFrame(name, parent)
-  local frame = CreateFrame("Frame", nil, parent)
-  frame:SetAllPoints(parent)
-  if name == "raids" then frame:Hide() end
-  
   local scrollFrame = CreateFrame("ScrollFrame", "AutoLFM_ScrollFrame_" .. name, parent, "UIPanelScrollFrameTemplate")
-  scrollFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", -1, 0)
+  scrollFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
   scrollFrame:SetWidth(295)
   scrollFrame:SetHeight(253)
   scrollFrame:EnableMouse(true)
   scrollFrame:EnableMouseWheel(true)
-  if name == "raids" then scrollFrame:Hide() end
   
   local contentFrame = CreateFrame("Frame", nil, scrollFrame)
   contentFrame:SetWidth(scrollFrame:GetWidth() - 20)
   contentFrame:SetHeight(1)
   scrollFrame:SetScrollChild(contentFrame)
   
-  return frame, scrollFrame, contentFrame
+  return scrollFrame, contentFrame
 end
 
-djframe, djScrollFrame, contentFrame = createScrollFrame("Dungeons", insideList)
-raidFrame, raidScrollFrame, raidContentFrame = createScrollFrame("raids", insideList)
+-- Dungeons scroll in insideDungeons frame
+djScrollFrame, contentFrame = createScrollFrame("Dungeons", insideDungeons)
+
+-- Raids scroll in insideRaids frame  
+raidScrollFrame, raidContentFrame = createScrollFrame("Raids", insideRaids)
+
+-- Force initial visibility for tab 1
+djScrollFrame:Show()
+raidScrollFrame:Hide()
 
 --------------------------------------------------
 -- Raid Size Slider
@@ -547,7 +574,6 @@ toggleButton:SetText("Start")
 
 toggleButton:SetScript("OnClick", function()
   if isBroadcasting then
-    -- Stop broadcast
     if stopMessageBroadcast then
       stopMessageBroadcast()
     end
@@ -555,12 +581,10 @@ toggleButton:SetScript("OnClick", function()
     PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg")
     searchStartTime = 0
   else
-    -- Ensure channel frame exists
     if EnsureChannelFrameExists then
       EnsureChannelFrameExists()
     end
     
-    -- Start broadcast (validation is done inside)
     local success = startMessageBroadcast()
     
     if success then
@@ -568,7 +592,6 @@ toggleButton:SetScript("OnClick", function()
       PlaySoundFile("Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_RoleCheck.ogg")
       searchStartTime = GetTime()
     end
-    -- If failed, startMessageBroadcast already printed errors
   end
 end)
 
@@ -622,10 +645,19 @@ end)
 --------------------------------------------------
 -- Display Lists After Frames Created
 --------------------------------------------------
-if AutoLFM_DungeonList and contentFrame then
-  AutoLFM_DungeonList.Display(contentFrame)
-end
+local displayFrame = CreateFrame("Frame")
+displayFrame:RegisterEvent("PLAYER_LOGIN")
 
-if AutoLFM_RaidList and raidContentFrame then
-  AutoLFM_RaidList.Display(raidContentFrame)
-end
+displayFrame:SetScript("OnEvent", function()
+  if event == "PLAYER_LOGIN" then
+    if AutoLFM_DungeonList and contentFrame then
+      AutoLFM_DungeonList.Display(contentFrame)
+    end
+    
+    if AutoLFM_RaidList and raidContentFrame then
+      AutoLFM_RaidList.Display(raidContentFrame)
+    end
+    
+    displayFrame:UnregisterEvent("PLAYER_LOGIN")
+  end
+end)
