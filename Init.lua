@@ -122,9 +122,9 @@ end
 -- Main Initialization
 --------------------------------------------------
 initFrame:SetScript("OnEvent", function()
-  local currentEvent = event
+  local eventName = event
   
-  if currentEvent == "PLAYER_ENTERING_WORLD" then
+  if eventName == "PLAYER_ENTERING_WORLD" then
     local coreSuccess = InitializeCoreSystems()
     if not coreSuccess then
       return
