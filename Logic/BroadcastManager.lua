@@ -73,7 +73,7 @@ function SendMessageToChannels(message)
     selectedChannelsList = {}
   end
   
-  if not next(selectedChannelsList) then
+if not selectedChannelsList or not next(selectedChannelsList) then
     if AutoLFM_PrintError then
       AutoLFM_PrintError("No channel selected")
     end

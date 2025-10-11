@@ -10,9 +10,15 @@ local function GetPlayerCounts()
   local inRaid = 0
   
   if GetPartyMemberCount and type(GetPartyMemberCount) == "function" then
-    inGroup = GetPartyMemberCount()
+    local count = GetPartyMemberCount()
+    if count then
+      inGroup = count
+    end
   else
-    inGroup = GetNumPartyMembers() + 1
+    local numParty = GetNumPartyMembers()
+    if numParty then
+      inGroup = numParty + 1
+    end
   end
   
   if GetRaidMemberCount and type(GetRaidMemberCount) == "function" then
