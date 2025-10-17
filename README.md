@@ -1,167 +1,235 @@
-# autoLFM - README
+# AutoLFM - Automated LFM Broadcaster for WoW Vanilla 1.12 (TurtleWoW)
 
-https://github.com/FSuhas/AutoLFM
-
-## Description
-
-**autoLFM** est un addon pour **World of Warcraft 1.12** conçu pour automatiser le processus de recherche de groupe (LFM). Il permet aux joueurs de créer automatiquement un message de recherche de groupe, ce qui simplifie l'interaction avec le système de LFG (Looking for Group). Cet addon permet d'économiser du temps et en optimisant les chances de trouver rapidement un groupe pour des donjons ou d'autres activités multijoueurs.
-
-## Image
-
-![channel select](Screen/channel.PNG)
-
-![donjons scaling](Screen/donjons.PNG)
-
-![quest](Screen/quest.PNG)
-
-![raid selector](Screen/raid.PNG)
-
-## Fonctionnalités
-
-- **Auto-message LFM** : Envoie automatiquement un message de recherche de groupe dans la fenêtre de discussion.
-- **Compatibilité avec les donjons et les raids** : S'intègre directement aux mécanismes de recherche de groupe pour des donjons, raids ou autres activités de groupe.
-- **Interface simple et légère** : Facilité d'utilisation sans ajout complexe à l'interface de jeu.
-
-## Installation
-
-1. Téléchargez le fichier de l'addon.
-2. Décompressez le fichier téléchargé.
-3. Déplacez le dossier `autoLFM` dans le répertoire `Interface/AddOns` de votre installation World of Warcraft 1.12.
-4. Lancez World of Warcraft et connectez-vous à votre personnage.
-5. Dans le menu de l'écran d'accueil, cliquez sur le bouton "AddOns" pour vérifier que **autoLFM** est activé.
-
-## Slash Commandes
-
-Les commandes Slash permettent d'interagir facilement avec l'addon via la fenêtre de discussion. Voici les principales commandes disponibles :
-
-- `/lfm` : Ouvre la fenêtre de l'addon **AutoLFM**.
-- `/lfm help` : Affiche la liste de toutes les commandes disponibles avec une brève description de chacune.
-- `/lfm broadcast` : Ouvre la selection des channels.
-- `/lfm minimap show` : Affiche le bouton de la mini-carte pour un accès rapide à l'addon.
-- `/lfm minimap hide` : Masque le bouton de la mini-carte si vous ne souhaitez pas qu'il soit visible.
-- `/lfm minimap reset` : Position du bouton de la minimap réinitialisée par défaut.
+<p align="center">
+  <img src="AutoLFM.png" alt="AutoLFM Interface" width="600"/>
+</p>
 
 
-- **Message de recherche de groupe automatique** : Lorsque l'addon est activé, il envoie automatiquement un message dans le chat pour signaler que vous cherchez des joueurs pour rejoindre  votre groupe pour un donjon ou autre activité.
+## 📖 Description
 
-- **Personnalisation** : Vous pouvez ajuster le texte de votre message de recherche de groupe en ajoutant du texte via le menu de l'addon dans le jeu.
-
-## Configuration
-
-1. Ouvrez le menu des options de l'addon avec `/lfm`.
-2. Vous pouvez personnaliser le message de recherche de groupe et définir des préférences spécifiques pour les types de groupes que vous souhaitez contruire.
-
-## Dépannage
-
-- **Le message LFM ne s'affiche pas** : Assurez-vous que l'addon est bien activé dans le menu AddOns avant de vous connecter.
+**AutoLFM** is a powerful World of Warcraft 1.12 (Vanilla) addon that automates the process of broadcasting "Looking For More" (LFM) messages for dungeons, raids, quests and more. This addon helps group leaders efficiently recruit party members without manual spam.
 
 
-## Aide et Support
+## 🐢 Turtle WoW Specific
+> **Note**: While this addon works on any WoW 1.12 client, it was specifically designed for Turtle WoW and includes content from that server (custom dungeons, raids, and features).
 
-Pour toute question, suggestion ou rapport de bug, vous pouvez nous contacter via les forums de WoW ou sur la page GitHub de l'addon.
+The interface design is inspired by and matches Turtle WoW's native LFG system:
+- Color scheme matches Turtle WoW aesthetics
+- Icon styling consistent with server UI elements
+- Familiar user experience for Turtle WoW players
 
 
-## API
-### Availability Check
+## ✨ Features
+
+- 🎯 **Smart Content Selection**
+  - Browse and select from all Vanilla and customs dungeons/raids
+  - Add quest links directly from your quest log
+  - Color-coded level filtering
+
+- 🎭 **Role Management**
+  - Tank, Healer, DPS role indicators
+  - Visual role selector with icons
+  - Automatic message formatting
+
+- ⚙️ **Customizable Broadcasting**
+  - Adjustable broadcast interval (30-120 seconds)
+  - Multiple channel support (LookingForGroup, World, etc.)
+  - Custom message additions
+  - Live message preview
+
+- 🎨 **Intuitive Interface**
+  - Clean tabbed navigation (Dungeons/Raids/Quests/More)
+  - Minimap button with draggable positioning
+  - Eye-catching broadcast animation
+
+- 📊 **Statistics Tracking**
+  - Broadcast duration timer
+  - Message count
+  - Next message countdown
+
+
+## 📥 Installation
+Use Addon install system from TurtleWoW launcher.
+
+Or, manually:
+1. Download the latest release
+2. Extract the `AutoLFM` folder to your `Interface\AddOns` directory
+3. Restart WoW or reload UI (`/reload`)
+4. Type `/lfm` to open the interface
+
+
+## 🎮 Usage
+
+### Quick Start
+
+1. **Open the interface**: `/lfm` or click the minimap button
+2. **Select content**: 
+   - Navigate to Dungeons/Raids/Quests tabs
+   - Check the content you want to recruit for
+3. **Choose roles**: Click Tank/Healer/DPS icons (optional)
+4. **Select channels**: Go to "More" tab, check desired channels
+5. **Start broadcasting**: Click the "Start" button
+
+### Commands
+
+```bash
+/lfm                    # Toggle main window
+/lfm help               # Show all commands
+
+# Minimap button
+/lfm minimap show       # Show minimap button
+/lfm minimap hide       # Hide minimap button
+/lfm minimap reset      # Reset button position
+
+# Misc modules
+/lfm misc status        # Show module status
+/lfm misc fps on/off    # Toggle FPS display
+/lfm misc rested on/off # Toggle Rested XP monitor
+
+# API (for developers)
+/lfm api status         # Check API availability
+/lfm api data           # Show current API data
 ```
-if AutoLFM_API and AutoLFM_API.IsAvailable() then
-    local status = AutoLFM_API.GetFullStatus()
+
+
+## 🏗️ Architecture
+
+```
+AutoLFM/
+├── Core/                        # Core systems
+│   ├── Utils.lua                # Utilities, constants, colors, chat output
+│   ├── Settings.lua             # SavedVariables management per character
+│   ├── Events.lua               # WoW event handling (PARTY_MEMBERS_CHANGED, etc.)
+│   └── Commands.lua             # Slash commands system (/lfm)
+│
+├── Logic/                       # Business logic
+│   ├── Content.lua              # Dungeon/Raid/Quest databases and management
+│   ├── Selection.lua            # Selection state (roles, channels, group)
+│   ├── Broadcaster.lua          # Message building and broadcasting engine
+│   └── API.lua                  # Public API for external addons
+│
+├── UI/                          # User interface
+│   ├── Components/              # Reusable UI components
+│   │   ├── MainWindow.lua       # Main frame, roles selector, preview
+│   │   ├── TabNavigation.lua    # Tab system (Dungeons/Raids/Quests/More)
+│   │   ├── MinimapButton.lua    # Draggable minimap button
+│   │   ├── PanelBuilder.lua     # UI builder (panels, scrolls, checkboxes)
+│   │   ├── IconAnimation.lua    # Eye animation during broadcast
+│   │   └── LinkIntegration.lua  # Quest/Item links integration (Shift+Click)
+│   ├── DungeonsPanel.lua        # Dungeon list with level filters
+│   ├── RaidsPanel.lua           # Raid list with size controls
+│   ├── QuestsPanel.lua          # Quest log integration panel
+│   └── MorePanel.lua            # Settings (interval, channels, minimap, stats)
+│
+├── Misc/                        # Optional modules
+│   ├── FPSDisplay.lua           # Toggle FPS display
+│   ├── RestedXP.lua             # Rested XP monitor
+│   ├── GuildSpam.lua            # Guild spam helper
+│   └── EasterEgg.lua            # Fun hidden features
+│
+├── UI/Textures/                 # Visual assets
+│   ├── Eyes/                    # Animation frames (eye01-16.blp)
+│   ├── Icons/                   # UI icons (chat, quest, tool, etc.)
+│   ├── mainFrame.blp            # Main window background
+│   ├── preview.blp              # Message preview background
+│   ├── roles*.blp               # Role selector graphics
+│   └── tab*.blp                 # Tab button graphics
+│
+├── UI/Sounds/                   # Audio files
+│   ├── LFG_RoleCheck.ogg        # Role check sound
+│   ├── LFG_Denied.ogg           # Error sound
+│   └── fumier.ogg               # Easter egg sound
+│
+├── Init.lua                     # Initialization and startup sequence
+├── AutoLFM.toc                  # Addon manifest
+├── Changelog.txt                # Versioning history
+└── README.md                    # Documentation
+```
+
+## 🎨 Features Detail
+
+### Dungeon Panel
+- **Smart filtering** by level color (gray/green/yellow/orange/red)
+- **Auto-sorting** by player level relevance
+- **Multi-selection** (up to 4 dungeons)
+- **Level ranges** displayed for each dungeon
+
+### Raid Panel
+- **Single selection** (one raid at a time)
+- **Variable group sizes** for applicable raids
+- **Dynamic slider** for 10-40 player raids
+- **Fixed sizes** for specific content
+
+### Quest Panel
+- **Direct integration** with quest log
+- **Shift+Click** to add quest links
+- **Item links** from bags (Shift+Click)
+- **Chat links** from chat frame (Shift+Click)
+
+### More Panel
+- **Interval control** with visual slider
+- **Channel management** with checkboxes
+- **Statistics display** (duration, sent, next)
+- **Minimap controls** (show/hide/reset)
+- **Custom message** editor
+
+## 🔌 API (For Developers)
+
+AutoLFM exposes a public API for integration with other addons:
+
+```lua
+-- Check API availability
+if AutoLFM.API and AutoLFM.API.IsAvailable() then
+    -- Get current state
+    local data = AutoLFM.API.GetData()
+    
+    -- Access specific info
+    local message = data.message          -- Current broadcast message
+    local isActive = data.isActive        -- Broadcasting status
+    local channels = data.channels        -- Selected channels
+    local roles = data.roles              -- Selected roles
+    local dungeons = data.dungeons        -- Selected dungeons
+    local raids = data.raids              -- Selected raids
+    
+    -- Subscribe to changes
+    AutoLFM.API.OnDataChange(function()
+        -- Called when any data changes
+    end)
 end
 ```
 
-### Main Function
-**AutoLFM\_API.GetFullStatus()**
-```
-{
-    groupType = "dungeon|raid|other",
-    selectedContent = {
-        type = "dungeon|raid|other",
-        list = { "DM", "STRAT", ... },           -- Selected abbreviations
-        details = {                              -- Details for each content
-            ["DM"] = {
-                name = "Dire Maul",
-                abrev = "DM",
-                size = 5,                        -- For dungeons
-                levelMin = 55, levelMax = 60
-            },
-            ["MC"] = {
-                name = "Molten Core",
-                abrev = "MC", 
-                sizeMin = 20, sizeMax = 40       -- For raids
-            }
-        }
-    },
-    playerCount = {
-        currentInGroup = 3,                      -- Current players in group
-        desiredTotal = 5,                        -- Desired total number
-        missing = 2                              -- Missing players to recruit
-    },
-    rolesNeeded = { "tank", "heal", "dps" },     -- Requested roles
-    dynamicMessage = {
-        combined = "LF2M DM tank heal",          -- Generated final message
-        userInput = "PST with gear",             -- User personal message
-        hasUserInput = true                      -- true if personal message exists
-    },
-    selectedChannels = { "LookingForGroup", "Trade - City", ... },
-    broadcastStats = {
-        isActive = true,                         -- true if broadcast is active
-        messagesSent = 15,                       -- Total messages sent
-        searchDuration = 450.2                   -- Search duration in seconds
-    },
-    timing = {
-        intervalSeconds = 80,                    -- Interval between messages
-        timeUntilNext = 23.5                     -- Time until next message
-    }
-}
-```
+## ⚙️ Configuration
 
-### Individual Functions
-| Function | Description | Return Type |
-| --- | --- | --- |
-| `AutoLFM_API.GetGroupType()` | Current group type | string |
-| `AutoLFM_API.GetSelectedContent()` | Selected content (dungeons/raids) | table |
-| `AutoLFM_API.GetPlayerCount()` | Player count information | table |
-| `AutoLFM_API.GetRolesNeeded()` | Requested roles | array |
-| `AutoLFM_API.GetDynamicMessage()` | Generated dynamic message | table |
-| `AutoLFM_API.GetSelectedChannels()` | Selected channels | array |
-| `AutoLFM_API.GetBroadcastStats()` | Broadcast statistics | table |
-| `AutoLFM_API.GetTiming()` | Timing information | table |
-| `AutoLFM_API.IsAvailable()` | Check if API is ready | boolean |
-| `AutoLFM_API.GetVersion()` | API version | string |
+Settings are automatically saved per character in `SavedVariables/AutoLFM.lua`.
 
-### Callback System
-```
--- Register callback
-AutoLFM_API.RegisterCallback("MyAddon", function(status)
-    -- Function called when data changes
-end)
+Configuration includes:
+- Broadcast interval
+- Channel preferences
+- Minimap button position
+- Dungeon level filters
+- Module states (FPS, Rested XP)
 
--- Unregister callback
-AutoLFM_API.UnregisterCallback("MyAddon")
-```
+## 🐛 Known Issues & TODO
 
-### Usage Example
-```
-if AutoLFM_API and AutoLFM_API.IsAvailable() then
-    local status = AutoLFM_API.GetFullStatus()
-    print("Type: " .. status.groupType)
-    print("Players: " .. status.playerCount.currentInGroup .. 
-          "/" .. status.playerCount.desiredTotal)
-    print("Messages sent: " .. status.broadcastStats.messagesSent)
-end
-```
+### Issues
+- You tell me.
 
-### Error Handling
-```
-local success, status = pcall(AutoLFM_API.GetFullStatus)
-if success then
-    -- Use the data
-else
-    print("API Error: " .. tostring(status))
-end
-```
+### UI Improvements
+- [ ] Add "Clear All" button on main frame (next to close button)
+- [ ] Fix preview message sizing (sometimes too large)
+- [ ] Align all UI elements consistently
+- [ ] Replace magic numbers with named constants
 
-### Debug Commands
-*   `/lfmapi debug` - Display all data in chat
-*   `/lfmapi status` - Test API availability
-*   `/lfmapi` - List available commands
+### Engine Improvements
+- [ ] Integrate FuBar module support
+- [ ] Rework on API
+
+
+## 📝 Informations
+
+- WoW Version: 1.12.1 (Interface 11200)
+- Lua Version: 5.0
+- External Libraries: None
+- Original Author: Gondoleon
+
+Contributions are welcome!

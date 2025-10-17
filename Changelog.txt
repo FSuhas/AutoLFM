@@ -1,4 +1,8 @@
 AddOn: AutoLFM
+
+Version: 2.0.0
+Full restructuration
+
 Version: 1.6.8
 Add API
 
