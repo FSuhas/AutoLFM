@@ -69,9 +69,9 @@ end
 -- Group State
 -----------------------------------------------------------------------------
 function AutoLFM.Logic.Selection.GetMode()
-  if selectedRaids and table.getn(selectedRaids) > 0 then
+  if AutoLFM.Logic.Content.GetSelectedRaids and table.getn(AutoLFM.Logic.Content.GetSelectedRaids()) > 0 then
     return "raid"
-  elseif selectedDungeons and table.getn(selectedDungeons) > 0 then
+  elseif AutoLFM.Logic.Content.GetSelectedDungeons and table.getn(AutoLFM.Logic.Content.GetSelectedDungeons()) > 0 then
     return "dungeon"
   else
     return "none"
@@ -80,30 +80,17 @@ end
 
 function AutoLFM.Logic.Selection.GetGroupCount()
   local success, result = pcall(function()
-    local mode = AutoLFM.Logic.Selection.GetMode()
-    
-    if mode == "raid" then
-      local raidCount = GetNumRaidMembers()
-      if raidCount and raidCount > 0 then return raidCount end
-      
-      local partyCount = GetNumPartyMembers()
-      if partyCount and partyCount > 0 then return partyCount + 1 end
-      
-      return 1
-    elseif mode == "dungeon" then
-      local partyCount = GetNumPartyMembers()
-      if partyCount and partyCount > 0 then return partyCount + 1 end
-      
-      return 1
-    else
-      local raidCount = GetNumRaidMembers()
-      if raidCount and raidCount > 0 then return raidCount end
-      
-      local partyCount = GetNumPartyMembers()
-      if partyCount and partyCount > 0 then return partyCount + 1 end
-      
-      return 1
+    local raidCount = GetNumRaidMembers()
+    if raidCount and raidCount > 0 then
+      return raidCount
     end
+    
+    local partyCount = GetNumPartyMembers()
+    if partyCount and partyCount > 0 then
+      return partyCount + 1
+    end
+    
+    return 1
   end)
   
   if not success then
@@ -140,6 +127,10 @@ function AutoLFM.Logic.Selection.ToggleRole(role)
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
   end
+  
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.ROLES_CHANGED)
+  end
 end
 
 function AutoLFM.Logic.Selection.ClearRoles()
@@ -149,6 +140,10 @@ function AutoLFM.Logic.Selection.ClearRoles()
   
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
+  end
+  
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.ROLES_CHANGED)
   end
 end
 
@@ -266,6 +261,10 @@ function AutoLFM.Logic.Selection.ToggleChannel(channelName, isSelected)
   end
   
   AutoLFM.Core.Settings.SaveChannels(selectedChannels)
+  
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CHANNELS_CHANGED)
+  end
 end
 
 function AutoLFM.Logic.Selection.GetChannels()
@@ -321,4 +320,8 @@ function AutoLFM.Logic.Selection.ClearChannels()
     selectedChannels[k] = nil
   end
   AutoLFM.Core.Settings.SaveChannels(selectedChannels)
+  
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CHANNELS_CHANGED)
+  end
 end

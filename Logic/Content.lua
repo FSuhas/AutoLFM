@@ -337,6 +337,10 @@ local function ToggleSelection(contentType, tag, isSelected)
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
   end
+  
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CONTENT_CHANGED)
+  end
 end
 
 local function ClearSelection(contentType)
@@ -353,6 +357,10 @@ local function ClearSelection(contentType)
   
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
+  end
+  
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CONTENT_CHANGED)
   end
 end
 
@@ -471,6 +479,10 @@ function AutoLFM.Logic.Content.SetRaidSize(size)
   
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
+  end
+  
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CONTENT_CHANGED)
   end
 end
 

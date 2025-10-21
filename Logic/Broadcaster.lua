@@ -323,6 +323,10 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
   messageCount = (messageCount or 0) + 1
   lastTimestamp = GetTime()
   
+  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+     AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.MESSAGE_SENT)
+  end
+  
   return true
 end
 
@@ -351,6 +355,10 @@ function AutoLFM.Logic.Broadcaster.Start()
       AutoLFM.UI.IconAnimation.Start()
     end
     
+    if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+      AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.BROADCAST_START)
+    end
+    
     return true
   end)
   
@@ -370,6 +378,10 @@ function AutoLFM.Logic.Broadcaster.Stop()
     
     if AutoLFM.UI.IconAnimation.Stop then
       AutoLFM.UI.IconAnimation.Stop()
+    end
+    
+    if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+      AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.BROADCAST_STOP)
     end
     
     messageCount = 0

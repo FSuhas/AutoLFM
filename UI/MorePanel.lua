@@ -235,6 +235,10 @@ local function CreateBroadcastIntervalSlider(parentFrame, editboxIcon)
     if value then
       sliderValue:SetText(math.floor(value) .. " secs")
       AutoLFM.Core.Settings.SaveInterval(value)
+      
+      if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+        AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.INTERVAL_CHANGED)
+      end
     end
   end)
   

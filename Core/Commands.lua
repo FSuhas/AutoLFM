@@ -152,11 +152,44 @@ local COMMANDS = {
         end
       },
       {
-        cmd = "data",
-        desc = "Shows all current API data",
+        cmd = "debug",
+        desc = "Shows detailed API debug information",
         handler = function()
-          if AutoLFM.API and AutoLFM.API.DataPrint then
-            AutoLFM.API.DataPrint()
+          if AutoLFM.API and AutoLFM.API.DebugPrint then
+            AutoLFM.API.DebugPrint()
+          else
+            AutoLFM.Core.Utils.PrintError("API not available")
+          end
+        end
+      },
+      {
+        cmd = "data",
+        desc = "Shows current API data (raw status)",
+        handler = function()
+          if not AutoLFM.API or not AutoLFM.API.IsAvailable or not AutoLFM.API.IsAvailable() then
+            AutoLFM.Core.Utils.PrintError("API not available")
+            return
+          end
+          
+          local status = AutoLFM.API.GetFullStatus()
+          
+          AutoLFM.Core.Utils.PrintSuccess("=== AutoLFM API Data ===")
+          AutoLFM.Core.Utils.Print("Group Type: " .. AutoLFM.Color(status.groupType, "yellow"))
+          AutoLFM.Core.Utils.Print("Broadcasting: " .. AutoLFM.Color(status.broadcastStats.isActive and "Yes" or "No", status.broadcastStats.isActive and "green" or "red"))
+          AutoLFM.Core.Utils.Print("Players: " .. AutoLFM.Color(status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal, "yellow"))
+          AutoLFM.Core.Utils.Print("Missing: " .. AutoLFM.Color(tostring(status.playerCount.missing), "yellow"))
+          AutoLFM.Core.Utils.Print("Selected Content: " .. AutoLFM.Color(tostring(table.getn(status.selectedContent.list)), "yellow") .. " items")
+          AutoLFM.Core.Utils.Print("Roles: " .. AutoLFM.Color(table.getn(status.rolesNeeded) > 0 and table.concat(status.rolesNeeded, ", ") or "none", "yellow"))
+          AutoLFM.Core.Utils.Print("Channels: " .. AutoLFM.Color(table.getn(status.selectedChannels) > 0 and table.concat(status.selectedChannels, ", ") or "none", "yellow"))
+          AutoLFM.Core.Utils.Print("Interval: " .. AutoLFM.Color(tostring(status.timing.intervalSeconds) .. "s", "yellow"))
+        end
+      },
+      {
+        cmd = "callbacks",
+        desc = "Lists registered callbacks",
+        handler = function()
+          if AutoLFM.API and AutoLFM.API.ListCallbacks then
+            AutoLFM.API.ListCallbacks()
           else
             AutoLFM.Core.Utils.PrintError("API not available")
           end

@@ -4,20 +4,13 @@
   <img src="AutoLFM.png" alt="AutoLFM Interface" width="600"/>
 </p>
 
-
 ## 📖 Description
 
 **AutoLFM** is a powerful World of Warcraft 1.12 (Vanilla) addon that automates the process of broadcasting "Looking For More" (LFM) messages for dungeons, raids, quests and more. This addon helps group leaders efficiently recruit party members without manual spam.
 
-
-## 🐢 Turtle WoW Specific
-> **Note**: While this addon works on any WoW 1.12 client, it was specifically designed for Turtle WoW and includes content from that server (custom dungeons, raids, and features).
-
-The interface design is inspired by and matches Turtle WoW's native LFG system:
-- Color scheme matches Turtle WoW aesthetics
-- Icon styling consistent with server UI elements
-- Familiar user experience for Turtle WoW players
-
+> **🐢 Turtle WoW Specific**  
+ While this addon works on any WoW 1.12 client, it was specifically designed for Turtle WoW and includes content from that server (custom dungeons, raids, and features).  
+The interface design is inspired by and matches Turtle WoW's native LFG system.
 
 ## ✨ Features
 
@@ -47,8 +40,8 @@ The interface design is inspired by and matches Turtle WoW's native LFG system:
   - Message count
   - Next message countdown
 
-
 ## 📥 Installation
+
 Use Addon install system from TurtleWoW launcher.
 
 Or, manually:
@@ -56,7 +49,6 @@ Or, manually:
 2. Extract the `AutoLFM` folder to your `Interface\AddOns` directory
 3. Restart WoW or reload UI (`/reload`)
 4. Type `/lfm` to open the interface
-
 
 ## 🎮 Usage
 
@@ -88,61 +80,57 @@ Or, manually:
 
 # API (for developers)
 /lfm api status         # Check API availability
-/lfm api data           # Show current API data
+/lfm api data           # Show current API status (concise)
+/lfm api debug          # Show detailed debug information
+/lfm api callbacks      # List registered callbacks
 ```
-
 
 ## 🏗️ Architecture
 
 ```
 AutoLFM/
+├── API/                         # Public API for external addons
+│   ├── AutoLFM_Example/         # Ready-to-use example addon
+│   ├── API.lua                  # API implementation (v2.0)
+│   ├── CHANGELOG.md             # API version history
+│   └── README.md                # Complete API documentation
+│
 ├── Core/                        # Core systems
-│   ├── Utils.lua                # Utilities, constants, colors, chat output
-│   ├── Settings.lua             # SavedVariables management per character
+│   ├── Commands.lua             # Slash commands system (/lfm)
 │   ├── Events.lua               # WoW event handling (PARTY_MEMBERS_CHANGED, etc.)
-│   └── Commands.lua             # Slash commands system (/lfm)
+│   ├── Settings.lua             # SavedVariables management per character
+│   └── Utils.lua                # Utilities, constants, colors, chat output
 │
 ├── Logic/                       # Business logic
-│   ├── Content.lua              # Dungeon/Raid/Quest databases and management
-│   ├── Selection.lua            # Selection state (roles, channels, group)
 │   ├── Broadcaster.lua          # Message building and broadcasting engine
-│   └── API.lua                  # Public API for external addons
+│   ├── Content.lua              # Dungeon/Raid/Quest databases and management
+│   └── Selection.lua            # Selection state (roles, channels, group)
+│
+├── Misc/                        # Optional modules
+│   ├── EasterEgg.lua            # Fun hidden features
+│   ├── FPSDisplay.lua           # Toggle FPS display
+│   ├── GuildSpam.lua            # Guild spam helper
+│   └── RestedXP.lua             # Rested XP monitor
 │
 ├── UI/                          # User interface
 │   ├── Components/              # Reusable UI components
+│   │   ├── IconAnimation.lua    # Eye animation during broadcast
+│   │   ├── LinkIntegration.lua  # Quest/Item links integration (Shift+Click)
 │   │   ├── MainWindow.lua       # Main frame, roles selector, preview
-│   │   ├── TabNavigation.lua    # Tab system (Dungeons/Raids/Quests/More)
 │   │   ├── MinimapButton.lua    # Draggable minimap button
 │   │   ├── PanelBuilder.lua     # UI builder (panels, scrolls, checkboxes)
-│   │   ├── IconAnimation.lua    # Eye animation during broadcast
-│   │   └── LinkIntegration.lua  # Quest/Item links integration (Shift+Click)
+│   │   └── TabNavigation.lua    # Tab system (Dungeons/Raids/Quests/More)
+│   ├── Sounds/                  # Audio files (.ogg)
+│   ├── Textures/                # Visual assets (.blp)
 │   ├── DungeonsPanel.lua        # Dungeon list with level filters
-│   ├── RaidsPanel.lua           # Raid list with size controls
+│   ├── MorePanel.lua            # Settings (interval, channels, minimap, stats)
 │   ├── QuestsPanel.lua          # Quest log integration panel
-│   └── MorePanel.lua            # Settings (interval, channels, minimap, stats)
+│   └── RaidsPanel.lua           # Raid list with size controls
 │
-├── Misc/                        # Optional modules
-│   ├── FPSDisplay.lua           # Toggle FPS display
-│   ├── RestedXP.lua             # Rested XP monitor
-│   ├── GuildSpam.lua            # Guild spam helper
-│   └── EasterEgg.lua            # Fun hidden features
-│
-├── UI/Textures/                 # Visual assets
-│   ├── Eyes/                    # Animation frames (eye01-16.blp)
-│   ├── Icons/                   # UI icons (chat, quest, tool, etc.)
-│   ├── mainFrame.blp            # Main window background
-│   ├── preview.blp              # Message preview background
-│   ├── roles*.blp               # Role selector graphics
-│   └── tab*.blp                 # Tab button graphics
-│
-├── UI/Sounds/                   # Audio files
-│   ├── LFG_RoleCheck.ogg        # Role check sound
-│   ├── LFG_Denied.ogg           # Error sound
-│   └── fumier.ogg               # Easter egg sound
-│
-├── Init.lua                     # Initialization and startup sequence
+├── AutoLFM.png                  # Addon preview image
 ├── AutoLFM.toc                  # Addon manifest
-├── Changelog.txt                # Versioning history
+├── CHANGELOG.md                 # Versioning history
+├── Init.lua                     # Initialization and startup sequence
 └── README.md                    # Documentation
 ```
 
@@ -175,28 +163,10 @@ AutoLFM/
 
 ## 🔌 API (For Developers)
 
-AutoLFM exposes a public API for integration with other addons:
+AutoLFM exposes a comprehensive public API for integration with other addons.  
+For API reference, usage examples, event system, and integration guides, see the dedicated API documentation.
 
-```lua
--- Check API availability
-if AutoLFM.API and AutoLFM.API.IsAvailable() then
-    -- Get current state
-    local data = AutoLFM.API.GetData()
-    
-    -- Access specific info
-    local message = data.message          -- Current broadcast message
-    local isActive = data.isActive        -- Broadcasting status
-    local channels = data.channels        -- Selected channels
-    local roles = data.roles              -- Selected roles
-    local dungeons = data.dungeons        -- Selected dungeons
-    local raids = data.raids              -- Selected raids
-    
-    -- Subscribe to changes
-    AutoLFM.API.OnDataChange(function()
-        -- Called when any data changes
-    end)
-end
-```
+**📖 [Complete API Documentation →](API/README.md)**
 
 ## ⚙️ Configuration
 
@@ -217,13 +187,10 @@ Configuration includes:
 ### UI Improvements
 - [ ] Add "Clear All" button on main frame (next to close button)
 - [ ] Fix preview message sizing (sometimes too large)
-- [ ] Align all UI elements consistently
-- [ ] Replace magic numbers with named constants
+- [ ] Align all UI elements consistently / replace magic numbers with named constants
 
 ### Engine Improvements
 - [ ] Integrate FuBar module support
-- [ ] Rework on API
-
 
 ## 📝 Informations
 
