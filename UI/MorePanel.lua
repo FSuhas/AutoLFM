@@ -548,12 +548,10 @@ local function CreateMinimapResetButton(parentFrame, yOffset)
   end)
   
   resetButton:SetScript("OnClick", function()
-    local defaultAngle = 225
+    AutoLFM.Core.Settings.ResetMinimapPos()
     
-    AutoLFM.Core.Settings.SaveMinimapPos(defaultAngle)
-    
-    if AutoLFM_MinimapButton and AutoLFM.UI.MinimapButton.SetPosition then
-      AutoLFM.UI.MinimapButton.SetPosition(defaultAngle)
+    if AutoLFM_MinimapButton and AutoLFM.UI.MinimapButton.ResetPosition then
+      AutoLFM.UI.MinimapButton.ResetPosition()
       AutoLFM_MinimapButton:Show()
       AutoLFM.Core.Settings.SaveMinimapHidden(false)
     end

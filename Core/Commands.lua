@@ -65,13 +65,13 @@ local COMMANDS = {
         cmd = "reset",
         desc = "Resets button position",
         handler = function()
-          local defaultAngle = 225
-          AutoLFM.Core.Settings.SaveMinimapPos(defaultAngle)
-          if AutoLFM_MinimapButton and AutoLFM.UI.MinimapButton.SetPosition then
-            AutoLFM.UI.MinimapButton.SetPosition(defaultAngle)
-            AutoLFM_MinimapButton:Show()
+          if AutoLFM_MinimapButton and AutoLFM.UI.MinimapButton.ResetPosition then
+            AutoLFM.Core.Settings.ResetMinimapPos()
+            AutoLFM.UI.MinimapButton.ResetPosition()
+            AutoLFM.Core.Utils.PrintSuccess("Minimap button position reset")
+          else
+            AutoLFM.Core.Utils.PrintError("Minimap button not initialized")
           end
-          AutoLFM.Core.Utils.PrintSuccess("Minimap button position reset")
         end
       }
     }
@@ -89,6 +89,12 @@ local COMMANDS = {
           AutoLFM.Core.Utils.Print("  FPS Display: " .. fpsStatus)
           local restedStatus = AutoLFM.Misc.RestedXP.IsEnabled() and "|cff55ff55ON|r" or "|cffff5555OFF|r"
           AutoLFM.Core.Utils.Print("  Rested XP Monitor: " .. restedStatus)
+          local inviteStatus = AutoLFM.Misc.AutoInvite.IsEnabled() and "|cff55ff55ON|r" or "|cffff5555OFF|r"
+          AutoLFM.Core.Utils.Print("  Auto Invite: " .. inviteStatus)
+          local spamStatus = AutoLFM.Misc.GuildSpam.IsEnabled() and "|cff55ff55ON|r" or "|cffff5555OFF|r"
+          AutoLFM.Core.Utils.Print("  Guild Spam: " .. spamStatus)
+          local markerStatus = AutoLFM.Misc.AutoMarker.IsEnabled() and "|cff55ff55ON|r" or "|cffff5555OFF|r"
+          AutoLFM.Core.Utils.Print("  Auto Marker: " .. markerStatus)
         end
       },
       {
@@ -128,6 +134,103 @@ local COMMANDS = {
             AutoLFM.Core.Utils.PrintSuccess("Rested XP Monitor disabled")
           else
             AutoLFM.Core.Utils.PrintError("Usage: /lfm misc rested [on|off|status]")
+          end
+        end
+      },
+      {
+        cmd = "invite",
+        desc = "Auto Invite on whisper",
+        args = "[status | on | off | keyword | confirm]",
+        handler = function(args)
+          local action = args[3]
+          if not action or action == "status" then
+            AutoLFM.Misc.AutoInvite.ShowStatus()
+          elseif action == "on" then
+            AutoLFM.Misc.AutoInvite.Enable()
+          elseif action == "off" then
+            AutoLFM.Misc.AutoInvite.Disable()
+          elseif action == "keyword" then
+            local newKeyword = args[4]
+            if newKeyword then
+              AutoLFM.Misc.AutoInvite.SetKeyword(newKeyword)
+            else
+              AutoLFM.Core.Utils.PrintError("Usage: /lfm misc invite keyword <word>")
+            end
+          elseif action == "confirm" then
+            AutoLFM.Misc.AutoInvite.ToggleConfirm()
+          else
+            AutoLFM.Core.Utils.PrintError("Usage: /lfm misc invite [on|off|status|keyword|confirm]")
+          end
+        end
+      },
+      {
+        cmd = "guild",
+        desc = "Guild Spam broadcaster",
+        args = "[status | start | stop | interval]",
+        handler = function(args)
+          local action = args[3]
+          if not action or action == "status" then
+            AutoLFM.Misc.GuildSpam.ShowStatus()
+          elseif action == "start" then
+            local message = ""
+            for i = 4, table.getn(args) do
+              if message ~= "" then
+                message = message .. " "
+              end
+              message = message .. args[i]
+            end
+            if message == "" then
+              AutoLFM.Core.Utils.PrintError("Usage: /lfm misc guild start <message>")
+            else
+              AutoLFM.Misc.GuildSpam.Start(message)
+            end
+          elseif action == "stop" then
+            AutoLFM.Misc.GuildSpam.Stop()
+          elseif action == "interval" then
+            local interval = args[4]
+            if interval then
+              AutoLFM.Misc.GuildSpam.SetInterval(interval)
+            else
+              AutoLFM.Core.Utils.PrintError("Usage: /lfm misc guild interval <seconds>")
+            end
+          else
+            AutoLFM.Core.Utils.PrintError("Usage: /lfm misc guild [status|start|stop|interval]")
+          end
+        end
+      },
+      {
+        cmd = "marker",
+        desc = "Auto Marker for raid icons",
+        args = "[status | on | off | add | del | list | clear]",
+        handler = function(args)
+          local action = args[3]
+          if not action or action == "status" then
+            AutoLFM.Misc.AutoMarker.ShowStatus()
+          elseif action == "on" then
+            AutoLFM.Misc.AutoMarker.Enable()
+          elseif action == "off" then
+            AutoLFM.Misc.AutoMarker.Disable()
+          elseif action == "add" then
+            local name = args[4]
+            local icon = args[5]
+            if name and icon then
+              AutoLFM.Misc.AutoMarker.AddPlayer(name, icon)
+            else
+              AutoLFM.Core.Utils.PrintError("Usage: /lfm misc marker add <n> <icon>")
+            end
+          elseif action == "del" then
+            local name = args[4]
+            if name then
+              AutoLFM.Misc.AutoMarker.RemovePlayer(name)
+            else
+              AutoLFM.Core.Utils.PrintError("Usage: /lfm misc marker del <n>")
+            end
+          elseif action == "list" then
+            AutoLFM.Misc.AutoMarker.ShowStatus()
+          elseif action == "clear" then
+            AutoLFM.Misc.AutoMarker.ClearAll()
+          else
+            AutoLFM.Core.Utils.PrintError("Usage: /lfm misc marker [status|on|off|add|del|list|clear]")
           end
         end
       }

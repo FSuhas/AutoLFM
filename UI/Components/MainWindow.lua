@@ -222,7 +222,7 @@ function AutoLFM.UI.MainWindow.CreateMessagePreview()
     local message = AutoLFM.Logic.Broadcaster.GetMessage()
     if message and message ~= "" then
       AutoLFM.Core.Utils.Print("Preview: ")
-      AutoLFM.Core.Utils.PrintNote(message)
+      AutoLFM.Core.Utils.PrintInfo(message)
     end
   end)
   
