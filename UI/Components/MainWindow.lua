@@ -45,7 +45,7 @@ function AutoLFM.UI.MainWindow.CreateFrame()
   mainIcon:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 7, -4)
   mainIcon:SetWidth(64)
   mainIcon:SetHeight(64)
-  mainIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Eyes\\eye07")
+  mainIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Eyes\\eye01")
   mainIconTexture = mainIcon
   
   local mainTitle = mainFrame:CreateFontString(nil, "MEDIUM", "GameFontNormal")
