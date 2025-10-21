@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.2] - Fix minimap button
+
+- Animation, position, size
+
 ## [2.1] - Misc modules, init, minimapBtn moving
 
 - Integrate misc modules
