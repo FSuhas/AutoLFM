@@ -74,13 +74,12 @@ Or, manually:
 /lfm minimap reset      # Reset button position
 
 # Misc modules
-/lfm misc status        # Show module status
-/lfm misc fps on/off    # Toggle FPS display
-/lfm misc rested on/off # Toggle Rested XP monitor
+/lfm misc status        # Show all modules status
+/lfm misc help          # List all misc commands
 
 # API (for developers)
 /lfm api status         # Check API availability
-/lfm api data           # Show current API status (concise)
+/lfm api data           # Show current API status
 /lfm api debug          # Show detailed debug information
 /lfm api callbacks      # List registered callbacks
 ```
@@ -106,11 +105,14 @@ AutoLFM/
 │   ├── Content.lua              # Dungeon/Raid/Quest databases and management
 │   └── Selection.lua            # Selection state (roles, channels, group)
 │
-├── Misc/                        # Optional modules
+├── Misc/                        # Optional utility modules
+│   ├── AutoInvite.lua           # Auto-invite players on whisper keyword
+│   ├── AutoMarker.lua           # Auto raid icon assignment
 │   ├── EasterEgg.lua            # Fun hidden features
-│   ├── FPSDisplay.lua           # Toggle FPS display
-│   ├── GuildSpam.lua            # Guild spam helper
-│   └── RestedXP.lua             # Rested XP monitor
+│   ├── FPSDisplay.lua           # FPS/latency display
+│   ├── GuildSpam.lua            # Guild chat broadcaster
+│   ├── RestedXP.lua             # Rested XP monitor
+│   └── README.md                # Complete misc documentation
 │
 ├── UI/                          # User interface
 │   ├── Components/              # Reusable UI components
@@ -132,7 +134,7 @@ AutoLFM/
 ├── AutoLFM.toc                  # Addon manifest
 ├── CHANGELOG.md                 # Versioning history
 ├── Init.lua                     # Initialization and startup sequence
-└── README.md                    # Documentation
+└── README.md                    # This file
 ```
 
 ## 🎨 Features Detail
@@ -168,29 +170,31 @@ AutoLFM/
 - **Smart detection** of active selections
 - **Tooltip** confirmation on hover
 
-## 🔌 API (For Developers)
+## 🔌 Extensions
 
-AutoLFM exposes a comprehensive public API for integration with other addons.  
-For API reference, usage examples, event system, and integration guides, see the dedicated API documentation.
+### Misc Modules
+Optional utility modules.
+
+**📖 [Complete Misc Modules Documentation →](Misc/README.md)**
+
+### Public API
+AutoLFM exposes a comprehensive public API for integration with other addons.
 
 **📖 [Complete API Documentation →](API/README.md)**
 
 ## ⚙️ Configuration
-
 Settings are automatically saved per character in `SavedVariables/AutoLFM.lua`.
 
 Configuration includes:
-- Broadcast interval
-- Channel preferences
+- Broadcast interval and channels
 - Minimap button position
 - Dungeon level filters
-- Module states (FPS, Rested XP)
+- Misc modules states and settings
 
-## 📝 Informations
-
-- WoW Version: 1.12.1 (Interface 11200)
-- Lua Version: 5.0
-- External Libraries: None
-- Original Author: Gondoleon
+## 📝 Information
+- **WoW Version**: 1.12.1 (Interface 11200)
+- **Lua Version**: 5.0
+- **External Libraries**: None
+- **Original Author**: Gondoleon
 
 Contributions are welcome!
