@@ -11,67 +11,49 @@ if not AutoLFM.Init then AutoLFM.Init = {} end
 local isInitialized = false
 
 -----------------------------------------------------------------------------
--- Helpers
------------------------------------------------------------------------------
-local function SafeCall0(module, method)
-  if module and module[method] then
-    return module[method]()
-  end
-  return nil
-end
-
-local function SafeCall1(module, method, arg1)
-  if module and module[method] then
-    return module[method](arg1)
-  end
-  return nil
-end
-
-local function SafeCall2(module, method, arg1, arg2)
-  if module and module[method] then
-    return module[method](arg1, arg2)
-  end
-  return nil
-end
-
------------------------------------------------------------------------------
 -- Initialization Stages
 -----------------------------------------------------------------------------
 local function InitCore()
   if not V2_Settings then V2_Settings = {} end
   
-  if not SafeCall0(AutoLFM.Core.Settings, "InitCharacter") then
-    SafeCall1(AutoLFM.Core.Utils, "PrintError", "Failed to create character ID")
+  if not AutoLFM.Core.Settings.InitCharacter() then
+    AutoLFM.Core.Utils.PrintError("Failed to create character ID")
     return false
   end
   
-  if not SafeCall0(AutoLFM.Core.Settings, "InitSavedVars") then
-    SafeCall1(AutoLFM.Core.Utils, "PrintError", "Failed to initialize SavedVariables")
+  if not AutoLFM.Core.Settings.InitSavedVars() then
+    AutoLFM.Core.Utils.PrintError("Failed to initialize SavedVariables")
     return false
   end
   
-  SafeCall0(AutoLFM.UI.DungeonsPanel, "InitFilters")
-  SafeCall0(AutoLFM.Logic.Selection, "Init")
-  SafeCall0(AutoLFM.Misc.FPSDisplay, "Init")
-  SafeCall0(AutoLFM.Misc.RestedXP, "Init")
+  if AutoLFM.UI.DungeonsPanel.InitFilters then
+    AutoLFM.UI.DungeonsPanel.InitFilters()
+  end
+  
+  AutoLFM.Logic.Selection.Init()
+  AutoLFM.Misc.FPSDisplay.Init()
+  AutoLFM.Misc.RestedXP.Init()
+  AutoLFM.Misc.AutoInvite.Init()
+  AutoLFM.Misc.GuildSpam.Init()
+  AutoLFM.Misc.AutoMarker.Init()
   
   return true
 end
 
 local function InitMainWindow()
-  AutoLFM_MainFrame = SafeCall0(AutoLFM.UI.MainWindow, "CreateFrame")
+  AutoLFM_MainFrame = AutoLFM.UI.MainWindow.CreateFrame()
   if not AutoLFM_MainFrame then return false end
   
-  AutoLFM_MainIconTexture = SafeCall0(AutoLFM.UI.MainWindow, "GetIconTexture")
-  SafeCall0(AutoLFM.UI.MainWindow, "CreateRoleSelector")
-  SafeCall0(AutoLFM.UI.MainWindow, "CreateMessagePreview")
-  SafeCall0(AutoLFM.UI.MainWindow, "CreateStartButton")
+  AutoLFM_MainIconTexture = AutoLFM.UI.MainWindow.GetIconTexture()
+  AutoLFM.UI.MainWindow.CreateRoleSelector()
+  AutoLFM.UI.MainWindow.CreateMessagePreview()
+  AutoLFM.UI.MainWindow.CreateStartButton()
   
   return true
 end
 
 local function InitPanels()
-  SafeCall0(AutoLFM.UI.TabNavigation, "CreateTabs")
+  AutoLFM.UI.TabNavigation.CreateTabs()
   
   local panels = {
     AutoLFM.UI.DungeonsPanel,
@@ -83,21 +65,23 @@ local function InitPanels()
   
   for i = 1, table.getn(panels) do
     local panel = panels[i]
-    if panel then
-      SafeCall1(panel, "Create", AutoLFM_MainFrame)
-      SafeCall0(panel, "Register")
+    if panel and panel.Create then
+      panel.Create(AutoLFM_MainFrame)
+    end
+    if panel and panel.Register then
+      panel.Register()
     end
   end
   
-  SafeCall0(AutoLFM.UI.TabNavigation, "Init")
-  SafeCall1(AutoLFM.UI.TabNavigation, "SwitchTo", 1)
+  AutoLFM.UI.TabNavigation.Init()
+  AutoLFM.UI.TabNavigation.SwitchTo(1)
 end
 
 local function InitExtras()
-  SafeCall0(AutoLFM.UI.MinimapButton, "Init")
-  SafeCall0(AutoLFM.UI.LinkIntegration, "Init")
-  SafeCall0(AutoLFM.Core.Events, "Setup")
-  SafeCall0(AutoLFM.Logic.Broadcaster, "InitLoop")
+  AutoLFM.UI.MinimapButton.Init()
+  AutoLFM.UI.LinkIntegration.Init()
+  AutoLFM.Core.Events.Setup()
+  AutoLFM.Logic.Broadcaster.InitLoop()
 end
 
 -----------------------------------------------------------------------------
@@ -119,13 +103,15 @@ function AutoLFM.Init.Run()
     
     isInitialized = true
     
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess and AutoLFM.Core.Utils.ColorizeText then
-      AutoLFM.Core.Utils.PrintSuccess("Loaded successfully! " .. AutoLFM.Core.Utils.ColorizeText("More info: ", "white") .. AutoLFM.Core.Utils.ColorizeText("/lfm help", "yellow"))
-    end
+    AutoLFM.Core.Utils.PrintSuccess("Loaded successfully! " .. AutoLFM.Core.Utils.ColorizeText("More info: ", "white") .. AutoLFM.Core.Utils.ColorizeText("/lfm help", "yellow"))
   end)
   
   if not success then
-    SafeCall1(AutoLFM.Core.Utils, "PrintError", "Initialization failed: " .. tostring(err))
+    if AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
+      AutoLFM.Core.Utils.PrintError("Initialization failed: " .. tostring(err))
+    else
+      DEFAULT_CHAT_FRAME:AddMessage("|cffff0000[AutoLFM] Initialization failed: " .. tostring(err) .. "|r")
+    end
   end
 end
 

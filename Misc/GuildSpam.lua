@@ -21,14 +21,14 @@ local updateFrame = nil
 function AutoLFM.Misc.GuildSpam.Start(msg)
   if not msg or msg == "" then
     if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("[MG] Message cannot be empty")
+      AutoLFM.Core.Utils.PrintError("Message cannot be empty")
     end
     return false
   end
   
   if not IsInGuild() then
     if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("[MG] You are not in a guild")
+      AutoLFM.Core.Utils.PrintError("You are not in a guild")
     end
     return false
   end
@@ -38,7 +38,7 @@ function AutoLFM.Misc.GuildSpam.Start(msg)
   isRunning = true
   
   if not updateFrame then
-    updateFrame = CreateFrame("Frame", "MGSpamFrame")
+    updateFrame = CreateFrame("Frame", "AutoLFM_GuildSpamFrame")
   end
   
   updateFrame.lastUpdate = nil
@@ -65,8 +65,11 @@ function AutoLFM.Misc.GuildSpam.Start(msg)
     end
   end)
   
+  AutoLFM.Core.Settings.SaveMiscModuleData("guildSpam", "message", message)
+  AutoLFM.Core.Settings.SaveMiscModule("guildSpam", true)
+  
   if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
-    AutoLFM.Core.Utils.PrintSuccess("[MG] Spam started every " .. interval .. "s: " .. msg)
+    AutoLFM.Core.Utils.PrintSuccess("Guild spam started (every " .. interval .. "s): " .. msg)
   end
   
   return true
@@ -82,55 +85,90 @@ function AutoLFM.Misc.GuildSpam.Stop()
     updateFrame:SetScript("OnUpdate", nil)
   end
   
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-    AutoLFM.Core.Utils.PrintError("[MG] Spam stopped")
+  AutoLFM.Core.Settings.SaveMiscModule("guildSpam", false)
+  
+  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintWarning then
+    AutoLFM.Core.Utils.PrintWarning("Guild spam stopped")
   end
 end
 
 function AutoLFM.Misc.GuildSpam.SetInterval(sec)
   local value = tonumber(sec)
-  if not value then
+  if not value or value < 30 then
     if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("[MG] Usage: /mg interval <seconds>")
+      AutoLFM.Core.Utils.PrintError("Interval must be at least 30 seconds")
     end
     return false
   end
   
   interval = value
   
+  AutoLFM.Core.Settings.SaveMiscModuleData("guildSpam", "interval", interval)
+  
   if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
-    AutoLFM.Core.Utils.PrintSuccess("[MG] New interval: " .. interval .. " seconds")
+    AutoLFM.Core.Utils.PrintSuccess("New interval: " .. interval .. " seconds")
   end
   
   return true
 end
 
+function AutoLFM.Misc.GuildSpam.GetInterval()
+  return interval
+end
+
+function AutoLFM.Misc.GuildSpam.GetMessage()
+  return message
+end
+
 function AutoLFM.Misc.GuildSpam.ShowStatus()
   if not message then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("[MG] No message defined")
+    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintWarning then
+      AutoLFM.Core.Utils.PrintWarning("No message defined")
     end
     return
   end
   
-  local state = isRunning and "|cff55ff55Active|r" or "|cffff5555Inactive|r"
+  local state = isRunning and AutoLFM.Color("Active", "green") or AutoLFM.Color("Inactive", "red")
   
   if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintInfo then
-    AutoLFM.Core.Utils.PrintInfo("[MG] Message: " .. message .. " | Interval: " .. interval .. "s | State: " .. state)
+    AutoLFM.Core.Utils.PrintInfo("Guild Spam Status:")
+    AutoLFM.Core.Utils.Print("  Message: " .. AutoLFM.Color(message, "yellow"))
+    AutoLFM.Core.Utils.Print("  Interval: " .. AutoLFM.Color(interval .. "s", "yellow"))
+    AutoLFM.Core.Utils.Print("  State: " .. state)
   end
 end
 
 -----------------------------------------------------------------------------
--- Slash Command Handler
+-- Initialization
+-----------------------------------------------------------------------------
+function AutoLFM.Misc.GuildSpam.Init()
+  local enabled = AutoLFM.Core.Settings.LoadMiscModule("guildSpam")
+  local savedMessage = AutoLFM.Core.Settings.LoadMiscModuleData("guildSpam", "message")
+  local savedInterval = AutoLFM.Core.Settings.LoadMiscModuleData("guildSpam", "interval")
+  
+  if savedMessage then
+    message = savedMessage
+  end
+  
+  if savedInterval then
+    interval = savedInterval
+  end
+  
+  if enabled and message and message ~= "" then
+    AutoLFM.Misc.GuildSpam.Start(message)
+  end
+end
+
+-----------------------------------------------------------------------------
+-- Legacy Slash Command (/mg)
 -----------------------------------------------------------------------------
 SLASH_MG1 = "/mg"
 SlashCmdList["MG"] = function(msg)
   local args = AutoLFM.Core.Utils.SplitString(" ", msg)
   
   if not args or table.getn(args) == 0 then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.Print then
-      AutoLFM.Core.Utils.Print("[MG] Usage: /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
-    end
+    AutoLFM.Core.Utils.PrintInfo("Legacy command /mg - Use /lfm misc guild instead")
+    AutoLFM.Core.Utils.PrintNote("Usage: /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
     return
   end
   
@@ -145,14 +183,14 @@ SlashCmdList["MG"] = function(msg)
   end
   
   if args[1] == "msg" then
+    AutoLFM.Core.Utils.PrintInfo("Legacy command /mg - Use /lfm misc guild instead")
     AutoLFM.Misc.GuildSpam.ShowStatus()
     return
   end
   
   if msg == "" then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.Print then
-      AutoLFM.Core.Utils.Print("[MG] Usage: /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
-    end
+    AutoLFM.Core.Utils.PrintInfo("Legacy command /mg - Use /lfm misc guild instead")
+    AutoLFM.Core.Utils.PrintNote("Usage: /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
     return
   end
   

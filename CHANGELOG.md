@@ -1,321 +1,242 @@
 # AutoLFM Changelog
 
+## [2.1] - Misc modules, init, minimapBtn moving
+
+- Integrate misc modules
+- Simplified Init.lua
+- Minimap button free moving
+
 ## [2.0] - Full Restructuration
 
-### Changed
-- Complete addon restructuration : modular folder architecture & separated concerns
+- Complete modular architecture
 - API v2.0 integration
-
-### Improved
-- Code maintainability and readability
-- Better organization for future development
 
 ## [1.6.8] - API Addition
 
-### Added
-- Initial API implementation for external addons
-- Basic functions: `GetVersion()`, `IsAvailable()`, `GetGroupType()`, `GetSelectedContent()`, `GetPlayerCount()`, `GetRolesNeeded()`, `GetDynamicMessage()`, `GetSelectedChannels()`, `GetBroadcastStats()`, `GetTiming()`, `GetFullStatus()`
-- Callback system for data changes
-- Foundation for addon integrations
+- Public API for external addons
+- Callback system
 
 ## [1.6.7] - FPS/MS Display
 
-### Added
-- FPS and MS display frame
-- Drag-and-drop functionality for FPS display
-- Performance monitoring tool
+- FPS and latency monitor
+- Draggable overlay
 
 ## [1.6.6] - Dungeon Level Updates
 
-### Changed
-- Updated dungeon level ranges for accuracy
-
-### Improved
-- Level consistency across content
+- Updated level ranges
 
 ## [1.6.5] - Content Variables Update
 
-### Changed
-- Updated dungeon and raid variables
-
-### Improved
-- Accuracy and completeness
+- Updated dungeon/raid data
 
 ## [1.6.4] - Edit Box Focus
 
-### Improved
-- Edit box focus handling
-- Quest and item link functionality
+- Improved quest/item links
 
 ## [1.6.3] - Code Refactor
 
-### Changed
-- Refactored code structure
-
-### Improved
-- Readability and maintainability
+- Structure improvements
 
 ## [1.6.2] - SavedVariables Improvements
 
-### Changed
-- Refactored saved variables initialization
-- Streamlined channel selection logic
+- Better initialization
 
 ## [1.6.1] - SavedVariables Refactor
 
-### Changed
-- Refactored saved variables initialization
+- Settings cleanup
 
 ## [1.6.0] - Channel Frame Toggle
 
-### Changed
-- Refactored channel frame toggle logic
+- Improved channel logic
 
 ## [1.5.9] - Channel Selection Refactor
 
-### Changed
-- Refactored channel selection logic
+- Channel selection improvements
 
 ## [1.5.8] - UI Adjustments
 
-### Changed
-- Adjusted AutoLFM frame display
-- Improved button dimensions and layout
+- Button layout improvements
 
 ## [1.5.7] - Graphical Improvements
 
-### Improved
-- Various graphical improvements
+- Visual enhancements
 
 ## [1.5.6] - Message Construction
 
-### Changed
-- Refactored `updateMsgFrameCombined` function
+- Message function refactor
 
 ## [1.5.5] - Visibility Checks
 
-### Added
-- Visibility checks for quest and item link functions
+- Link function checks
 
 ## [1.5.4] - Item Link Copy
 
-### Added
-- Custom item button click behavior
-- Copy item link to edit box
+- Custom item button behavior
 
 ## [1.5.3] - Quest Link Creation
 
-### Added
-- Quest link creation
-- Modified quest log button behavior
+- Quest log integration
 
 ## [1.5.2] - Event Handling Refactor
 
-### Changed
-- Refactored event handling for raid and group updates
+- Event system improvements
 
 ## [1.5.1] - Raid Status Check
 
-### Added
-- Raid status check
+- Added raid status
 
 ## [1.5.0] - Raid Status Implementation
 
-### Added
-- Implemented raid status check
+- Implemented raid checks
 
 ## [1.4.9] - Minimap Button Update
 
-### Changed
-- Updated minimap button size
+- Button size adjustment
 
 ## [1.4.8] - Raid Status Enhancement
 
-### Improved
-- Enhanced raid status check
+- Enhanced raid checks
 
 ## [1.4.7] - Code Structure Refactor
 
-### Changed
-- Major code structure refactor
-
-### Improved
-- Readability and maintainability
+- Major restructure
 
 ## [1.4.6] - Channel Selection Update
 
-### Changed
-- Updated channel selection logic
+- Channel logic update
 
 ## [1.4.5] - Channel Frame Visibility
 
-### Changed
-- Updated channel frame visibility logic
+- Visibility logic update
 
 ## [1.4.4] - Channel Frame Display
 
-### Added
-- Channel frame display logic
-- Enhanced slash command functionality
+- Channel frame logic
+- Slash command enhancement
 
 ## [1.4.3] - Dungeon & Raid Definitions
 
-### Added
-- Slider for raid size selection
-
-### Changed
-- Refactored dungeon and raid definitions
+- Raid size slider
+- Definition refactor
 
 ## [1.4.2] - Channel Functions Refactor
 
-### Changed
-- Refactored channel selection functions
+- Channel function improvements
 
 ## [1.4.1] - SavedVariables
 
-### Added
-- SavedVariables support
+- Added SavedVariables support
 
 ## [1.4.0] - Channel Selection
 
-### Added
-- Channel selection: World, LookingForGroup, Hardcore
+- World, LFG, Hardcore channels
 
 ## [1.3.9] - Sound Effects
 
-### Added
-- Sound effects
+- Added sound effects
 
 ## [1.3.8] - Minimap Button Border
 
-### Added
-- Border to minimap button
+- Button border added
 
 ## [1.3.7] - Minimap Button Fix
 
-### Fixed
-- Minimap button issues
+- Fixed minimap issues
 
 ## [1.3.6] - Dire Maul East
 
-### Added
-- Dire Maul East dungeon
+- Added DM East
 
 ## [1.3.5] - Refactor & Animations
 
-### Added
 - OnMouseOver animations
-
-### Changed
 - Code refactoring
 
 ## [1.3.4] - Broadcast Animation
 
-### Added
-- Fun animation when broadcast is active
+- Active broadcast animation
 
 ## [1.3.3] - Minor Fixes
 
-### Fixed
-- Various minor fixes
+- Bug fixes
 
 ## [1.3.2] - Features in Progress
 
-### Changed
-- Work in progress on new features
+- WIP features
 
 ## [1.3.1] - Member Count Fix
 
-### Fixed
-- Member count calculation
+- Fixed count calculation
 
 ## [1.3.0] - Graphical Overhaul
 
-### Changed
-- Complete graphical overhaul
+- Complete UI redesign
 - Code factorization
 
 ## [1.2.9] - Karazhan Crypts
 
-### Changed
-- Karazhan Crypts set to 5 players
+- Set to 5 players
 
 ## [1.2.8] - Version Rollback
 
-### Fixed
-- Reverted to version 1.2.5 due to raid/group count bug
+- Reverted to 1.2.5
 
 ## [1.2.7] - Group & Raid Count Fix
 
-### Fixed
-- Group and raid count bug
+- Fixed count bug
 
 ## [1.2.6] - Group Count Fix
 
-### Fixed
-- Group count calculation
+- Fixed calculation
 
 ## [1.2.5] - Frame Repositioning
 
-### Improved
-- Frame repositioning
+- Frame improvements
 
 ## [1.2.4] - Dungeon Colors
 
-### Changed
-- Adjusted dungeon colors
+- Adjusted colors
 
 ## [1.2.3] - Color Overhaul
 
-### Changed
-- Complete color scheme overhaul
+- Complete color redesign
 
 ## [1.2.2] - Selection System
 
-### Improved
-- Selection system
+- Improved selection
 
 ## [1.2.1] - Details Addition
 
-### Changed
-- Removed free text input to add details
+- Removed free text input
 
 ## [1.2.0] - Broadcast Timer
 
-### Changed
-- Adjusted broadcast timer
+- Adjusted timer
 
 ## [1.1.9] - Minor Fixes
 
-### Fixed
-- Minor corrections
+- Corrections
 
 ## [1.1.8] - Localization
 
-### Changed
-- French to English adjustments
+- French to English
 
 ## [1.1.7] - Dungeon Ratio
 
-### Changed
-- Adjusted dungeon player ratio
+- Player ratio adjustments
 
 ## [1.1.6] - Broadcast Persistence
 
-### Changed
-- Messages continue broadcasting when window is closed
+- Messages persist when closed
 
 ## [1.1.5] - Minor Fixes
 
-### Fixed
-- Minor corrections
+- Corrections
 
 ## [1.1.4] - Git Integration
 
-### Added
-- Git repository
+- Added Git repository
 
 ## [1.1.3] - Changelog Addition
 
-### Added
-- Changelog file
+- Added changelog
