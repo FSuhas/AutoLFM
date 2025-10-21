@@ -39,29 +39,32 @@ function AutoLFM.UI.MinimapButton.Init()
   AutoLFM_MinimapButton = CreateFrame("Button", "AutoLFM_MinimapButton", UIParent)
   AutoLFM_MinimapButton:SetFrameStrata("MEDIUM")
   AutoLFM_MinimapButton:SetFrameLevel(8)
-  AutoLFM_MinimapButton:SetWidth(30)
-  AutoLFM_MinimapButton:SetHeight(30)
+  AutoLFM_MinimapButton:SetWidth(42)
+  AutoLFM_MinimapButton:SetHeight(42)
   
   local icon = AutoLFM_MinimapButton:CreateTexture(nil, "BACKGROUND")
-  icon:SetWidth(30)
-  icon:SetHeight(30)
+  icon:SetWidth(42)
+  icon:SetHeight(42)
   icon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Eyes\\eye07")
   icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
-  icon:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", -1, 1)
+  icon:SetPoint("CENTER", AutoLFM_MinimapButton, "CENTER", 0, 0)
   
   local overlay = AutoLFM_MinimapButton:CreateTexture(nil, "OVERLAY")
-  overlay:SetWidth(50)
-  overlay:SetHeight(50)
+  overlay:SetWidth(64)
+  overlay:SetHeight(64)
   overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-  overlay:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", 0, 0)
+  overlay:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", 1, -2)
+
+  -- 🔥 Ajout pour que l’animation le détecte
+  AutoLFM_MinimapButton.icon = icon
   
   AutoLFM_MinimapButton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-  
+
   AutoLFM_MinimapButton:EnableMouse(true)
   AutoLFM_MinimapButton:SetMovable(true)
   AutoLFM_MinimapButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   AutoLFM_MinimapButton:RegisterForDrag("RightButton")
-  
+
   AutoLFM_MinimapButton:SetScript("OnEnter", function()
     GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
     GameTooltip:SetText("Auto|cff0070DDL|r|cffffffffF|r|cffff0000M")
@@ -70,11 +73,11 @@ function AutoLFM.UI.MinimapButton.Init()
     GameTooltip:AddLine("Shift + Right Click: Reset position", 1, 1, 1)
     GameTooltip:Show()
   end)
-  
+
   AutoLFM_MinimapButton:SetScript("OnLeave", function()
     GameTooltip:Hide()
   end)
-  
+
   AutoLFM_MinimapButton:SetScript("OnClick", function()
     if arg1 == "LeftButton" then
       if AutoLFM_MainFrame then
@@ -90,11 +93,11 @@ function AutoLFM.UI.MinimapButton.Init()
       AutoLFM.Core.Utils.PrintSuccess("Minimap button position reset")
     end
   end)
-  
+
   AutoLFM_MinimapButton:SetScript("OnDragStart", function()
     AutoLFM_MinimapButton:StartMoving()
   end)
-  
+
   AutoLFM_MinimapButton:SetScript("OnDragStop", function()
     AutoLFM_MinimapButton:StopMovingOrSizing()
     
@@ -103,7 +106,7 @@ function AutoLFM.UI.MinimapButton.Init()
       AutoLFM.Core.Settings.SaveMinimapPos(x, y)
     end
   end)
-  
+
   if settings.posX and settings.posY then
     AutoLFM_MinimapButton:ClearAllPoints()
     AutoLFM_MinimapButton:SetPoint("CENTER", UIParent, "BOTTOMLEFT", settings.posX, settings.posY)
