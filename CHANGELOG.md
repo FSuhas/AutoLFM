@@ -1,5 +1,19 @@
 # AutoLFM Changelog
 
+## [2.1.1] - Clear Tab Implementation
+
+### Added
+- Clear Tab: One-click action tab to clear all selections
+
+### Changed
+- Updated README architecture section to include ClearTab.lua
+- Updated TODO list: Clear All functionality marked as complete
+- Message preview tooltip now uses manual SetPoint positioning
+
+### Improved
+- User experience with quick reset functionality
+- Tab navigation system to support action tabs
+
 ## [2.1.0] - API Complete Integration
 
 ### Added

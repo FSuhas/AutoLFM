@@ -227,7 +227,8 @@ function AutoLFM.UI.MainWindow.CreateMessagePreview()
   end)
   
   previewButton:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(previewButton, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(previewButton, "ANCHOR_NONE")
+    GameTooltip:SetPoint("BOTTOMRIGHT", previewButton, "TOPLEFT", 25, -10)
     GameTooltip:SetText("Preview full message in chat", 1, 1, 1)
     GameTooltip:Show()
   end)
@@ -263,6 +264,10 @@ function AutoLFM.UI.MainWindow.UpdateMessagePreview()
       if messagePreviewFrame and messagePreviewFrame.previewButton then
         messagePreviewFrame.previewButton:Hide()
       end
+    end
+    
+    if AutoLFM.UI.ClearTab and AutoLFM.UI.ClearTab.UpdateIcon then
+      AutoLFM.UI.ClearTab.UpdateIcon()
     end
   end)
 end

@@ -77,7 +77,8 @@ local function InitPanels()
     AutoLFM.UI.DungeonsPanel,
     AutoLFM.UI.RaidsPanel,
     AutoLFM.UI.QuestsPanel,
-    AutoLFM.UI.MorePanel
+    AutoLFM.UI.MorePanel,
+    AutoLFM.UI.ClearTab
   }
   
   for i = 1, table.getn(panels) do

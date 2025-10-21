@@ -13,7 +13,8 @@ AutoLFM.UI.TabNavigation.TABS = {
   {id = 1, label = "Dungeons", panelId = "dungeons"},
   {id = 2, label = "Raids", panelId = "raids"},
   {id = 3, label = "Quests", panelId = "quests"},
-  {id = 4, label = "More", panelId = "more"}
+  {id = 4, label = "More", panelId = "more"},
+  {id = 5, icon = "close", panelId = "clear", isAction = true}
 }
 
 -----------------------------------------------------------------------------
@@ -32,13 +33,24 @@ local function UpdateTabVisualState(index, isActive)
   local tab = tabs[index]
   if not tab then return end
   
+  if tab.isAction then
+    return
+  end
+  
   local texture = isActive and "tabActive" or "tabInactive"
   local r, g, b = 1, isActive and 1 or 0.82, isActive and 1 or 0
   
   tab.bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. texture)
-  tab.text:SetTextColor(r, g, b)
   
-  if isActive then
+  if tab.text then
+    tab.text:SetTextColor(r, g, b)
+  end
+  
+  if tab.icon then
+    tab.icon:SetVertexColor(r, g, b)
+  end
+  
+  if isActive and tab.highlight then
     tab.highlight:Hide()
   end
 end
@@ -52,55 +64,116 @@ local function CreateTab(tabConfig, index, anchorTo)
   local tab = CreateFrame("Button", nil, mainFrame)
   
   if anchorTo then
-    tab:SetPoint("LEFT", anchorTo, "RIGHT", -6, 0)
+    local offset = -6
+    tab:SetPoint("LEFT", anchorTo, "RIGHT", offset, 0)
   else
-    tab:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 20, 46)
+    tab:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 18, 46)
   end
   
-  tab:SetWidth(80)
-  tab:SetHeight(32)
+  local isIconTab = tabConfig.icon ~= nil
+  
+  if isIconTab then
+    tab:SetWidth(40)
+    tab:SetHeight(32)
+  else
+    tab:SetWidth(80)
+    tab:SetHeight(32)
+  end
   
   local bg = tab:CreateTexture(nil, "BACKGROUND")
-  bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. (index == 1 and "tabActive" or "tabInactive"))
+  
+  if isIconTab then
+    bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tabIcon")
+  else
+    bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. (index == 1 and "tabActive" or "tabInactive"))
+  end
+  
   bg:SetAllPoints()
   
-  local highlight = tab:CreateTexture(nil, "BORDER")
-  highlight:SetPoint("CENTER", tab, "CENTER", 0, 0)
-  highlight:SetWidth(70)
-  highlight:SetHeight(24)
-  highlight:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tabHighlight")
-  highlight:Hide()
+  local highlight = nil
   
-  local text = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  text:SetPoint("CENTER", tab, "CENTER", 0, 0)
-  text:SetText(tabConfig.label)
-  text:SetTextColor(1, index == 1 and 1 or 0.82, index == 1 and 1 or 0)
+  if not isIconTab then
+    highlight = tab:CreateTexture(nil, "BORDER")
+    highlight:SetPoint("CENTER", tab, "CENTER", 0, 0)
+    highlight:SetWidth(70)
+    highlight:SetHeight(24)
+    highlight:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tabHighlight")
+    highlight:Hide()
+  end
+  
+  local text = nil
+  local icon = nil
+  
+  if isIconTab then
+    icon = tab:CreateTexture(nil, "OVERLAY")
+    icon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\" .. tabConfig.icon)
+    icon:SetWidth(24)
+    icon:SetHeight(24)
+    icon:SetPoint("CENTER", tab, "CENTER", 0, 0)
+    icon:SetVertexColor(1, 0.82, 0)
+    
+    if AutoLFM.UI.ClearTab and AutoLFM.UI.ClearTab.SetIcon then
+      AutoLFM.UI.ClearTab.SetIcon(icon)
+    end
+    if AutoLFM.UI.ClearTab and AutoLFM.UI.ClearTab.SetButton then
+      AutoLFM.UI.ClearTab.SetButton(tab)
+    end
+  else
+    text = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    text:SetPoint("CENTER", tab, "CENTER", 0, 0)
+    text:SetText(tabConfig.label)
+    text:SetTextColor(1, index == 1 and 1 or 0.82, index == 1 and 1 or 0)
+  end
   
   tabs[index] = {
     btn = tab,
     bg = bg,
     text = text,
+    icon = icon,
     highlight = highlight,
-    panelId = tabConfig.panelId
+    panelId = tabConfig.panelId,
+    isAction = tabConfig.isAction or false
   }
   
   tab:SetScript("OnClick", function()
-    AutoLFM.UI.TabNavigation.SwitchTo(index)
-  end)
-  
-  tab:SetScript("OnEnter", function()
-    if currentTab ~= index then
-      highlight:Show()
-      text:SetTextColor(1, 1, 1)
+    if tabConfig.isAction then
+      if AutoLFM.UI.ClearTab and AutoLFM.UI.ClearTab.OnTabClick then
+        AutoLFM.UI.ClearTab.OnTabClick()
+      end
+    else
+      AutoLFM.UI.TabNavigation.SwitchTo(index)
     end
   end)
   
-  tab:SetScript("OnLeave", function()
-    highlight:Hide()
-    if currentTab ~= index then
-      text:SetTextColor(1, 0.82, 0)
-    end
-  end)
+  if not isIconTab then
+    tab:SetScript("OnEnter", function()
+      if currentTab ~= index then
+        if highlight then
+          highlight:Show()
+        end
+        if text then
+          text:SetTextColor(1, 1, 1)
+        end
+        if icon and not isIconTab then
+          icon:SetVertexColor(1, 1, 1)
+        end
+      end
+    end)
+    
+    tab:SetScript("OnLeave", function()
+      if highlight then
+        highlight:Hide()
+      end
+      if currentTab ~= index then
+        if text then
+          text:SetTextColor(1, 0.82, 0)
+        end
+        if icon and not isIconTab then
+          icon:SetVertexColor(1, 0.82, 0)
+        end
+      end
+    end)
+  end
   
   return tab
 end

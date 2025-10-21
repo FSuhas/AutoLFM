@@ -132,56 +132,6 @@ local function CreateCustomMessageEditBox(parentFrame)
     customMessageEditBox:ClearFocus()
   end)
   
-  local clearButton = CreateFrame("Button", nil, parentFrame)
-  clearButton:SetWidth(60)
-  clearButton:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
-  clearButton:SetPoint("BOTTOMRIGHT", customMessageEditBox, "TOPRIGHT", 8, 2)
-  clearButton:SetFrameLevel(parentFrame:GetFrameLevel() + 1)
-  
-  local clearIcon = clearButton:CreateTexture(nil, "ARTWORK")
-  clearIcon:SetWidth(20)
-  clearIcon:SetHeight(20)
-  clearIcon:SetPoint("LEFT", clearButton, "LEFT", 0, 0)
-  clearIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\close")
-  
-  local clearIconHL = clearButton:CreateTexture(nil, "HIGHLIGHT")
-  clearIconHL:SetWidth(20)
-  clearIconHL:SetHeight(20)
-  clearIconHL:SetPoint("LEFT", clearButton, "LEFT", 0, 0)
-  clearIconHL:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\close")
-  clearIconHL:SetBlendMode("ADD")
-  
-  local clearText = clearButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  clearText:SetPoint("LEFT", clearIcon, "RIGHT", -1, 0)
-  clearText:SetText("Clear")
-  clearText:SetTextColor(1, 0, 0)
-  
-  clearButton:SetScript("OnClick", function()
-    if customMessageEditBox then
-      customMessageEditBox:SetText("")
-      customMessageEditBox:ClearFocus()
-    end
-    if AutoLFM.Logic.Broadcaster.SetCustomMessage then
-      AutoLFM.Logic.Broadcaster.SetCustomMessage("")
-    end
-    if AutoLFM.Logic.Broadcaster.UpdateMessage then
-      AutoLFM.Logic.Broadcaster.UpdateMessage()
-    end
-    if AutoLFM.UI.MainWindow.UpdateMessagePreview then
-      AutoLFM.UI.MainWindow.UpdateMessagePreview()
-    end
-  end)
-  
-  clearButton:SetScript("OnEnter", function()
-    clearText:SetTextColor(1, 0.82, 0)
-    clearIcon:SetVertexColor(1, 1, 1)
-  end)
-  
-  clearButton:SetScript("OnLeave", function()
-    clearText:SetTextColor(1, 0, 0)
-    clearIcon:SetVertexColor(1, 1, 1)
-  end)
-  
   updatePlaceholder()
   
   return customMessageEditBox, editboxIcon, editboxLabel
@@ -672,133 +622,6 @@ local function CreateMinimapControls(parentFrame)
 end
 
 -----------------------------------------------------------------------------
--- Clear All Button
------------------------------------------------------------------------------
-local function HasAnySelection()
-  local hasDungeons = false
-  if AutoLFM.Logic.Content.GetSelectedDungeons then
-    local dungeons = AutoLFM.Logic.Content.GetSelectedDungeons()
-    hasDungeons = dungeons and table.getn(dungeons) > 0
-  end
-  
-  local hasRaids = false
-  if AutoLFM.Logic.Content.GetSelectedRaids then
-    local raids = AutoLFM.Logic.Content.GetSelectedRaids()
-    hasRaids = raids and table.getn(raids) > 0
-  end
-  
-  local hasRoles = false
-  if AutoLFM.Logic.Selection.GetRoles then
-    local roles = AutoLFM.Logic.Selection.GetRoles()
-    hasRoles = roles and table.getn(roles) > 0
-  end
-  
-  local hasQuests = false
-  local editBox = nil
-  if AutoLFM.UI.MorePanel.GetCustomMessageEditBox then
-    editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
-  end
-  if editBox then
-    local text = editBox:GetText() or ""
-    hasQuests = string.find(text, "|Hquest:") ~= nil
-  end
-  
-  local hasCustomMessage = false
-  if customMessageEditBox then
-    local text = customMessageEditBox:GetText() or ""
-    hasCustomMessage = text ~= ""
-  end
-  
-  return hasDungeons or hasRaids or hasRoles or hasQuests or hasCustomMessage
-end
-
-local function CreateRemoveAllButton(panelData)
-  if not panelData or not panelData.bottomZone then return nil end
-  
-  local removeAllButton = CreateFrame("Button", nil, panelData.bottomZone)
-  removeAllButton:SetWidth(80)
-  removeAllButton:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
-  removeAllButton:SetPoint("LEFT", panelData.bottomZone, "LEFT", 16, -7)
-  removeAllButton.isHovered = false
-  
-  local removeAllText = removeAllButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  removeAllText:SetPoint("LEFT", removeAllButton, "LEFT", 0, 0)
-  removeAllText:SetText("Clear all")
-  removeAllText:SetTextColor(0.5, 0.5, 0.5)
-  
-  local function UpdateRemoveAllState()
-    if removeAllButton.isHovered then return end
-    
-    if HasAnySelection() then
-      removeAllText:SetTextColor(1, 0.82, 0)
-    else
-      removeAllText:SetTextColor(0.5, 0.5, 0.5)
-    end
-  end
-  
-  removeAllButton:SetScript("OnClick", function()
-    if not HasAnySelection() then return end
-    
-    if AutoLFM.Logic.Content.ClearDungeons then
-      AutoLFM.Logic.Content.ClearDungeons()
-    end
-    
-    if AutoLFM.UI.DungeonsPanel.ClearSelection then
-      AutoLFM.UI.DungeonsPanel.ClearSelection()
-    end
-    
-    if AutoLFM.Logic.Content.ClearRaids then
-      AutoLFM.Logic.Content.ClearRaids()
-    end
-    
-    if AutoLFM.UI.RaidsPanel.ClearSelection then
-      AutoLFM.UI.RaidsPanel.ClearSelection()
-    end
-    
-    if AutoLFM.UI.MainWindow.ClearRoleCheckboxes then
-      AutoLFM.UI.MainWindow.ClearRoleCheckboxes()
-    end
-    
-    if AutoLFM.Logic.Selection.ClearRoles then
-      AutoLFM.Logic.Selection.ClearRoles()
-    end
-    
-    if customMessageEditBox then
-      customMessageEditBox:SetText("")
-      customMessageEditBox:ClearFocus()
-    end
-    
-    if AutoLFM.Logic.Broadcaster.SetCustomMessage then
-      AutoLFM.Logic.Broadcaster.SetCustomMessage("")
-    end
-    
-    if AutoLFM.Logic.Broadcaster.UpdateMessage then
-      AutoLFM.Logic.Broadcaster.UpdateMessage()
-    end
-    
-    if AutoLFM.UI.MainWindow.UpdateMessagePreview then
-      AutoLFM.UI.MainWindow.UpdateMessagePreview()
-    end
-    
-    UpdateRemoveAllState()
-  end)
-  
-  removeAllButton:SetScript("OnEnter", function()
-    removeAllButton.isHovered = true
-    if HasAnySelection() then
-      removeAllText:SetTextColor(1, 0, 0)
-    end
-  end)
-  
-  removeAllButton:SetScript("OnLeave", function()
-    removeAllButton.isHovered = false
-    UpdateRemoveAllState()
-  end)
-  
-  return removeAllButton, UpdateRemoveAllState
-end
-
------------------------------------------------------------------------------
 -- Panel Management
 -----------------------------------------------------------------------------
 function AutoLFM.UI.MorePanel.Create(parentFrame)
@@ -863,15 +686,10 @@ function AutoLFM.UI.MorePanel.Create(parentFrame)
     minimapFrame:SetPoint("TOPLEFT", rightFrame, "TOPLEFT", 5, -5)
   end
   
-  local removeAllButton, UpdateRemoveAllState = CreateRemoveAllButton(panelData)
-  
   local lastSliderUpdate = 0
   morePanelFrame:SetScript("OnUpdate", function()
     UpdateStatsDisplay()
     UpdateMinimapRadioButtons()
-    if UpdateRemoveAllState then
-      UpdateRemoveAllState()
-    end
     
     local now = GetTime()
     if now - lastSliderUpdate < AutoLFM.UI.MorePanel.UPDATE_THROTTLE then return end

@@ -119,9 +119,10 @@ AutoLFM/
 │   │   ├── MainWindow.lua       # Main frame, roles selector, preview
 │   │   ├── MinimapButton.lua    # Draggable minimap button
 │   │   ├── PanelBuilder.lua     # UI builder (panels, scrolls, checkboxes)
-│   │   └── TabNavigation.lua    # Tab system (Dungeons/Raids/Quests/More)
+│   │   └── TabNavigation.lua    # Tab system (Dungeons/Raids/Quests/More/Clear)
 │   ├── Sounds/                  # Audio files (.ogg)
 │   ├── Textures/                # Visual assets (.blp)
+│   ├── ClearTab.lua             # Clear all selections (action tab)
 │   ├── DungeonsPanel.lua        # Dungeon list with level filters
 │   ├── MorePanel.lua            # Settings (interval, channels, minimap, stats)
 │   ├── QuestsPanel.lua          # Quest log integration panel
@@ -161,6 +162,12 @@ AutoLFM/
 - **Minimap controls** (show/hide/reset)
 - **Custom message** editor
 
+### Clear Tab
+- **One-click clear** all selections (dungeons, raids, roles, messages)
+- **Visual feedback** with color indicators (gray/orange/red)
+- **Smart detection** of active selections
+- **Tooltip** confirmation on hover
+
 ## 🔌 API (For Developers)
 
 AutoLFM exposes a comprehensive public API for integration with other addons.  
@@ -185,7 +192,6 @@ Configuration includes:
 - You tell me.
 
 ### UI Improvements
-- [ ] Add "Clear All" button on main frame (next to close button)
 - [ ] Fix preview message sizing (sometimes too large)
 - [ ] Align all UI elements consistently / replace magic numbers with named constants
 

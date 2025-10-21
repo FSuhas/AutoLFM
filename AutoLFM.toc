@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
 ## Notes: Automated LFM Message
-## Version: 2.1.0
+## Version: 2.1.1
 ## Author: Gondoleon, NSO73
 ## DefaultState: Enabled
 ## SavedVariables: V2_Settings
@@ -31,6 +31,7 @@ UI\DungeonsPanel.lua
 UI\RaidsPanel.lua
 UI\QuestsPanel.lua
 UI\MorePanel.lua
+UI\ClearTab.lua
 
 #--------------------------------------------------
 # Misc
