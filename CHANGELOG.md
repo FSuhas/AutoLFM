@@ -1,8 +1,9 @@
 # AutoLFM Changelog
 
-## [2.4] - Reorganize MorePanel
+## [2.4] - Reorganize MorePanel, save HC status
 
 - Simplify frames (REALY NEED TO USE PROPER XML TEMPLATE IN FUTURE)
+- Save harcore player status for channel broadcast
 
 ## [2.3] - Fix Hardcore chan
 
