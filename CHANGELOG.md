@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.4] - Reorganize MorePanel
+
+- Simplify frames (REALY NEED TO USE PROPER XML TEMPLATE IN FUTURE)
+
 ## [2.3] - Fix Hardcore chan
 
 - Add Hardcore channel detection and message handling
