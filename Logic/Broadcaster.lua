@@ -295,13 +295,30 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
   
   local sentCount = 0
   local hadErrors = false
-  
+
   for channelName, _ in pairs(selectedChannels) do
-    if channelName ~= "Hardcore" then
+    if channelName == "Hardcore" then
+      -------------------------------------------------------------------------
+      -- Canal Hardcore → ajouter le préfixe /h
+      -------------------------------------------------------------------------
+      local hardcoreMessage = "/h " .. message
+      local success, err = pcall(SendChatMessage, hardcoreMessage, "SAY")
+      
+      if success then
+        sentCount = sentCount + 1
+        -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Hardcore]|r " .. message)
+      else
+        hadErrors = true
+        AutoLFM.Core.Utils.PrintError("Failed to send on Hardcore: " .. tostring(err))
+      end
+
+    else
+      -------------------------------------------------------------------------
+      -- Canaux normaux
+      -------------------------------------------------------------------------
       local channelId = AutoLFM.Logic.Selection.GetChannelId(channelName)
       if channelId then
         local success, err = pcall(SendChatMessage, message, "CHANNEL", nil, channelId)
-        
         if success then
           sentCount = sentCount + 1
         else
@@ -314,21 +331,22 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
       end
     end
   end
-  
+
   if sentCount == 0 then
     AutoLFM.Core.Utils.PrintError("Message not sent: all channels are invalid")
     return false
   end
-  
+
   messageCount = (messageCount or 0) + 1
   lastTimestamp = GetTime()
   
-  if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+  if AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
      AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.MESSAGE_SENT)
   end
   
   return true
 end
+
 
 function AutoLFM.Logic.Broadcaster.Start()
   local success, result = pcall(function()
