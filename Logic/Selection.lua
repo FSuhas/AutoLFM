@@ -181,10 +181,6 @@ end
 -- Hardcore Detection
 -----------------------------------------------------------------------------
 
--- ============================================================================
--- AutoLFM: Hardcore Mode Detection (Canal Hardcore)
--- ============================================================================
-
 local isHardcore = false
 local hc_channel = 999  -- ID virtuel pour le canal Hardcore
 

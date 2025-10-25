@@ -298,9 +298,6 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
 
   for channelName, _ in pairs(selectedChannels) do
     if channelName == "Hardcore" then
-      -------------------------------------------------------------------------
-      -- Canal Hardcore → ajouter le préfixe /h
-      -------------------------------------------------------------------------
       local hardcoreMessage = message
       local success, err = pcall(SendChatMessage, hardcoreMessage, "Hardcore")
       
@@ -313,9 +310,6 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
       end
 
     else
-      -------------------------------------------------------------------------
-      -- Canaux normaux
-      -------------------------------------------------------------------------
       local channelId = AutoLFM.Logic.Selection.GetChannelId(channelName)
       if channelId then
         local success, err = pcall(SendChatMessage, message, "CHANNEL", nil, channelId)
