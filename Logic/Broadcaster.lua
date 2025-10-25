@@ -301,8 +301,8 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
       -------------------------------------------------------------------------
       -- Canal Hardcore → ajouter le préfixe /h
       -------------------------------------------------------------------------
-      local hardcoreMessage = "/h " .. message
-      local success, err = pcall(SendChatMessage, hardcoreMessage, "SAY")
+      local hardcoreMessage = message
+      local success, err = pcall(SendChatMessage, hardcoreMessage, "Hardcore")
       
       if success then
         sentCount = sentCount + 1
