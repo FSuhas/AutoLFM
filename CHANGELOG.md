@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.3] - Fix Hardcore chan
+
+- Add Hardcore channel detection and message handling
+
 ## [2.2] - Fix minimap button
 
 - Animation, position, size
