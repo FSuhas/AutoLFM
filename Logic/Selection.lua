@@ -17,6 +17,7 @@ AutoLFM.Logic.Selection.ROLES = {"Tank", "Heal", "DPS"}
 -----------------------------------------------------------------------------
 local selectedRoles = {}
 local selectedChannels = {}
+local isHardcore = false
 
 -----------------------------------------------------------------------------
 -- Initialization
@@ -25,6 +26,9 @@ function AutoLFM.Logic.Selection.Init()
   local loadedChannels = AutoLFM.Core.Settings.LoadChannels()
   if loadedChannels then
     for k, v in pairs(loadedChannels) do
+      if k == "Hardcore" and v == true then
+        isHardcore = true
+      end
       selectedChannels[k] = v
     end
   end
@@ -180,26 +184,14 @@ end
 -----------------------------------------------------------------------------
 -- Hardcore Detection
 -----------------------------------------------------------------------------
+local hcFrame = CreateFrame("Frame")
+hcFrame:RegisterEvent("CHAT_MSG_HARDCORE")
 
-local isHardcore = false
-local hc_channel = 999  -- ID virtuel pour le canal Hardcore
-
--- Fonction qui vérifie la présence du canal Hardcore
-local function CheckHardcoreChannel()
-  local id = GetChannelName("Hardcore")
-
-  -- Si le canal "Hardcore" n’a pas d’ID, on le remplace par un ID fictif
-  if (not id or id == 0) then
-    id = hc_channel
-  end
-
-  -- Si un ID (réel ou virtuel) est présent, on active le mode Hardcore
-  if id and id > 0 then
+hcFrame:SetScript("OnEvent", function()
+  if event == "CHAT_MSG_HARDCORE" then
     if not isHardcore then
       isHardcore = true
-      if DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM]|r Hardcore channel detected. Hardcore mode enabled.", 0.1, 1, 0.1)
-      end
+      
       if AutoLFM and AutoLFM.Logic and AutoLFM.Logic.Selection then
         local channels = AutoLFM.Logic.Selection.GetChannels()
         channels["Hardcore"] = true
@@ -208,30 +200,17 @@ local function CheckHardcoreChannel()
           AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CHANNELS_CHANGED)
         end
       end
-    end
-  else
-    if isHardcore then
-      isHardcore = false
-      if DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM]|r Hardcore channel not detected. Hardcore mode disabled.", 1, 0.2, 0.2)
+      
+      if AutoLFM.UI and AutoLFM.UI.MorePanel and AutoLFM.UI.MorePanel.RefreshChannelCheckboxes then
+        AutoLFM.UI.MorePanel.RefreshChannelCheckboxes()
       end
     end
   end
-end
-
--- Frame pour surveiller les événements liés aux canaux
-local hcFrame = CreateFrame("Frame")
-hcFrame:RegisterEvent("CHAT_MSG_HARDCORE")
-
-hcFrame:SetScript("OnEvent", function()
-  CheckHardcoreChannel()
 end)
 
--- Fonction publique utilisée par le reste de l’addon
 function AutoLFM.Logic.Selection.IsHardcoreMode()
   return isHardcore
 end
-
 
 -----------------------------------------------------------------------------
 -- Channels Management
@@ -242,10 +221,6 @@ end
 
 local function IsChannelAvailable(channelName)
   if not channelName then return false end
-  
-  if IsHardcoreChannel(channelName) then
-    return true
-  end
   
   local channelId = GetChannelName(channelName)
   return channelId and channelId > 0
@@ -260,7 +235,9 @@ function AutoLFM.Logic.Selection.FindAvailableChannels()
       local channelData = {name = channelName, id = 0}
       
       if IsHardcoreChannel(channelName) then
-        table.insert(found, channelData)
+        if isHardcore then
+          table.insert(found, channelData)
+        end
       else
         local channelId = GetChannelName(channelName)
         if channelId and channelId > 0 then
