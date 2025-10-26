@@ -136,55 +136,31 @@ end
 local function CreateRaidRow(parent, raid, index, yOffset)
   if not parent or not raid then return nil end
   
-  local clickableFrame = CreateFrame("Button", "ClickableRaidFrame" .. index, parent)
-  clickableFrame:SetHeight(20)
-  clickableFrame:SetWidth(300)
-  clickableFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
-  
-  local checkbox = CreateFrame("CheckButton", "RaidCheckbox" .. index, clickableFrame, "UICheckButtonTemplate")
-  checkbox:SetWidth(20)
-  checkbox:SetHeight(20)
-  checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
-  
+  local isChecked = false
   if AutoLFM.Logic.Content.IsRaidSelected then
-    checkbox:SetChecked(AutoLFM.Logic.Content.IsRaidSelected(raid.tag))
+    isChecked = AutoLFM.Logic.Content.IsRaidSelected(raid.tag)
   end
   
-  checkButtons[raid.tag] = checkbox
-  
-  local sizeLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  sizeLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
   local sizeText = raid.sizeMin == raid.sizeMax and "(" .. raid.sizeMin .. ")" or "(" .. raid.sizeMin .. " - " .. raid.sizeMax .. ")"
-  sizeLabel:SetText(sizeText)
   
-  local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
-  label:SetText(raid.name)
-  
-  AutoLFM.UI.PanelBuilder.SetupRowHover(
-    clickableFrame,
-    checkbox,
-    label,
-    sizeLabel,
-    {r = 1, g = 0.82, b = 0}
-  )
-  
-  AutoLFM.UI.PanelBuilder.SetupClickToToggle(
-    clickableFrame,
-    checkbox,
-    function(isChecked)
+  local clickableFrame = AutoLFM.UI.PanelBuilder.CreateSelectableRow({
+    parent = parent,
+    frameName = "ClickableRaidFrame" .. index,
+    checkboxName = "RaidCheckbox" .. index,
+    yOffset = yOffset,
+    mainText = raid.name,
+    rightText = sizeText,
+    color = {r = 1, g = 0.82, b = 0},
+    isChecked = isChecked,
+    onCheckboxClick = function(checkbox, isChecked)
       OnRaidCheckboxClick(checkbox, raid.tag)
     end
-  )
+  })
   
-  AutoLFM.UI.PanelBuilder.SetupCheckboxClick(
-    checkbox,
-    function(isChecked)
-      OnRaidCheckboxClick(checkbox, raid.tag)
-    end
-  )
-  
-  table.insert(clickableFrames, clickableFrame)
+  if clickableFrame then
+    checkButtons[raid.tag] = clickableFrame.checkbox
+    table.insert(clickableFrames, clickableFrame)
+  end
   
   return clickableFrame
 end

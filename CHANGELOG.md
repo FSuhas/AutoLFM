@@ -1,5 +1,10 @@
 # AutoLFM Changelog
 
+## [2.7] - Refactoring row creation, illustration
+
+- Centralized selectable row creation in PanelBuilder
+- Change illustration
+
 ## [2.6] - Code cleanup
 
 - Removed dead code, reduced duplication

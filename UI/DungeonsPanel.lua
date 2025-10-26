@@ -254,62 +254,35 @@ end
 local function CreateDungeonRow(parent, dungeon, priority, yOffset)
   if not parent or not dungeon then return nil end
   
-  local clickableFrame = CreateFrame("Button", "ClickableDungeonFrame" .. dungeon.tag, parent)
-  clickableFrame:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT)
-  clickableFrame:SetWidth(300)
-  clickableFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
-  
-  local checkbox = CreateFrame("CheckButton", "DungeonCheckbox" .. dungeon.tag, clickableFrame, "UICheckButtonTemplate")
-  checkbox:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
-  checkbox:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
-  checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
-  
+  local r, g, b = AutoLFM.Logic.Content.GetColor(priority, true)
+  local isChecked = false
   if AutoLFM.Logic.Content.IsDungeonSelected then
-    checkbox:SetChecked(AutoLFM.Logic.Content.IsDungeonSelected(dungeon.tag))
+    isChecked = AutoLFM.Logic.Content.IsDungeonSelected(dungeon.tag)
   end
   
-  checkButtons[dungeon.tag] = checkbox
-  
-  local levelLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  levelLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
-  levelLabel:SetText("(" .. dungeon.levelMin .. " - " .. dungeon.levelMax .. ")")
-  
-  local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
-  label:SetText(dungeon.name)
-  
-  local r, g, b = AutoLFM.Logic.Content.GetColor(priority, true)
-  label:SetTextColor(r, g, b)
-  levelLabel:SetTextColor(r, g, b)
-  
-  AutoLFM.UI.PanelBuilder.SetupRowHover(
-    clickableFrame,
-    checkbox,
-    label,
-    levelLabel,
-    {r = r, g = g, b = b}
-  )
-  
-  AutoLFM.UI.PanelBuilder.SetupClickToToggle(
-    clickableFrame,
-    checkbox,
-    function(isChecked)
+  local clickableFrame = AutoLFM.UI.PanelBuilder.CreateSelectableRow({
+    parent = parent,
+    frameName = "ClickableDungeonFrame" .. dungeon.tag,
+    checkboxName = "DungeonCheckbox" .. dungeon.tag,
+    yOffset = yOffset,
+    mainText = dungeon.name,
+    rightText = "(" .. dungeon.levelMin .. " - " .. dungeon.levelMax .. ")",
+    color = {r = r, g = g, b = b},
+    isChecked = isChecked,
+    onCheckboxClick = function(checkbox, isChecked)
       OnDungeonCheckboxClick(checkbox, dungeon.tag)
-    end
-  )
+    end,
+    customProperties = {
+      dungeonTag = dungeon.tag,
+      priority = priority
+    }
+  })
   
-  AutoLFM.UI.PanelBuilder.SetupCheckboxClick(
-    checkbox,
-    function(isChecked)
-      OnDungeonCheckboxClick(checkbox, dungeon.tag)
-    end
-  )
-  
-  clickableFrame.dungeonTag = dungeon.tag
-  clickableFrame.priority = priority
-  
-  table.insert(clickableFrames, clickableFrame)
-  dungeonRows[dungeon.tag] = clickableFrame
+  if clickableFrame then
+    checkButtons[dungeon.tag] = clickableFrame.checkbox
+    table.insert(clickableFrames, clickableFrame)
+    dungeonRows[dungeon.tag] = clickableFrame
+  end
   
   return clickableFrame
 end

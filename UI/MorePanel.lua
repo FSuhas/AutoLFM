@@ -106,7 +106,7 @@ local function CreateCustomMessageEditBox()
     insets = { left = 8, right = 2, top = 2, bottom = 2 }
   })
   customMessageEditBox:SetBackdropColor(0, 0, 0, 0.8)
-  customMessageEditBox:SetBackdropBorderColor(1, 0.5, 0, 1)
+  customMessageEditBox:SetBackdropBorderColor(1, 0.82, 0, 1)
   customMessageEditBox:SetJustifyH("CENTER")
   customMessageEditBox:SetTextInsets(10, 10, 5, 5)
   
@@ -334,7 +334,7 @@ local function CreateMinimapList(lastAnchor)
   showRadio = CreateFrame("CheckButton", nil, morePanelFrame, "UIRadioButtonTemplate")
   showRadio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   showRadio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  showRadio:SetPoint("TOPLEFT", minimapIcon, "BOTTOMLEFT", 15, -5)
+  showRadio:SetPoint("TOPLEFT", minimapIcon, "BOTTOMLEFT", 10, -5)
   showRadio:SetChecked(isVisible)
   
   local showText = CreateFrame("Button", nil, morePanelFrame)
@@ -532,7 +532,7 @@ local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
   if lastButton then
     button:SetPoint("TOPLEFT", lastButton, "BOTTOMLEFT", 0, -4)
   else
-    button:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 15, -20)
+    button:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -20)
   end
   
   if not hasAccess then
