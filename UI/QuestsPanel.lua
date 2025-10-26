@@ -194,83 +194,41 @@ end
 -- Quest Button Creation
 -----------------------------------------------------------------------------
 local function CreateQuestButton(parent, index)
-  local btn = CreateFrame("Button", "QuestListButton" .. index, parent)
-  btn:SetWidth(300)
-  btn:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT)
-  
-  local checkbox = CreateFrame("CheckButton", "QuestCheckbox" .. index, btn, "UICheckButtonTemplate")
-  checkbox:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
-  checkbox:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
-  checkbox:SetPoint("LEFT", btn, "LEFT", 0, 0)
-  btn.checkbox = checkbox
-  
-  local levelLabel = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  levelLabel:SetPoint("RIGHT", btn, "RIGHT", -10, 0)
-  levelLabel:SetText("")
-  btn.levelText = levelLabel
-  
-  local text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  text:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
-  text:SetText("")
-  btn.text = text
-  
-  AutoLFM.UI.PanelBuilder.SetupCheckboxClick(
-    checkbox,
-    function(isChecked)
+  local btn = AutoLFM.UI.PanelBuilder.CreateSelectableRow({
+    parent = parent,
+    frameName = "QuestListButton" .. index,
+    checkboxName = "QuestCheckbox" .. index,
+    yOffset = 0,
+    mainText = "",
+    rightText = "",
+    color = {r = 1, g = 1, b = 1},
+    isChecked = false,
+    onCheckboxClick = function(checkbox, isChecked)
       local questIndex = checkbox:GetParent().questIndex
       if questIndex then
         OnQuestCheckboxClick(checkbox, questIndex)
       end
-    end
-  )
-  
-  AutoLFM.UI.PanelBuilder.SetupClickToToggle(
-    btn,
-    checkbox,
-    function(isChecked)
-      OnQuestCheckboxClick(checkbox, btn.questIndex)
-    end
-  )
-  
-  btn:SetScript("OnEnter", function()
-    local questIndex = this.questIndex
-    if questIndex and questIndex > 0 then
-      local numEntries = GetNumQuestLogEntries()
-      if questIndex > numEntries then return end
-      
-      local title, level, questTag, suggestedGroup, isHeader = GetQuestLogTitle(questIndex)
-      if not title or title == "" or isHeader then return end
-      
-      local r, g, b = btn.originalR or 1, btn.originalG or 0.82, btn.originalB or 0
-      
-      btn:SetBackdrop({
-        bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "white",
-        insets = {left = 1, right = 1, top = 1, bottom = 1},
-      })
-      btn:SetBackdropColor(r, g, b, 0.3)
-      btn.text:SetTextColor(1, 1, 1)
-      btn.levelText:SetTextColor(1, 1, 1)
-      btn.checkbox:LockHighlight()
-      
-      pcall(function()
-        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    end,
+    customTooltip = function(frame)
+      local questIndex = frame.questIndex
+      if questIndex and questIndex > 0 then
+        local numEntries = GetNumQuestLogEntries()
+        if questIndex > numEntries then return end
+        
+        local title, level, questTag, suggestedGroup, isHeader = GetQuestLogTitle(questIndex)
+        if not title or title == "" or isHeader then return end
+        
+        GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
         GameTooltip:SetQuestLogItem("quest", questIndex)
         GameTooltip:Show()
-      end)
+      end
     end
-  end)
+  })
   
-  btn:SetScript("OnLeave", function()
-    btn:SetBackdrop(nil)
-    
-    if btn.originalR and btn.originalG and btn.originalB then
-      btn.text:SetTextColor(btn.originalR, btn.originalG, btn.originalB)
-      btn.levelText:SetTextColor(btn.originalR, btn.originalG, btn.originalB)
-    end
-    
-    btn.checkbox:UnlockHighlight()
-    AutoLFM.UI.PanelBuilder.HideTooltip()
-  end)
+  if btn then
+    btn.text = btn.label
+    btn.levelText = btn.rightLabel
+  end
   
   return btn
 end
