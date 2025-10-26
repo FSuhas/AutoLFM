@@ -17,21 +17,10 @@ AutoLFM.Logic.Selection.ROLES = {"Tank", "Heal", "DPS"}
 -----------------------------------------------------------------------------
 local selectedRoles = {}
 local selectedChannels = {}
+local isHardcore = false
 
 -----------------------------------------------------------------------------
--- Initialization
------------------------------------------------------------------------------
-function AutoLFM.Logic.Selection.Init()
-  local loadedChannels = AutoLFM.Core.Settings.LoadChannels()
-  if loadedChannels then
-    for k, v in pairs(loadedChannels) do
-      selectedChannels[k] = v
-    end
-  end
-end
-
------------------------------------------------------------------------------
--- Helpers
+-- Private Helpers
 -----------------------------------------------------------------------------
 local function FindIndex(list, item)
   if not list then return nil end
@@ -63,6 +52,47 @@ local function ToggleInList(list, item, shouldAdd)
   end
   
   return list
+end
+
+-----------------------------------------------------------------------------
+-- Hardcore Detection
+-----------------------------------------------------------------------------
+local function DetectHardcoreCharacter()
+  for tab = 1, GetNumSpellTabs() do
+    local _, _, offset, numSpells = GetSpellTabInfo(tab)
+    for i = 1, numSpells do
+      local spellName = GetSpellName(offset + i, "spell")
+      if spellName and string.find(string.lower(spellName), "hardcore") then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+function AutoLFM.Logic.Selection.IsHardcoreMode()
+  return isHardcore
+end
+
+-----------------------------------------------------------------------------
+-- Initialization
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.Selection.Init()
+  -- Detect hardcore mode by scanning spellbook
+  isHardcore = DetectHardcoreCharacter()
+  
+  -- Load previously saved channel selections for this character
+  local loadedChannels = AutoLFM.Core.Settings.LoadChannels()
+  if loadedChannels then
+    for k, v in pairs(loadedChannels) do
+      -- Security: skip Hardcore channel if character is not hardcore
+      if k == "Hardcore" and not isHardcore then
+        -- Skip
+      else
+        selectedChannels[k] = v
+      end
+    end
+  end
 end
 
 -----------------------------------------------------------------------------
@@ -155,14 +185,6 @@ function AutoLFM.Logic.Selection.IsRoleSelected(role)
   return FindIndex(selectedRoles, role) ~= nil
 end
 
-function AutoLFM.Logic.Selection.GetRolesCount()
-  return table.getn(selectedRoles)
-end
-
-function AutoLFM.Logic.Selection.AreAllRolesSelected()
-  return table.getn(selectedRoles) == table.getn(AutoLFM.Logic.Selection.ROLES)
-end
-
 function AutoLFM.Logic.Selection.GetRolesString()
   local count = table.getn(selectedRoles)
   
@@ -170,68 +192,12 @@ function AutoLFM.Logic.Selection.GetRolesString()
     return ""
   end
   
-  if AutoLFM.Logic.Selection.AreAllRolesSelected() then
+  if count == table.getn(AutoLFM.Logic.Selection.ROLES) then
     return "Need All"
   end
   
   return "Need " .. table.concat(selectedRoles, " & ")
 end
-
------------------------------------------------------------------------------
--- Hardcore Detection
------------------------------------------------------------------------------
-
-local isHardcore = false
-local hc_channel = 999  -- ID virtuel pour le canal Hardcore
-
--- Fonction qui vérifie la présence du canal Hardcore
-local function CheckHardcoreChannel()
-  local id = GetChannelName("Hardcore")
-
-  -- Si le canal "Hardcore" n’a pas d’ID, on le remplace par un ID fictif
-  if (not id or id == 0) then
-    id = hc_channel
-  end
-
-  -- Si un ID (réel ou virtuel) est présent, on active le mode Hardcore
-  if id and id > 0 then
-    if not isHardcore then
-      isHardcore = true
-      if DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM]|r Hardcore channel detected. Hardcore mode enabled.", 0.1, 1, 0.1)
-      end
-      if AutoLFM and AutoLFM.Logic and AutoLFM.Logic.Selection then
-        local channels = AutoLFM.Logic.Selection.GetChannels()
-        channels["Hardcore"] = true
-        AutoLFM.Core.Settings.SaveChannels(channels)
-        if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
-          AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CHANNELS_CHANGED)
-        end
-      end
-    end
-  else
-    if isHardcore then
-      isHardcore = false
-      if DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM]|r Hardcore channel not detected. Hardcore mode disabled.", 1, 0.2, 0.2)
-      end
-    end
-  end
-end
-
--- Frame pour surveiller les événements liés aux canaux
-local hcFrame = CreateFrame("Frame")
-hcFrame:RegisterEvent("CHAT_MSG_HARDCORE")
-
-hcFrame:SetScript("OnEvent", function()
-  CheckHardcoreChannel()
-end)
-
--- Fonction publique utilisée par le reste de l’addon
-function AutoLFM.Logic.Selection.IsHardcoreMode()
-  return isHardcore
-end
-
 
 -----------------------------------------------------------------------------
 -- Channels Management
@@ -243,10 +209,6 @@ end
 local function IsChannelAvailable(channelName)
   if not channelName then return false end
   
-  if IsHardcoreChannel(channelName) then
-    return true
-  end
-  
   local channelId = GetChannelName(channelName)
   return channelId and channelId > 0
 end
@@ -257,15 +219,14 @@ function AutoLFM.Logic.Selection.FindAvailableChannels()
   for i = 1, table.getn(AutoLFM.Logic.Selection.CHANNELS) do
     local channelName = AutoLFM.Logic.Selection.CHANNELS[i]
     if channelName then
-      local channelData = {name = channelName, id = 0}
-      
       if IsHardcoreChannel(channelName) then
-        table.insert(found, channelData)
+        if isHardcore then
+          table.insert(found, channelName)
+        end
       else
         local channelId = GetChannelName(channelName)
         if channelId and channelId > 0 then
-          channelData.id = channelId
-          table.insert(found, channelData)
+          table.insert(found, channelName)
         end
       end
     end
@@ -314,29 +275,7 @@ function AutoLFM.Logic.Selection.GetChannelId(channelName)
   return nil
 end
 
-function AutoLFM.Logic.Selection.GetChannelsCount()
-  local count = 0
-  for _ in pairs(selectedChannels) do
-    count = count + 1
-  end
-  
-  return count
-end
 
-function AutoLFM.Logic.Selection.ValidateChannels()
-  local valid = {}
-  local invalid = {}
-  
-  for channelName, _ in pairs(selectedChannels) do
-    if IsChannelAvailable(channelName) then
-      table.insert(valid, channelName)
-    else
-      table.insert(invalid, channelName)
-    end
-  end
-  
-  return valid, invalid
-end
 
 function AutoLFM.Logic.Selection.ClearChannels()
   for k in pairs(selectedChannels) do

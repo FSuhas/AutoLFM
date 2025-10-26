@@ -41,11 +41,11 @@ function AutoLFM.UI.MinimapButton.Init()
   local overlay = AutoLFM_MinimapButton:CreateTexture(nil, "OVERLAY")
   overlay:SetWidth(52)
   overlay:SetHeight(52)
-  overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+  overlay:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "minimapBorder")
   overlay:SetPoint("TOPLEFT", AutoLFM_MinimapButton, "TOPLEFT", 0, 0)
   
   local highlight = AutoLFM_MinimapButton:CreateTexture(nil, "HIGHLIGHT")
-  highlight:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+  highlight:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "minimapHighlight")
   highlight:SetAllPoints(AutoLFM_MinimapButton)
   highlight:SetBlendMode("ADD")
   

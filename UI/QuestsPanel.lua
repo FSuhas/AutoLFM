@@ -244,7 +244,7 @@ local function CreateQuestButton(parent, index)
       local r, g, b = btn.originalR or 1, btn.originalG or 0.82, btn.originalB or 0
       
       btn:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
+        bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "white",
         insets = {left = 1, right = 1, top = 1, bottom = 1},
       })
       btn:SetBackdropColor(r, g, b, 0.3)

@@ -1,5 +1,18 @@
 # AutoLFM Changelog
 
+## [2.6] - Code cleanup
+
+- Removed dead code, reduced duplication
+
+## [2.5] - Self-contained Assets
+
+- Internalized all UI textures (buttons, sliders, backdrops)
+
+## [2.4] - Reorganize MorePanel, HC status from spell
+
+- Simplify frames (REALY NEED TO USE PROPER XML TEMPLATE IN FUTURE)
+- Identify Hardcore status from spell
+
 ## [2.3] - Fix Hardcore chan
 
 - Add Hardcore channel detection and message handling
