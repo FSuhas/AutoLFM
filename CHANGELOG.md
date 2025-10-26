@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.6] - Code cleanup
+
+- Removed dead code, reduced duplication
+
 ## [2.5] - Self-contained Assets
 
 - Internalized all UI textures (buttons, sliders, backdrops)

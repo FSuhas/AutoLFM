@@ -13,7 +13,6 @@ AutoLFM.Logic.Broadcaster.INTERVAL_MIN = 30
 AutoLFM.Logic.Broadcaster.INTERVAL_MAX = 120
 AutoLFM.Logic.Broadcaster.INTERVAL_STEP = 10
 AutoLFM.Logic.Broadcaster.INTERVAL_DEFAULT = 60
-AutoLFM.Logic.Broadcaster.UPDATE_THROTTLE = 1.0
 
 -----------------------------------------------------------------------------
 -- Private State
@@ -26,6 +25,13 @@ local generatedMessage = ""
 local customMessage = ""
 local broadcastFrame = nil
 local lastUpdateCheck = 0
+
+-----------------------------------------------------------------------------
+-- Helpers
+-----------------------------------------------------------------------------
+local function IsMessageEmpty(msg)
+  return not msg or msg == "" or msg == " "
+end
 
 -----------------------------------------------------------------------------
 -- Message Construction
@@ -204,7 +210,7 @@ end
 -----------------------------------------------------------------------------
 local validationRules = {
   message = function()
-    if not generatedMessage or generatedMessage == "" or generatedMessage == " " then
+    if IsMessageEmpty(generatedMessage) then
       return false, "The LFM message is empty"
     end
     return true, nil
@@ -511,7 +517,7 @@ local function ShouldExecuteBroadcast(currentTime)
 end
 
 local function ExecuteBroadcast()
-  if not generatedMessage or generatedMessage == "" or generatedMessage == " " then
+  if IsMessageEmpty(generatedMessage) then
     return
   end
   
@@ -530,7 +536,7 @@ end
 local function OnBroadcastUpdate()
   local currentTime = GetTime()
   
-  if currentTime - lastUpdateCheck < AutoLFM.Logic.Broadcaster.UPDATE_THROTTLE then
+  if currentTime - lastUpdateCheck < AutoLFM.UI.MorePanel.UPDATE_THROTTLE then
     return
   end
   lastUpdateCheck = currentTime

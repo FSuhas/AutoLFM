@@ -185,14 +185,6 @@ function AutoLFM.Logic.Selection.IsRoleSelected(role)
   return FindIndex(selectedRoles, role) ~= nil
 end
 
-function AutoLFM.Logic.Selection.GetRolesCount()
-  return table.getn(selectedRoles)
-end
-
-function AutoLFM.Logic.Selection.AreAllRolesSelected()
-  return table.getn(selectedRoles) == table.getn(AutoLFM.Logic.Selection.ROLES)
-end
-
 function AutoLFM.Logic.Selection.GetRolesString()
   local count = table.getn(selectedRoles)
   
@@ -200,7 +192,7 @@ function AutoLFM.Logic.Selection.GetRolesString()
     return ""
   end
   
-  if AutoLFM.Logic.Selection.AreAllRolesSelected() then
+  if count == table.getn(AutoLFM.Logic.Selection.ROLES) then
     return "Need All"
   end
   

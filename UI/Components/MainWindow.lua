@@ -319,22 +319,8 @@ function AutoLFM.UI.MainWindow.CreateStartButton()
   return broadcastButton
 end
 
-function AutoLFM.UI.MainWindow.GetStartButton()
-  return broadcastButton
-end
-
 function AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
   return broadcastButton
 end
 
-function AutoLFM.UI.MainWindow.SetBroadcastToggleButton(button)
-  if button then
-    broadcastButton = button
-  end
-end
 
------------------------------------------------------------------------------
--- Globals (Required by WoW API)
------------------------------------------------------------------------------
-AutoLFM_MainFrame = nil
-AutoLFM_MainIconTexture = nil

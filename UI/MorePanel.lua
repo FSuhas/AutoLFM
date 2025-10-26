@@ -689,10 +689,6 @@ function AutoLFM.UI.MorePanel.GetFrame()
   return morePanelFrame
 end
 
-function AutoLFM.UI.MorePanel.GetBroadcastToggleButton()
-  return AutoLFM.UI.MainWindow.GetStartButton()
-end
-
 function AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider()
   return broadcastIntervalSlider
 end
