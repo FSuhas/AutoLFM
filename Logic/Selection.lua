@@ -227,17 +227,14 @@ function AutoLFM.Logic.Selection.FindAvailableChannels()
   for i = 1, table.getn(AutoLFM.Logic.Selection.CHANNELS) do
     local channelName = AutoLFM.Logic.Selection.CHANNELS[i]
     if channelName then
-      local channelData = {name = channelName, id = 0}
-      
       if IsHardcoreChannel(channelName) then
         if isHardcore then
-          table.insert(found, channelData)
+          table.insert(found, channelName)
         end
       else
         local channelId = GetChannelName(channelName)
         if channelId and channelId > 0 then
-          channelData.id = channelId
-          table.insert(found, channelData)
+          table.insert(found, channelName)
         end
       end
     end
@@ -286,29 +283,7 @@ function AutoLFM.Logic.Selection.GetChannelId(channelName)
   return nil
 end
 
-function AutoLFM.Logic.Selection.GetChannelsCount()
-  local count = 0
-  for _ in pairs(selectedChannels) do
-    count = count + 1
-  end
-  
-  return count
-end
 
-function AutoLFM.Logic.Selection.ValidateChannels()
-  local valid = {}
-  local invalid = {}
-  
-  for channelName, _ in pairs(selectedChannels) do
-    if IsChannelAvailable(channelName) then
-      table.insert(valid, channelName)
-    else
-      table.insert(invalid, channelName)
-    end
-  end
-  
-  return valid, invalid
-end
 
 function AutoLFM.Logic.Selection.ClearChannels()
   for k in pairs(selectedChannels) do
