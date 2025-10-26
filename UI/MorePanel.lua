@@ -497,11 +497,11 @@ end
 -----------------------------------------------------------------------------
 -- Channel Selector (Independent Frame)
 -----------------------------------------------------------------------------
-local function CreateChannelCheckbox(parentFrame, channel, lastButton)
-  if not parentFrame or not channel then return nil end
+local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
+  if not parentFrame or not channelName then return nil end
   
   local hasAccess = true
-  if channel.name == "Hardcore" then
+  if channelName == "Hardcore" then
     if AutoLFM.Logic.Selection.IsHardcoreMode then
       hasAccess = AutoLFM.Logic.Selection.IsHardcoreMode()
     else
@@ -520,7 +520,7 @@ local function CreateChannelCheckbox(parentFrame, channel, lastButton)
     if not this.GetChecked then return end
     
     if AutoLFM.Logic.Selection.ToggleChannel then
-      AutoLFM.Logic.Selection.ToggleChannel(channel.name, this:GetChecked())
+      AutoLFM.Logic.Selection.ToggleChannel(channelName, this:GetChecked())
     end
   end)
   
@@ -545,7 +545,7 @@ local function CreateChannelCheckbox(parentFrame, channel, lastButton)
   
   local channelText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   channelText:SetPoint("LEFT", button, "RIGHT", 5, 0)
-  channelText:SetText(channel.name)
+  channelText:SetText(channelName)
   channelText:SetTextColor(1, 0.82, 0)
   
   if not hasAccess then
@@ -567,12 +567,12 @@ local function CreateChannelCheckbox(parentFrame, channel, lastButton)
   end)
   
   if hasAccess and AutoLFM.Logic.Selection.IsChannelSelected then
-    button:SetChecked(AutoLFM.Logic.Selection.IsChannelSelected(channel.name))
+    button:SetChecked(AutoLFM.Logic.Selection.IsChannelSelected(channelName))
   else
     button:SetChecked(false)
   end
   
-  channelButtons[channel.name] = button
+  channelButtons[channelName] = button
   
   return button
 end
@@ -594,9 +594,9 @@ local function CreateChannelCheckboxes()
   
   local lastButton = nil
   
-  for _, channel in ipairs(foundChannels) do
-    if channel and channel.name then
-      lastButton = CreateChannelCheckbox(channelsFrame, channel, lastButton)
+  for _, channelName in ipairs(foundChannels) do
+    if channelName then
+      lastButton = CreateChannelCheckbox(channelsFrame, channelName, lastButton)
     end
   end
 end
