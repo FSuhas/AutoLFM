@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.5] - Self-contained Assets
+
+- Internalized all UI textures (buttons, sliders, backdrops)
+
 ## [2.4] - Reorganize MorePanel, HC status from spell
 
 - Simplify frames (REALY NEED TO USE PROPER XML TEMPLATE IN FUTURE)
