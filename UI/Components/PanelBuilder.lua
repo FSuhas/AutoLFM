@@ -248,6 +248,124 @@ function AutoLFM.UI.PanelBuilder.SetupCheckboxClick(checkbox, onToggleFunc)
 end
 
 -----------------------------------------------------------------------------
+-- Selectable Row Creation (Generic)
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.CreateSelectableRow(config)
+  if not config or not config.parent then return nil end
+  
+  local clickableFrame = CreateFrame("Button", config.frameName, config.parent)
+  clickableFrame:SetHeight(config.rowHeight or AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT)
+  clickableFrame:SetWidth(config.rowWidth or 300)
+  clickableFrame:SetPoint("TOPLEFT", config.parent, "TOPLEFT", 0, -(config.yOffset or 0))
+  
+  local checkbox = CreateFrame("CheckButton", config.checkboxName, clickableFrame, "UICheckButtonTemplate")
+  checkbox:SetWidth(config.checkboxSize or AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
+  checkbox:SetHeight(config.checkboxSize or AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
+  checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
+  
+  if config.isChecked ~= nil then
+    checkbox:SetChecked(config.isChecked)
+  end
+  
+  local rightLabel = nil
+  if config.rightText then
+    rightLabel = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    rightLabel:SetPoint("RIGHT", clickableFrame, "RIGHT", -10, 0)
+    rightLabel:SetText(config.rightText)
+  end
+  
+  local label = clickableFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  label:SetPoint("LEFT", checkbox, "RIGHT", 2, 0)
+  label:SetText(config.mainText or "")
+  
+  if config.color then
+    local r = config.color.r or 1
+    local g = config.color.g or 1
+    local b = config.color.b or 1
+    label:SetTextColor(r, g, b)
+    if rightLabel then
+      rightLabel:SetTextColor(r, g, b)
+    end
+  end
+  
+  if config.customProperties then
+    for key, value in pairs(config.customProperties) do
+      clickableFrame[key] = value
+    end
+  end
+  
+  if config.customTooltip then
+    clickableFrame:SetScript("OnEnter", function()
+      local r = clickableFrame.originalR or (config.color and config.color.r) or 1
+      local g = clickableFrame.originalG or (config.color and config.color.g) or 1
+      local b = clickableFrame.originalB or (config.color and config.color.b) or 1
+      
+      clickableFrame:SetBackdrop({
+        bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "white",
+        insets = {left = 1, right = 1, top = 1, bottom = 1},
+      })
+      clickableFrame:SetBackdropColor(r, g, b, 0.3)
+      label:SetTextColor(1, 1, 1)
+      if rightLabel then
+        rightLabel:SetTextColor(1, 1, 1)
+      end
+      checkbox:LockHighlight()
+      
+      pcall(function()
+        config.customTooltip(clickableFrame)
+      end)
+    end)
+    
+    clickableFrame:SetScript("OnLeave", function()
+      clickableFrame:SetBackdrop(nil)
+      
+      local r = clickableFrame.originalR or (config.color and config.color.r) or 1
+      local g = clickableFrame.originalG or (config.color and config.color.g) or 1
+      local b = clickableFrame.originalB or (config.color and config.color.b) or 1
+      
+      label:SetTextColor(r, g, b)
+      if rightLabel then
+        rightLabel:SetTextColor(r, g, b)
+      end
+      
+      checkbox:UnlockHighlight()
+      AutoLFM.UI.PanelBuilder.HideTooltip()
+    end)
+  elseif config.color and not config.overrideHover then
+    AutoLFM.UI.PanelBuilder.SetupRowHover(
+      clickableFrame,
+      checkbox,
+      label,
+      rightLabel,
+      config.color
+    )
+  end
+  
+  if config.onCheckboxClick then
+    AutoLFM.UI.PanelBuilder.SetupClickToToggle(
+      clickableFrame,
+      checkbox,
+      function(isChecked)
+        config.onCheckboxClick(checkbox, isChecked)
+      end
+    )
+    
+    AutoLFM.UI.PanelBuilder.SetupCheckboxClick(
+      checkbox,
+      function(isChecked)
+        config.onCheckboxClick(checkbox, isChecked)
+      end
+    )
+  end
+  
+  clickableFrame.checkbox = checkbox
+  clickableFrame.label = label
+  clickableFrame.rightLabel = rightLabel
+  
+  return clickableFrame
+end
+
+-----------------------------------------------------------------------------
 -- Checkbox Utilities
 -----------------------------------------------------------------------------
 function AutoLFM.UI.PanelBuilder.CreateCheckbox(parent, name, onClickCallback)
