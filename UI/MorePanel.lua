@@ -62,7 +62,7 @@ local function CreateMainPanel(parentFrame)
   morePanelFrame:SetWidth(292)
   morePanelFrame:SetHeight(253)
   morePanelFrame:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBackground",
     tile = true,
     tileSize = 16,
     insets = { left = 4, right = 4, top = 4, bottom = 4 }
@@ -98,8 +98,8 @@ local function CreateCustomMessageEditBox()
   customMessageEditBox:SetMaxLetters(AutoLFM.UI.MorePanel.MAX_MESSAGE_LENGTH)
   customMessageEditBox:SetText("")
   customMessageEditBox:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBackground",
+    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBorder",
     tile = true,
     tileSize = 8,
     edgeSize = 16,
@@ -186,10 +186,10 @@ local function CreateBroadcastIntervalSlider()
   
   broadcastIntervalSlider:SetValueStep(AutoLFM.Logic.Broadcaster.INTERVAL_STEP)
   broadcastIntervalSlider:SetOrientation("HORIZONTAL")
-  broadcastIntervalSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  broadcastIntervalSlider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
   broadcastIntervalSlider:SetBackdrop({
-    bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
-    edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
+    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBackground",
+    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBorder",
     tile = true,
     tileSize = 8,
     edgeSize = 8,
@@ -430,11 +430,11 @@ local function CreateMinimapList(lastAnchor)
   
   local resetIcon = resetButton:CreateTexture(nil, "ARTWORK")
   resetIcon:SetAllPoints(resetButton)
-  resetIcon:SetTexture("Interface\\Buttons\\UI-RotationLeft-Button-Up")
+  resetIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonRotationLeft")
   
   local resetHL = resetButton:CreateTexture(nil, "HIGHLIGHT")
   resetHL:SetAllPoints(resetButton)
-  resetHL:SetTexture("Interface\\Buttons\\UI-Common-MouseHilight")
+  resetHL:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonHighlight")
   resetHL:SetBlendMode("ADD")
   
   local resetText = CreateFrame("Button", nil, morePanelFrame)
@@ -613,7 +613,7 @@ local function CreateChannelsFrame(lastAnchor)
   channelsFrame:SetWidth(135)
   channelsFrame:SetHeight(100)
   channelsFrame:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBackground",
     tile = true,
     tileSize = 16,
     insets = { left = 4, right = 4, top = 4, bottom = 0 }

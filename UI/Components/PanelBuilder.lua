@@ -195,7 +195,7 @@ function AutoLFM.UI.PanelBuilder.SetupRowHover(frame, checkbox, label, rightLabe
   
   frame:SetScript("OnEnter", function()
     frame:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8X8",
+      bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "white",
       insets = {left = 1, right = 1, top = 1, bottom = 1}
     })
     frame:SetBackdropColor(originalR, originalG, originalB, 0.3)

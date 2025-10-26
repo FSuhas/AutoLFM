@@ -294,10 +294,10 @@ function AutoLFM_RaidList.CreateSizeSlider(bottomZone)
   raidSizeSlider:SetValue(10)
   raidSizeSlider:SetValueStep(1)
   raidSizeSlider:SetOrientation("HORIZONTAL")
-  raidSizeSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  raidSizeSlider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
   raidSizeSlider:SetBackdrop({
-    bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
-    edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
+    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBackground",
+    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBorder",
     tile = true,
     tileSize = 8,
     edgeSize = 8,
