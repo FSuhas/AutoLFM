@@ -20,22 +20,7 @@ local selectedChannels = {}
 local isHardcore = false
 
 -----------------------------------------------------------------------------
--- Initialization
------------------------------------------------------------------------------
-function AutoLFM.Logic.Selection.Init()
-  local loadedChannels = AutoLFM.Core.Settings.LoadChannels()
-  if loadedChannels then
-    for k, v in pairs(loadedChannels) do
-      if k == "Hardcore" and v == true then
-        isHardcore = true
-      end
-      selectedChannels[k] = v
-    end
-  end
-end
-
------------------------------------------------------------------------------
--- Helpers
+-- Private Helpers
 -----------------------------------------------------------------------------
 local function FindIndex(list, item)
   if not list then return nil end
@@ -67,6 +52,47 @@ local function ToggleInList(list, item, shouldAdd)
   end
   
   return list
+end
+
+-----------------------------------------------------------------------------
+-- Hardcore Detection
+-----------------------------------------------------------------------------
+local function DetectHardcoreCharacter()
+  for tab = 1, GetNumSpellTabs() do
+    local _, _, offset, numSpells = GetSpellTabInfo(tab)
+    for i = 1, numSpells do
+      local spellName = GetSpellName(offset + i, "spell")
+      if spellName and string.find(string.lower(spellName), "hardcore") then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+function AutoLFM.Logic.Selection.IsHardcoreMode()
+  return isHardcore
+end
+
+-----------------------------------------------------------------------------
+-- Initialization
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.Selection.Init()
+  -- Detect hardcore mode by scanning spellbook
+  isHardcore = DetectHardcoreCharacter()
+  
+  -- Load previously saved channel selections for this character
+  local loadedChannels = AutoLFM.Core.Settings.LoadChannels()
+  if loadedChannels then
+    for k, v in pairs(loadedChannels) do
+      -- Security: skip Hardcore channel if character is not hardcore
+      if k == "Hardcore" and not isHardcore then
+        -- Skip
+      else
+        selectedChannels[k] = v
+      end
+    end
+  end
 end
 
 -----------------------------------------------------------------------------
@@ -179,37 +205,6 @@ function AutoLFM.Logic.Selection.GetRolesString()
   end
   
   return "Need " .. table.concat(selectedRoles, " & ")
-end
-
------------------------------------------------------------------------------
--- Hardcore Detection
------------------------------------------------------------------------------
-local hcFrame = CreateFrame("Frame")
-hcFrame:RegisterEvent("CHAT_MSG_HARDCORE")
-
-hcFrame:SetScript("OnEvent", function()
-  if event == "CHAT_MSG_HARDCORE" then
-    if not isHardcore then
-      isHardcore = true
-      
-      if AutoLFM and AutoLFM.Logic and AutoLFM.Logic.Selection then
-        local channels = AutoLFM.Logic.Selection.GetChannels()
-        channels["Hardcore"] = true
-        AutoLFM.Core.Settings.SaveChannels(channels)
-        if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
-          AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CHANNELS_CHANGED)
-        end
-      end
-      
-      if AutoLFM.UI and AutoLFM.UI.MorePanel and AutoLFM.UI.MorePanel.RefreshChannelCheckboxes then
-        AutoLFM.UI.MorePanel.RefreshChannelCheckboxes()
-      end
-    end
-  end
-end)
-
-function AutoLFM.Logic.Selection.IsHardcoreMode()
-  return isHardcore
 end
 
 -----------------------------------------------------------------------------

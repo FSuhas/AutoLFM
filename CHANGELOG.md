@@ -1,9 +1,9 @@
 # AutoLFM Changelog
 
-## [2.4] - Reorganize MorePanel, save HC status
+## [2.4] - Reorganize MorePanel, HC status from spell
 
 - Simplify frames (REALY NEED TO USE PROPER XML TEMPLATE IN FUTURE)
-- Save harcore player status for channel broadcast
+- Identify Hardcore status from spell
 
 ## [2.3] - Fix Hardcore chan
 
