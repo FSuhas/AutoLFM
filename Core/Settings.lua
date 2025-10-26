@@ -61,10 +61,7 @@ end
 
 local function EnsureMiscModules(charData)
   if not charData then return end
-  
-  if not charData.miscModules then
-    charData.miscModules = {}
-  end
+  if not charData.miscModules then charData.miscModules = {} end
   
   for key, defaultValue in pairs(DEFAULTS.MISC_MODULES) do
     if charData.miscModules[key] == nil then
@@ -84,20 +81,12 @@ function AutoLFM.Core.Settings.InitCharacter()
 end
 
 function AutoLFM.Core.Settings.InitSavedVars()
-  if not EnsureCharData() then
-    return false
-  end
-  
+  if not EnsureCharData() then return false end
   local charData = GetCharData()
   if not charData then return false end
   
-  if not charData.dungeonFilters then
-    charData.dungeonFilters = {}
-  end
-  
-  if not charData.miscModulesData then
-    charData.miscModulesData = {}
-  end
+  if not charData.dungeonFilters then charData.dungeonFilters = {} end
+  if not charData.miscModulesData then charData.miscModulesData = {} end
   
   EnsureMiscModules(charData)
   
@@ -115,7 +104,9 @@ function AutoLFM.Core.Settings.SaveChannels(channels)
   if not EnsureCharData() then return end
   local charData = GetCharData()
   if charData then
-    charData.selectedChannels = channels or {}
+    local copy = {}
+    for k, v in pairs(channels or {}) do copy[k] = v end
+    charData.selectedChannels = copy
   end
 end
 
@@ -156,16 +147,12 @@ end
 
 function AutoLFM.Core.Settings.LoadMinimap()
   if not EnsureCharData() then
-    return {
-      hidden = DEFAULTS.MINIMAP_HIDDEN
-    }
+    return { hidden = DEFAULTS.MINIMAP_HIDDEN }
   end
   
   local charData = GetCharData()
   if not charData then
-    return {
-      hidden = DEFAULTS.MINIMAP_HIDDEN
-    }
+    return { hidden = DEFAULTS.MINIMAP_HIDDEN }
   end
   
   return {
@@ -209,7 +196,6 @@ function AutoLFM.Core.Settings.LoadInterval()
   if not EnsureCharData() then
     return DEFAULTS.BROADCAST_INTERVAL
   end
-  
   local charData = GetCharData()
   return charData and charData.broadcastInterval or DEFAULTS.BROADCAST_INTERVAL
 end
@@ -221,8 +207,8 @@ function AutoLFM.Core.Settings.SaveMiscModule(moduleName, isEnabled)
   if not EnsureCharData() then return end
   local charData = GetCharData()
   if not charData then return end
-  
   EnsureMiscModules(charData)
+  
   charData.miscModules[moduleName] = (isEnabled == true)
 end
 
@@ -230,40 +216,22 @@ function AutoLFM.Core.Settings.LoadMiscModule(moduleName)
   if not EnsureCharData() then
     return DEFAULTS.MISC_MODULES[moduleName] or false
   end
-  
   local charData = GetCharData()
-  if not charData then
-    return DEFAULTS.MISC_MODULES[moduleName] or false
-  end
-  
+  if not charData then return DEFAULTS.MISC_MODULES[moduleName] or false end
   EnsureMiscModules(charData)
   
   local value = charData.miscModules[moduleName]
-  if value == nil then
-    return DEFAULTS.MISC_MODULES[moduleName] or false
-  end
-  
-  return value == true
+  return (value == true)
 end
 
 function AutoLFM.Core.Settings.GetAllMiscModules()
-  if not EnsureCharData() then
-    local result = {}
-    for key, value in pairs(DEFAULTS.MISC_MODULES) do
-      result[key] = value
-    end
-    return result
-  end
-  
   local charData = GetCharData()
   if not charData then
-    local result = {}
+    charData = { miscModules = {} }
     for key, value in pairs(DEFAULTS.MISC_MODULES) do
-      result[key] = value
+      charData.miscModules[key] = value
     end
-    return result
   end
-  
   EnsureMiscModules(charData)
   return charData.miscModules
 end
@@ -279,7 +247,6 @@ function AutoLFM.Core.Settings.SaveMiscModuleData(moduleName, key, value)
   if not charData.miscModulesData then
     charData.miscModulesData = {}
   end
-  
   if not charData.miscModulesData[moduleName] then
     charData.miscModulesData[moduleName] = {}
   end
