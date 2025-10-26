@@ -1,7 +1,7 @@
 # AutoLFM - Automated LFM Broadcaster for WoW Vanilla 1.12 (TurtleWoW)
 
 <p align="center">
-  <img src="AutoLFM.png" alt="AutoLFM Interface" width="550"/>
+  <img src="AutoLFM.png" alt="AutoLFM Interface"/>
 </p>
 
 ## 📖 Description
