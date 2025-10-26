@@ -20,7 +20,7 @@ local function OnGroupRosterChange()
       local result = AutoLFM.Logic.Broadcaster.HandleGroupFull("raid")
       
       if result and result.needsUIUpdate then
-        local button = AutoLFM.UI.MainWindow.GetStartButton()
+        local button = AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
         if button then
           button:SetText("Start")
         end
@@ -37,7 +37,7 @@ local function OnGroupRosterChange()
       local result = AutoLFM.Logic.Broadcaster.HandleGroupFull("dungeon")
       
       if result and result.needsUIUpdate then
-        local button = AutoLFM.UI.MainWindow.GetStartButton()
+        local button = AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
         if button then
           button:SetText("Start")
         end
