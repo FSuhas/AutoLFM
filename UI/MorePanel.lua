@@ -15,7 +15,7 @@ AutoLFM.UI.MorePanel.UPDATE_THROTTLE = 0.1
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
-local morePanelFrame = nil
+local mainFrame = nil
 local customMessageEditBox = nil
 local broadcastIntervalSlider = nil
 local channelsFrame = nil
@@ -43,7 +43,6 @@ end
 -- Utilities
 -----------------------------------------------------------------------------
 local function SnapToStep(value)
-  if not value then return AutoLFM.Logic.Broadcaster.INTERVAL_STEP end
   local roundedValue = math.floor(value / AutoLFM.Logic.Broadcaster.INTERVAL_STEP + 0.5) * AutoLFM.Logic.Broadcaster.INTERVAL_STEP
   return roundedValue
 end
@@ -57,39 +56,39 @@ local function CreateMainPanel(parentFrame)
   local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, "AutoLFM_MorePanel")
   if not panelData then return nil end
   
-  morePanelFrame = panelData.panel
-  morePanelFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 25, -155)
-  morePanelFrame:SetWidth(292)
-  morePanelFrame:SetHeight(253)
-  morePanelFrame:SetBackdrop({
+  mainFrame = panelData.panel
+  mainFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 25, -155)
+  mainFrame:SetWidth(292)
+  mainFrame:SetHeight(253)
+  mainFrame:SetBackdrop({
     bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBackground",
     tile = true,
     tileSize = 16,
     insets = { left = 4, right = 4, top = 4, bottom = 4 }
   })
-  morePanelFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.5)
+  mainFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.5)
   
-  return morePanelFrame
+  return mainFrame
 end
 
 -----------------------------------------------------------------------------
 -- Custom Message EditBox
 -----------------------------------------------------------------------------
 local function CreateCustomMessageEditBox()
-  if not morePanelFrame then return end
+  if not mainFrame then return end
   
-  local editboxIcon = morePanelFrame:CreateTexture(nil, "OVERLAY")
+  local editboxIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   editboxIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\send")
   editboxIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   editboxIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  editboxIcon:SetPoint("TOPLEFT", morePanelFrame, "TOPLEFT", 5, -5)
+  editboxIcon:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 5, -5)
   
-  local editboxLabel = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local editboxLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   editboxLabel:SetText("Add details to your message:")
   editboxLabel:SetPoint("LEFT", editboxIcon, "RIGHT", 3, 0)
   editboxLabel:SetTextColor(1, 1, 1)
 
-  customMessageEditBox = CreateFrame("EditBox", "AutoLFM_EditBox", morePanelFrame)
+  customMessageEditBox = CreateFrame("EditBox", "AutoLFM_EditBox", mainFrame)
   customMessageEditBox:SetPoint("TOPLEFT", editboxIcon, "BOTTOMLEFT", 0, -5)
   customMessageEditBox:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.EDITBOX_WIDTH)
   customMessageEditBox:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.EDITBOX_HEIGHT)
@@ -162,20 +161,20 @@ end
 -- Broadcast Interval Slider
 -----------------------------------------------------------------------------
 local function CreateBroadcastIntervalSlider()
-  if not morePanelFrame or not customMessageEditBox then return end
+  if not mainFrame or not customMessageEditBox then return end
   
-  local sliderIcon = morePanelFrame:CreateTexture(nil, "OVERLAY")
+  local sliderIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   sliderIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\tool")
   sliderIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sliderIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sliderIcon:SetPoint("TOPLEFT", customMessageEditBox, "BOTTOMLEFT", 0, -10)
   
-  local sliderLabel = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local sliderLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sliderLabel:SetText("Interval:")
   sliderLabel:SetPoint("LEFT", sliderIcon, "RIGHT", 3, 0)
   sliderLabel:SetTextColor(1, 1, 1)
   
-  broadcastIntervalSlider = CreateFrame("Slider", nil, morePanelFrame)
+  broadcastIntervalSlider = CreateFrame("Slider", nil, mainFrame)
   broadcastIntervalSlider:SetWidth(145)
   broadcastIntervalSlider:SetHeight(17)
   broadcastIntervalSlider:SetPoint("LEFT", sliderLabel, "RIGHT", 10, 0)
@@ -196,7 +195,7 @@ local function CreateBroadcastIntervalSlider()
     insets = {left = 3, right = 3, top = 6, bottom = 6}
   })
   
-  local sliderValue = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local sliderValue = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sliderValue:SetText(savedInterval .. " secs")
   sliderValue:SetPoint("LEFT", broadcastIntervalSlider, "RIGHT", 10, 0)
   
@@ -253,50 +252,50 @@ local function UpdateStatsDisplay()
 end
 
 local function CreateStatsList(lastAnchor)
-  if not morePanelFrame or not lastAnchor then return end
+  if not mainFrame or not lastAnchor then return end
   
-  local durationIcon = morePanelFrame:CreateTexture(nil, "OVERLAY")
+  local durationIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   durationIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\bag")
   durationIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   durationIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   durationIcon:SetPoint("TOPLEFT", lastAnchor, "BOTTOMLEFT", 0, -7)
   
-  local durationLabel = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local durationLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   durationLabel:SetText("Duration: ")
   durationLabel:SetPoint("LEFT", durationIcon, "RIGHT", 3, 0)
   durationLabel:SetTextColor(1, 1, 1)
   
-  durationValueText = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  durationValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   durationValueText:SetText("00:00")
   durationValueText:SetPoint("LEFT", durationLabel, "RIGHT", 0, 0)
   
-  local sentIcon = morePanelFrame:CreateTexture(nil, "OVERLAY")
+  local sentIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   sentIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\book")
   sentIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sentIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sentIcon:SetPoint("TOPLEFT", durationIcon, "BOTTOMLEFT", 0, -7)
   
-  local sentLabel = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local sentLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sentLabel:SetText("Sent: ")
   sentLabel:SetPoint("LEFT", sentIcon, "RIGHT", 3, 0)
   sentLabel:SetTextColor(1, 1, 1)
   
-  sentValueText = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sentValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sentValueText:SetText("0")
   sentValueText:SetPoint("LEFT", sentLabel, "RIGHT", 0, 0)
   
-  local nextIcon = morePanelFrame:CreateTexture(nil, "OVERLAY")
+  local nextIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   nextIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\chat")
   nextIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   nextIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   nextIcon:SetPoint("TOPLEFT", sentIcon, "BOTTOMLEFT", 0, -7)
   
-  local nextLabel = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local nextLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   nextLabel:SetText("Next: ")
   nextLabel:SetPoint("LEFT", nextIcon, "RIGHT", 3, 0)
   nextLabel:SetTextColor(1, 1, 1)
   
-  nextValueText = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  nextValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   nextValueText:SetText("--")
   nextValueText:SetPoint("LEFT", nextLabel, "RIGHT", 0, 0)
   
@@ -316,28 +315,28 @@ local function UpdateMinimapRadioButtons()
 end
 
 local function CreateMinimapList(lastAnchor)
-  if not morePanelFrame or not lastAnchor then return end
+  if not mainFrame or not lastAnchor then return end
   
-  local minimapIcon = morePanelFrame:CreateTexture(nil, "OVERLAY")
+  local minimapIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   minimapIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\minimap")
   minimapIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   minimapIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   minimapIcon:SetPoint("TOPLEFT", lastAnchor, "BOTTOMLEFT", 0, -7)
   
-  local minimapTitle = morePanelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local minimapTitle = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   minimapTitle:SetText("Minimap button:")
   minimapTitle:SetPoint("LEFT", minimapIcon, "RIGHT", 3, 0)
   minimapTitle:SetTextColor(1, 1, 1)
   
   local isVisible = AutoLFM_MinimapButton and AutoLFM_MinimapButton:IsShown()
   
-  showRadio = CreateFrame("CheckButton", nil, morePanelFrame, "UIRadioButtonTemplate")
+  showRadio = CreateFrame("CheckButton", nil, mainFrame, "UIRadioButtonTemplate")
   showRadio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   showRadio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   showRadio:SetPoint("TOPLEFT", minimapIcon, "BOTTOMLEFT", 10, -5)
   showRadio:SetChecked(isVisible)
   
-  local showText = CreateFrame("Button", nil, morePanelFrame)
+  local showText = CreateFrame("Button", nil, mainFrame)
   showText:SetPoint("LEFT", showRadio, "RIGHT", 0, 0)
   showText:SetWidth(55)
   showText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
@@ -377,13 +376,13 @@ local function CreateMinimapList(lastAnchor)
     UpdateMinimapRadioButtons()
   end)
   
-  hideRadio = CreateFrame("CheckButton", nil, morePanelFrame, "UIRadioButtonTemplate")
+  hideRadio = CreateFrame("CheckButton", nil, mainFrame, "UIRadioButtonTemplate")
   hideRadio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   hideRadio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   hideRadio:SetPoint("TOPLEFT", showRadio, "BOTTOMLEFT", 0, -4)
   hideRadio:SetChecked(not isVisible)
   
-  local hideText = CreateFrame("Button", nil, morePanelFrame)
+  local hideText = CreateFrame("Button", nil, mainFrame)
   hideText:SetPoint("LEFT", hideRadio, "RIGHT", 0, 0)
   hideText:SetWidth(55)
   hideText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
@@ -423,7 +422,7 @@ local function CreateMinimapList(lastAnchor)
     UpdateMinimapRadioButtons()
   end)
   
-  local resetButton = CreateFrame("Button", nil, morePanelFrame)
+  local resetButton = CreateFrame("Button", nil, mainFrame)
   resetButton:SetWidth(20)
   resetButton:SetHeight(20)
   resetButton:SetPoint("TOPLEFT", hideRadio, "BOTTOMLEFT", -2, -4)
@@ -437,7 +436,7 @@ local function CreateMinimapList(lastAnchor)
   resetHL:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonHighlight")
   resetHL:SetBlendMode("ADD")
   
-  local resetText = CreateFrame("Button", nil, morePanelFrame)
+  local resetText = CreateFrame("Button", nil, mainFrame)
   resetText:SetPoint("LEFT", resetButton, "RIGHT", 0, 0)
   resetText:SetWidth(55)
   resetText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
@@ -602,14 +601,14 @@ local function CreateChannelCheckboxes()
 end
 
 local function CreateChannelsFrame(lastAnchor)
-  if not morePanelFrame or not lastAnchor then return end
+  if not mainFrame or not lastAnchor then return end
   if channelsFrame then
-    channelsFrame:SetParent(morePanelFrame)
+    channelsFrame:SetParent(mainFrame)
     channelsFrame:Show()
     return
   end
   
-  channelsFrame = CreateFrame("Frame", "AutoLFM_ChannelSelector", morePanelFrame)
+  channelsFrame = CreateFrame("Frame", "AutoLFM_ChannelSelector", mainFrame)
   channelsFrame:SetWidth(135)
   channelsFrame:SetHeight(100)
   channelsFrame:SetBackdrop({
@@ -639,7 +638,7 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.UI.MorePanel.Create(parentFrame)
   if not parentFrame then return nil end
-  if morePanelFrame then return morePanelFrame end
+  if mainFrame then return mainFrame end
   
   CreateMainPanel(parentFrame)
   CreateCustomMessageEditBox()
@@ -648,7 +647,7 @@ function AutoLFM.UI.MorePanel.Create(parentFrame)
   CreateChannelsFrame(durationAnchor)
   CreateMinimapList(minimapAnchor)
   
-  morePanelFrame:SetScript("OnUpdate", function()
+  mainFrame:SetScript("OnUpdate", function()
     UpdateStatsDisplay()
     UpdateMinimapRadioButtons()
     
@@ -667,12 +666,12 @@ function AutoLFM.UI.MorePanel.Create(parentFrame)
     end
   end)
   
-  return morePanelFrame
+  return mainFrame
 end
 
 function AutoLFM.UI.MorePanel.Show()
-  if morePanelFrame then
-    morePanelFrame:Show()
+  if mainFrame then
+    mainFrame:Show()
   end
   
   AutoLFM.UI.MorePanel.RefreshChannelCheckboxes()
@@ -680,13 +679,13 @@ function AutoLFM.UI.MorePanel.Show()
 end
 
 function AutoLFM.UI.MorePanel.Hide()
-  if morePanelFrame then
-    morePanelFrame:Hide()
+  if mainFrame then
+    mainFrame:Hide()
   end
 end
 
 function AutoLFM.UI.MorePanel.GetFrame()
-  return morePanelFrame
+  return mainFrame
 end
 
 function AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider()

@@ -13,8 +13,10 @@ local isInitialized = false
 -----------------------------------------------------------------------------
 -- Helper: SafeInit
 -----------------------------------------------------------------------------
-local function SafeInit(name, func)
-  local ok, err = pcall(func)
+local function SafeInit(name, func, arg1)
+  if not func then return end
+  
+  local ok, err = pcall(func, arg1)
   if not ok then
     if AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
       AutoLFM.Core.Utils.PrintError("Error initializing " .. name .. ": " .. tostring(err))
@@ -49,25 +51,25 @@ local function InitCore()
     AutoLFM.UI.DungeonsPanel.InitFilters()
   end
   
-  if AutoLFM.Logic and AutoLFM.Logic.Selection then
-    SafeInit("Logic.Selection", function() AutoLFM.Logic.Selection.Init() end)
+  if AutoLFM.Logic and AutoLFM.Logic.Selection and AutoLFM.Logic.Selection.Init then
+    SafeInit("Logic.Selection", AutoLFM.Logic.Selection.Init)
   end
   
   if AutoLFM.Misc then
     if AutoLFM.Misc.FPSDisplay and AutoLFM.Misc.FPSDisplay.Init then
-      SafeInit("FPSDisplay", function() AutoLFM.Misc.FPSDisplay.Init() end)
+      SafeInit("FPSDisplay", AutoLFM.Misc.FPSDisplay.Init)
     end
     if AutoLFM.Misc.RestedXP and AutoLFM.Misc.RestedXP.Init then
-      SafeInit("RestedXP", function() AutoLFM.Misc.RestedXP.Init() end)
+      SafeInit("RestedXP", AutoLFM.Misc.RestedXP.Init)
     end
     if AutoLFM.Misc.AutoInvite and AutoLFM.Misc.AutoInvite.Init then
-      SafeInit("AutoInvite", function() AutoLFM.Misc.AutoInvite.Init() end)
+      SafeInit("AutoInvite", AutoLFM.Misc.AutoInvite.Init)
     end
     if AutoLFM.Misc.GuildSpam and AutoLFM.Misc.GuildSpam.Init then
-      SafeInit("GuildSpam", function() AutoLFM.Misc.GuildSpam.Init() end)
+      SafeInit("GuildSpam", AutoLFM.Misc.GuildSpam.Init)
     end
     if AutoLFM.Misc.AutoMarker and AutoLFM.Misc.AutoMarker.Init then
-      SafeInit("AutoMarker", function() AutoLFM.Misc.AutoMarker.Init() end)
+      SafeInit("AutoMarker", AutoLFM.Misc.AutoMarker.Init)
     end
   end
   
@@ -108,10 +110,10 @@ local function InitPanels()
   for i = 1, table.getn(panels) do
     local panel = panels[i]
     if panel and panel.Create then
-      SafeInit("Panel Create", function() panel.Create(AutoLFM_MainFrame) end)
+      SafeInit("Panel Create", panel.Create, AutoLFM_MainFrame)
     end
     if panel and panel.Register then
-      SafeInit("Panel Register", function() panel.Register() end)
+      SafeInit("Panel Register", panel.Register)
     end
   end
   
@@ -123,16 +125,16 @@ end
 
 local function InitExtras()
   if AutoLFM.UI and AutoLFM.UI.MinimapButton and AutoLFM.UI.MinimapButton.Init then
-    SafeInit("MinimapButton", function() AutoLFM.UI.MinimapButton.Init() end)
+    SafeInit("MinimapButton", AutoLFM.UI.MinimapButton.Init)
   end
   if AutoLFM.UI and AutoLFM.UI.LinkIntegration and AutoLFM.UI.LinkIntegration.Init then
-    SafeInit("LinkIntegration", function() AutoLFM.UI.LinkIntegration.Init() end)
+    SafeInit("LinkIntegration", AutoLFM.UI.LinkIntegration.Init)
   end
   if AutoLFM.Core and AutoLFM.Core.Events and AutoLFM.Core.Events.Setup then
-    SafeInit("Core.Events", function() AutoLFM.Core.Events.Setup() end)
+    SafeInit("Core.Events", AutoLFM.Core.Events.Setup)
   end
   if AutoLFM.Logic and AutoLFM.Logic.Broadcaster and AutoLFM.Logic.Broadcaster.InitLoop then
-    SafeInit("Broadcaster", function() AutoLFM.Logic.Broadcaster.InitLoop() end)
+    SafeInit("Broadcaster", AutoLFM.Logic.Broadcaster.InitLoop)
   end
 end
 

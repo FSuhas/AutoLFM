@@ -78,16 +78,12 @@ end
 -- Initialization
 -----------------------------------------------------------------------------
 function AutoLFM.Logic.Selection.Init()
-  -- Detect hardcore mode by scanning spellbook
   isHardcore = DetectHardcoreCharacter()
   
-  -- Load previously saved channel selections for this character
   local loadedChannels = AutoLFM.Core.Settings.LoadChannels()
   if loadedChannels then
     for k, v in pairs(loadedChannels) do
-      -- Security: skip Hardcore channel if character is not hardcore
       if k == "Hardcore" and not isHardcore then
-        -- Skip
       else
         selectedChannels[k] = v
       end
@@ -178,7 +174,7 @@ function AutoLFM.Logic.Selection.ClearRoles()
 end
 
 function AutoLFM.Logic.Selection.GetRoles()
-  return selectedRoles or {}
+  return selectedRoles
 end
 
 function AutoLFM.Logic.Selection.IsRoleSelected(role)
@@ -252,7 +248,7 @@ function AutoLFM.Logic.Selection.ToggleChannel(channelName, isSelected)
 end
 
 function AutoLFM.Logic.Selection.GetChannels()
-  return selectedChannels or {}
+  return selectedChannels
 end
 
 function AutoLFM.Logic.Selection.IsChannelSelected(channelName)
@@ -274,8 +270,6 @@ function AutoLFM.Logic.Selection.GetChannelId(channelName)
   
   return nil
 end
-
-
 
 function AutoLFM.Logic.Selection.ClearChannels()
   for k in pairs(selectedChannels) do

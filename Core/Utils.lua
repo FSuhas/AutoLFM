@@ -20,7 +20,7 @@ AutoLFM.Core.Utils.CONSTANTS = {
 -- String Utilities
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Utils.SplitString(delim, text)
-  if not text or not delim then return {} end
+  if not text then return {} end
   
   local result = {}
   local start = 1

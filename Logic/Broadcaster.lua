@@ -45,8 +45,6 @@ local function CalculateGroupCounts(mode, targetSize)
   local currentCount = AutoLFM.Logic.Selection.GetGroupCount()
   local missingCount = targetSize - currentCount
   
-  if missingCount < 0 then missingCount = 0 end
-  
   return {
     current = currentCount,
     target = targetSize,
@@ -177,7 +175,7 @@ function AutoLFM.Logic.Broadcaster.UpdateMessage()
       AutoLFM.UI.MainWindow.UpdateMessagePreview()
     end
     
-    if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
       AutoLFM.API.NotifyDataChanged()
     end
   end)
@@ -268,11 +266,9 @@ function AutoLFM.Logic.Broadcaster.Validate()
   local errors = {}
   
   for ruleName, validator in pairs(validationRules) do
-    local success, isValid, errorMsg = pcall(validator)
+    local isValid, errorMsg = validator()
     
-    if not success then
-      table.insert(errors, "Validation error (" .. ruleName .. "): " .. tostring(isValid))
-    elseif not isValid and errorMsg then
+    if not isValid and errorMsg then
       table.insert(errors, errorMsg)
     end
   end
@@ -289,13 +285,11 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.Logic.Broadcaster.SendToChannels(message)
   if not message or message == "" then
-    AutoLFM.Core.Utils.PrintError("Message is empty")
     return false
   end
   
   local selectedChannels = AutoLFM.Logic.Selection.GetChannels()
   if not selectedChannels or not next(selectedChannels) then
-    AutoLFM.Core.Utils.PrintError("No channel selected")
     return false
   end
   
@@ -340,7 +334,7 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
   messageCount = (messageCount or 0) + 1
   lastTimestamp = GetTime()
   
-  if AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+  if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
      AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.MESSAGE_SENT)
   end
   
@@ -373,7 +367,7 @@ function AutoLFM.Logic.Broadcaster.Start()
       AutoLFM.UI.IconAnimation.Start()
     end
     
-    if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
+    if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
       AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.BROADCAST_START)
     end
     
@@ -389,25 +383,18 @@ function AutoLFM.Logic.Broadcaster.Start()
 end
 
 function AutoLFM.Logic.Broadcaster.Stop()
-  local success, err = pcall(function()
-    isActive = false
-    
-    AutoLFM.Core.Utils.PrintWarning("Broadcast stopped")
-    
-    if AutoLFM.UI.IconAnimation.Stop then
-      AutoLFM.UI.IconAnimation.Stop()
-    end
-    
-    if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
-      AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.BROADCAST_STOP)
-    end
-    
-    messageCount = 0
-  end)
+  isActive = false
+  AutoLFM.Core.Utils.PrintWarning("Broadcast stopped")
   
-  if not success then
-    AutoLFM.Core.Utils.PrintError("Error stopping broadcast: " .. tostring(err))
+  if AutoLFM.UI.IconAnimation.Stop then
+    AutoLFM.UI.IconAnimation.Stop()
   end
+  
+  if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
+    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.BROADCAST_STOP)
+  end
+  
+  messageCount = 0
 end
 
 function AutoLFM.Logic.Broadcaster.IsActive()
@@ -462,28 +449,16 @@ local function ClearAllSelections()
 end
 
 function AutoLFM.Logic.Broadcaster.HandleGroupFull(contentType)
-  local success, result = pcall(function()
-    if AutoLFM.Logic.Broadcaster.IsActive() then
-      AutoLFM.Logic.Broadcaster.Stop()
-    end
-    
-    ClearAllSelections()
-    
-    return {
-      needsUIUpdate = true,
-      playStopSound = true
-    }
-  end)
-  
-  if not success then
-    AutoLFM.Core.Utils.PrintError("Error handling group full: " .. tostring(result))
-    return {
-      needsUIUpdate = false,
-      playStopSound = false
-    }
+  if AutoLFM.Logic.Broadcaster.IsActive() then
+    AutoLFM.Logic.Broadcaster.Stop()
   end
   
-  return result
+  ClearAllSelections()
+  
+  return {
+    needsUIUpdate = true,
+    playStopSound = true
+  }
 end
 
 -----------------------------------------------------------------------------
