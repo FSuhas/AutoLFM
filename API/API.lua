@@ -74,10 +74,6 @@ function AutoLFM.API.GetPlayerCount()
   local desiredTotal = 0
   local missing = 0
   
-  if not currentInGroup or currentInGroup < 1 then
-    currentInGroup = 1
-  end
-  
   if mode == "raid" then
     desiredTotal = AutoLFM.Logic.Content.GetRaidSize()
     if desiredTotal < 1 then

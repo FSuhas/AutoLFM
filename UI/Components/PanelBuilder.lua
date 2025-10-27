@@ -170,7 +170,7 @@ function AutoLFM.UI.PanelBuilder.HidePanel(panelFrame, scrollFrame)
 end
 
 function AutoLFM.UI.PanelBuilder.UpdateScrollHeight(contentFrame, visibleCount, rowHeight)
-  if not contentFrame or not contentFrame.SetHeight then return end
+  if not contentFrame then return end
   
   rowHeight = rowHeight or AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT
   local contentHeight = visibleCount * rowHeight
@@ -406,7 +406,7 @@ function AutoLFM.UI.PanelBuilder.BatchUpdateCheckboxes(checkboxTable, checkState
   if not checkboxTable or not checkStateFunc then return end
   
   for key, checkbox in pairs(checkboxTable) do
-    if checkbox and checkbox.SetChecked then
+    if checkbox then
       local isChecked = checkStateFunc(key)
       checkbox:SetChecked(isChecked)
     end
@@ -417,7 +417,7 @@ function AutoLFM.UI.PanelBuilder.ClearCheckboxes(checkboxTable)
   if not checkboxTable then return end
   
   for _, checkbox in pairs(checkboxTable) do
-    if checkbox and checkbox.SetChecked then
+    if checkbox then
       checkbox:SetChecked(false)
     end
   end
@@ -427,7 +427,7 @@ function AutoLFM.UI.PanelBuilder.UpdateCheckboxes(checkboxTable, stateCheckFunc)
   if not checkboxTable or not stateCheckFunc then return end
   
   for tag, checkbox in pairs(checkboxTable) do
-    if checkbox and checkbox.SetChecked then
+    if checkbox then
       local isChecked = stateCheckFunc(tag)
       checkbox:SetChecked(isChecked)
     end

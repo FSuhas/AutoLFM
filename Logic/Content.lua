@@ -138,7 +138,7 @@ end
 -- Color Utilities
 -----------------------------------------------------------------------------
 function AutoLFM.Logic.Content.GetColor(identifier, returnRGBOnly)
-  if not identifier or not AutoLFM.Logic.Content.COLORS then 
+  if not identifier then 
     if returnRGBOnly then
       return 1, 0.82, 0
     else
@@ -238,7 +238,7 @@ local function GetSelected(contentType)
   elseif contentType == AutoLFM.Logic.Content.TYPE_RAID then
     return selectedRaids
   end
-  return nil
+  return {}
 end
 
 local function SetSelected(contentType, tags)
@@ -262,13 +262,13 @@ end
 local function ClearOpposite(contentType)
   if contentType == AutoLFM.Logic.Content.TYPE_DUNGEON then
     if AutoLFM.Logic.Content.ClearRaids then AutoLFM.Logic.Content.ClearRaids() end
-    if AutoLFM_RaidList and AutoLFM_RaidList.ClearSelection then
-      AutoLFM_RaidList.ClearSelection()
+    if AutoLFM.UI.RaidsPanel.ClearSelection then
+      AutoLFM.UI.RaidsPanel.ClearSelection()
     end
   elseif contentType == AutoLFM.Logic.Content.TYPE_RAID then
     if AutoLFM.Logic.Content.ClearDungeons then AutoLFM.Logic.Content.ClearDungeons() end
-    if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearSelection then
-      AutoLFM_DungeonList.ClearSelection()
+    if AutoLFM.UI.DungeonsPanel.ClearSelection then
+      AutoLFM.UI.DungeonsPanel.ClearSelection()
     end
   end
 end
@@ -300,8 +300,8 @@ local function HandleDungeonSelection(tags, tag, isSelected)
       local removedTag = tags[1]
       table.remove(tags, 1)
       
-      if AutoLFM_DungeonList and AutoLFM_DungeonList.UncheckDungeon then
-        AutoLFM_DungeonList.UncheckDungeon(removedTag)
+      if AutoLFM.UI.DungeonsPanel.UncheckDungeon then
+        AutoLFM.UI.DungeonsPanel.UncheckDungeon(removedTag)
       end
     end
     table.insert(tags, tag)
@@ -406,7 +406,7 @@ function AutoLFM.Logic.Content.ClearDungeons()
 end
 
 function AutoLFM.Logic.Content.GetSelectedDungeons()
-  return GetSelected(AutoLFM.Logic.Content.TYPE_DUNGEON) or {}
+  return GetSelected(AutoLFM.Logic.Content.TYPE_DUNGEON)
 end
 
 function AutoLFM.Logic.Content.IsDungeonSelected(tag)
@@ -459,7 +459,7 @@ function AutoLFM.Logic.Content.ClearRaids()
 end
 
 function AutoLFM.Logic.Content.GetSelectedRaids()
-  return GetSelected(AutoLFM.Logic.Content.TYPE_RAID) or {}
+  return GetSelected(AutoLFM.Logic.Content.TYPE_RAID)
 end
 
 function AutoLFM.Logic.Content.IsRaidSelected(tag)

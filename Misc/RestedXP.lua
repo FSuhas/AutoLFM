@@ -18,16 +18,14 @@ local isEnabled = false
 -----------------------------------------------------------------------------
 function AutoLFM.Misc.RestedXP.CheckFull()
   local level = UnitLevel("player")
-  if level >= 60 then return end
+  if not level or level >= 60 then return end
   
   local restXP = GetXPExhaustion()
   local maxXP = UnitXPMax("player")
   
   if restXP and restXP >= (maxXP * 1.5) then
     if not hasAnnouncedFull then
-      if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
-        AutoLFM.Core.Utils.PrintSuccess("Your rested XP is FULL!")
-      end
+      AutoLFM.Core.Utils.PrintSuccess("Your rested XP is FULL!")
       PlaySound("LEVELUP")
       hasAnnouncedFull = true
     end
@@ -38,10 +36,8 @@ end
 
 function AutoLFM.Misc.RestedXP.ShowStatus()
   local level = UnitLevel("player")
-  if level >= 60 then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("You are level 60, rested XP does not apply")
-    end
+  if not level or level >= 60 then
+    AutoLFM.Core.Utils.PrintError("You are level 60, rested XP does not apply")
     return
   end
   
@@ -49,11 +45,9 @@ function AutoLFM.Misc.RestedXP.ShowStatus()
   local maxXP = UnitXPMax("player")
   local percent = math.floor((restXP / (maxXP * 1.5)) * 100)
   
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintInfo then
-    AutoLFM.Core.Utils.PrintInfo(
-      string.format("Current rested XP: %d / %d (~%d%%)", restXP, maxXP * 1.5, percent)
-    )
-  end
+  AutoLFM.Core.Utils.PrintInfo(
+    string.format("Current rested XP: %d / %d (~%d%%)", restXP, maxXP * 1.5, percent)
+  )
 end
 
 -----------------------------------------------------------------------------

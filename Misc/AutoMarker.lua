@@ -23,6 +23,7 @@ local ICON_NAMES = {
 }
 
 local function GetIconName(index)
+  if not index or index < 1 or index > 8 then return "Unknown" end
   return ICON_NAMES[index] or "Unknown"
 end
 
@@ -93,7 +94,6 @@ local function Setup()
   
   updateFrame.timer = 0
   updateFrame:SetScript("OnUpdate", function()
-    if not updateFrame.timer then updateFrame.timer = 0 end
     updateFrame.timer = updateFrame.timer + arg1
     
     if updateFrame.timer > 1 then
