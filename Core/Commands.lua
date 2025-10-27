@@ -306,7 +306,7 @@ local COMMANDS = {
 -- Help Formatting
 -----------------------------------------------------------------------------
 local function FormatArgs(argsText)
-  if not argsText then return "" end
+  if not argsText or argsText == "" then return "" end
   
   local result = ""
   local currentWord = ""
@@ -426,9 +426,7 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Commands.Handle(msg)
   local success, err = pcall(function()
-    if not msg then msg = "" end
-    
-    local args = AutoLFM.Core.Utils.SplitString(" ", msg)
+    local args = AutoLFM.Core.Utils.SplitString(" ", msg or "")
     local cmdName = args[1] or ""
     local subCmdName = args[2]
     

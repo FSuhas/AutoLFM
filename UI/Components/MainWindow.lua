@@ -30,6 +30,7 @@ function AutoLFM.UI.MainWindow.CreateFrame()
   if mainFrame then return mainFrame end
   
   mainFrame = CreateFrame("Frame", "AutoLFM_MainFrame", UIParent)
+  mainFrame:SetToplevel(1)
   UIPanelWindows["AutoLFM_MainFrame"] = { area = "left", pushable = 3 }
   mainFrame:SetWidth(384)
   mainFrame:SetHeight(512)
@@ -137,7 +138,7 @@ end
 -- Message Preview
 -----------------------------------------------------------------------------
 local function TruncateText(text, maxWidth, fontString)
-  if not text or not fontString then return "", false end
+  if not text then return "", false end
   
   fontString:SetText(text)
   local textWidth = fontString:GetStringWidth()
@@ -244,32 +245,30 @@ function AutoLFM.UI.MainWindow.CreateMessagePreview()
 end
 
 function AutoLFM.UI.MainWindow.UpdateMessagePreview()
-  if not messageText or not AutoLFM.Logic.Broadcaster.GetMessage then return end
+  if not messageText then return end
   
-  local success, err = pcall(function()
-    local message = AutoLFM.Logic.Broadcaster.GetMessage()
-    if message and message ~= "" then
-      local truncated, isTruncated = TruncateText(message, 290, messageText)
-      messageText:SetText(truncated)
-      
-      if messagePreviewFrame and messagePreviewFrame.previewButton then
-        if isTruncated then
-          messagePreviewFrame.previewButton:Show()
-        else
-          messagePreviewFrame.previewButton:Hide()
-        end
-      end
-    else
-      messageText:SetText("")
-      if messagePreviewFrame and messagePreviewFrame.previewButton then
+  local message = AutoLFM.Logic.Broadcaster.GetMessage and AutoLFM.Logic.Broadcaster.GetMessage() or ""
+  if message and message ~= "" then
+    local truncated, isTruncated = TruncateText(message, 290, messageText)
+    messageText:SetText(truncated)
+    
+    if messagePreviewFrame and messagePreviewFrame.previewButton then
+      if isTruncated then
+        messagePreviewFrame.previewButton:Show()
+      else
         messagePreviewFrame.previewButton:Hide()
       end
     end
-    
-    if AutoLFM.UI.ClearTab and AutoLFM.UI.ClearTab.UpdateIcon then
-      AutoLFM.UI.ClearTab.UpdateIcon()
+  else
+    messageText:SetText("")
+    if messagePreviewFrame and messagePreviewFrame.previewButton then
+      messagePreviewFrame.previewButton:Hide()
     end
-  end)
+  end
+  
+  if AutoLFM.UI.ClearTab and AutoLFM.UI.ClearTab.UpdateIcon then
+    AutoLFM.UI.ClearTab.UpdateIcon()
+  end
 end
 
 -----------------------------------------------------------------------------
@@ -286,33 +285,27 @@ function AutoLFM.UI.MainWindow.CreateStartButton()
   broadcastButton:SetText("Start")
   
   broadcastButton:SetScript("OnClick", function()
-    local success, err = pcall(function()
-      if not AutoLFM.Logic.Broadcaster.IsActive then return end
+    if not AutoLFM.Logic.Broadcaster.IsActive then return end
+    
+    if AutoLFM.Logic.Broadcaster.IsActive() then
+      if AutoLFM.Logic.Broadcaster.Stop then
+        AutoLFM.Logic.Broadcaster.Stop()
+      end
+      broadcastButton:SetText("Start")
+      pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_STOP)
+    else
+      if AutoLFM.UI.MorePanel.EnsureChannelUIExists then
+        AutoLFM.UI.MorePanel.EnsureChannelUIExists()
+      end
       
-      if AutoLFM.Logic.Broadcaster.IsActive() then
-        if AutoLFM.Logic.Broadcaster.Stop then
-          AutoLFM.Logic.Broadcaster.Stop()
-        end
-        broadcastButton:SetText("Start")
-        pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_STOP)
-      else
-        if AutoLFM.UI.MorePanel.EnsureChannelUIExists then
-          AutoLFM.UI.MorePanel.EnsureChannelUIExists()
-        end
+      if AutoLFM.Logic.Broadcaster.Start then
+        local startSuccess = AutoLFM.Logic.Broadcaster.Start()
         
-        if AutoLFM.Logic.Broadcaster.Start then
-          local startSuccess = AutoLFM.Logic.Broadcaster.Start()
-          
-          if startSuccess then
-            broadcastButton:SetText("Stop")
-            pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_START)
-          end
+        if startSuccess then
+          broadcastButton:SetText("Stop")
+          pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_START)
         end
       end
-    end)
-    
-    if not success then
-      AutoLFM.Core.Utils.PrintError("Broadcast button error: " .. tostring(err))
     end
   end)
   
@@ -322,5 +315,3 @@ end
 function AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
   return broadcastButton
 end
-
-

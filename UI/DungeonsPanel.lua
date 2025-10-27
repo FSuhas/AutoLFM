@@ -5,15 +5,14 @@
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
 if not AutoLFM.UI.DungeonsPanel then AutoLFM.UI.DungeonsPanel = {} end
-if not AutoLFM_DungeonList then AutoLFM_DungeonList = {} end
 
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
-local dungeonsPanelFrame = nil
-local dungeonScrollFrame = nil
-local dungeonListContentFrame = nil
-local dungeonFilterFrame = nil
+local mainFrame = nil
+local scrollFrame = nil
+local contentFrame = nil
+local filterFrame = nil
 local filterCheckboxes = {}
 local filterFrameLabelFrame = nil
 local filterFrameLabelText = nil
@@ -26,7 +25,6 @@ local filterStates = {}
 -- Dungeon Filter Management
 -----------------------------------------------------------------------------
 function AutoLFM.UI.DungeonsPanel.InitFilters()
-  if not AutoLFM.Logic.Content.COLORS then return end
   
   local savedFilters = AutoLFM.Core.Settings.LoadFilters()
   
@@ -43,7 +41,7 @@ function AutoLFM.UI.DungeonsPanel.InitFilters()
 end
 
 function AutoLFM.UI.DungeonsPanel.ShouldShowDungeonPriority(priority)
-  if not priority or not AutoLFM.Logic.Content.COLORS then return true end
+  if not priority then return true end
   
   for i = 1, table.getn(AutoLFM.Logic.Content.COLORS) do
     local color = AutoLFM.Logic.Content.COLORS[i]
@@ -75,7 +73,6 @@ function AutoLFM.UI.DungeonsPanel.GetAllFilterStates()
 end
 
 function AutoLFM.UI.DungeonsPanel.ResetFilters()
-  if not AutoLFM.Logic.Content.COLORS then return end
   
   for i = 1, table.getn(AutoLFM.Logic.Content.COLORS) do
     local color = AutoLFM.Logic.Content.COLORS[i]
@@ -93,13 +90,12 @@ end
 -- Filter System UI
 -----------------------------------------------------------------------------
 local function RefreshDungeonDisplay()
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.Refresh then
-    AutoLFM_DungeonList.Refresh()
+  if AutoLFM.UI.DungeonsPanel.Refresh then
+    AutoLFM.UI.DungeonsPanel.Refresh()
   end
 end
 
 local function HasDisabledFilter()
-  if not AutoLFM.Logic.Content.COLORS then return false end
   for i = 1, table.getn(AutoLFM.Logic.Content.COLORS) do
     local color = AutoLFM.Logic.Content.COLORS[i]
     if color and color.key and not AutoLFM.UI.DungeonsPanel.GetFilterState(color.key) then
@@ -146,12 +142,10 @@ local function CreateFilterCheckbox(parentFrame, colorData, index, xOffset)
   checkbox:SetChecked(AutoLFM.UI.DungeonsPanel.GetFilterState(colorData.key) == true)
   
   checkbox:SetScript("OnClick", function()
-    pcall(function()
-      local isChecked = checkbox:GetChecked()
-      AutoLFM.UI.DungeonsPanel.ToggleFilter(colorData.key, isChecked)
-      RefreshDungeonDisplay()
-      UpdateFilterLabelColor()
-    end)
+    local isChecked = checkbox:GetChecked()
+    AutoLFM.UI.DungeonsPanel.ToggleFilter(colorData.key, isChecked)
+    RefreshDungeonDisplay()
+    UpdateFilterLabelColor()
   end)
   
   filterCheckboxes[colorData.key] = checkbox
@@ -328,7 +322,7 @@ local function UpdateRowVisibility()
   end
 end
 
-function AutoLFM_DungeonList.Display(parent)
+function AutoLFM.UI.DungeonsPanel.Display(parent)
   if not parent then return end
   
   for i = 1, table.getn(clickableFrames) do
@@ -372,15 +366,15 @@ function AutoLFM_DungeonList.Display(parent)
   end
 end
 
-function AutoLFM_DungeonList.Refresh()
+function AutoLFM.UI.DungeonsPanel.Refresh()
   UpdateRowVisibility()
   
-  if dungeonScrollFrame and dungeonScrollFrame.UpdateScrollChildRect then
-    dungeonScrollFrame:UpdateScrollChildRect()
+  if scrollFrame and scrollFrame.UpdateScrollChildRect then
+    scrollFrame:UpdateScrollChildRect()
   end
 end
 
-function AutoLFM_DungeonList.ClearSelection()
+function AutoLFM.UI.DungeonsPanel.ClearSelection()
   if AutoLFM.Logic.Content.ClearDungeons then
     AutoLFM.Logic.Content.ClearDungeons()
   end
@@ -388,16 +382,16 @@ function AutoLFM_DungeonList.ClearSelection()
   AutoLFM.UI.PanelBuilder.ClearCheckboxes(checkButtons)
 end
 
-function AutoLFM_DungeonList.ClearBackdrops()
+function AutoLFM.UI.DungeonsPanel.ClearBackdrops()
   AutoLFM.UI.PanelBuilder.ClearBackdrops(clickableFrames)
 end
 
-function AutoLFM_DungeonList.UpdateCheckboxes()
+function AutoLFM.UI.DungeonsPanel.UpdateCheckboxes()
   if not AutoLFM.Logic.Content.IsDungeonSelected then return end
   AutoLFM.UI.PanelBuilder.UpdateCheckboxes(checkButtons, AutoLFM.Logic.Content.IsDungeonSelected)
 end
 
-function AutoLFM_DungeonList.UncheckDungeon(dungeonTag)
+function AutoLFM.UI.DungeonsPanel.UncheckDungeon(dungeonTag)
   if not dungeonTag then return end
   if not checkButtons then return end
   
@@ -413,82 +407,43 @@ function AutoLFM_DungeonList.UncheckDungeon(dungeonTag)
 end
 
 -----------------------------------------------------------------------------
--- Public API (accessible via namespace)
------------------------------------------------------------------------------
-function AutoLFM.UI.DungeonsPanel.DisplayList(parent)
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.Display then
-    return AutoLFM_DungeonList.Display(parent)
-  end
-end
-
-function AutoLFM.UI.DungeonsPanel.RefreshList()
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.Refresh then
-    return AutoLFM_DungeonList.Refresh()
-  end
-end
-
-function AutoLFM.UI.DungeonsPanel.ClearSelection()
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearSelection then
-    return AutoLFM_DungeonList.ClearSelection()
-  end
-end
-
-function AutoLFM.UI.DungeonsPanel.ClearBackdrops()
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
-    return AutoLFM_DungeonList.ClearBackdrops()
-  end
-end
-
-function AutoLFM.UI.DungeonsPanel.UpdateCheckboxes()
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.UpdateCheckboxes then
-    return AutoLFM_DungeonList.UpdateCheckboxes()
-  end
-end
-
-function AutoLFM.UI.DungeonsPanel.UncheckDungeon(dungeonTag)
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.UncheckDungeon then
-    return AutoLFM_DungeonList.UncheckDungeon(dungeonTag)
-  end
-end
-
------------------------------------------------------------------------------
 -- Panel Management
 -----------------------------------------------------------------------------
 function AutoLFM.UI.DungeonsPanel.Create(parentFrame)
   if not parentFrame then return nil end
-  if dungeonsPanelFrame then return dungeonsPanelFrame end
+  if mainFrame then return mainFrame end
   
   local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, "AutoLFM_DungeonsPanel")
   if not panelData then return nil end
   
-  dungeonsPanelFrame = panelData.panel
-  dungeonsPanelFrame:Show()
+  mainFrame = panelData.panel
+  mainFrame:Show()
   
   panelData = AutoLFM.UI.PanelBuilder.AddScrollFrame(panelData, "AutoLFM_ScrollFrame_Dungeons")
-  dungeonScrollFrame = panelData.scrollFrame
-  dungeonListContentFrame = panelData.contentFrame
+  scrollFrame = panelData.scrollFrame
+  contentFrame = panelData.contentFrame
   
-  if AutoLFM.UI.DungeonsPanel.DisplayList then
-    AutoLFM.UI.DungeonsPanel.DisplayList(dungeonListContentFrame)
+  if AutoLFM.UI.DungeonsPanel.Display then
+    AutoLFM.UI.DungeonsPanel.Display(contentFrame)
     
-    if dungeonScrollFrame.UpdateScrollChildRect then
-      dungeonScrollFrame:UpdateScrollChildRect()
+    if scrollFrame.UpdateScrollChildRect then
+      scrollFrame:UpdateScrollChildRect()
     end
   end
   
-  dungeonFilterFrame = CreateColorFilterUI(panelData.bottomZone)
-  if dungeonFilterFrame then
-    dungeonFilterFrame:Show()
+  filterFrame = CreateColorFilterUI(panelData.bottomZone)
+  if filterFrame then
+    filterFrame:Show()
   end
   
-  return dungeonsPanelFrame
+  return mainFrame
 end
 
 function AutoLFM.UI.DungeonsPanel.Show()
-  AutoLFM.UI.PanelBuilder.ShowPanel(dungeonsPanelFrame, dungeonScrollFrame)
+  AutoLFM.UI.PanelBuilder.ShowPanel(mainFrame, scrollFrame)
   
-  if dungeonFilterFrame then
-    dungeonFilterFrame:Show()
+  if filterFrame then
+    filterFrame:Show()
   end
   
   if AutoLFM.UI.RaidsPanel.HideSizeControls then
@@ -501,23 +456,23 @@ function AutoLFM.UI.DungeonsPanel.Show()
 end
 
 function AutoLFM.UI.DungeonsPanel.Hide()
-  AutoLFM.UI.PanelBuilder.HidePanel(dungeonsPanelFrame, dungeonScrollFrame)
+  AutoLFM.UI.PanelBuilder.HidePanel(mainFrame, scrollFrame)
   
-  if dungeonFilterFrame then
-    dungeonFilterFrame:Hide()
+  if filterFrame then
+    filterFrame:Hide()
   end
 end
 
 function AutoLFM.UI.DungeonsPanel.GetFrame()
-  return dungeonsPanelFrame
+  return mainFrame
 end
 
 function AutoLFM.UI.DungeonsPanel.GetContentFrame()
-  return dungeonListContentFrame
+  return contentFrame
 end
 
 function AutoLFM.UI.DungeonsPanel.GetScrollFrame()
-  return dungeonScrollFrame
+  return scrollFrame
 end
 
 function AutoLFM.UI.DungeonsPanel.Register()

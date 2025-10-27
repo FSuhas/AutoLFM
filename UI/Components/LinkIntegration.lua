@@ -62,39 +62,39 @@ local function HookQuestLog()
     local lastClickTime = 0
 
     questFrame:SetScript("OnEvent", function()
-        local success, err = pcall(function()
-            if not QuestLogFrame or not QuestLogFrame:IsVisible() then return end
+      local success, err = pcall(function()
+        if not QuestLogFrame or not QuestLogFrame:IsVisible() then return end
 
-            local currentTime = GetTime()
-            if currentTime - lastClickTime < 0.1 then return end
+        local currentTime = GetTime()
+        if currentTime - lastClickTime < 0.1 then return end
 
-            local selectedQuest = GetQuestLogSelection()
-            if selectedQuest and selectedQuest > 0 and selectedQuest ~= lastClickedQuest then
-                lastClickedQuest = selectedQuest
-                lastClickTime = currentTime
+        local selectedQuest = GetQuestLogSelection()
+        if selectedQuest and selectedQuest > 0 and selectedQuest ~= lastClickedQuest then
+          lastClickedQuest = selectedQuest
+          lastClickTime = currentTime
 
-                if IsShiftKeyDown() and AutoLFM.UI.MorePanel.GetEditBoxFocus then
-                    local editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox and AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
-                    if editBox and AutoLFM_MainFrame and AutoLFM_MainFrame:IsVisible() then
-                        local title, level, _, _, _, _, _, questID = GetQuestLogTitle(selectedQuest)
-                        if title and title ~= "" then
-                            level = level or 0
-                            questID = questID or 0
-                            local cleanTitle = string.gsub(title, "^%[.-%]%s*", "")
-                            local link = AutoLFM.Logic.Content.CreateQuestLink(questID, level, cleanTitle)
+          if IsShiftKeyDown() and AutoLFM.UI.MorePanel.GetEditBoxFocus then
+            local editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox and AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
+            if editBox and AutoLFM_MainFrame and AutoLFM_MainFrame:IsVisible() then
+              local title, level, _, _, _, _, _, questID = GetQuestLogTitle(selectedQuest)
+              if title then
+                level = level or 0
+                questID = questID or 0
+                local cleanTitle = string.gsub(title, "^%[.-%]%s*", "")
+                local link = AutoLFM.Logic.Content.CreateQuestLink(questID, level, cleanTitle)
 
-                            local currentText = editBox:GetText() or ""
-                            editBox:SetText((currentText == "" and link) or (currentText .. " " .. link))
-                            editBox:SetFocus()
-                            editBox:HighlightText(0, 0)
-                        end
-                    end
-                end
+                local currentText = editBox:GetText() or ""
+                editBox:SetText((currentText == "" and link) or (currentText .. " " .. link))
+                editBox:SetFocus()
+                editBox:HighlightText(0, 0)
+              end
             end
-        end)
-        if not success then
-            AutoLFM.Core.Utils.PrintError("QuestLog hook error: " .. tostring(err))
+          end
         end
+      end)
+      if not success then
+        AutoLFM.Core.Utils.PrintError("QuestLog hook error: " .. tostring(err))
+      end
     end)
 end
 

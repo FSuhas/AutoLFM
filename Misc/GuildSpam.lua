@@ -20,16 +20,10 @@ local updateFrame = nil
 -----------------------------------------------------------------------------
 function AutoLFM.Misc.GuildSpam.Start(msg)
   if not msg or msg == "" then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("Message cannot be empty")
-    end
     return false
   end
   
   if not IsInGuild() then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("You are not in a guild")
-    end
     return false
   end
   
@@ -67,10 +61,7 @@ function AutoLFM.Misc.GuildSpam.Start(msg)
   
   AutoLFM.Core.Settings.SaveMiscModuleData("guildSpam", "message", message)
   AutoLFM.Core.Settings.SaveMiscModule("guildSpam", true)
-  
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
-    AutoLFM.Core.Utils.PrintSuccess("Guild spam started (every " .. interval .. "s): " .. msg)
-  end
+  AutoLFM.Core.Utils.PrintSuccess("Guild spam started (every " .. interval .. "s): " .. msg)
   
   return true
 end
@@ -86,28 +77,19 @@ function AutoLFM.Misc.GuildSpam.Stop()
   end
   
   AutoLFM.Core.Settings.SaveMiscModule("guildSpam", false)
-  
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintWarning then
-    AutoLFM.Core.Utils.PrintWarning("Guild spam stopped")
-  end
+  AutoLFM.Core.Utils.PrintWarning("Guild spam stopped")
 end
 
 function AutoLFM.Misc.GuildSpam.SetInterval(sec)
   local value = tonumber(sec)
   if not value or value < 30 then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-      AutoLFM.Core.Utils.PrintError("Interval must be at least 30 seconds")
-    end
     return false
   end
   
   interval = value
   
   AutoLFM.Core.Settings.SaveMiscModuleData("guildSpam", "interval", interval)
-  
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
-    AutoLFM.Core.Utils.PrintSuccess("New interval: " .. interval .. " seconds")
-  end
+  AutoLFM.Core.Utils.PrintSuccess("New interval: " .. interval .. " seconds")
   
   return true
 end
@@ -122,20 +104,16 @@ end
 
 function AutoLFM.Misc.GuildSpam.ShowStatus()
   if not message then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintWarning then
-      AutoLFM.Core.Utils.PrintWarning("No message defined")
-    end
+    AutoLFM.Core.Utils.PrintWarning("No message defined")
     return
   end
   
   local state = isRunning and AutoLFM.Color("Active", "green") or AutoLFM.Color("Inactive", "red")
   
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintInfo then
-    AutoLFM.Core.Utils.PrintInfo("Guild Spam Status:")
-    AutoLFM.Core.Utils.Print("  Message: " .. AutoLFM.Color(message, "yellow"))
-    AutoLFM.Core.Utils.Print("  Interval: " .. AutoLFM.Color(interval .. "s", "yellow"))
-    AutoLFM.Core.Utils.Print("  State: " .. state)
-  end
+  AutoLFM.Core.Utils.PrintInfo("Guild Spam Status:")
+  AutoLFM.Core.Utils.Print("  Message: " .. AutoLFM.Color(message, "yellow"))
+  AutoLFM.Core.Utils.Print("  Interval: " .. AutoLFM.Color(interval .. "s", "yellow"))
+  AutoLFM.Core.Utils.Print("  State: " .. state)
 end
 
 -----------------------------------------------------------------------------

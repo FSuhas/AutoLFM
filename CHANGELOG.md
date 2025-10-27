@@ -1,5 +1,12 @@
 # AutoLFM Changelog
 
+## [2.8] - Cleanup guards, helpers UI panels, illustration
+
+- Removed redundant guards and optimized pcall usage
+- Eliminated global helper variables UI panels
+- Add toplevel for mainframe
+- Change illustration
+
 ## [2.7] - Refactoring row creation, illustration
 
 - Centralized selectable row creation in PanelBuilder

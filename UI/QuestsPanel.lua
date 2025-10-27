@@ -9,9 +9,9 @@ if not AutoLFM.UI.QuestsPanel then AutoLFM.UI.QuestsPanel = {} end
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
-local questsPanelFrame = nil
-local questScrollFrame = nil
-local questListContentFrame = nil
+local mainFrame = nil
+local scrollFrame = nil
+local contentFrame = nil
 local questButtons = {}
 local questInfoLabelFrame = nil
 local questInfoLabelButton = nil
@@ -24,7 +24,7 @@ local function CreateQuestHyperlink(questIndex)
   if not questIndex or questIndex < 1 then return nil end
   
   local title, level, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
-  if not title or title == "" then return nil end
+  if not title then return nil end
   
   questID = questID or 0
   level = level or 0
@@ -38,11 +38,7 @@ local function IsQuestLinkInEditBox(link)
   if not link then return false end
   if not AutoLFM_MainFrame or not AutoLFM_MainFrame:IsVisible() then return false end
   
-  local editBox = nil
-  if AutoLFM.UI.MorePanel.GetCustomMessageEditBox then
-    editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
-  end
-  
+  local editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox and AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
   if not editBox then return false end
   
   local currentText = editBox:GetText() or ""
@@ -55,11 +51,7 @@ local function RemoveLinkFromEditBox(link)
   if not link then return false end
   if not AutoLFM_MainFrame or not AutoLFM_MainFrame:IsVisible() then return false end
   
-  local editBox = nil
-  if AutoLFM.UI.MorePanel.GetCustomMessageEditBox then
-    editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
-  end
-  
+  local editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox and AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
   if not editBox then return false end
   
   local currentText = editBox:GetText() or ""
@@ -87,11 +79,7 @@ local function InsertLinkToEditBox(link)
   if not link then return false end
   if not AutoLFM_MainFrame or not AutoLFM_MainFrame:IsVisible() then return false end
   
-  local editBox = nil
-  if AutoLFM.UI.MorePanel.GetCustomMessageEditBox then
-    editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
-  end
-  
+  local editBox = AutoLFM.UI.MorePanel.GetCustomMessageEditBox and AutoLFM.UI.MorePanel.GetCustomMessageEditBox()
   if not editBox then return false end
   
   local currentText = editBox:GetText() or ""
@@ -237,7 +225,7 @@ end
 -- Quest List Update
 -----------------------------------------------------------------------------
 local function UpdateQuestList()
-  if not questListContentFrame then return end
+  if not contentFrame then return end
   if not questButtons then return end
   
   for i = 1, table.getn(questButtons) do
@@ -247,7 +235,7 @@ local function UpdateQuestList()
   local numEntries, numQuests = GetNumQuestLogEntries()
   
   if numQuests == 0 then
-    questListContentFrame:SetHeight(1)
+    contentFrame:SetHeight(1)
     return
   end
   
@@ -258,9 +246,9 @@ local function UpdateQuestList()
     
     if not isHeader and level and level > 0 then
       if not questButtons[buttonIndex] then
-        questButtons[buttonIndex] = CreateQuestButton(questListContentFrame, buttonIndex)
+        questButtons[buttonIndex] = CreateQuestButton(contentFrame, buttonIndex)
         if buttonIndex == 1 then
-          questButtons[buttonIndex]:SetPoint("TOPLEFT", questListContentFrame, "TOPLEFT", 0, 0)
+          questButtons[buttonIndex]:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 0, 0)
         else
           questButtons[buttonIndex]:SetPoint("TOPLEFT", questButtons[buttonIndex - 1], "BOTTOMLEFT", 0, 0)
         end
@@ -308,7 +296,7 @@ local function UpdateQuestList()
     end
   end
   
-  AutoLFM.UI.PanelBuilder.UpdateScrollHeight(questListContentFrame, buttonIndex - 1)
+  AutoLFM.UI.PanelBuilder.UpdateScrollHeight(contentFrame, buttonIndex - 1)
   
   UpdateInfoLabelState()
 end
@@ -318,21 +306,21 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.UI.QuestsPanel.Create(parentFrame)
   if not parentFrame then return nil end
-  if questsPanelFrame then return questsPanelFrame end
+  if mainFrame then return mainFrame end
   
   local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, "AutoLFM_QuestsPanel")
   if not panelData then return nil end
   
-  questsPanelFrame = panelData.panel
+  mainFrame = panelData.panel
   
   panelData = AutoLFM.UI.PanelBuilder.AddScrollFrame(panelData, "AutoLFM_ScrollFrame_Quests")
-  questScrollFrame = panelData.scrollFrame
-  questListContentFrame = panelData.contentFrame
+  scrollFrame = panelData.scrollFrame
+  contentFrame = panelData.contentFrame
   
   UpdateQuestList()
   
-  if questScrollFrame.UpdateScrollChildRect then
-    questScrollFrame:UpdateScrollChildRect()
+  if scrollFrame.UpdateScrollChildRect then
+    scrollFrame:UpdateScrollChildRect()
   end
   
   questInfoLabelButton, questInfoLabelText = AutoLFM.UI.PanelBuilder.CreateClickableLabel(
@@ -363,49 +351,49 @@ function AutoLFM.UI.QuestsPanel.Create(parentFrame)
   questUpdateFrame:RegisterEvent("QUEST_LOG_UPDATE")
   questUpdateFrame:SetScript("OnEvent", function()
     UpdateQuestList()
-    if questScrollFrame and questScrollFrame.UpdateScrollChildRect then
-      questScrollFrame:UpdateScrollChildRect()
+    if scrollFrame and scrollFrame.UpdateScrollChildRect then
+      scrollFrame:UpdateScrollChildRect()
     end
     UpdateInfoLabelState()
   end)
   
-  return questsPanelFrame
+  return mainFrame
 end
 
 function AutoLFM.UI.QuestsPanel.Show()
-  AutoLFM.UI.PanelBuilder.ShowPanel(questsPanelFrame, questScrollFrame)
+  AutoLFM.UI.PanelBuilder.ShowPanel(mainFrame, scrollFrame)
   
   UpdateQuestList()
   
-  if AutoLFM_RaidList and AutoLFM_RaidList.HideSizeControls then
-    AutoLFM_RaidList.HideSizeControls()
+  if AutoLFM.UI.RaidsPanel.HideSizeControls then
+    AutoLFM.UI.RaidsPanel.HideSizeControls()
   end
   
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
-    AutoLFM_DungeonList.ClearBackdrops()
+  if AutoLFM.UI.DungeonsPanel.ClearBackdrops then
+    AutoLFM.UI.DungeonsPanel.ClearBackdrops()
   end
   
-  if AutoLFM_RaidList and AutoLFM_RaidList.ClearBackdrops then
-    AutoLFM_RaidList.ClearBackdrops()
+  if AutoLFM.UI.RaidsPanel.ClearBackdrops then
+    AutoLFM.UI.RaidsPanel.ClearBackdrops()
   end
   
   UpdateInfoLabelState()
 end
 
 function AutoLFM.UI.QuestsPanel.Hide()
-  AutoLFM.UI.PanelBuilder.HidePanel(questsPanelFrame, questScrollFrame)
+  AutoLFM.UI.PanelBuilder.HidePanel(mainFrame, scrollFrame)
 end
 
 function AutoLFM.UI.QuestsPanel.GetFrame()
-  return questsPanelFrame
+  return mainFrame
 end
 
 function AutoLFM.UI.QuestsPanel.GetContentFrame()
-  return questListContentFrame
+  return contentFrame
 end
 
 function AutoLFM.UI.QuestsPanel.GetScrollFrame()
-  return questScrollFrame
+  return scrollFrame
 end
 
 function AutoLFM.UI.QuestsPanel.Register()
@@ -413,14 +401,14 @@ function AutoLFM.UI.QuestsPanel.Register()
     AutoLFM.UI.QuestsPanel.Show,
     AutoLFM.UI.QuestsPanel.Hide,
     function()
-      if AutoLFM_RaidList and AutoLFM_RaidList.HideSizeControls then
-        AutoLFM_RaidList.HideSizeControls()
+      if AutoLFM.UI.RaidsPanel.HideSizeControls then
+      AutoLFM.UI.RaidsPanel.HideSizeControls()
       end
-      if AutoLFM_DungeonList and AutoLFM_DungeonList.ClearBackdrops then
-        AutoLFM_DungeonList.ClearBackdrops()
+      if AutoLFM.UI.DungeonsPanel.ClearBackdrops then
+      AutoLFM.UI.DungeonsPanel.ClearBackdrops()
       end
-      if AutoLFM_RaidList and AutoLFM_RaidList.ClearBackdrops then
-        AutoLFM_RaidList.ClearBackdrops()
+      if AutoLFM.UI.RaidsPanel.ClearBackdrops then
+      AutoLFM.UI.RaidsPanel.ClearBackdrops()
       end
     end
   )

@@ -59,8 +59,8 @@ end
 -----------------------------------------------------------------------------
 local function OnPlayerLogin()
   local dungeonContent = AutoLFM.UI.DungeonsPanel.GetContentFrame()
-  if AutoLFM_DungeonList and AutoLFM_DungeonList.Display and dungeonContent then
-    AutoLFM_DungeonList.Display(dungeonContent)
+  if AutoLFM.UI.DungeonsPanel.Display and dungeonContent then
+    AutoLFM.UI.DungeonsPanel.Display(dungeonContent)
     
     local dungeonScroll = AutoLFM.UI.DungeonsPanel.GetScrollFrame()
     if dungeonScroll and dungeonScroll.UpdateScrollChildRect then
@@ -69,8 +69,8 @@ local function OnPlayerLogin()
   end
   
   local raidContent = AutoLFM.UI.RaidsPanel.GetContentFrame()
-  if AutoLFM_RaidList and AutoLFM_RaidList.Display and raidContent then
-    AutoLFM_RaidList.Display(raidContent)
+  if AutoLFM.UI.RaidsPanel.Display and raidContent then
+    AutoLFM.UI.RaidsPanel.Display(raidContent)
     
     local raidScroll = AutoLFM.UI.RaidsPanel.GetScrollFrame()
     if raidScroll and raidScroll.UpdateScrollChildRect then

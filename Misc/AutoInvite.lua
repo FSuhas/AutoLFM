@@ -25,7 +25,7 @@ local function IsPlayerLeaderOrSolo()
 end
 
 local function Trim(text)
-  if not text then return text end
+  if not text then return "" end
   return string.gsub(text, "^%s*(.-)%s*$", "%1")
 end
 

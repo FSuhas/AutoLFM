@@ -74,8 +74,10 @@ end
 -- Character
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Settings.InitCharacter()
-  local name = UnitName("player") or "Unknown"
-  local realm = GetRealmName() or "Unknown"
+  local name = UnitName("player")
+  local realm = GetRealmName()
+  if not name or not realm then return nil end
+  
   characterID = name .. "-" .. realm
   return characterID
 end
@@ -83,7 +85,6 @@ end
 function AutoLFM.Core.Settings.InitSavedVars()
   if not EnsureCharData() then return false end
   local charData = GetCharData()
-  if not charData then return false end
   
   if not charData.dungeonFilters then charData.dungeonFilters = {} end
   if not charData.miscModulesData then charData.miscModulesData = {} end
@@ -103,11 +104,10 @@ end
 function AutoLFM.Core.Settings.SaveChannels(channels)
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if charData then
-    local copy = {}
-    for k, v in pairs(channels or {}) do copy[k] = v end
-    charData.selectedChannels = copy
-  end
+  
+  local copy = {}
+  for k, v in pairs(channels or {}) do copy[k] = v end
+  charData.selectedChannels = copy
 end
 
 function AutoLFM.Core.Settings.LoadChannels()
@@ -122,27 +122,24 @@ end
 function AutoLFM.Core.Settings.SaveMinimapPos(x, y)
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if charData then
-    charData.minimapBtnX = x
-    charData.minimapBtnY = y
-  end
+  
+  charData.minimapBtnX = x
+  charData.minimapBtnY = y
 end
 
 function AutoLFM.Core.Settings.SaveMinimapHidden(isHidden)
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if charData then
-    charData.minimapBtnHidden = (isHidden == true)
-  end
+  
+  charData.minimapBtnHidden = (isHidden == true)
 end
 
 function AutoLFM.Core.Settings.ResetMinimapPos()
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if charData then
-    charData.minimapBtnX = nil
-    charData.minimapBtnY = nil
-  end
+  
+  charData.minimapBtnX = nil
+  charData.minimapBtnY = nil
 end
 
 function AutoLFM.Core.Settings.LoadMinimap()
@@ -168,7 +165,6 @@ end
 function AutoLFM.Core.Settings.SaveFilters(filters)
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if not charData then return end
   
   for colorKey, value in pairs(filters) do
     charData.dungeonFilters[colorKey] = (value == true)
@@ -187,9 +183,8 @@ end
 function AutoLFM.Core.Settings.SaveInterval(interval)
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if charData then
-    charData.broadcastInterval = interval or DEFAULTS.BROADCAST_INTERVAL
-  end
+  
+  charData.broadcastInterval = interval or DEFAULTS.BROADCAST_INTERVAL
 end
 
 function AutoLFM.Core.Settings.LoadInterval()
@@ -206,7 +201,6 @@ end
 function AutoLFM.Core.Settings.SaveMiscModule(moduleName, isEnabled)
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if not charData then return end
   EnsureMiscModules(charData)
   
   charData.miscModules[moduleName] = (isEnabled == true)
@@ -217,7 +211,6 @@ function AutoLFM.Core.Settings.LoadMiscModule(moduleName)
     return DEFAULTS.MISC_MODULES[moduleName] or false
   end
   local charData = GetCharData()
-  if not charData then return DEFAULTS.MISC_MODULES[moduleName] or false end
   EnsureMiscModules(charData)
   
   local value = charData.miscModules[moduleName]
@@ -242,7 +235,6 @@ end
 function AutoLFM.Core.Settings.SaveMiscModuleData(moduleName, key, value)
   if not EnsureCharData() then return end
   local charData = GetCharData()
-  if not charData then return end
   
   if not charData.miscModulesData then
     charData.miscModulesData = {}
