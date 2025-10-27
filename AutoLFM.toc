@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
 ## Notes: Automated LFM Message
-## Version: 2.8
+## Version: 2.9
 ## Author: Gondoleon, NSO73
 ## DefaultState: Enabled
 ## SavedVariables: V2_Settings
