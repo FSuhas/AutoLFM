@@ -281,10 +281,7 @@ local function UpdateQuestList()
           return text
         end
 
-        -- Coupe à la limite
         local truncated = string.sub(text, 1, maxLength)
-
-        -- Recule jusqu’au dernier espace pour ne pas couper le mot
         local lastSpace = string.find(truncated, " [^ ]*$")
         if lastSpace then
           truncated = string.sub(truncated, 1, lastSpace - 1)
