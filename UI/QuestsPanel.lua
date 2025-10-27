@@ -261,14 +261,20 @@ local function UpdateQuestList()
       local displayTitle = title or "Unknown Quest"
       local rightLabel = ""
       
+      if not level or level <= 0 then
+        level = 1
+      end
+      
       local isDungeon = string.find(displayTitle, "%[%d+d%]")
       local isRaid = string.find(displayTitle, "%[%d+r%]")
       
+      displayTitle = string.gsub(displayTitle, "^%[%d+%+?[dr]?%]%s*", "")
+      
+      displayTitle = "[" .. level .. "] " .. displayTitle
+      
       if isDungeon then
-        displayTitle = string.gsub(displayTitle, "%[(%d+)d%]", "[%1]")
         rightLabel = "(Dungeon)"
       elseif isRaid then
-        displayTitle = string.gsub(displayTitle, "%[(%d+)r%]", "[%1]")
         rightLabel = "(Raid)"
       end
       
