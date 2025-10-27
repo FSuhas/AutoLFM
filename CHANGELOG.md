@@ -1,5 +1,10 @@
 # AutoLFM Changelog
 
+## [2.9] - Enhance quest list display
+
+- Adding dungeon/raid detection 
+- Truncating long titles
+
 ## [2.8] - Cleanup guards, helpers UI panels, illustration
 
 - Removed redundant guards and optimized pcall usage

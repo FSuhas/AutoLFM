@@ -242,9 +242,12 @@ local function UpdateQuestList()
   local buttonIndex = 1
   
   for questIndex = 1, numEntries do
-    local title, level, questTag, suggestedGroup, isHeader, isCollapsed = GetQuestLogTitle(questIndex)
+    local title, level, questTag, suggestedGroup, isHeader = GetQuestLogTitle(questIndex)
+    local isDungeon = title and string.find(title, "%[%d+d%]")
+    local isRaid = title and string.find(title, "%[%d+r%]")
     
-    if not isHeader and level and level > 0 then
+
+    if level and level > 0 then
       if not questButtons[buttonIndex] then
         questButtons[buttonIndex] = CreateQuestButton(contentFrame, buttonIndex)
         if buttonIndex == 1 then
@@ -261,22 +264,37 @@ local function UpdateQuestList()
       local displayTitle = title or "Unknown Quest"
       local rightLabel = ""
       
-      if not level or level <= 0 then
-        level = 1
-      end
-      
       local isDungeon = string.find(displayTitle, "%[%d+d%]")
       local isRaid = string.find(displayTitle, "%[%d+r%]")
       
       displayTitle = string.gsub(displayTitle, "^%[%d+%+?[dr]?%]%s*", "")
-      
-      displayTitle = "[" .. level .. "] " .. displayTitle
-      
-      if isDungeon then
-        rightLabel = "(Dungeon)"
-      elseif isRaid then
-        rightLabel = "(Raid)"
+
+      if questTag == nil then
+        rightLabel = ""
+      else
+        rightLabel = "(" .. tostring(questTag) .. ")"
       end
+
+      local function TruncateText(text, maxLength)
+        if not text then return "" end
+        if string.len(text) <= maxLength then
+          return text
+        end
+
+        -- Coupe à la limite
+        local truncated = string.sub(text, 1, maxLength)
+
+        -- Recule jusqu’au dernier espace pour ne pas couper le mot
+        local lastSpace = string.find(truncated, " [^ ]*$")
+        if lastSpace then
+          truncated = string.sub(truncated, 1, lastSpace - 1)
+        end
+
+        return truncated .. "..."
+      end
+
+      displayTitle = "[" .. level .. "] " .. displayTitle
+      displayTitle = TruncateText(displayTitle, 30)
       
       local playerLevel = UnitLevel("player")
       local priority = AutoLFM.Logic.Content.CalculateQuestPriority(playerLevel, level)
