@@ -23,7 +23,14 @@ local function CreateFPSFrame()
   fpsFrame = CreateFrame("Frame", "MyFPSFrame", UIParent)
   fpsFrame:SetWidth(90)
   fpsFrame:SetHeight(40)
-  fpsFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+
+  -- Load saved position or default
+  local saved = V2_Settings and V2_Settings.FPSDisplayPosition
+  if saved then
+    fpsFrame:SetPoint(saved.point or "CENTER", UIParent, saved.relativePoint or "CENTER", saved.x or 0, saved.y or 200)
+  else
+    fpsFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+  end
 
   fpsFrame.bg = fpsFrame:CreateTexture(nil, "BACKGROUND")
   fpsFrame.bg:SetAllPoints(fpsFrame)
@@ -47,6 +54,16 @@ local function CreateFPSFrame()
   
   fpsFrame:SetScript("OnMouseUp", function()
     fpsFrame:StopMovingOrSizing()
+
+    -- Save position to V2_Settings
+    if not V2_Settings then V2_Settings = {} end
+    if not V2_Settings.FPSDisplayPosition then V2_Settings.FPSDisplayPosition = {} end
+
+    local point, _, relativePoint, xOfs, yOfs = fpsFrame:GetPoint()
+    V2_Settings.FPSDisplayPosition.point = point
+    V2_Settings.FPSDisplayPosition.relativePoint = relativePoint
+    V2_Settings.FPSDisplayPosition.x = xOfs
+    V2_Settings.FPSDisplayPosition.y = yOfs
   end)
   
   local lastUpdate = 0
