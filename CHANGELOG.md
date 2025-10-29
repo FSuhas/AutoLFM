@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [3.0] - Add fun Paladin-style invitation messages
+
+- Add randomize confirmation response
+
 ## [2.9] - Enhance quest list display
 
 - Adding dungeon/raid detection 
