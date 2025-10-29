@@ -6,7 +6,7 @@ Optional utility modules.
 
 | Module | Description | Commands |
 |--------|-------------|----------|
-| **FPS Display** | Real-time FPS/latency monitor | `/lfm misc fps` |
+| **FPS Display** | Real-time FPS/latency monitor | `/lfm misc fps` or `CTRL+R (by défault)` |
 | **Rested XP** | Alert when rested XP reaches max | `/lfm misc rested` |
 | **Auto Invite** | Auto-invite on whisper keyword | `/lfm misc invite` |
 | **Guild Spam** | Automated guild chat broadcaster | `/lfm misc guild` |

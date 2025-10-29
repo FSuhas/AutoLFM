@@ -37,7 +37,13 @@ local function HandleWhisper(message, sender)
   if not message or not sender then return end
   
   local trimmed = Trim(message)
-  if string.lower(trimmed) ~= string.lower(keyword) then return end
+  local lowerMsg = string.lower(trimmed)
+  local lowerKey = string.lower(keyword)
+  
+  -- ✅ Vérifie si le mot-clé apparaît n'importe où dans le message
+  if not string.find(lowerMsg, lowerKey, 1, true) then
+    return
+  end
   
   local playerName = UnitName("player")
   if sender == playerName then return end
@@ -46,7 +52,7 @@ local function HandleWhisper(message, sender)
     InviteByName(sender)
     
     if sendConfirmation then
-      SendChatMessage("Invited! Come join.", "WHISPER", nil, sender)
+      SendChatMessage("The winds of fate call upon you, " .. sender .. "... your invitation has been cast!", "WHISPER", nil, sender)
     end
   else
     if sendConfirmation then
@@ -54,6 +60,7 @@ local function HandleWhisper(message, sender)
     end
   end
 end
+
 
 -----------------------------------------------------------------------------
 -- Event Setup
