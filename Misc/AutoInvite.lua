@@ -15,6 +15,22 @@ local sendConfirmation = true
 local eventFrame = nil
 
 -----------------------------------------------------------------------------
+-- Fun Paladin-style invitation messages
+-----------------------------------------------------------------------------
+local inviteMessages = {
+  "⚔️ %s, the Light demands your presence! Don’t make an old paladin wait!",
+  "🛡️ %s, by the Light! Get over here before my beard turns greyer!",
+  "✨ %s, the Light calls—and so does your raid leader. Move it!",
+  "⚔️ %s, the crusade awaits! Don’t make me smite you for being late!",
+  "🔥 %s, blessed hammer in hand, it’s time to join the fight!"
+}
+
+local function GetRandomInviteMessage(target)
+  local index = math.random(1, table.getn(inviteMessages))
+  return string.format(inviteMessages[index], target)
+end
+
+-----------------------------------------------------------------------------
 -- Helpers
 -----------------------------------------------------------------------------
 local function IsPlayerLeaderOrSolo()
@@ -40,7 +56,7 @@ local function HandleWhisper(message, sender)
   local lowerMsg = string.lower(trimmed)
   local lowerKey = string.lower(keyword)
   
-  -- ✅ Vérifie si le mot-clé apparaît n'importe où dans le message
+  -- Vérifie si le mot-clé apparaît n'importe où dans le message
   if not string.find(lowerMsg, lowerKey, 1, true) then
     return
   end
@@ -52,7 +68,7 @@ local function HandleWhisper(message, sender)
     InviteByName(sender)
     
     if sendConfirmation then
-      SendChatMessage("The winds of fate call upon you, " .. sender .. "... your invitation has been cast!", "WHISPER", nil, sender)
+      SendChatMessage(GetRandomInviteMessage(sender), "WHISPER", nil, sender)
     end
   else
     if sendConfirmation then
@@ -60,7 +76,6 @@ local function HandleWhisper(message, sender)
     end
   end
 end
-
 
 -----------------------------------------------------------------------------
 -- Event Setup
