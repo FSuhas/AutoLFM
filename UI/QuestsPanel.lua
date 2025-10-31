@@ -179,6 +179,24 @@ local function OnQuestCheckboxClick(checkbox, questIndex)
 end
 
 -----------------------------------------------------------------------------
+-- Text Utilities
+-----------------------------------------------------------------------------
+local function TruncateText(text, maxLength)
+  if not text then return "" end
+  if string.len(text) <= maxLength then
+    return text
+  end
+
+  local truncated = string.sub(text, 1, maxLength)
+  local lastSpace = string.find(truncated, " [^ ]*$")
+  if lastSpace then
+    truncated = string.sub(truncated, 1, lastSpace - 1)
+  end
+
+  return truncated .. "..."
+end
+
+-----------------------------------------------------------------------------
 -- Quest Button Creation
 -----------------------------------------------------------------------------
 local function CreateQuestButton(parent, index)
@@ -199,15 +217,33 @@ local function CreateQuestButton(parent, index)
     end,
     customTooltip = function(frame)
       local questIndex = frame.questIndex
-      if questIndex and questIndex > 0 then
-        local numEntries = GetNumQuestLogEntries()
-        if questIndex > numEntries then return end
+      if not questIndex or questIndex <= 0 then return end
+      
+      local numEntries = GetNumQuestLogEntries()
+      if questIndex > numEntries then return end
+      
+      local title, level, _, _, isHeader = GetQuestLogTitle(questIndex)
+      if not title or title == "" or isHeader then return end
+      
+      local questZone = nil
+      for i = questIndex - 1, 1, -1 do
+        local headerTitle, headerLevel = GetQuestLogTitle(i)
+        if headerTitle and (not headerLevel or headerLevel == 0) then
+          questZone = headerTitle
+          break
+        end
+      end
+      
+      if questZone then
+        local scale = UIParent:GetEffectiveScale()
+        local x, y = GetCursorPosition()
+        x = x / scale
+        y = y / scale
         
-        local title, level, questTag, suggestedGroup, isHeader = GetQuestLogTitle(questIndex)
-        if not title or title == "" or isHeader then return end
-        
-        GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
-        GameTooltip:SetQuestLogItem("quest", questIndex)
+        GameTooltip:SetOwner(frame, "ANCHOR_NONE")
+        GameTooltip:ClearAllPoints()
+        GameTooltip:SetPoint("TOPLEFT", "UIParent", "BOTTOMLEFT", x + 10, y - 10)
+        GameTooltip:SetText(questZone, 1, 0.82, 0)
         GameTooltip:Show()
       end
     end
@@ -243,10 +279,7 @@ local function UpdateQuestList()
   
   for questIndex = 1, numEntries do
     local title, level, questTag, suggestedGroup, isHeader = GetQuestLogTitle(questIndex)
-    local isDungeon = title and string.find(title, "%[%d+d%]")
-    local isRaid = title and string.find(title, "%[%d+r%]")
     
-
     if level and level > 0 then
       if not questButtons[buttonIndex] then
         questButtons[buttonIndex] = CreateQuestButton(contentFrame, buttonIndex)
@@ -264,30 +297,12 @@ local function UpdateQuestList()
       local displayTitle = title or "Unknown Quest"
       local rightLabel = ""
       
-      local isDungeon = string.find(displayTitle, "%[%d+d%]")
-      local isRaid = string.find(displayTitle, "%[%d+r%]")
-      
       displayTitle = string.gsub(displayTitle, "^%[%d+%+?[dr]?%]%s*", "")
 
       if questTag == nil then
         rightLabel = ""
       else
         rightLabel = "(" .. tostring(questTag) .. ")"
-      end
-
-      local function TruncateText(text, maxLength)
-        if not text then return "" end
-        if string.len(text) <= maxLength then
-          return text
-        end
-
-        local truncated = string.sub(text, 1, maxLength)
-        local lastSpace = string.find(truncated, " [^ ]*$")
-        if lastSpace then
-          truncated = string.sub(truncated, 1, lastSpace - 1)
-        end
-
-        return truncated .. "..."
       end
 
       displayTitle = "[" .. level .. "] " .. displayTitle
