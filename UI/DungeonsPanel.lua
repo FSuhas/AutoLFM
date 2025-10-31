@@ -56,7 +56,7 @@ end
 function AutoLFM.UI.DungeonsPanel.ToggleFilter(colorKey, isEnabled)
   if not colorKey then return end
   
-  filterStates[colorKey] = (isEnabled == true or isEnabled == 1)
+  filterStates[colorKey] = (isEnabled == true)
   
   if AutoLFM.Core.Settings.SaveFilters then
     AutoLFM.Core.Settings.SaveFilters(filterStates)
@@ -139,7 +139,7 @@ local function CreateFilterCheckbox(parentFrame, colorData, index, xOffset)
     disabledCheckedTexture:SetVertexColor(colorData.r, colorData.g, colorData.b)
   end
   
-  checkbox:SetChecked(AutoLFM.UI.DungeonsPanel.GetFilterState(colorData.key) == true)
+  checkbox:SetChecked(AutoLFM.UI.DungeonsPanel.GetFilterState(colorData.key))
   
   checkbox:SetScript("OnClick", function()
     local isChecked = checkbox:GetChecked()
@@ -226,7 +226,7 @@ function AutoLFM.UI.DungeonsPanel.UpdateFilterUI()
   for colorKey, checkbox in pairs(filterCheckboxes) do
     if checkbox and checkbox.SetChecked then
       local state = AutoLFM.UI.DungeonsPanel.GetFilterState(colorKey)
-      checkbox:SetChecked(state == true)
+      checkbox:SetChecked(state)
     end
   end
   
