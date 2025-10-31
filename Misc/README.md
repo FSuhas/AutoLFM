@@ -6,10 +6,10 @@ Optional utility modules.
 
 | Module | Description | Commands |
 |--------|-------------|----------|
-| **FPS Display** | Real-time FPS/latency monitor | `/lfm misc fps` or `CTRL+R (by défault)` |
+| **FPS Display** | Real-time FPS/latency monitor | `/lfm misc fps` or <kbd>CTRL+R</kbd> |
 | **Rested XP** | Alert when rested XP reaches max | `/lfm misc rested` |
-| **Auto Invite** | Auto-invite on whisper keyword | `/lfm misc invite` |
-| **Guild Spam** | Automated guild chat broadcaster | `/lfm misc guild` |
+| **Auto Invite** | Auto-invite on whisper keyword | `/lfm misc autoinv` |
+| **Guild Spam** | Automated guild chat broadcaster | `/lfm misc gspam` |
 | **Auto Marker** | Automatic raid icon assignment | `/lfm misc marker` |
 
 ---
@@ -39,20 +39,20 @@ Alerts when rested XP reaches maximum (150% of level bar).
 
 Automatically invites players who whisper a keyword.
 ```bash
-/lfm misc invite on/off                  # Toggle
-/lfm misc invite keyword <word>          # Change keyword
-/lfm misc invite confirm                 # Toggle confirmation whisper
-/lfm misc invite status                  # Show settings
+/lfm misc autoinv on/off                  # Toggle
+/lfm misc autoinv keyword <word>          # Change keyword
+/lfm misc autoinv confirm                 # Toggle confirmation whisper
+/lfm misc autoinv status                  # Show settings
 ```
 
 ## 🏰 Guild Spam
 
 Broadcasts messages in guild chat at regular intervals.
 ```bash
-/lfm misc guild start <message>          # Start broadcasting
-/lfm misc guild stop                     # Stop
-/lfm misc guild interval <seconds>       # Change interval (min 30s)
-/lfm misc guild status                   # Show settings
+/lfm misc gspam start <message>          # Start broadcasting
+/lfm misc gspam stop                     # Stop
+/lfm misc gspam interval <seconds>       # Change interval (min 30s)
+/lfm misc gspam status                   # Show settings
 ```
 
 ## 🎯 Auto Marker
@@ -73,8 +73,8 @@ All legacy commands still work for backward compatibility:
 
 | Module | Modern | Legacy |
 |--------|--------|--------|
-| Auto Invite | `/lfm misc invite` | `/ainv` |
-| Guild Spam | `/lfm misc guild` | `/mg` |
+| Auto Invite | `/lfm misc autoinv` | `/ainv` |
+| Guild Spam | `/lfm misc gspam` | `/mg` |
 | Auto Marker | `/lfm misc marker` | `/am` |
 | Rested XP | `/lfm misc rested` | `/rested` |
 
