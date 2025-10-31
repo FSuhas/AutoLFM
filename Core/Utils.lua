@@ -101,3 +101,7 @@ end
 function AutoLFM.Core.Utils.PrintNote(message)
   AutoLFM.Core.Utils.Print(message, "gray")
 end
+
+function AutoLFM.Core.Utils.PrintTitle(message)
+  AutoLFM.Core.Utils.Print(message, "blue")
+end

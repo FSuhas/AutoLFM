@@ -1,6 +1,12 @@
 # AutoLFM Changelog
 
-## [3.0] - Add fun Paladin-style invitation messages
+## [2.11] - Tooltips zones quests, slash commands
+
+- Revamping commands SLASH and helpers
+- Add zone tooltips in QuestsPanel
+- Versioning fix
+
+## [2.10] - Add fun Paladin-style invitation messages
 
 - Add randomize confirmation response
 
