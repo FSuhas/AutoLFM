@@ -191,10 +191,6 @@ function FuBarPlugin.Init()
     return false
   end
   
-  if AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
-    AutoLFM.Core.Utils.PrintSuccess("FuBar plugin loaded")
-  end
-  
   return true
 end
 
