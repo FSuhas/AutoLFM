@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.13] - FuBar plugin
+
+- Add FuBar plugin
+
 ## [2.12] - API v2.1
 
 - Monitoring
