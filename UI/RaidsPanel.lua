@@ -9,45 +9,35 @@ if not AutoLFM.UI.RaidsPanel then AutoLFM.UI.RaidsPanel = {} end
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
-local mainFrame = nil
-local scrollFrame = nil
-local contentFrame = nil
+local mainFrame
+local scrollFrame
+local contentFrame
 local clickableFrames = {}
 local checkButtons = {}
-local raidSizeControlFrame = nil
-local raidSizeSlider = nil
-local raidSizeValueEditBox = nil
-local raidSizeValueText = nil
-local raidSizeLabelFrame = nil
-local raidSizeLabelText = nil
+
+local raidSizeControlFrame
+local raidSizeSlider
+local raidSizeEditBox
+local raidSizeValueText
+local raidSizeLabelText
 
 -----------------------------------------------------------------------------
 -- Size Controls
 -----------------------------------------------------------------------------
 local function GetRaidSizeState(raidTag)
-  if not raidTag then
-    return {isFixed = true, minSize = 10, maxSize = 10, currentSize = 10}
-  end
-  
-  if not AutoLFM.Logic.Content.GetRaidByTag or not AutoLFM.Logic.Content.GetRaidSizeRange or not AutoLFM.Logic.Content.InitRaidSize then
-    return {isFixed = true, minSize = 10, maxSize = 10, currentSize = 10}
-  end
-  
-  local raid = AutoLFM.Logic.Content.GetRaidByTag(raidTag)
-  if not raid then
-    return {isFixed = true, minSize = 10, maxSize = 10, currentSize = 10}
-  end
-  
-  local minSize, maxSize = AutoLFM.Logic.Content.GetRaidSizeRange(raidTag)
-  local currentSize = AutoLFM.Logic.Content.InitRaidSize(raidTag)
-  local isFixed = (minSize == maxSize)
-  
-  return {
-    isFixed = isFixed,
-    minSize = minSize,
-    maxSize = maxSize,
-    currentSize = currentSize
-  }
+    if not raidTag or
+       not AutoLFM.Logic.Content.GetRaidByTag or
+       not AutoLFM.Logic.Content.GetRaidSizeRange or
+       not AutoLFM.Logic.Content.InitRaidSize then
+        return {isFixed = true, minSize = 10, maxSize = 10, currentSize = 10}
+    end
+
+    local raid = AutoLFM.Logic.Content.GetRaidByTag(raidTag)
+    if not raid then return {isFixed = true, minSize = 10, maxSize = 10, currentSize = 10} end
+
+    local minSize, maxSize = AutoLFM.Logic.Content.GetRaidSizeRange(raidTag)
+    local currentSize = AutoLFM.Logic.Content.InitRaidSize(raidTag)
+    return {isFixed = (minSize == maxSize), minSize = minSize, maxSize = maxSize, currentSize = currentSize}
 end
 
 local function SetFixedSizeState()
@@ -60,13 +50,9 @@ local function SetFixedSizeState()
   raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
   raidSizeValueText:Show()
   
-  if raidSizeLabelText then
-    raidSizeLabelText:SetTextColor(1, 1, 1)
-  end
+  if raidSizeLabelText then raidSizeLabelText:SetTextColor(1, 1, 1) end
   
-  if AutoLFM.Logic.Content.SetRaidSize then
-    AutoLFM.Logic.Content.SetRaidSize(10)
-  end
+  if AutoLFM.Logic.Content.SetRaidSize then AutoLFM.Logic.Content.SetRaidSize(10) end
 end
 
 local function SetVariableSizeState(sizeState)
@@ -84,9 +70,7 @@ local function SetVariableSizeState(sizeState)
   raidSizeValueEditBox:SetFocus()
   raidSizeValueEditBox:HighlightText()
   
-  if raidSizeLabelText then
-    raidSizeLabelText:SetTextColor(1, 0.82, 0)
-  end
+  if raidSizeLabelText then raidSizeLabelText:SetTextColor(1, 0.82, 0) end
 end
 
 local function UpdateSizeControlsForRaid(raidTag)
@@ -104,17 +88,13 @@ end
 -----------------------------------------------------------------------------
 local function OnRaidCheckboxClick(checkbox, raidTag)
   if not checkbox or not raidTag then return end
-  
   local isChecked = checkbox:GetChecked()
   
   if isChecked then
     for tag, otherCheckbox in pairs(checkButtons) do
       if otherCheckbox ~= checkbox then
         otherCheckbox:SetChecked(false)
-        local parentFrame = otherCheckbox:GetParent()
-        if parentFrame then
-          parentFrame:SetBackdrop(nil)
-        end
+        if otherCheckbox:GetParent() then otherCheckbox:GetParent():SetBackdrop(nil) end
       end
     end
     
@@ -129,105 +109,96 @@ local function OnRaidCheckboxClick(checkbox, raidTag)
     SetFixedSizeState()
   end
   
-  checkbox:GetParent():SetBackdrop(nil)
+  if checkbox:GetParent() then
+    checkbox:GetParent():SetBackdrop(nil)
+  end
 end
 
 local function CreateRaidRow(parent, raid, index, yOffset)
-  if not parent or not raid then return nil end
-  
-  local isChecked = false
-  if AutoLFM.Logic.Content.IsRaidSelected then
-    isChecked = AutoLFM.Logic.Content.IsRaidSelected(raid.tag)
-  end
-  
-  local sizeText = raid.sizeMin == raid.sizeMax and "(" .. raid.sizeMin .. ")" or "(" .. raid.sizeMin .. " - " .. raid.sizeMax .. ")"
-  
-  local clickableFrame = AutoLFM.UI.PanelBuilder.CreateSelectableRow({
-    parent = parent,
-    frameName = "ClickableRaidFrame" .. index,
-    checkboxName = "RaidCheckbox" .. index,
-    yOffset = yOffset,
-    mainText = raid.name,
-    rightText = sizeText,
-    color = {r = 1, g = 0.82, b = 0},
-    isChecked = isChecked,
-    onCheckboxClick = function(checkbox, isChecked)
-      OnRaidCheckboxClick(checkbox, raid.tag)
+    if not parent or not raid then return end
+
+    local checked = AutoLFM.Logic.Content.IsRaidSelected and AutoLFM.Logic.Content.IsRaidSelected(raid.tag)
+    local sizeText = raid.sizeMin == raid.sizeMax
+        and "("..raid.sizeMin..")"
+        or "("..raid.sizeMin.." - "..raid.sizeMax..")"
+
+    local frame = AutoLFM.UI.PanelBuilder.CreateSelectableRow{
+        parent = parent,
+        frameName = "RaidRow"..index,
+        checkboxName = "RaidCheckbox"..index,
+        yOffset = yOffset,
+        mainText = raid.name,
+        rightText = sizeText,
+        color = {r=1,g=0.82,b=0},
+        isChecked = checked,
+        onCheckboxClick = function(cb) OnRaidCheckboxClick(cb, raid.tag) end
+    }
+
+    if frame then
+        checkButtons[raid.tag] = frame.checkbox
+        table.insert(clickableFrames, frame)
     end
-  })
-  
-  if clickableFrame then
-    checkButtons[raid.tag] = clickableFrame.checkbox
-    table.insert(clickableFrames, clickableFrame)
-  end
-  
-  return clickableFrame
+
+    return frame
 end
 
+-------------------------------------------------------------------------------
+-- Panel Display
+-------------------------------------------------------------------------------
 function AutoLFM.UI.RaidsPanel.Display(parent)
-  if not parent then return end
-  
-  for _, child in ipairs({parent:GetChildren()}) do
-    child:Hide()
-  end
-  
-  clickableFrames = {}
-  checkButtons = {}
-  
-  local yOffset = 0
-  
-  for index = 1, table.getn(AutoLFM.Logic.Content.RAIDS or {}) do
-    local raid = AutoLFM.Logic.Content.RAIDS[index]
-    if raid then
-      CreateRaidRow(parent, raid, index, yOffset)
-      yOffset = yOffset + 20
+    if not parent then return end
+    for _, child in ipairs({parent:GetChildren()}) do child:Hide() end
+
+    clickableFrames, checkButtons = {}, {}
+    local yOffset = 0
+
+    local raids = AutoLFM.Logic.Content.RAIDS or {}
+    local numRaids = table.getn(raids)
+
+    for index = 1, numRaids do
+        local raid = raids[index]
+        if raid then
+            CreateRaidRow(parent, raid, index, yOffset)
+            yOffset = yOffset + 20
+        end
     end
-  end
 end
 
 function AutoLFM.UI.RaidsPanel.ClearSelection()
-  if AutoLFM.Logic.Content.ClearRaids then
-    AutoLFM.Logic.Content.ClearRaids()
-  end
-  
-  AutoLFM.UI.PanelBuilder.ClearCheckboxes(checkButtons)
-  
-  SetFixedSizeState()
+    if AutoLFM.Logic.Content.ClearRaids then AutoLFM.Logic.Content.ClearRaids() end
+    AutoLFM.UI.PanelBuilder.ClearCheckboxes(checkButtons)
+    SetFixedSizeState()
 end
 
 function AutoLFM.UI.RaidsPanel.ClearBackdrops()
-  AutoLFM.UI.PanelBuilder.ClearBackdrops(clickableFrames)
+    AutoLFM.UI.PanelBuilder.ClearBackdrops(clickableFrames)
 end
 
 function AutoLFM.UI.RaidsPanel.UpdateCheckboxes()
-  if not AutoLFM.Logic.Content.IsRaidSelected then return end
-  AutoLFM.UI.PanelBuilder.UpdateCheckboxes(checkButtons, AutoLFM.Logic.Content.IsRaidSelected)
+    if not AutoLFM.Logic.Content.IsRaidSelected then return end
+    AutoLFM.UI.PanelBuilder.UpdateCheckboxes(checkButtons, AutoLFM.Logic.Content.IsRaidSelected)
 end
 
+-------------------------------------------------------------------------------
+-- Size Controls UI
+-------------------------------------------------------------------------------
 function AutoLFM.UI.RaidsPanel.ShowSizeControls()
-  if raidSizeControlFrame then
-    raidSizeControlFrame:Show()
-  end
-  
-  if not AutoLFM.Logic.Content.GetSelectedRaids then return end
-  
-  local selectedRaids = AutoLFM.Logic.Content.GetSelectedRaids()
-  if selectedRaids and table.getn(selectedRaids) > 0 then
-    UpdateSizeControlsForRaid(selectedRaids[1])
-  else
-    SetFixedSizeState()
-  end
+    if raidSizeControlFrame then raidSizeControlFrame:Show() end
+    if not AutoLFM.Logic.Content.GetSelectedRaids then return end
+    local selected = AutoLFM.Logic.Content.GetSelectedRaids()
+    if selected and table.getn(selected) > 0 then
+        UpdateSizeControlsForRaid(selected[1])
+    else
+        SetFixedSizeState()
+    end
 end
 
 function AutoLFM.UI.RaidsPanel.HideSizeControls()
-  if raidSizeControlFrame then
-    raidSizeControlFrame:Hide()
-  end
+    if raidSizeControlFrame then raidSizeControlFrame:Hide() end
 end
 
 function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
-  if not bottomZone then return end
-  if raidSizeControlFrame then return end
+  if not bottomZone or raidSizeControlFrame then return end
   
   raidSizeControlFrame = CreateFrame("Frame", nil, bottomZone)
   raidSizeControlFrame:SetAllPoints(bottomZone)
@@ -261,7 +232,7 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   raidSizeValueEditBox:SetTextColor(1, 1, 0)
   raidSizeValueEditBox:Hide()
   
-  raidSizeSlider = CreateFrame("Slider", "AutoLFM_RaidSizeSlider", raidSizeControlFrame)
+  raidSizeSlider = CreateFrame("Slider", nil, raidSizeControlFrame)
   raidSizeSlider:SetPoint("LEFT", raidSizeValueEditBox, "RIGHT", 0, 0)
   raidSizeSlider:SetWidth(115)
   raidSizeSlider:SetHeight(17)
@@ -271,12 +242,10 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   raidSizeSlider:SetOrientation("HORIZONTAL")
   raidSizeSlider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
   raidSizeSlider:SetBackdrop({
-    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBackground",
-    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBorder",
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = {left = 3, right = 3, top = 6, bottom = 6}
+      bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH.."sliderBackground",
+      edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH.."sliderBorder",
+      tile = true, tileSize = 8, edgeSize = 8,
+      insets = {left=3, right=3, top=6, bottom=6}
   })
   raidSizeSlider:EnableMouse(true)
   raidSizeSlider:Hide()
@@ -303,37 +272,22 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
     GameTooltip:Hide()
   end)
   
-  raidSizeValueEditBox:SetScript("OnEditFocusGained", function()
-    raidSizeValueEditBox:HighlightText()
-  end)
+  raidSizeValueEditBox:SetScript("OnEditFocusGained", function() raidSizeValueEditBox:HighlightText() end)
   
   raidSizeValueEditBox:SetScript("OnTextChanged", function()
     local value = tonumber(raidSizeValueEditBox:GetText())
     if value and raidSizeSlider and raidSizeSlider:IsShown() then
       local minVal, maxVal = raidSizeSlider:GetMinMaxValues()
-      if value >= minVal and value <= maxVal then
-        raidSizeSlider:SetValue(value)
-      end
+      if value >= minVal and value <= maxVal then raidSizeSlider:SetValue(value) end
     end
   end)
   
-  raidSizeValueEditBox:SetScript("OnEnterPressed", function()
-    raidSizeValueEditBox:ClearFocus()
-  end)
-  
-  raidSizeValueEditBox:SetScript("OnEscapePressed", function()
-    raidSizeValueEditBox:ClearFocus()
-  end)
-  
+  raidSizeValueEditBox:SetScript("OnEnterPressed", function() raidSizeValueEditBox:ClearFocus() end)
+  raidSizeValueEditBox:SetScript("OnEscapePressed", function() raidSizeValueEditBox:ClearFocus() end)
   raidSizeSlider:SetScript("OnValueChanged", function()
     local value = raidSizeSlider:GetValue()
-    if AutoLFM.Logic.Content.SetRaidSize then
-      AutoLFM.Logic.Content.SetRaidSize(value)
-    end
-    
-    if raidSizeValueEditBox then
-      raidSizeValueEditBox:SetText(tostring(value))
-    end
+    if AutoLFM.Logic.Content.SetRaidSize then AutoLFM.Logic.Content.SetRaidSize(value) end
+    if raidSizeValueEditBox then raidSizeValueEditBox:SetText(tostring(value)) end
   end)
   
   SetFixedSizeState()
@@ -342,69 +296,40 @@ end
 -----------------------------------------------------------------------------
 -- Panel Management
 -----------------------------------------------------------------------------
-function AutoLFM.UI.RaidsPanel.Create(parentFrame)
-  if not parentFrame then return nil end
-  if mainFrame then return mainFrame end
-  
-  local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, "AutoLFM_RaidsPanel")
-  if not panelData then return nil end
-  
-  mainFrame = panelData.panel
-  
-  panelData = AutoLFM.UI.PanelBuilder.AddScrollFrame(panelData, "AutoLFM_ScrollFrame_Raids")
-  scrollFrame = panelData.scrollFrame
-  contentFrame = panelData.contentFrame
-  
-  if AutoLFM.UI.RaidsPanel.Display then
+function AutoLFM.UI.RaidsPanel.Create(parent)
+    if not parent then return end
+    if mainFrame then return mainFrame end
+
+    local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parent, "AutoLFM_RaidsPanel")
+    if not panelData then return end
+
+    mainFrame = panelData.panel
+    panelData = AutoLFM.UI.PanelBuilder.AddScrollFrame(panelData, "AutoLFM_ScrollFrame_Raids")
+    scrollFrame, contentFrame = panelData.scrollFrame, panelData.contentFrame
+
     AutoLFM.UI.RaidsPanel.Display(contentFrame)
-  end
-  
-  if AutoLFM.UI.RaidsPanel.CreateSizeSlider then
     AutoLFM.UI.RaidsPanel.CreateSizeSlider(panelData.bottomZone)
-  end
-  
-  return mainFrame
+
+    return mainFrame
 end
 
 function AutoLFM.UI.RaidsPanel.Show()
-  AutoLFM.UI.PanelBuilder.ShowPanel(mainFrame, scrollFrame)
-  
-  if AutoLFM.UI.RaidsPanel.ShowSizeControls then
+    AutoLFM.UI.PanelBuilder.ShowPanel(mainFrame, scrollFrame)
     AutoLFM.UI.RaidsPanel.ShowSizeControls()
-  end
-  
-  if AutoLFM.UI.DungeonsPanel.ClearBackdrops then
-    AutoLFM.UI.DungeonsPanel.ClearBackdrops()
-  end
+    if AutoLFM.UI.DungeonsPanel.ClearBackdrops then AutoLFM.UI.DungeonsPanel.ClearBackdrops() end
 end
 
 function AutoLFM.UI.RaidsPanel.Hide()
-  AutoLFM.UI.PanelBuilder.HidePanel(mainFrame, scrollFrame)
-end
-
-function AutoLFM.UI.RaidsPanel.GetFrame()
-  return mainFrame
-end
-
-function AutoLFM.UI.RaidsPanel.GetContentFrame()
-  return contentFrame
-end
-
-function AutoLFM.UI.RaidsPanel.GetScrollFrame()
-  return scrollFrame
+    AutoLFM.UI.PanelBuilder.HidePanel(mainFrame, scrollFrame)
 end
 
 function AutoLFM.UI.RaidsPanel.Register()
-  AutoLFM.UI.TabNavigation.RegisterPanel("raids",
-    AutoLFM.UI.RaidsPanel.Show,
-    AutoLFM.UI.RaidsPanel.Hide,
-    function()
-      if AutoLFM.UI.RaidsPanel.ShowSizeControls then
-        AutoLFM.UI.RaidsPanel.ShowSizeControls()
-      end
-      if AutoLFM.UI.DungeonsPanel.ClearBackdrops then
-        AutoLFM.UI.DungeonsPanel.ClearBackdrops()
-      end
-    end
-  )
+    AutoLFM.UI.TabNavigation.RegisterPanel("raids",
+        AutoLFM.UI.RaidsPanel.Show,
+        AutoLFM.UI.RaidsPanel.Hide,
+        function()
+            AutoLFM.UI.RaidsPanel.ShowSizeControls()
+            if AutoLFM.UI.DungeonsPanel.ClearBackdrops then AutoLFM.UI.DungeonsPanel.ClearBackdrops() end
+        end
+    )
 end
