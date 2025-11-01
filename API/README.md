@@ -4,8 +4,8 @@
 
 The **AutoLFM API** provides a comprehensive interface for external addons to interact with AutoLFM's broadcasting system. This allows developers to build integrations, gather statistics, and react to broadcast events.
 
-**API Version:** v2.0  
-**Compatible with:** AutoLFM v2.1.0+  
+**API Version:** v2.1  
+**Compatible with:** AutoLFM v2.11+  
 
 ## 🔌 Quick Start
 
@@ -40,7 +40,7 @@ local missing = status.playerCount.missing      -- Number of players needed
 #### `AutoLFM.API.GetVersion()`
 Returns the API version string.
 
-**Returns:** `string` - Version number (e.g., "v2.0")
+**Returns:** `string` - Version number (e.g., "v2.1")
 
 **Example:**
 ```lua
@@ -236,7 +236,8 @@ AutoLFM.API.EVENTS = {
   CONTENT_CHANGED = "CONTENT_CHANGED",
   ROLES_CHANGED = "ROLES_CHANGED",
   CHANNELS_CHANGED = "CHANNELS_CHANGED",
-  INTERVAL_CHANGED = "INTERVAL_CHANGED"
+  INTERVAL_CHANGED = "INTERVAL_CHANGED",
+  PLAYER_COUNT_CHANGED = "PLAYER_COUNT_CHANGED"
 }
 ```
 
@@ -275,6 +276,27 @@ AutoLFM.API.UnregisterCallback("MyAddon")
 AutoLFM.API.UnregisterEventCallback(AutoLFM.API.EVENTS.BROADCAST_START, "MyAddon")
 ```
 
+### Optional: Player Count Monitoring
+
+By default, player count changes are **not** monitored to save resources. External addons can enable monitoring if needed:
+
+```lua
+-- Enable monitoring (call once during addon initialization)
+if AutoLFM.API.InitMonitoring then
+  AutoLFM.API.InitMonitoring()
+end
+
+-- Register callback for player count changes
+AutoLFM.API.RegisterEventCallback(
+  AutoLFM.API.EVENTS.PLAYER_COUNT_CHANGED,
+  "MyAddon",
+  function(status)
+    DEFAULT_CHAT_FRAME:AddMessage("Player count changed: " .. 
+      status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal)
+  end
+)
+```
+
 ## 🛠️ Debug Tools
 
 ### Show Current API Status
@@ -284,11 +306,13 @@ AutoLFM.API.UnregisterEventCallback(AutoLFM.API.EVENTS.BROADCAST_START, "MyAddon
 ```
 
 Outputs concise status:
+- API version
 - Group type
 - Broadcasting status
 - Player count
 - Selected roles and channels
 - Broadcast interval
+- Registered callbacks count
 
 ### Print Detailed Debug Information
 
@@ -313,6 +337,8 @@ Outputs complete debug info:
 
 ```lua
 AutoLFM.API.ListCallbacks()
+-- or via command:
+/lfm api callbacks
 ```
 
 Shows all addons currently registered for callbacks.
@@ -352,6 +378,7 @@ See **[AutoLFM_Example/README.md](AutoLFM_Example/README.md)** for installation 
 ### Performance
 - `GetFullStatus()` creates a new table each call - cache if needed
 - Event callbacks are more efficient than polling for changes
+- Player count monitoring is optional - enable only if needed
 
 ## 🐛 Troubleshooting
 
@@ -373,8 +400,13 @@ end
 
 ## 📝 Changelog
 
-### v2.0 (Current)
-- **Event System**: Added 7 event types (`BROADCAST_START`, `BROADCAST_STOP`, `MESSAGE_SENT`, `CONTENT_CHANGED`, `ROLES_CHANGED`, `CHANNELS_CHANGED`, `INTERVAL_CHANGED`)
+### v2.1 (Current)
+- **Code Optimization**: Refactored internal structure with helper functions (`GetUtils()`, `SafePrint()`, `GetEmptyStatus()`, `ExecuteCallback()`)
+- **Monitoring**: Player count monitoring now optional via `InitMonitoring()` - not enabled by default
+- **Commands**: Added callback count to `/lfm api data` output
+
+### v2.0
+- **Event System**: Added 8 event types (`BROADCAST_START`, `BROADCAST_STOP`, `MESSAGE_SENT`, `CONTENT_CHANGED`, `ROLES_CHANGED`, `CHANNELS_CHANGED`, `INTERVAL_CHANGED`, `PLAYER_COUNT_CHANGED`)
 - **New Functions**: `RegisterEventCallback()`, `UnregisterEventCallback()`, `IsActive()`, `DebugPrint()`, `GetCallbackCount()`, `ListCallbacks()`
 - **Renamed**: `GetDynamicMessage()` → `GetMessage()` with improved structure
 - **Improvements**: Better error handling with pcall, safe defaults when API unavailable, consistent return structures

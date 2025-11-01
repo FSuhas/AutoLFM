@@ -8,13 +8,7 @@ if not AutoLFM.API then AutoLFM.API = {} end
 -----------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------
-AutoLFM.API.VERSION = "v2.0"
-
------------------------------------------------------------------------------
--- Private State
------------------------------------------------------------------------------
-local callbacks = {}
-local eventCallbacks = {}
+AutoLFM.API.VERSION = "v2.1"
 
 local EVENTS = {
   BROADCAST_START = "BROADCAST_START",
@@ -23,10 +17,40 @@ local EVENTS = {
   CONTENT_CHANGED = "CONTENT_CHANGED",
   ROLES_CHANGED = "ROLES_CHANGED",
   CHANNELS_CHANGED = "CHANNELS_CHANGED",
-  INTERVAL_CHANGED = "INTERVAL_CHANGED"
+  INTERVAL_CHANGED = "INTERVAL_CHANGED",
+  PLAYER_COUNT_CHANGED = "PLAYER_COUNT_CHANGED"
 }
 
 AutoLFM.API.EVENTS = EVENTS
+
+-----------------------------------------------------------------------------
+-- Private State
+-----------------------------------------------------------------------------
+local callbacks = {}
+local eventCallbacks = {}
+local lastPlayerCount = nil
+
+-----------------------------------------------------------------------------
+-- Private Helpers
+-----------------------------------------------------------------------------
+local function SafePrint(printFunc, message)
+  if AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Core.Utils[printFunc] then
+    AutoLFM.Core.Utils[printFunc](message)
+  end
+end
+
+local function GetEmptyStatus()
+  return {
+    groupType = "unknown",
+    selectedContent = { type = "unknown", list = {}, details = {} },
+    playerCount = { currentInGroup = 1, desiredTotal = 1, missing = 0 },
+    rolesNeeded = {},
+    message = { combined = "", userInput = "", hasUserInput = false },
+    selectedChannels = {},
+    broadcastStats = { isActive = false, messagesSent = 0, searchDuration = 0 },
+    timing = { intervalSeconds = 60, timeUntilNext = 0 }
+  }
+end
 
 -----------------------------------------------------------------------------
 -- Version & Availability
@@ -62,17 +86,12 @@ end
 
 function AutoLFM.API.GetPlayerCount()
   if not AutoLFM.API.IsAvailable() then
-    return {
-      currentInGroup = 1,
-      desiredTotal = 1,
-      missing = 0
-    }
+    return { currentInGroup = 1, desiredTotal = 1, missing = 0 }
   end
   
   local mode = AutoLFM.Logic.Selection.GetMode()
   local currentInGroup = AutoLFM.Logic.Selection.GetGroupCount()
-  local desiredTotal = 0
-  local missing = 0
+  local desiredTotal = 1
   
   if mode == "raid" then
     desiredTotal = AutoLFM.Logic.Content.GetRaidSize()
@@ -81,11 +100,9 @@ function AutoLFM.API.GetPlayerCount()
     end
   elseif mode == "dungeon" then
     desiredTotal = AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_DUNGEON
-  else
-    desiredTotal = 1
   end
   
-  missing = desiredTotal - currentInGroup
+  local missing = desiredTotal - currentInGroup
   if missing < 0 then missing = 0 end
   
   return {
@@ -100,28 +117,20 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.API.GetSelectedContent()
   if not AutoLFM.API.IsAvailable() then
-    return {
-      type = "unknown",
-      list = {},
-      details = {}
-    }
+    return { type = "unknown", list = {}, details = {} }
   end
   
   local groupType = AutoLFM.API.GetGroupType()
-  local content = {
-    type = groupType,
-    list = {},
-    details = {}
-  }
+  local content = { type = groupType, list = {}, details = {} }
   
   if groupType == "dungeon" then
     local selectedDungeons = AutoLFM.Logic.Content.GetSelectedDungeons()
     for i = 1, table.getn(selectedDungeons) do
-      local dungeonTag = selectedDungeons[i]
-      table.insert(content.list, dungeonTag)
-      local dungeon = AutoLFM.Logic.Content.GetDungeonByTag(dungeonTag)
+      local tag = selectedDungeons[i]
+      table.insert(content.list, tag)
+      local dungeon = AutoLFM.Logic.Content.GetDungeonByTag(tag)
       if dungeon then
-        content.details[dungeonTag] = {
+        content.details[tag] = {
           name = dungeon.name or "",
           tag = dungeon.tag or "",
           levelMin = dungeon.levelMin or 1,
@@ -132,11 +141,11 @@ function AutoLFM.API.GetSelectedContent()
   elseif groupType == "raid" then
     local selectedRaids = AutoLFM.Logic.Content.GetSelectedRaids()
     for i = 1, table.getn(selectedRaids) do
-      local raidTag = selectedRaids[i]
-      table.insert(content.list, raidTag)
-      local raid = AutoLFM.Logic.Content.GetRaidByTag(raidTag)
+      local tag = selectedRaids[i]
+      table.insert(content.list, tag)
+      local raid = AutoLFM.Logic.Content.GetRaidByTag(tag)
       if raid then
-        content.details[raidTag] = {
+        content.details[tag] = {
           name = raid.name or "",
           tag = raid.tag or "",
           sizeMin = raid.sizeMin or 10,
@@ -169,11 +178,7 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.API.GetMessage()
   if not AutoLFM.API.IsAvailable() then
-    return {
-      combined = "",
-      userInput = "",
-      hasUserInput = false
-    }
+    return { combined = "", userInput = "", hasUserInput = false }
   end
   
   local combined = AutoLFM.Logic.Broadcaster.GetMessage()
@@ -213,16 +218,12 @@ end
 
 function AutoLFM.API.GetBroadcastStats()
   if not AutoLFM.API.IsAvailable() then
-    return {
-      isActive = false,
-      messagesSent = 0,
-      searchDuration = 0
-    }
+    return { isActive = false, messagesSent = 0, searchDuration = 0 }
   end
   
   local stats = AutoLFM.Logic.Broadcaster.GetStats()
-  
   local searchDuration = 0
+  
   if stats.searchStartTimestamp and stats.searchStartTimestamp > 0 then
     searchDuration = GetTime() - stats.searchStartTimestamp
   end
@@ -236,25 +237,21 @@ end
 
 function AutoLFM.API.GetTiming()
   if not AutoLFM.API.IsAvailable() then
-    return {
-      intervalSeconds = 60,
-      timeUntilNext = 0
-    }
+    return { intervalSeconds = 60, timeUntilNext = 0 }
   end
   
   local interval = AutoLFM.Logic.Broadcaster.INTERVAL_DEFAULT
-  local nextBroadcast = 0
-  local timeUntilNext = 0
-  
   local broadcastSlider = AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider()
+  
   if broadcastSlider and broadcastSlider.GetValue then
-    interval = broadcastSlider:GetValue() or AutoLFM.Logic.Broadcaster.INTERVAL_DEFAULT
+    interval = broadcastSlider:GetValue() or interval
   end
   
+  local timeUntilNext = 0
   local stats = AutoLFM.Logic.Broadcaster.GetStats()
   
   if stats.isActive and stats.lastTimestamp and stats.lastTimestamp > 0 then
-    nextBroadcast = stats.lastTimestamp + interval
+    local nextBroadcast = stats.lastTimestamp + interval
     timeUntilNext = nextBroadcast - GetTime()
     if timeUntilNext < 0 then timeUntilNext = 0 end
   end
@@ -270,19 +267,10 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.API.GetFullStatus()
   if not AutoLFM.API.IsAvailable() then
-    return {
-      groupType = "unknown",
-      selectedContent = { type = "unknown", list = {}, details = {} },
-      playerCount = { currentInGroup = 1, desiredTotal = 1, missing = 0 },
-      rolesNeeded = {},
-      message = { combined = "", userInput = "", hasUserInput = false },
-      selectedChannels = {},
-      broadcastStats = { isActive = false, messagesSent = 0, searchDuration = 0 },
-      timing = { intervalSeconds = 60, timeUntilNext = 0 }
-    }
+    return GetEmptyStatus()
   end
   
-  local status = {
+  return {
     groupType = AutoLFM.API.GetGroupType(),
     selectedContent = AutoLFM.API.GetSelectedContent(),
     playerCount = AutoLFM.API.GetPlayerCount(),
@@ -292,7 +280,6 @@ function AutoLFM.API.GetFullStatus()
     broadcastStats = AutoLFM.API.GetBroadcastStats(),
     timing = AutoLFM.API.GetTiming()
   }
-  return status
 end
 
 -----------------------------------------------------------------------------
@@ -300,17 +287,12 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.API.RegisterCallback(addonName, callback)
   if not addonName or not callback or type(callback) ~= "function" then
-    if AutoLFM.Core and AutoLFM.Core.Utils then
-      AutoLFM.Core.Utils.PrintError("RegisterCallback: invalid parameters")
-    end
+    SafePrint("PrintError", "RegisterCallback: invalid parameters")
     return false
   end
   
   callbacks[addonName] = callback
-  
-  if AutoLFM.Core and AutoLFM.Core.Utils then
-    AutoLFM.Core.Utils.PrintSuccess("Callback registered for " .. addonName)
-  end
+  SafePrint("PrintSuccess", "Callback registered for " .. addonName)
   
   return true
 end
@@ -319,19 +301,14 @@ function AutoLFM.API.UnregisterCallback(addonName)
   if not addonName then return false end
   
   callbacks[addonName] = nil
-  
-  if AutoLFM.Core and AutoLFM.Core.Utils then
-    AutoLFM.Core.Utils.PrintInfo("Callback unregistered for " .. addonName)
-  end
+  SafePrint("PrintInfo", "Callback unregistered for " .. addonName)
   
   return true
 end
 
 function AutoLFM.API.RegisterEventCallback(eventType, addonName, callback)
   if not eventType or not addonName or not callback or type(callback) ~= "function" then
-    if AutoLFM.Core and AutoLFM.Core.Utils then
-      AutoLFM.Core.Utils.PrintError("RegisterEventCallback: invalid parameters")
-    end
+    SafePrint("PrintError", "RegisterEventCallback: invalid parameters")
     return false
   end
   
@@ -340,10 +317,7 @@ function AutoLFM.API.RegisterEventCallback(eventType, addonName, callback)
   end
   
   eventCallbacks[eventType][addonName] = callback
-  
-  if AutoLFM.Core and AutoLFM.Core.Utils then
-    AutoLFM.Core.Utils.PrintSuccess("Event callback registered: " .. eventType .. " for " .. addonName)
-  end
+  SafePrint("PrintSuccess", "Event callback registered: " .. eventType .. " for " .. addonName)
   
   return true
 end
@@ -355,39 +329,58 @@ function AutoLFM.API.UnregisterEventCallback(eventType, addonName)
     eventCallbacks[eventType][addonName] = nil
   end
   
-  if AutoLFM.Core and AutoLFM.Core.Utils then
-    AutoLFM.Core.Utils.PrintInfo("Event callback unregistered: " .. eventType .. " for " .. addonName)
-  end
+  SafePrint("PrintInfo", "Event callback unregistered: " .. eventType .. " for " .. addonName)
   
   return true
+end
+
+function AutoLFM.API.GetCallbackCount()
+  local count = 0
+  for _, _ in pairs(callbacks) do
+    count = count + 1
+  end
+  return count
+end
+
+function AutoLFM.API.ListCallbacks()
+  if not AutoLFM.Core or not AutoLFM.Core.Utils then return end
+  
+  AutoLFM.Core.Utils.PrintSuccess("=== Registered Callbacks ===")
+  
+  local count = 0
+  for addonName, _ in pairs(callbacks) do
+    count = count + 1
+    AutoLFM.Core.Utils.Print("  " .. count .. ". " .. addonName)
+  end
+  
+  if count == 0 then
+    AutoLFM.Core.Utils.PrintNote("No callbacks registered")
+  end
 end
 
 -----------------------------------------------------------------------------
 -- Notification System
 -----------------------------------------------------------------------------
+local function ExecuteCallback(callback, status, eventType, addonName)
+  local success, err = pcall(callback, status, eventType)
+  if not success then
+    SafePrint("PrintError", "Callback error for " .. tostring(addonName) .. ": " .. tostring(err))
+  end
+end
+
 function AutoLFM.API.NotifyDataChanged(eventType)
   local status = AutoLFM.API.GetFullStatus()
   
   for addonName, callback in pairs(callbacks) do
     if type(callback) == "function" then
-      local success, err = pcall(callback, status, eventType)
-      if not success then
-        if AutoLFM.Core and AutoLFM.Core.Utils then
-          AutoLFM.Core.Utils.PrintError("Callback error for " .. tostring(addonName) .. ": " .. tostring(err))
-        end
-      end
+      ExecuteCallback(callback, status, eventType, addonName)
     end
   end
   
   if eventType and eventCallbacks[eventType] then
     for addonName, callback in pairs(eventCallbacks[eventType]) do
       if type(callback) == "function" then
-        local success, err = pcall(callback, status)
-        if not success then
-          if AutoLFM.Core and AutoLFM.Core.Utils then
-            AutoLFM.Core.Utils.PrintError("Event callback error for " .. tostring(addonName) .. ": " .. tostring(err))
-          end
-        end
+        ExecuteCallback(callback, status, nil, addonName)
       end
     end
   end
@@ -398,14 +391,11 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.API.DebugPrint()
   if not AutoLFM.API.IsAvailable() then
-    if AutoLFM.Core and AutoLFM.Core.Utils then
-      AutoLFM.Core.Utils.PrintError("API not available")
-    end
+    SafePrint("PrintError", "API not available")
     return
   end
 
   local status = AutoLFM.API.GetFullStatus()
-  
   if not AutoLFM.Core or not AutoLFM.Core.Utils then return end
 
   AutoLFM.Core.Utils.PrintSuccess("=== AutoLFM API Debug ===")
@@ -434,26 +424,39 @@ function AutoLFM.API.DebugPrint()
   AutoLFM.Core.Utils.Print(AutoLFM.Core.Utils.ColorizeText("Registered Callbacks: ", "white") .. AutoLFM.API.GetCallbackCount())
 end
 
-function AutoLFM.API.GetCallbackCount()
-  local count = 0
-  for _, _ in pairs(callbacks) do
-    count = count + 1
+-----------------------------------------------------------------------------
+-- Player Count Monitoring (Optional)
+-----------------------------------------------------------------------------
+local function CheckPlayerCountChanged()
+  local currentCount = AutoLFM.API.GetPlayerCount()
+  
+  if not lastPlayerCount then
+    lastPlayerCount = currentCount
+    return
   end
-  return count
+  
+  if currentCount.currentInGroup ~= lastPlayerCount.currentInGroup or
+     currentCount.desiredTotal ~= lastPlayerCount.desiredTotal then
+    lastPlayerCount = currentCount
+    AutoLFM.API.NotifyDataChanged(EVENTS.PLAYER_COUNT_CHANGED)
+  end
 end
 
-function AutoLFM.API.ListCallbacks()
-  if not AutoLFM.Core or not AutoLFM.Core.Utils then return end
+local function OnPartyMembersChanged()
+  CheckPlayerCountChanged()
+end
+
+local function OnRaidRosterUpdate()
+  CheckPlayerCountChanged()
+end
+
+function AutoLFM.API.InitMonitoring()
+  if not AutoLFM.Core or not AutoLFM.Core.Events then return false end
   
-  AutoLFM.Core.Utils.PrintSuccess("=== Registered Callbacks ===")
+  AutoLFM.Core.Events.Register("PARTY_MEMBERS_CHANGED", "API_Monitor", OnPartyMembersChanged)
+  AutoLFM.Core.Events.Register("RAID_ROSTER_UPDATE", "API_Monitor", OnRaidRosterUpdate)
   
-  local count = 0
-  for addonName, _ in pairs(callbacks) do
-    count = count + 1
-    AutoLFM.Core.Utils.Print("  " .. count .. ". " .. addonName)
-  end
+  lastPlayerCount = AutoLFM.API.GetPlayerCount()
   
-  if count == 0 then
-    AutoLFM.Core.Utils.PrintNote("No callbacks registered")
-  end
+  return true
 end
