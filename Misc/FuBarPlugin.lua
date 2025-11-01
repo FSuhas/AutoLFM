@@ -61,18 +61,17 @@ local function RegisterPlugin()
   
   function plugin:OnTextUpdate()
     if not self:IsActive() then
-      self:SetText(AutoLFM.Color("AutoLFM", "gray"))
+      self:SetText(AutoLFM.Core.Utils.ColorizeText("AutoLFM", "gray"))
       return
     end
     
     local text = "AutoLFM"
     
-    if AutoLFM.Logic.Broadcaster.IsActive() then
-      if AutoLFM.API and AutoLFM.API.GetPlayerCount then
-        local playerCount = AutoLFM.API.GetPlayerCount()
-        if playerCount then
-          text = text .. " " .. AutoLFM.Color(playerCount.currentInGroup .. "/" .. playerCount.desiredTotal, "yellow")
-        end
+    if AutoLFM.API and AutoLFM.API.IsAvailable() and AutoLFM.API.IsActive() then
+      local playerCount = AutoLFM.API.GetPlayerCount()
+      if playerCount then
+        local countText = playerCount.currentInGroup .. "/" .. playerCount.desiredTotal
+        text = text .. " " .. AutoLFM.Core.Utils.ColorizeText(countText, "yellow")
       end
     end
     
@@ -84,7 +83,9 @@ local function RegisterPlugin()
       return
     end
     
-    if not AutoLFM.Logic.Broadcaster then return end
+    if not AutoLFM.API or not AutoLFM.API.IsAvailable() then
+      return
+    end
     
     local tablet = AceLibrary("Tablet-2.0")
     if not tablet then return end
@@ -93,52 +94,44 @@ local function RegisterPlugin()
     
     local cat = tablet:AddCategory("columns", 2)
     
-    local isActive = AutoLFM.Logic.Broadcaster.IsActive()
-    local status = isActive and AutoLFM.Color("Active", "green") or AutoLFM.Color("Inactive", "red")
+    local isActive = AutoLFM.API.IsActive()
+    local status = isActive and AutoLFM.Core.Utils.ColorizeText("Active", "green") or AutoLFM.Core.Utils.ColorizeText("Inactive", "red")
     cat:AddLine("text", "Status:", "text2", status)
     
-    local message = AutoLFM.Logic.Broadcaster.GetMessage()
-    if message and message ~= "" then
-      cat:AddLine("text", "Message:", "text2", message)
+    local message = AutoLFM.API.GetMessage()
+    if message and message.combined and message.combined ~= "" then
+      cat:AddLine("text", "Message:", "text2", message.combined)
     end
     
-    local channels = AutoLFM.Logic.Selection.GetChannels()
-    if channels and next(channels) then
-      local channelList = {}
-      for name, _ in pairs(channels) do
-        table.insert(channelList, name)
-      end
-      cat:AddLine("text", "Channels:", "text2", table.concat(channelList, ", "))
+    local channels = AutoLFM.API.GetSelectedChannels()
+    if channels and table.getn(channels) > 0 then
+      cat:AddLine("text", "Channels:", "text2", table.concat(channels, ", "))
     end
     
     if isActive then
-      local stats = AutoLFM.Logic.Broadcaster.GetStats()
+      local stats = AutoLFM.API.GetBroadcastStats()
       if stats then
-        local duration = AutoLFM.Logic.Broadcaster.FormatDuration()
+        local duration = "00:00"
+        if stats.searchDuration and stats.searchDuration > 0 then
+          local minutes = math.floor(stats.searchDuration / 60)
+          local seconds = math.floor(math.mod(stats.searchDuration, 60))
+          duration = string.format("%02d:%02d", minutes, seconds)
+        end
         cat:AddLine("text", "Duration:", "text2", duration)
         
-        local interval = AutoLFM.Logic.Broadcaster.INTERVAL_DEFAULT
-        if AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider then
-          local slider = AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider()
-          if slider and slider.GetValue then
-            interval = slider:GetValue()
-          end
-        end
-        cat:AddLine("text", "Interval:", "text2", interval .. "s")
-        
-        cat:AddLine("text", "Messages:", "text2", tostring(stats.messageCount or 0))
-        
-        if AutoLFM.API and AutoLFM.API.GetTiming then
-          local timing = AutoLFM.API.GetTiming()
-          if timing and timing.timeUntilNext then
+        local timing = AutoLFM.API.GetTiming()
+        if timing then
+          cat:AddLine("text", "Interval:", "text2", timing.intervalSeconds .. "s")
+          
+          if timing.timeUntilNext then
             local seconds = math.floor(timing.timeUntilNext)
             cat:AddLine("text", "Next:", "text2", seconds .. "s")
           end
         end
+        
+        cat:AddLine("text", "Messages:", "text2", tostring(stats.messagesSent or 0))
       end
     end
-    
-    tablet:SetHint(AutoLFM.Color("Left-click", "orange") .. " to open window\n" .. AutoLFM.Color("Right-click", "orange") .. " for options")
   end
   
   function plugin:OnClick(button)
@@ -212,17 +205,18 @@ function FuBarPlugin.Update()
 end
 
 -----------------------------------------------------------------------------
--- API Integration
+-- API Event Callbacks
 -----------------------------------------------------------------------------
 if AutoLFM.API and AutoLFM.API.RegisterEventCallback then
   local events = {
     "BROADCAST_START",
     "BROADCAST_STOP",
-    "MESSAGE_SENT"
+    "MESSAGE_SENT",
+    "PLAYER_COUNT_CHANGED"
   }
   
-  for _, event in ipairs(events) do
-    AutoLFM.API.RegisterEventCallback(event, "FuBar_AutoLFM", function()
+  for i = 1, table.getn(events) do
+    AutoLFM.API.RegisterEventCallback(events[i], "FuBar_AutoLFM", function()
       FuBarPlugin.Update()
     end)
   end

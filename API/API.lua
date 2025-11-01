@@ -317,7 +317,6 @@ function AutoLFM.API.RegisterEventCallback(eventType, addonName, callback)
   end
   
   eventCallbacks[eventType][addonName] = callback
-  SafePrint("PrintSuccess", "Event callback registered: " .. eventType .. " for " .. addonName)
   
   return true
 end
@@ -425,8 +424,10 @@ function AutoLFM.API.DebugPrint()
 end
 
 -----------------------------------------------------------------------------
--- Player Count Monitoring (Optional)
+-- Player Count Monitoring
 -----------------------------------------------------------------------------
+local monitoringFrame = nil
+
 local function CheckPlayerCountChanged()
   local currentCount = AutoLFM.API.GetPlayerCount()
   
@@ -442,19 +443,20 @@ local function CheckPlayerCountChanged()
   end
 end
 
-local function OnPartyMembersChanged()
-  CheckPlayerCountChanged()
-end
-
-local function OnRaidRosterUpdate()
-  CheckPlayerCountChanged()
-end
-
 function AutoLFM.API.InitMonitoring()
-  if not AutoLFM.Core or not AutoLFM.Core.Events then return false end
+  if monitoringFrame then
+    return true
+  end
   
-  AutoLFM.Core.Events.Register("PARTY_MEMBERS_CHANGED", "API_Monitor", OnPartyMembersChanged)
-  AutoLFM.Core.Events.Register("RAID_ROSTER_UPDATE", "API_Monitor", OnRaidRosterUpdate)
+  monitoringFrame = CreateFrame("Frame")
+  monitoringFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+  monitoringFrame:RegisterEvent("RAID_ROSTER_UPDATE")
+  
+  monitoringFrame:SetScript("OnEvent", function()
+    if event == "PARTY_MEMBERS_CHANGED" or event == "RAID_ROSTER_UPDATE" then
+      CheckPlayerCountChanged()
+    end
+  end)
   
   lastPlayerCount = AutoLFM.API.GetPlayerCount()
   
