@@ -4,9 +4,18 @@
 
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.Misc then AutoLFM.Misc = {} end
-if not AutoLFM.Misc.FuBar then AutoLFM.Misc.FuBar = {} end
 
+local function IsFuBarAvailable()
+    return AceLibrary and AceLibrary:HasInstance("FuBarPlugin-2.0")
+end
+
+if not IsFuBarAvailable() then
+    return
+end
+
+if not AutoLFM.Misc.FuBar then AutoLFM.Misc.FuBar = {} end
 local FuBarPlugin = AutoLFM.Misc.FuBar
+
 
 -----------------------------------------------------------------------------
 -- Constants
