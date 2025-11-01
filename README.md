@@ -173,15 +173,6 @@ AutoLFM/
 
 ## 🔌 Extensions
 
-### FuBar Integration
-Optional FuBar plugin for quick status display and control.
-
-**📋 Requirements:**
-- FuBar addon
-- FuBarPlugin-2.0 addon
-
-**📖 [Complete FuBar Documentation →](Misc/README_FuBar.md)**
-
 ### Misc Modules
 Optional utility modules.
 
