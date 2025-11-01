@@ -71,6 +71,9 @@ local function InitCore()
     if AutoLFM.Misc.AutoMarker and AutoLFM.Misc.AutoMarker.Init then
       SafeInit("AutoMarker", AutoLFM.Misc.AutoMarker.Init)
     end
+    if AutoLFM.Misc.FuBar and AutoLFM.Misc.FuBar.Init then
+      SafeInit("FuBar", AutoLFM.Misc.FuBar.Init)
+    end
   end
   
   return true

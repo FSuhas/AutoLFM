@@ -110,6 +110,7 @@ AutoLFM/
 │   ├── AutoMarker.lua           # Auto raid icon assignment
 │   ├── EasterEgg.lua            # Fun hidden features
 │   ├── FPSDisplay.lua           # FPS/latency display
+│   ├── FuBarPlugin.lua          # FuBar integration plugin
 │   ├── GuildSpam.lua            # Guild chat broadcaster
 │   ├── RestedXP.lua             # Rested XP monitor
 │   └── README.md                # Complete misc documentation
@@ -171,6 +172,15 @@ AutoLFM/
 - **Tooltip** confirmation on hover
 
 ## 🔌 Extensions
+
+### FuBar Integration
+Optional FuBar plugin for quick status display and control.
+
+**📋 Requirements:**
+- FuBar addon
+- FuBarPlugin-2.0 addon
+
+**📖 [Complete FuBar Documentation →](Misc/README_FuBar.md)**
 
 ### Misc Modules
 Optional utility modules.
