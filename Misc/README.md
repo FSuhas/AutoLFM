@@ -11,6 +11,7 @@ Optional utility modules.
 | **Auto Invite** | Auto-invite on whisper keyword | `/lfm misc autoinv` |
 | **Guild Spam** | Automated guild chat broadcaster | `/lfm misc gspam` |
 | **Auto Marker** | Automatic raid icon assignment | `/lfm misc marker` |
+| **FuBar Plugin** | FuBar integration | Automatic |
 
 ---
 
@@ -66,6 +67,13 @@ Automatically assigns raid icons to specific players.
 /lfm misc marker list                    # Show tracked players
 /lfm misc marker clear                   # Clear all marks
 ```
+
+## 🌐 FuBar Plugin
+
+Integration with FuBar for quick status display.
+
+Enabled if FuBar detected. (**Requirements:** FuBar addon & FuBarPlugin-2.0 addon)
+
 
 ## 🔄 Legacy Commands
 
