@@ -213,6 +213,11 @@ local function OnIntervalChanged(status)
   UpdateUI()
 end
 
+local function OnPlayerCountChanged(status)
+  DEFAULT_CHAT_FRAME:AddMessage("|cffffff00[Example]|r PLAYER_COUNT_CHANGED event fired")
+  UpdateUI()
+end
+
 --=============================================================================
 -- Initialization
 --=============================================================================
@@ -230,6 +235,9 @@ local function Initialize()
     UpdateUI()
   end)
   
+  -- Initialize API monitoring for player count changes
+  AutoLFM.API.InitMonitoring()
+  
   -- Register ALL event-specific callbacks
   AutoLFM.API.RegisterEventCallback(AutoLFM.API.EVENTS.BROADCAST_START, ADDON_NAME, OnBroadcastStart)
   AutoLFM.API.RegisterEventCallback(AutoLFM.API.EVENTS.BROADCAST_STOP, ADDON_NAME, OnBroadcastStop)
@@ -238,8 +246,9 @@ local function Initialize()
   AutoLFM.API.RegisterEventCallback(AutoLFM.API.EVENTS.ROLES_CHANGED, ADDON_NAME, OnRolesChanged)
   AutoLFM.API.RegisterEventCallback(AutoLFM.API.EVENTS.CHANNELS_CHANGED, ADDON_NAME, OnChannelsChanged)
   AutoLFM.API.RegisterEventCallback(AutoLFM.API.EVENTS.INTERVAL_CHANGED, ADDON_NAME, OnIntervalChanged)
+  AutoLFM.API.RegisterEventCallback(AutoLFM.API.EVENTS.PLAYER_COUNT_CHANGED, ADDON_NAME, OnPlayerCountChanged)
   
-  DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Example]|r All 7 event callbacks registered")
+  DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Example]|r All 8 event callbacks registered")
   DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Example]|r Type |cffffff00/lfmexample|r to toggle UI")
   
   UpdateUI()
@@ -277,18 +286,11 @@ end
 --=============================================================================
 local initFrame = CreateFrame("Frame")
 initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-initFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
-initFrame:RegisterEvent("RAID_ROSTER_UPDATE")
 
 initFrame:SetScript("OnEvent", function()
   if event == "PLAYER_ENTERING_WORLD" then
     Initialize()
     initFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
-  elseif event == "PARTY_MEMBERS_CHANGED" or event == "RAID_ROSTER_UPDATE" then
-    -- Update UI when group changes
-    if mainFrame:IsShown() then
-      UpdateUI()
-    end
   end
 end)
 

@@ -49,7 +49,7 @@ This example addon showcases **ALL** AutoLFM API features:
 - ✅ `GetTiming()` - Interval and next broadcast timer
 - ✅ `GetFullStatus()` - Complete status in one call
 
-### 🔔 Event System (7 events)
+### 🔔 Event System (8 events)
 - ✅ `BROADCAST_START` - Broadcast started
 - ✅ `BROADCAST_STOP` - Broadcast stopped
 - ✅ `MESSAGE_SENT` - Message sent to channels
@@ -57,10 +57,12 @@ This example addon showcases **ALL** AutoLFM API features:
 - ✅ `ROLES_CHANGED` - Roles selection changed
 - ✅ `CHANNELS_CHANGED` - Channels selection changed
 - ✅ `INTERVAL_CHANGED` - Broadcast interval changed
+- ✅ `PLAYER_COUNT_CHANGED` - Player count changed (requires `InitMonitoring()`)
 
 ### 🛠️ Callback System
 - ✅ `RegisterCallback()` - Global callback registration
-- ✅ `RegisterEventCallback()` - Event-specific callbacks (all 7 events)
+- ✅ `RegisterEventCallback()` - Event-specific callbacks (all 8 events)
+- ✅ `InitMonitoring()` - Enable player count change detection
 - ✅ Real-time UI updates on any data change
 
 ### 🐛 Debug Tools

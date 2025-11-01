@@ -1,5 +1,11 @@
 # AutoLFM Changelog
 
+## [2.14] - Addon API example
+
+- Update Addon API example
+- Remove Readme Fubar section
+- (Previous commits: refactoring DungeonsPanel and fix Filters issue)
+
 ## [2.13] - FuBar plugin
 
 - Add FuBar plugin
