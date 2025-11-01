@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
 ## Notes: Automated LFM Message
-## Version: 2.11
+## Version: 2.13
 ## Author: Gondoleon, NSO73
 ## DefaultState: Enabled
 ## SavedVariables: V2_Settings
@@ -40,6 +40,7 @@ Misc\AutoInvite.lua
 Misc\AutoMarker.lua
 Misc\EasterEgg.lua
 Misc\FPSDisplay.lua
+Misc\FuBarPlugin.lua
 Misc\GuildSpam.lua
 Misc\RestedXP.lua
 

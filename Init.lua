@@ -71,6 +71,9 @@ local function InitCore()
     if AutoLFM.Misc.AutoMarker and AutoLFM.Misc.AutoMarker.Init then
       SafeInit("AutoMarker", AutoLFM.Misc.AutoMarker.Init)
     end
+    if AutoLFM.Misc.FuBar and AutoLFM.Misc.FuBar.Init then
+      SafeInit("FuBar", AutoLFM.Misc.FuBar.Init)
+    end
   end
   
   return true
@@ -135,6 +138,9 @@ local function InitExtras()
   end
   if AutoLFM.Logic and AutoLFM.Logic.Broadcaster and AutoLFM.Logic.Broadcaster.InitLoop then
     SafeInit("Broadcaster", AutoLFM.Logic.Broadcaster.InitLoop)
+  end
+  if AutoLFM.API and AutoLFM.API.InitMonitoring then
+    SafeInit("API.Monitoring", AutoLFM.API.InitMonitoring)
   end
 end
 

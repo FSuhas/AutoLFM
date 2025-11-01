@@ -1,5 +1,15 @@
 # AutoLFM Changelog
 
+## [2.13] - FuBar plugin
+
+- Add FuBar plugin
+
+## [2.12] - API v2.1
+
+- Monitoring
+- PLAYER_COUNT_CHANGED
+- Refactoring
+
 ## [2.11] - Tooltips zones quests, slash commands
 
 - Revamping commands SLASH and helpers
