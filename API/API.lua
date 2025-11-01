@@ -292,7 +292,6 @@ function AutoLFM.API.RegisterCallback(addonName, callback)
   end
   
   callbacks[addonName] = callback
-  SafePrint("PrintSuccess", "Callback registered for " .. addonName)
   
   return true
 end
@@ -301,7 +300,6 @@ function AutoLFM.API.UnregisterCallback(addonName)
   if not addonName then return false end
   
   callbacks[addonName] = nil
-  SafePrint("PrintInfo", "Callback unregistered for " .. addonName)
   
   return true
 end
@@ -327,8 +325,6 @@ function AutoLFM.API.UnregisterEventCallback(eventType, addonName)
   if eventCallbacks[eventType] then
     eventCallbacks[eventType][addonName] = nil
   end
-  
-  SafePrint("PrintInfo", "Event callback unregistered: " .. eventType .. " for " .. addonName)
   
   return true
 end
