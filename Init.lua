@@ -139,6 +139,9 @@ local function InitExtras()
   if AutoLFM.Logic and AutoLFM.Logic.Broadcaster and AutoLFM.Logic.Broadcaster.InitLoop then
     SafeInit("Broadcaster", AutoLFM.Logic.Broadcaster.InitLoop)
   end
+  if AutoLFM.API and AutoLFM.API.InitMonitoring then
+    SafeInit("API.Monitoring", AutoLFM.API.InitMonitoring)
+  end
 end
 
 -----------------------------------------------------------------------------
