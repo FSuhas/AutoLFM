@@ -13,38 +13,77 @@ local FuBarPlugin = AutoLFM.Misc.FuBar
 -----------------------------------------------------------------------------
 local PLUGIN_NAME = "FuBar_AutoLFM"
 local PLUGIN_VERSION = "1.0"
+local ICON_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\Eyes\\eye07"
 
 -----------------------------------------------------------------------------
 -- Plugin Registration
 -----------------------------------------------------------------------------
 local function RegisterPlugin()
-  local plugin = AceLibrary("AceAddon-2.0"):new("FuBarPlugin-2.0")
+  local plugin = AceLibrary("AceAddon-2.0"):new("FuBarPlugin-2.0", "AceDB-2.0")
+  
+  plugin:RegisterDB("FuBar_AutoLFM_DB")
+  plugin:RegisterDefaults("profile", {
+    disabled = false
+  })
   
   plugin.name = PLUGIN_NAME
   plugin.title = "FuBar - AutoLFM"
   plugin.version = PLUGIN_VERSION
-  plugin.hasIcon = "Interface\\AddOns\\AutoLFM\\AutoLFM"
-  plugin.defaultPosition = "RIGHT"
+  plugin.hasIcon = ICON_PATH
+  plugin.defaultPosition = "CENTER"
   plugin.cannotDetachTooltip = true
+  
+  function plugin:IsActive()
+    if self.db and self.db.profile then
+      return not self.db.profile.disabled
+    end
+    return true
+  end
+  
+  function plugin:ToggleActive()
+    if self.db and self.db.profile then
+      self.db.profile.disabled = not self.db.profile.disabled
+      if self.db.profile.disabled then
+        self:Hide()
+      else
+        self:Show()
+      end
+    end
+  end
   
   function plugin:OnInitialize()
   end
   
   function plugin:OnEnable()
     self:Update()
+    self:ScheduleRepeatingEvent("FuBar_AutoLFM_Update", self.Update, 1, self)
   end
   
   function plugin:OnTextUpdate()
-    local isActive = AutoLFM.Logic.Broadcaster.IsActive()
-    
-    if isActive then
-      self:SetText("|cff00ff00ON|r")
-    else
-      self:SetText("|cffff0000OFF|r")
+    if not self:IsActive() then
+      self:SetText(AutoLFM.Color("AutoLFM", "gray"))
+      return
     end
+    
+    local text = "AutoLFM"
+    
+    if AutoLFM.Logic.Broadcaster.IsActive() then
+      if AutoLFM.API and AutoLFM.API.GetPlayerCount then
+        local playerCount = AutoLFM.API.GetPlayerCount()
+        if playerCount then
+          text = text .. " " .. AutoLFM.Color(playerCount.currentInGroup .. "/" .. playerCount.desiredTotal, "yellow")
+        end
+      end
+    end
+    
+    self:SetText(text)
   end
   
   function plugin:OnTooltipUpdate()
+    if not self:IsActive() then
+      return
+    end
+    
     if not AutoLFM.Logic.Broadcaster then return end
     
     local tablet = AceLibrary("Tablet-2.0")
@@ -55,7 +94,7 @@ local function RegisterPlugin()
     local cat = tablet:AddCategory("columns", 2)
     
     local isActive = AutoLFM.Logic.Broadcaster.IsActive()
-    local status = isActive and "|cff00ff00Active|r" or "|cffff0000Inactive|r"
+    local status = isActive and AutoLFM.Color("Active", "green") or AutoLFM.Color("Inactive", "red")
     cat:AddLine("text", "Status:", "text2", status)
     
     local message = AutoLFM.Logic.Broadcaster.GetMessage()
@@ -88,54 +127,48 @@ local function RegisterPlugin()
         cat:AddLine("text", "Interval:", "text2", interval .. "s")
         
         cat:AddLine("text", "Messages:", "text2", tostring(stats.messageCount or 0))
+        
+        if AutoLFM.API and AutoLFM.API.GetTiming then
+          local timing = AutoLFM.API.GetTiming()
+          if timing and timing.timeUntilNext then
+            local seconds = math.floor(timing.timeUntilNext)
+            cat:AddLine("text", "Next:", "text2", seconds .. "s")
+          end
+        end
       end
     end
     
-    tablet:SetHint("|cffeda55fLeft-click|r to toggle broadcast\n|cffeda55fRight-click|r for options")
+    tablet:SetHint(AutoLFM.Color("Left-click", "orange") .. " to open window\n" .. AutoLFM.Color("Right-click", "orange") .. " for options")
   end
   
   function plugin:OnClick(button)
     if button == "LeftButton" then
-      if AutoLFM.Logic.Broadcaster.IsActive() then
-        AutoLFM.Logic.Broadcaster.Stop()
-      else
-        AutoLFM.Logic.Broadcaster.Start()
+      if AutoLFM_MainFrame then
+        if AutoLFM_MainFrame:IsVisible() then
+          HideUIPanel(AutoLFM_MainFrame)
+        else
+          ShowUIPanel(AutoLFM_MainFrame)
+        end
       end
-      self:Update()
     end
   end
-  
-  function plugin:OnMenuRequest()
+
+  function plugin:OnMenuRequest(level, value, inTooltip)
     local dewdrop = AceLibrary("Dewdrop-2.0")
     if not dewdrop then return end
     
-    dewdrop:AddLine(
-      "text", "Open AutoLFM Window",
-      "func", function()
-        if AutoLFM.UI.MainWindow.Toggle then
-          AutoLFM.UI.MainWindow.Toggle()
-        end
+    if not inTooltip then
+      if level == 1 then
+        dewdrop:AddLine(
+          "text", "Open AutoLFM Window",
+          "func", function()
+            if AutoLFM_MainFrame then
+              ShowUIPanel(AutoLFM_MainFrame)
+            end
+          end,
+          "closeWhenClicked", true
+        )
       end
-    )
-    
-    dewdrop:AddLine()
-    
-    if AutoLFM.Logic.Broadcaster.IsActive() then
-      dewdrop:AddLine(
-        "text", "|cffff0000Stop Broadcast|r",
-        "func", function()
-          AutoLFM.Logic.Broadcaster.Stop()
-          plugin:Update()
-        end
-      )
-    else
-      dewdrop:AddLine(
-        "text", "|cff00ff00Start Broadcast|r",
-        "func", function()
-          AutoLFM.Logic.Broadcaster.Start()
-          plugin:Update()
-        end
-      )
     end
   end
   
@@ -182,15 +215,15 @@ end
 -- API Integration
 -----------------------------------------------------------------------------
 if AutoLFM.API and AutoLFM.API.RegisterEventCallback then
-  AutoLFM.API.RegisterEventCallback("BROADCAST_START", "FuBar_AutoLFM", function()
-    FuBarPlugin.Update()
-  end)
+  local events = {
+    "BROADCAST_START",
+    "BROADCAST_STOP",
+    "MESSAGE_SENT"
+  }
   
-  AutoLFM.API.RegisterEventCallback("BROADCAST_STOP", "FuBar_AutoLFM", function()
-    FuBarPlugin.Update()
-  end)
-  
-  AutoLFM.API.RegisterEventCallback("MESSAGE_SENT", "FuBar_AutoLFM", function()
-    FuBarPlugin.Update()
-  end)
+  for _, event in ipairs(events) do
+    AutoLFM.API.RegisterEventCallback(event, "FuBar_AutoLFM", function()
+      FuBarPlugin.Update()
+    end)
+  end
 end
