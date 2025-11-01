@@ -371,6 +371,7 @@ function AutoLFM.Core.Commands.Handle(msg)
       local status = AutoLFM.API.GetFullStatus()
       
       AutoLFM.Core.Utils.PrintTitle("=== AutoLFM API Data ===")
+      AutoLFM.Core.Utils.Print("API Version: " .. AutoLFM.Color(AutoLFM.API.GetVersion(), "yellow"))
       AutoLFM.Core.Utils.Print("Group Type: " .. AutoLFM.Color(status.groupType, "yellow"))
       AutoLFM.Core.Utils.Print("Broadcasting: " .. AutoLFM.Color(status.broadcastStats.isActive and "Yes" or "No", status.broadcastStats.isActive and "green" or "red"))
       AutoLFM.Core.Utils.Print("Players: " .. AutoLFM.Color(status.playerCount.currentInGroup .. "/" .. status.playerCount.desiredTotal, "yellow"))
@@ -379,6 +380,7 @@ function AutoLFM.Core.Commands.Handle(msg)
       AutoLFM.Core.Utils.Print("Roles: " .. AutoLFM.Color(table.getn(status.rolesNeeded) > 0 and table.concat(status.rolesNeeded, ", ") or "none", "yellow"))
       AutoLFM.Core.Utils.Print("Channels: " .. AutoLFM.Color(table.getn(status.selectedChannels) > 0 and table.concat(status.selectedChannels, ", ") or "none", "yellow"))
       AutoLFM.Core.Utils.Print("Interval: " .. AutoLFM.Color(tostring(status.timing.intervalSeconds) .. "s", "yellow"))
+      AutoLFM.Core.Utils.Print("Callbacks: " .. AutoLFM.Color(tostring(AutoLFM.API.GetCallbackCount()), "yellow"))
       
     elseif cmd2 == "callbacks" then
       if AutoLFM.API and AutoLFM.API.ListCallbacks then
