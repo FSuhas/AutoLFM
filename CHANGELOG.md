@@ -1,5 +1,11 @@
 # AutoLFM Changelog
 
+## [2.15] - FuBar plugin 0.1, refactoring Raids & Quests Panels
+
+- FuBarPlugin v0.1 (need design)
+- (Previous commits: refactoring Raids & Quests Panels)
+
+
 ## [2.14] - Addon API example
 
 - Update Addon API example
