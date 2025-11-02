@@ -90,7 +90,7 @@ function AutoLFM.UI.DungeonsPanel.GetAllFilterStates() return filterStates end
 
 local function UpdateFilterLabelColor()
   if filterLabelText then
-    local r, g, b = HasDisabledFilter() and 1 or 1, HasDisabledFilter() and 0.82 or 1, 0
+    local r, g, b = HasDisabledFilter() and 1 or 1, HasDisabledFilter() and 0.82 or 1, HasDisabledFilter() and 0 or 1
     filterLabelText:SetTextColor(r, g, b)
   end
 end
