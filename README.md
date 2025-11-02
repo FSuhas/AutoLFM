@@ -44,11 +44,7 @@ The interface design is inspired by and matches Turtle WoW's native LFG system.
 
 Use Addon install system from TurtleWoW launcher.
 
-Or, manually:
-1. Download the latest release
-2. Extract the `AutoLFM` folder to your `Interface\AddOns` directory
-3. Restart WoW or reload UI (`/reload`)
-4. Type `/lfm` to open the interface
+Or, manually: download the latest release and extract the `AutoLFM` folder to your `Interface\AddOns` directory
 
 ## 🎮 Usage
 
@@ -67,21 +63,9 @@ Or, manually:
 ```bash
 /lfm                    # Toggle main window
 /lfm help               # Show all commands
-
-# Minimap button
-/lfm minimap show       # Show minimap button
-/lfm minimap hide       # Hide minimap button
-/lfm minimap reset      # Reset button position
-
-# Misc modules
-/lfm misc status        # Show all modules status
-/lfm misc help          # List all misc commands
-
-# API (for developers)
-/lfm api status         # Check API availability
-/lfm api data           # Show current API status
-/lfm api debug          # Show detailed debug information
-/lfm api callbacks      # List registered callbacks
+/lfm minimap            # Show minimap commands
+/lfm misc               # Show misc commands
+/lfm api                # Show api commands
 ```
 
 ## 🏗️ Architecture
