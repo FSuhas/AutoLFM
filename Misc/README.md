@@ -72,7 +72,7 @@ Automatically assigns raid icons to specific players.
 
 Integration with FuBar for quick status display.
 
-Enabled if FuBar detected. (**Requirements:** FuBar addon & FuBarPlugin-2.0 addon)
+Enabled if FuBar detected. (**Requirements:** FuBar, FuBarPlugin-2.0 and lib Tablet-2.0)
 
 
 ## 🔄 Legacy Commands
