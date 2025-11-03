@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.16] - Add functionality
+
+- Uncheck all quest checkboxes on tab click
+
 ## [2.15] - FuBar plugin 0.1, refactoring Raids & Quests Panels
 
 - FuBarPlugin v0.1 (need design)

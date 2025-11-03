@@ -119,6 +119,10 @@ function AutoLFM.UI.ClearTab.OnTabClick()
   if AutoLFM.UI.RaidsPanel and AutoLFM.UI.RaidsPanel.ClearSelection then
     AutoLFM.UI.RaidsPanel.ClearSelection()
   end
+
+  if AutoLFM.UI.QuestsPanel and AutoLFM.UI.QuestsPanel.UncheckAllQuestCheckboxes then
+    AutoLFM.UI.QuestsPanel.UncheckAllQuestCheckboxes()
+  end
   
   if AutoLFM.UI.MainWindow and AutoLFM.UI.MainWindow.ClearRoleCheckboxes then
     AutoLFM.UI.MainWindow.ClearRoleCheckboxes()

@@ -103,7 +103,7 @@ local function UpdateInfoLabelState()
   end
 end
 
-local function UncheckAllQuestCheckboxes()
+function AutoLFM.UI.QuestsPanel.UncheckAllQuestCheckboxes()
   for _, btn in ipairs(questButtons) do
     if btn.checkbox and btn.checkbox:GetChecked() then
       btn.checkbox:SetChecked(false)
