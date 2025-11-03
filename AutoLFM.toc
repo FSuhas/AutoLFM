@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
 ## Notes: Automated LFM Message
-## Version: 2.16
+## Version: 2.17
 ## Author: Gondoleon, NSO73
 ## DefaultState: Enabled
 ## SavedVariables: V2_Settings
@@ -9,6 +9,7 @@
 #--------------------------------------------------
 # Engine
 #--------------------------------------------------
+Core\AutoLFM_WelcomePopup.lua
 Core\Utils.lua
 Core\Settings.lua
 Core\Events.lua
