@@ -54,6 +54,10 @@ local function InitCore()
   if AutoLFM.Logic and AutoLFM.Logic.Selection and AutoLFM.Logic.Selection.Init then
     SafeInit("Logic.Selection", AutoLFM.Logic.Selection.Init)
   end
+
+  if AutoLFM.Core.AutoLFM_WelcomePopup and AutoLFM.Core.AutoLFM_WelcomePopup.Init then
+    SafeInit("WelcomePopup", AutoLFM.Core.AutoLFM_WelcomePopup.Init)
+  end
   
   if AutoLFM.Misc then
     if AutoLFM.Misc.FPSDisplay and AutoLFM.Misc.FPSDisplay.Init then
@@ -171,7 +175,7 @@ function AutoLFM.Init.Run()
       DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[AutoLFM]|r Loaded successfully! Type /lfm help")
     end
   end)
-  
+
   if not success then
     if AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
       AutoLFM.Core.Utils.PrintError("Initialization failed: " .. tostring(err))
@@ -190,6 +194,16 @@ initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 initFrame:SetScript("OnEvent", function()
   if event == "PLAYER_ENTERING_WORLD" then
     AutoLFM.Init.Run()
+      local char = UnitName("player") .. "-" .. GetRealmName()
+      V2_Settings = V2_Settings or {}
+      V2_Settings[char] = V2_Settings[char] or {}
+      if V2_Settings[char].welcomeShown == nil then
+          V2_Settings[char].welcomeShown = false
+      end
+
+      if M.ShouldShow() then
+          M.Show()
+      end
     initFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
   end
 end)

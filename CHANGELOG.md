@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.17] - Add Welcome Popup 
+
+- New functionality to AutoLFM
+
 ## [2.16] - Add functionality
 
 - Uncheck all quest checkboxes on tab click
