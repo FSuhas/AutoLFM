@@ -1,5 +1,10 @@
 # AutoLFM Changelog
 
+## [2.18] - FuBar plugin 1.0
+
+- FuBarPlugin v1.0
+- Add "gold" color in utils (wow yellow game color)
+
 ## [2.17] - Add Welcome Popup 
 
 - New functionality to AutoLFM
