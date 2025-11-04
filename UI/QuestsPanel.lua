@@ -256,9 +256,10 @@ end
 -----------------------------------------------------------------------------
 -- Panel Management
 -----------------------------------------------------------------------------
-function AutoLFM.UI.QuestsPanel.Create(parentFrame)
-  if not parentFrame then return nil end
+function AutoLFM.UI.QuestsPanel.Init()
   if mainFrame then return mainFrame end
+  local parentFrame = AutoLFM.UI.MainWindow.GetFrame()
+  if not parentFrame then return nil end
 
   local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, "AutoLFM_QuestsPanel")
   mainFrame = panelData.panel
@@ -290,7 +291,7 @@ function AutoLFM.UI.QuestsPanel.Create(parentFrame)
     UpdateInfoLabelState()
   end)
 
-  return mainFrame
+  AutoLFM.UI.QuestsPanel.Register()
 end
 
 function AutoLFM.UI.QuestsPanel.Show()

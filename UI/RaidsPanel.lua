@@ -296,9 +296,10 @@ end
 -----------------------------------------------------------------------------
 -- Panel Management
 -----------------------------------------------------------------------------
-function AutoLFM.UI.RaidsPanel.Create(parent)
-    if not parent then return end
+function AutoLFM.UI.RaidsPanel.Init()
     if mainFrame then return mainFrame end
+    local parent = AutoLFM.UI.MainWindow.GetFrame()
+    if not parent then return nil end
 
     local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parent, "AutoLFM_RaidsPanel")
     if not panelData then return end
@@ -310,7 +311,7 @@ function AutoLFM.UI.RaidsPanel.Create(parent)
     AutoLFM.UI.RaidsPanel.Display(contentFrame)
     AutoLFM.UI.RaidsPanel.CreateSizeSlider(panelData.bottomZone)
 
-    return mainFrame
+    AutoLFM.UI.RaidsPanel.Register()
 end
 
 function AutoLFM.UI.RaidsPanel.Show()

@@ -5,6 +5,7 @@
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
 if not AutoLFM.UI.DungeonsPanel then AutoLFM.UI.DungeonsPanel = {} end
+if not AutoLFM.UI.DungeonsPanel.Filters then AutoLFM.UI.DungeonsPanel.Filters = {} end
 
 -----------------------------------------------------------------------------
 -- Private State
@@ -41,7 +42,7 @@ end
 -- Dungeon Filter Management
 -----------------------------------------------------------------------------
 
-function AutoLFM.UI.DungeonsPanel.InitFilters()
+function AutoLFM.UI.DungeonsPanel.Filters.Init()
   local saved = AutoLFM.Core.Settings.LoadFilters() or {}
   EachColor(function(c) filterStates[c.key] = saved[c.key] ~= false end)
 end
@@ -262,8 +263,12 @@ function AutoLFM.UI.DungeonsPanel.UncheckDungeon(tag) local cb = tag and checkBu
 -- Panel Management
 -----------------------------------------------------------------------------
 
-function AutoLFM.UI.DungeonsPanel.Create(parent)
+function AutoLFM.UI.DungeonsPanel.Init()
+  AutoLFM.UI.DungeonsPanel.Filters.Init()
+  
   if mainFrame then return mainFrame end
+  local parent = AutoLFM.UI.MainWindow.GetFrame()
+  if not parent then return nil end
   local p = AutoLFM.UI.PanelBuilder.CreatePanel(parent, "AutoLFM_DungeonsPanel")
   if not p then return end
   mainFrame = p.panel mainFrame:Show()
@@ -273,7 +278,8 @@ function AutoLFM.UI.DungeonsPanel.Create(parent)
   if scrollFrame.UpdateScrollChildRect then scrollFrame:UpdateScrollChildRect() end
   filterFrame = CreateColorFilterUI(p.bottomZone)
   filterFrame:Show()
-  return mainFrame
+  
+  AutoLFM.UI.DungeonsPanel.Register()
 end
 
 function AutoLFM.UI.DungeonsPanel.Show()
