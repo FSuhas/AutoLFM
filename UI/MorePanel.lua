@@ -52,10 +52,8 @@ end
 -----------------------------------------------------------------------------
 local function CreateMainPanel(parentFrame)
   if not parentFrame then return nil end
-  
   local panelData = AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, "AutoLFM_MorePanel")
   if not panelData then return nil end
-  
   mainFrame = panelData.panel
   mainFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 25, -155)
   mainFrame:SetWidth(292)
@@ -67,7 +65,6 @@ local function CreateMainPanel(parentFrame)
     insets = { left = 4, right = 4, top = 4, bottom = 4 }
   })
   mainFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.5)
-  
   return mainFrame
 end
 
@@ -76,13 +73,11 @@ end
 -----------------------------------------------------------------------------
 local function CreateCustomMessageEditBox()
   if not mainFrame then return end
-  
   local editboxIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   editboxIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\send")
   editboxIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   editboxIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   editboxIcon:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 5, -5)
-  
   local editboxLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   editboxLabel:SetText("Add details to your message:")
   editboxLabel:SetPoint("LEFT", editboxIcon, "RIGHT", 3, 0)
@@ -108,11 +103,9 @@ local function CreateCustomMessageEditBox()
   customMessageEditBox:SetBackdropBorderColor(1, 0.82, 0, 1)
   customMessageEditBox:SetJustifyH("CENTER")
   customMessageEditBox:SetTextInsets(10, 10, 5, 5)
-  
   local placeholder = customMessageEditBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
   placeholder:SetText("(optional if dungeon or raid selected)")
   placeholder:SetPoint("CENTER", customMessageEditBox, "CENTER", 0, 0)
-  
   local function updatePlaceholder()
     if customMessageEditBox:GetText() == "" then
       placeholder:Show()
@@ -120,17 +113,14 @@ local function CreateCustomMessageEditBox()
       placeholder:Hide()
     end
   end
-  
   customMessageEditBox:SetScript("OnEditFocusGained", function()
     placeholder:Hide()
     AutoLFM.UI.MorePanel.UpdateEditBoxFocus(true)
   end)
-  
   customMessageEditBox:SetScript("OnEditFocusLost", function()
     AutoLFM.UI.MorePanel.UpdateEditBoxFocus(false)
     updatePlaceholder()
   end)
-  
   customMessageEditBox:SetScript("OnTextChanged", function()
     if AutoLFM.Logic.Broadcaster.SetCustomMessage then
       AutoLFM.Logic.Broadcaster.SetCustomMessage(customMessageEditBox:GetText())
@@ -143,17 +133,13 @@ local function CreateCustomMessageEditBox()
     end
     updatePlaceholder()
   end)
-  
   customMessageEditBox:SetScript("OnEnterPressed", function()
     customMessageEditBox:ClearFocus()
   end)
-  
   customMessageEditBox:SetScript("OnEscapePressed", function()
     customMessageEditBox:ClearFocus()
   end)
-  
   updatePlaceholder()
-  
   return customMessageEditBox
 end
 
@@ -162,27 +148,22 @@ end
 -----------------------------------------------------------------------------
 local function CreateBroadcastIntervalSlider()
   if not mainFrame or not customMessageEditBox then return end
-  
   local sliderIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   sliderIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\tool")
   sliderIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sliderIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sliderIcon:SetPoint("TOPLEFT", customMessageEditBox, "BOTTOMLEFT", 0, -10)
-  
   local sliderLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sliderLabel:SetText("Interval:")
   sliderLabel:SetPoint("LEFT", sliderIcon, "RIGHT", 3, 0)
   AutoLFM.Core.Utils.SetFontColor(sliderLabel, "white")
-  
   broadcastIntervalSlider = CreateFrame("Slider", nil, mainFrame)
   broadcastIntervalSlider:SetWidth(145)
   broadcastIntervalSlider:SetHeight(17)
   broadcastIntervalSlider:SetPoint("LEFT", sliderLabel, "RIGHT", 10, 0)
   broadcastIntervalSlider:SetMinMaxValues(AutoLFM.Logic.Broadcaster.INTERVAL_MIN, AutoLFM.Logic.Broadcaster.INTERVAL_MAX)
-  
   local savedInterval = AutoLFM.Core.Settings.LoadInterval()
   broadcastIntervalSlider:SetValue(savedInterval)
-  
   broadcastIntervalSlider:SetValueStep(AutoLFM.Logic.Broadcaster.INTERVAL_STEP)
   broadcastIntervalSlider:SetOrientation("HORIZONTAL")
   broadcastIntervalSlider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
@@ -194,23 +175,19 @@ local function CreateBroadcastIntervalSlider()
     edgeSize = 8,
     insets = {left = 3, right = 3, top = 6, bottom = 6}
   })
-  
   local sliderValue = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sliderValue:SetText(savedInterval .. " secs")
   sliderValue:SetPoint("LEFT", broadcastIntervalSlider, "RIGHT", 10, 0)
-  
   broadcastIntervalSlider:SetScript("OnValueChanged", function()
     local value = broadcastIntervalSlider:GetValue()
     if value then
       sliderValue:SetText(math.floor(value) .. " secs")
       AutoLFM.Core.Settings.SaveInterval(value)
-      
       if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
         AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.INTERVAL_CHANGED)
       end
     end
   end)
-  
   return sliderIcon
 end
 
@@ -219,14 +196,12 @@ end
 -----------------------------------------------------------------------------
 local function UpdateStatsDisplay()
   if not durationValueText or not sentValueText or not nextValueText then return end
-  
   if AutoLFM.Logic.Broadcaster.FormatDuration then
     local formattedDuration = AutoLFM.Logic.Broadcaster.FormatDuration()
     durationValueText:SetText(formattedDuration)
   else
     durationValueText:SetText("00:00")
   end
-  
   if AutoLFM.Logic.Broadcaster.GetStats then
     local stats = AutoLFM.Logic.Broadcaster.GetStats()
     if stats and stats.messageCount then
@@ -237,12 +212,10 @@ local function UpdateStatsDisplay()
   else
     sentValueText:SetText("0")
   end
-  
   local timing = nil
   if AutoLFM.API and AutoLFM.API.GetTiming then
     timing = AutoLFM.API.GetTiming()
   end
-  
   if timing and timing.timeUntilNext then
     local seconds = math.floor(timing.timeUntilNext)
     nextValueText:SetText(seconds .. "s")
@@ -253,52 +226,42 @@ end
 
 local function CreateStatsList(lastAnchor)
   if not mainFrame or not lastAnchor then return end
-  
   local durationIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   durationIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\bag")
   durationIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   durationIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   durationIcon:SetPoint("TOPLEFT", lastAnchor, "BOTTOMLEFT", 0, -7)
-  
   local durationLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   durationLabel:SetText("Duration: ")
   durationLabel:SetPoint("LEFT", durationIcon, "RIGHT", 3, 0)
   AutoLFM.Core.Utils.SetFontColor(durationLabel, "white")
-  
   durationValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   durationValueText:SetText("00:00")
   durationValueText:SetPoint("LEFT", durationLabel, "RIGHT", 0, 0)
-  
   local sentIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   sentIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\book")
   sentIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sentIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   sentIcon:SetPoint("TOPLEFT", durationIcon, "BOTTOMLEFT", 0, -7)
-  
   local sentLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sentLabel:SetText("Sent: ")
   sentLabel:SetPoint("LEFT", sentIcon, "RIGHT", 3, 0)
   AutoLFM.Core.Utils.SetFontColor(sentLabel, "white")
-  
   sentValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sentValueText:SetText("0")
   sentValueText:SetPoint("LEFT", sentLabel, "RIGHT", 0, 0)
-  
   local nextIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   nextIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\chat")
   nextIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   nextIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   nextIcon:SetPoint("TOPLEFT", sentIcon, "BOTTOMLEFT", 0, -7)
-  
   local nextLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   nextLabel:SetText("Next: ")
   nextLabel:SetPoint("LEFT", nextIcon, "RIGHT", 3, 0)
   AutoLFM.Core.Utils.SetFontColor(nextLabel, "white")
-  
   nextValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   nextValueText:SetText("--")
   nextValueText:SetPoint("LEFT", nextLabel, "RIGHT", 0, 0)
-  
   return durationIcon, nextIcon
 end
 
@@ -308,7 +271,6 @@ end
 local function UpdateMinimapRadioButtons()
   if not showRadio or not hideRadio then return end
   if not AutoLFM_MinimapButton then return end
-  
   local isVisible = AutoLFM_MinimapButton:IsShown()
   showRadio:SetChecked(isVisible)
   hideRadio:SetChecked(not isVisible)
@@ -316,58 +278,34 @@ end
 
 local function CreateMinimapList(lastAnchor)
   if not mainFrame or not lastAnchor then return end
-  
   local minimapIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   minimapIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\minimap")
   minimapIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   minimapIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   minimapIcon:SetPoint("TOPLEFT", lastAnchor, "BOTTOMLEFT", 0, -7)
-  
   local minimapTitle = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   minimapTitle:SetText("Minimap button:")
   minimapTitle:SetPoint("LEFT", minimapIcon, "RIGHT", 3, 0)
   AutoLFM.Core.Utils.SetFontColor(minimapTitle, "white")
-  
   local isVisible = AutoLFM_MinimapButton and AutoLFM_MinimapButton:IsShown()
-  
   showRadio = CreateFrame("CheckButton", nil, mainFrame, "UIRadioButtonTemplate")
   showRadio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   showRadio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   showRadio:SetPoint("TOPLEFT", minimapIcon, "BOTTOMLEFT", 10, -5)
   showRadio:SetChecked(isVisible)
-  
   local showText = CreateFrame("Button", nil, mainFrame)
   showText:SetPoint("LEFT", showRadio, "RIGHT", 0, 0)
   showText:SetWidth(55)
   showText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
-  
   local showLabel = showText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   showLabel:SetPoint("LEFT", showText, "LEFT", 5, 0)
   showLabel:SetText("Show")
   AutoLFM.Core.Utils.SetFontColor(showLabel, "gold")
-  
   showText:SetScript("OnClick", function()
     showRadio:Click()
   end)
-  
-  showText:SetScript("OnEnter", function()
-    AutoLFM.Core.Utils.SetFontColor(showLabel, "blue")
-    showRadio:LockHighlight()
-  end)
-  
-  showText:SetScript("OnLeave", function()
-    AutoLFM.Core.Utils.SetFontColor(showLabel, "gold")
-    showRadio:UnlockHighlight()
-  end)
-  
-  showRadio:SetScript("OnEnter", function()
-    AutoLFM.Core.Utils.SetFontColor(showLabel, "blue")
-  end)
-  
-  showRadio:SetScript("OnLeave", function()
-    AutoLFM.Core.Utils.SetFontColor(showLabel, "gold")
-  end)
-  
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(showText, showLabel, "gold", "blue")
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(showRadio, showLabel, "gold", "blue")
   showRadio:SetScript("OnClick", function()
     if AutoLFM_MinimapButton and not AutoLFM_MinimapButton:IsShown() then
       AutoLFM_MinimapButton:Show()
@@ -375,45 +313,24 @@ local function CreateMinimapList(lastAnchor)
     end
     UpdateMinimapRadioButtons()
   end)
-  
   hideRadio = CreateFrame("CheckButton", nil, mainFrame, "UIRadioButtonTemplate")
   hideRadio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   hideRadio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   hideRadio:SetPoint("TOPLEFT", showRadio, "BOTTOMLEFT", 0, -4)
   hideRadio:SetChecked(not isVisible)
-  
   local hideText = CreateFrame("Button", nil, mainFrame)
   hideText:SetPoint("LEFT", hideRadio, "RIGHT", 0, 0)
   hideText:SetWidth(55)
   hideText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
-  
   local hideLabel = hideText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   hideLabel:SetPoint("LEFT", hideText, "LEFT", 5, 0)
   hideLabel:SetText("Hide")
   AutoLFM.Core.Utils.SetFontColor(hideLabel, "gold")
-  
   hideText:SetScript("OnClick", function()
     hideRadio:Click()
   end)
-  
-  hideText:SetScript("OnEnter", function()
-    AutoLFM.Core.Utils.SetFontColor(hideLabel, "blue")
-    hideRadio:LockHighlight()
-  end)
-  
-  hideText:SetScript("OnLeave", function()
-    AutoLFM.Core.Utils.SetFontColor(hideLabel, "gold")
-    hideRadio:UnlockHighlight()
-  end)
-  
-  hideRadio:SetScript("OnEnter", function()
-    AutoLFM.Core.Utils.SetFontColor(hideLabel, "blue")
-  end)
-  
-  hideRadio:SetScript("OnLeave", function()
-    AutoLFM.Core.Utils.SetFontColor(hideLabel, "gold")
-  end)
-  
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(hideText, hideLabel, "gold", "blue")
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(hideRadio, hideLabel, "gold", "blue")
   hideRadio:SetScript("OnClick", function()
     if AutoLFM_MinimapButton and AutoLFM_MinimapButton:IsShown() then
       AutoLFM_MinimapButton:Hide()
@@ -421,75 +338,40 @@ local function CreateMinimapList(lastAnchor)
     end
     UpdateMinimapRadioButtons()
   end)
-  
   local resetButton = CreateFrame("Button", nil, mainFrame)
   resetButton:SetWidth(20)
   resetButton:SetHeight(20)
   resetButton:SetPoint("TOPLEFT", hideRadio, "BOTTOMLEFT", -2, -4)
-  
   local resetIcon = resetButton:CreateTexture(nil, "ARTWORK")
   resetIcon:SetAllPoints(resetButton)
   resetIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonRotationLeft")
-  
   local resetHL = resetButton:CreateTexture(nil, "HIGHLIGHT")
   resetHL:SetAllPoints(resetButton)
   resetHL:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonHighlight")
   resetHL:SetBlendMode("ADD")
-  
   local resetText = CreateFrame("Button", nil, mainFrame)
   resetText:SetPoint("LEFT", resetButton, "RIGHT", 0, 0)
   resetText:SetWidth(55)
   resetText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
-  
   local resetLabel = resetText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   resetLabel:SetPoint("LEFT", resetText, "LEFT", 5, 0)
   resetLabel:SetText("Reset")
   AutoLFM.Core.Utils.SetFontColor(resetLabel, "gold")
-  
   resetText:SetScript("OnClick", function()
     resetButton:Click()
   end)
-  
-  resetText:SetScript("OnEnter", function()
-    AutoLFM.Core.Utils.SetFontColor(resetLabel, "blue")
-    resetButton:LockHighlight()
-    GameTooltip:SetOwner(resetText, "ANCHOR_RIGHT")
-    GameTooltip:SetText("Reset minimap button position", 1, 1, 1)
-    GameTooltip:Show()
-  end)
-  
-  resetText:SetScript("OnLeave", function()
-    AutoLFM.Core.Utils.SetFontColor(resetLabel, "gold")
-    resetButton:UnlockHighlight()
-    GameTooltip:Hide()
-  end)
-  
-  resetButton:SetScript("OnEnter", function()
-    AutoLFM.Core.Utils.SetFontColor(resetLabel, "blue")
-    GameTooltip:SetOwner(resetButton, "ANCHOR_RIGHT")
-    GameTooltip:SetText("Reset minimap button position", 1, 1, 1)
-    GameTooltip:Show()
-  end)
-  
-  resetButton:SetScript("OnLeave", function()
-    AutoLFM.Core.Utils.SetFontColor(resetLabel, "gold")
-    GameTooltip:Hide()
-  end)
-  
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(resetText, resetLabel, "gold", "blue")
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(resetButton, resetLabel, "gold", "blue")
   resetButton:SetScript("OnClick", function()
     AutoLFM.Core.Settings.ResetMinimapPos()
-    
     if AutoLFM_MinimapButton and AutoLFM.UI.MinimapButton.ResetPosition then
       AutoLFM.UI.MinimapButton.ResetPosition()
       AutoLFM_MinimapButton:Show()
       AutoLFM.Core.Settings.SaveMinimapHidden(false)
     end
-    
     UpdateMinimapRadioButtons()
   end)
-  
   UpdateMinimapRadioButtons()
-  
   return minimapIcon
 end
 
@@ -498,7 +380,6 @@ end
 -----------------------------------------------------------------------------
 local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
   if not parentFrame or not channelName then return nil end
-  
   local hasAccess = true
   if channelName == "Hardcore" then
     if AutoLFM.Logic.Selection.IsHardcoreMode then
@@ -507,33 +388,25 @@ local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
       hasAccess = false
     end
   end
-  
   local button = AutoLFM.UI.PanelBuilder.CreateCheckbox(parentFrame, nil, function()
     if not this then return end
-    
     if not hasAccess then
       this:SetChecked(false)
       return
     end
-    
     if not this.GetChecked then return end
-    
     if AutoLFM.Logic.Selection.ToggleChannel then
       AutoLFM.Logic.Selection.ToggleChannel(channelName, this:GetChecked())
     end
   end)
-  
   if not button then return nil end
-  
   button:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   button:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  
   if lastButton then
     button:SetPoint("TOPLEFT", lastButton, "BOTTOMLEFT", 0, -4)
   else
     button:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -20)
   end
-  
   if not hasAccess then
     button:Disable()
     button:SetAlpha(0.5)
@@ -541,22 +414,18 @@ local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
     button:Enable()
     button:SetAlpha(1.0)
   end
-  
   local channelText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   channelText:SetPoint("LEFT", button, "RIGHT", 5, 0)
   channelText:SetText(channelName)
   AutoLFM.Core.Utils.SetFontColor(channelText, "gold")
-  
   if not hasAccess then
     AutoLFM.Core.Utils.SetFontColor(channelText, "gray")
   end
-  
   button:SetScript("OnEnter", function()
     if hasAccess then
       AutoLFM.Core.Utils.SetFontColor(channelText, "blue")
     end
   end)
-  
   button:SetScript("OnLeave", function()
     if hasAccess then
       AutoLFM.Core.Utils.SetFontColor(channelText, "gold")
@@ -564,35 +433,28 @@ local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
       AutoLFM.Core.Utils.SetFontColor(channelText, "gray")
     end
   end)
-  
   if hasAccess and AutoLFM.Logic.Selection.IsChannelSelected then
     button:SetChecked(AutoLFM.Logic.Selection.IsChannelSelected(channelName))
   else
     button:SetChecked(false)
   end
-  
   channelButtons[channelName] = button
-  
   return button
 end
 
 local function CreateChannelCheckboxes()
   if not channelsFrame or not AutoLFM.Logic.Selection.FindAvailableChannels then return end
-  
   for _, button in pairs(channelButtons) do
     if button then
       button:Hide()
     end
   end
   channelButtons = {}
-  
   local foundChannels = AutoLFM.Logic.Selection.FindAvailableChannels()
   if not foundChannels or table.getn(foundChannels) == 0 then
     return
   end
-  
   local lastButton = nil
-  
   for _, channelName in ipairs(foundChannels) do
     if channelName then
       lastButton = CreateChannelCheckbox(channelsFrame, channelName, lastButton)
@@ -607,7 +469,6 @@ local function CreateChannelsFrame(lastAnchor)
     channelsFrame:Show()
     return
   end
-  
   channelsFrame = CreateFrame("Frame", "AutoLFM_ChannelSelector", mainFrame)
   channelsFrame:SetWidth(135)
   channelsFrame:SetHeight(100)
@@ -620,13 +481,11 @@ local function CreateChannelsFrame(lastAnchor)
   channelsFrame:SetBackdropColor(0.1, 0.1, 0.1, 0.3)
   channelsFrame:SetPoint("TOPLEFT", lastAnchor, "TOPRIGHT", 130, 0)
   channelsFrame:Show()
-  
   local channelIcon = channelsFrame:CreateTexture(nil, "OVERLAY")
   channelIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\channel")
   channelIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   channelIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   channelIcon:SetPoint("TOPLEFT", channelsFrame, "TOPLEFT", 0, 0)
-  
   local titleText = channelsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   titleText:SetText("Channels:")
   titleText:SetPoint("LEFT", channelIcon, "RIGHT", 3, 0)
@@ -639,22 +498,18 @@ end
 function AutoLFM.UI.MorePanel.Create(parentFrame)
   if not parentFrame then return nil end
   if mainFrame then return mainFrame end
-  
   CreateMainPanel(parentFrame)
   CreateCustomMessageEditBox()
   local sliderAnchor = CreateBroadcastIntervalSlider()
   local durationAnchor, minimapAnchor = CreateStatsList(sliderAnchor)
   CreateChannelsFrame(durationAnchor)
   CreateMinimapList(minimapAnchor)
-  
   mainFrame:SetScript("OnUpdate", function()
     UpdateStatsDisplay()
     UpdateMinimapRadioButtons()
-    
     local now = GetTime()
     if now - lastSliderUpdate < AutoLFM.UI.MorePanel.UPDATE_THROTTLE then return end
     lastSliderUpdate = now
-    
     if broadcastIntervalSlider then
       local currentValue = broadcastIntervalSlider:GetValue()
       if currentValue then
@@ -665,7 +520,6 @@ function AutoLFM.UI.MorePanel.Create(parentFrame)
       end
     end
   end)
-  
   return mainFrame
 end
 
@@ -673,7 +527,6 @@ function AutoLFM.UI.MorePanel.Show()
   if mainFrame then
     mainFrame:Show()
   end
-  
   AutoLFM.UI.MorePanel.RefreshChannelCheckboxes()
   UpdateMinimapRadioButtons()
 end

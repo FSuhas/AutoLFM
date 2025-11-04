@@ -3,6 +3,7 @@
 ## [2.19] - Code refactoring
 
 - Centralized utility functions to Core/Utils.lua (truncate, setfontcolor, ...)
+- Label hover behavior: created AttachLabelHighlight utility
 
 ## [2.18] - FuBar plugin 1.0
 

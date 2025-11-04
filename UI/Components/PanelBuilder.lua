@@ -454,6 +454,22 @@ function AutoLFM.UI.PanelBuilder.HideFrames(frameCollection)
 end
 
 -----------------------------------------------------------------------------
+-- Label Highlight Utilities
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.AttachLabelHighlight(button, label, normalColor, hoverColor)
+  if not button or not label then return end
+  normalColor = normalColor or "gold"
+  hoverColor = hoverColor or "blue"
+  button:SetScript("OnEnter", function()
+    AutoLFM.Core.Utils.SetFontColor(label, hoverColor)
+    button:LockHighlight()
+  end)
+  button:SetScript("OnLeave", function()
+    AutoLFM.Core.Utils.SetFontColor(label, normalColor)
+    button:UnlockHighlight()
+  end)
+end
+-----------------------------------------------------------------------------
 -- Tooltip Utilities
 -----------------------------------------------------------------------------
 function AutoLFM.UI.PanelBuilder.ShowTooltip(frame, text, anchor)
