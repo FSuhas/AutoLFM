@@ -164,37 +164,33 @@ local function CreateBroadcastIntervalSlider()
       y = -10
     }
   })
-  broadcastIntervalSlider = CreateFrame("Slider", nil, mainFrame)
-  broadcastIntervalSlider:SetWidth(145)
-  broadcastIntervalSlider:SetHeight(17)
-  broadcastIntervalSlider:SetPoint("LEFT", sliderLabel, "RIGHT", 10, 0)
-  broadcastIntervalSlider:SetMinMaxValues(AutoLFM.Logic.Broadcaster.INTERVAL_MIN, AutoLFM.Logic.Broadcaster.INTERVAL_MAX)
   local savedInterval = AutoLFM.Core.Settings.LoadInterval()
-  broadcastIntervalSlider:SetValue(savedInterval)
-  broadcastIntervalSlider:SetValueStep(AutoLFM.Logic.Broadcaster.INTERVAL_STEP)
-  broadcastIntervalSlider:SetOrientation("HORIZONTAL")
-  broadcastIntervalSlider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
-  broadcastIntervalSlider:SetBackdrop({
-    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBackground",
-    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBorder",
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = {left = 3, right = 3, top = 6, bottom = 6}
-  })
   local sliderValue = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sliderValue:SetText(savedInterval .. " secs")
-  sliderValue:SetPoint("LEFT", broadcastIntervalSlider, "RIGHT", 10, 0)
-  broadcastIntervalSlider:SetScript("OnValueChanged", function()
-    local value = broadcastIntervalSlider:GetValue()
-    if value then
+  broadcastIntervalSlider = AutoLFM.UI.PanelBuilder.CreateSlider({
+    parent = mainFrame,
+    width = 145,
+    height = 17,
+    minValue = AutoLFM.Logic.Broadcaster.INTERVAL_MIN,
+    maxValue = AutoLFM.Logic.Broadcaster.INTERVAL_MAX,
+    initialValue = savedInterval,
+    valueStep = AutoLFM.Logic.Broadcaster.INTERVAL_STEP,
+    point = {
+      point = "LEFT",
+      relativeTo = sliderLabel,
+      relativePoint = "RIGHT",
+      x = 10,
+      y = 0
+    },
+    onValueChanged = function(value)
       sliderValue:SetText(math.floor(value) .. " secs")
       AutoLFM.Core.Settings.SaveInterval(value)
       if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
         AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.INTERVAL_CHANGED)
       end
     end
-  end)
+  })
+  sliderValue:SetPoint("LEFT", broadcastIntervalSlider, "RIGHT", 10, 0)
   return sliderIcon
 end
 

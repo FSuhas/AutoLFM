@@ -232,20 +232,25 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   AutoLFM.Core.Utils.SetFontColor(raidSizeValueEditBox, "yellow")
   raidSizeValueEditBox:Hide()
   
-  raidSizeSlider = CreateFrame("Slider", nil, raidSizeControlFrame)
-  raidSizeSlider:SetPoint("LEFT", raidSizeValueEditBox, "RIGHT", 0, 0)
-  raidSizeSlider:SetWidth(115)
-  raidSizeSlider:SetHeight(17)
-  raidSizeSlider:SetMinMaxValues(10, 10)
-  raidSizeSlider:SetValue(10)
-  raidSizeSlider:SetValueStep(1)
-  raidSizeSlider:SetOrientation("HORIZONTAL")
-  raidSizeSlider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
-  raidSizeSlider:SetBackdrop({
-      bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH.."sliderBackground",
-      edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH.."sliderBorder",
-      tile = true, tileSize = 8, edgeSize = 8,
-      insets = {left=3, right=3, top=6, bottom=6}
+  raidSizeSlider = AutoLFM.UI.PanelBuilder.CreateSlider({
+    parent = raidSizeControlFrame,
+    width = 115,
+    height = 17,
+    minValue = 10,
+    maxValue = 10,
+    initialValue = 10,
+    valueStep = 1,
+    point = {
+      point = "LEFT",
+      relativeTo = raidSizeValueEditBox,
+      relativePoint = "RIGHT",
+      x = 0,
+      y = 0
+    },
+    onValueChanged = function(value)
+      if AutoLFM.Logic.Content.SetRaidSize then AutoLFM.Logic.Content.SetRaidSize(value) end
+      if raidSizeValueEditBox then raidSizeValueEditBox:SetText(tostring(value)) end
+    end
   })
   raidSizeSlider:EnableMouse(true)
   raidSizeSlider:Hide()
@@ -284,11 +289,6 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   
   raidSizeValueEditBox:SetScript("OnEnterPressed", function() raidSizeValueEditBox:ClearFocus() end)
   raidSizeValueEditBox:SetScript("OnEscapePressed", function() raidSizeValueEditBox:ClearFocus() end)
-  raidSizeSlider:SetScript("OnValueChanged", function()
-    local value = raidSizeSlider:GetValue()
-    if AutoLFM.Logic.Content.SetRaidSize then AutoLFM.Logic.Content.SetRaidSize(value) end
-    if raidSizeValueEditBox then raidSizeValueEditBox:SetText(tostring(value)) end
-  end)
   
   SetFixedSizeState()
 end

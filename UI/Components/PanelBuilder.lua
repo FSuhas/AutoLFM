@@ -501,6 +501,47 @@ function AutoLFM.UI.PanelBuilder.CreateIconWithLabel(config)
 end
 
 -----------------------------------------------------------------------------
+-- Slider
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.CreateSlider(config)
+  if not config or not config.parent then return nil end
+  local slider = CreateFrame("Slider", config.name, config.parent)
+  slider:SetWidth(config.width or 145)
+  slider:SetHeight(config.height or 17)
+  if config.point then
+    slider:SetPoint(
+      config.point.point or "TOPLEFT",
+      config.point.relativeTo or config.parent,
+      config.point.relativePoint or "TOPLEFT",
+      config.point.x or 0,
+      config.point.y or 0
+    )
+  end
+  slider:SetMinMaxValues(config.minValue or 0, config.maxValue or 100)
+  slider:SetValue(config.initialValue or config.minValue or 0)
+  slider:SetValueStep(config.valueStep or 1)
+  slider:SetOrientation("HORIZONTAL")
+  slider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
+  slider:SetBackdrop({
+    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBackground",
+    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBorder",
+    tile = true,
+    tileSize = 8,
+    edgeSize = 8,
+    insets = {left = 3, right = 3, top = 6, bottom = 6}
+  })
+  if config.onValueChanged then
+    slider:SetScript("OnValueChanged", function()
+      local value = slider:GetValue()
+      if value then
+        config.onValueChanged(value)
+      end
+    end)
+  end
+  return slider
+end
+
+-----------------------------------------------------------------------------
 -- Radio Button Group
 -----------------------------------------------------------------------------
 function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
