@@ -59,6 +59,7 @@ function AutoLFM.Init.Run()
   
   Call("Core.Settings.Init")
 
+  Call("UI.DarkUI.Init")
   Call("UI.MainWindow.Init")
 
   Call("UI.DungeonsPanel.Init")

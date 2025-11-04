@@ -52,7 +52,7 @@ local function CreateMainPanel(parentFrame)
   mainFrame:SetWidth(292)
   mainFrame:SetHeight(253)
   mainFrame:SetBackdrop(AutoLFM.UI.PanelBuilder.BACKDROPS.PANEL)
-  mainFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.5)
+  mainFrame:SetBackdropColor(0, 0, 0, 0)
   return mainFrame
 end
 
@@ -381,6 +381,117 @@ local function CreateMinimapList(lastAnchor)
 end
 
 -----------------------------------------------------------------------------
+-- Dark UI Controls
+-----------------------------------------------------------------------------
+local darkUIRadioGroup = nil
+
+local function UpdateDarkUIRadioButtons()
+  if not darkUIRadioGroup then return end
+  
+  local isEnabled = AutoLFM.UI.DarkUI.IsEnabled()
+  if isEnabled then
+    darkUIRadioGroup.Update("on")
+  else
+    darkUIRadioGroup.Update("off")
+  end
+end
+
+local function CreateDarkUIList(lastAnchor)
+  if not mainFrame or not lastAnchor then return end
+  local darkUIIcon = AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = mainFrame,
+    texture = "Icons\\tabard",
+    label = "Dark UI:",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = lastAnchor,
+      relativePoint = "TOPRIGHT",
+      x = 130,
+      y = 0
+    }
+  })
+
+  local isEnabled = AutoLFM.UI.DarkUI.IsEnabled()
+  darkUIRadioGroup = AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup({
+    parent = mainFrame,
+    anchor = {
+      point = "TOPLEFT",
+      relativeTo = darkUIIcon,
+      relativePoint = "BOTTOMLEFT",
+      x = 10,
+      y = -5
+    },
+    buttons = {
+      {
+        key = "on",
+        label = "On",
+        checked = isEnabled,
+        onClick = function()
+          if not AutoLFM.UI.DarkUI.IsEnabled() then
+            AutoLFM.UI.DarkUI.Enable()
+          end
+        end
+      },
+      {
+        key = "off",
+        label = "Off",
+        checked = not isEnabled,
+        onClick = function()
+          if AutoLFM.UI.DarkUI.IsEnabled() then
+            AutoLFM.UI.DarkUI.Disable()
+          end
+        end
+      }
+    },
+    labelWidth = 55,
+    labelColor = "gold",
+    hoverColor = "blue",
+    spacing = -4
+  })
+  if not darkUIRadioGroup then return nil end
+
+  local lastRadio = darkUIRadioGroup.radioButtons["off"]
+  local reloadButton = CreateFrame("Button", nil, mainFrame)
+  reloadButton:SetWidth(20)
+  reloadButton:SetHeight(20)
+  reloadButton:SetPoint("TOPLEFT", lastRadio, "BOTTOMLEFT", -2, -4)
+
+  local reloadIcon = reloadButton:CreateTexture(nil, "ARTWORK")
+  reloadIcon:SetAllPoints(reloadButton)
+  reloadIcon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Icons\\buttonRotationLeft")
+
+  local reloadHL = reloadButton:CreateTexture(nil, "HIGHLIGHT")
+  reloadHL:SetAllPoints(reloadButton)
+  reloadHL:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Icons\\buttonHighlight")
+  reloadHL:SetBlendMode("ADD")
+
+  local reloadText = CreateFrame("Button", nil, mainFrame)
+  reloadText:SetPoint("LEFT", reloadButton, "RIGHT", 0, 0)
+  reloadText:SetWidth(55)
+  reloadText:SetHeight(AutoLFM.Core.Constants.BUTTON_HEIGHT)
+
+  local reloadLabel = reloadText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  reloadLabel:SetPoint("LEFT", reloadText, "LEFT", 5, 0)
+  reloadLabel:SetText("Reload")
+  AutoLFM.Core.Utils.SetFontColor(reloadLabel, "gold")
+
+  reloadText:SetScript("OnClick", function()
+    reloadButton:Click()
+  end)
+
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(reloadText, reloadLabel, "gold", "blue")
+  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(reloadButton, reloadLabel, "gold", "blue")
+
+  reloadButton:SetScript("OnClick", function()
+    ReloadUI()
+  end)
+
+  UpdateDarkUIRadioButtons()
+  return darkUIIcon
+end
+
+-----------------------------------------------------------------------------
 -- Channel Selector (Independent Frame)
 -----------------------------------------------------------------------------
 local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
@@ -478,9 +589,12 @@ local function CreateChannelsFrame(lastAnchor)
   channelsFrame:SetWidth(135)
   channelsFrame:SetHeight(100)
   channelsFrame:SetBackdrop(AutoLFM.UI.PanelBuilder.BACKDROPS.PANEL)
-  channelsFrame:SetBackdropColor(0.1, 0.1, 0.1, 0.3)
+  channelsFrame:SetBackdropColor(0, 0, 0, 0)
   channelsFrame:SetPoint("TOPLEFT", lastAnchor, "TOPRIGHT", 130, 0)
   channelsFrame:Show()
+  
+  AutoLFM.UI.DarkUI.RegisterFrame(channelsFrame)
+  
   AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
     parent = channelsFrame,
     texture = "Icons\\channel",
@@ -508,7 +622,8 @@ function AutoLFM.UI.MorePanel.Init()
   local sliderAnchor = CreateBroadcastIntervalSlider()
   local durationAnchor, minimapAnchor = CreateStatsList(sliderAnchor)
   CreateChannelsFrame(durationAnchor)
-  CreateMinimapList(minimapAnchor)
+  local darkUIAnchor = CreateMinimapList(minimapAnchor)
+  CreateDarkUIList(darkUIAnchor)
   mainFrame:SetScript("OnUpdate", function()
     UpdateStatsDisplay()
     UpdateMinimapRadioButtons()
@@ -525,6 +640,8 @@ function AutoLFM.UI.MorePanel.Init()
       end
     end
   end)
+  
+  AutoLFM.UI.DarkUI.RegisterFrame(mainFrame)
   
   AutoLFM.UI.MorePanel.Register()
 end

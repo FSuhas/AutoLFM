@@ -31,6 +31,7 @@ local function ShowMainHelp()
   AutoLFM.Core.Utils.PrintTitle("=== AutoLFM Commands ===")
   AutoLFM.Core.Utils.Print("/lfm" .. AutoLFM.Color(" - Opens AutoLFM window", "white"))
   AutoLFM.Core.Utils.Print("/lfm minimap" .. AutoLFM.Color(" - Minimap button commands", "white"))
+  AutoLFM.Core.Utils.Print("/lfm darkui" .. AutoLFM.Color(" - Dark mode commands", "white"))
   AutoLFM.Core.Utils.Print("/lfm misc" .. AutoLFM.Color(" - Misc modules commands", "white"))
   AutoLFM.Core.Utils.Print("/lfm api" .. AutoLFM.Color(" - API testing commands", "white"))
 end
@@ -113,6 +114,39 @@ function AutoLFM.Core.Commands.Handle(msg)
       
     else
       ShowErrorAndHelp("Unknown command: " .. ErrorCommandPath(cmd1, cmd2), ShowMinimapHelp)
+    end
+    return
+  end
+  
+  -----------------------------------------------------------------------------
+  -- DARK
+  -----------------------------------------------------------------------------
+  if cmd1 == "darkui" then
+    local function ShowDarkHelp()
+      AutoLFM.Core.Utils.PrintTitle("=== Dark Mode Commands " .. AutoLFM.Color("( ","white") .. AutoLFM.Color("/reload","gold") .. AutoLFM.Color(" must be required)","white") .. AutoLFM.Color(" ===","blue"))
+      AutoLFM.Core.Utils.Print("/lfm darkui on" .. AutoLFM.Color(" - Enables dark mode", "white"))
+      AutoLFM.Core.Utils.Print("/lfm darkui off" .. AutoLFM.Color(" - Disables dark mode", "white"))
+    end
+    
+    if not cmd2 or cmd2 == "help" then
+      ShowDarkHelp()
+      
+    elseif cmd2 == "on" then
+      if not AutoLFM.UI.DarkUI.IsEnabled() then
+        AutoLFM.UI.DarkUI.Enable()
+      else
+        AutoLFM.Core.Utils.PrintWarning("Dark mode already enabled")
+      end
+      
+    elseif cmd2 == "off" then
+      if AutoLFM.UI.DarkUI.IsEnabled() then
+        AutoLFM.UI.DarkUI.Disable()
+      else
+        AutoLFM.Core.Utils.PrintWarning("Dark mode already disabled")
+      end
+      
+    else
+      ShowErrorAndHelp("Unknown command: " .. ErrorCommandPath(cmd1, cmd2), ShowDarkHelp)
     end
     return
   end

@@ -124,6 +124,7 @@ AutoLFM.Core.Constants.PRIORITY_COLORS = {
 AutoLFM.Core.Constants.DEFAULTS = {
   MINIMAP_ANGLE = 235,
   MINIMAP_HIDDEN = false,
+  DARK_MODE = nil,
   BROADCAST_INTERVAL = 60,
   MISC_MODULES = {
     fpsDisplay = false,
