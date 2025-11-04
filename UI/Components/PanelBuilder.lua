@@ -471,6 +471,36 @@ function AutoLFM.UI.PanelBuilder.AttachLabelHighlight(button, label, normalColor
 end
 
 -----------------------------------------------------------------------------
+-- Icon With Label Creation
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.CreateIconWithLabel(config)
+  if not config or not config.parent then return nil, nil end
+  local size = config.size or AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE
+  local labelOffset = config.labelOffset or 3
+  local icon = config.parent:CreateTexture(nil, "OVERLAY")
+  icon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. (config.texture or "Icons\\generic"))
+  icon:SetWidth(size)
+  icon:SetHeight(size)
+  if config.point then
+    icon:SetPoint(
+      config.point.point or "TOPLEFT",
+      config.point.relativeTo or config.parent,
+      config.point.relativePoint or "TOPLEFT",
+      config.point.x or 0,
+      config.point.y or 0
+    )
+  end
+  local labelFontString = nil
+  if config.label then
+    labelFontString = config.parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    labelFontString:SetText(config.label)
+    labelFontString:SetPoint("LEFT", icon, "RIGHT", labelOffset, 0)
+    AutoLFM.Core.Utils.SetFontColor(labelFontString, config.labelColor or "white")
+  end
+  return icon, labelFontString
+end
+
+-----------------------------------------------------------------------------
 -- Radio Button Group
 -----------------------------------------------------------------------------
 function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)

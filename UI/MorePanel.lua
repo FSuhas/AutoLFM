@@ -72,15 +72,19 @@ end
 -----------------------------------------------------------------------------
 local function CreateCustomMessageEditBox()
   if not mainFrame then return end
-  local editboxIcon = mainFrame:CreateTexture(nil, "OVERLAY")
-  editboxIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\send")
-  editboxIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  editboxIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  editboxIcon:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 5, -5)
-  local editboxLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  editboxLabel:SetText("Add details to your message:")
-  editboxLabel:SetPoint("LEFT", editboxIcon, "RIGHT", 3, 0)
-  AutoLFM.Core.Utils.SetFontColor(editboxLabel, "white")
+  local editboxIcon = AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = mainFrame,
+    texture = "Icons\\send",
+    label = "Add details to your message:",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = mainFrame,
+      relativePoint = "TOPLEFT",
+      x = 5,
+      y = -5
+    }
+  })
 
   customMessageEditBox = CreateFrame("EditBox", "AutoLFM_EditBox", mainFrame)
   customMessageEditBox:SetPoint("TOPLEFT", editboxIcon, "BOTTOMLEFT", 0, -5)
@@ -147,15 +151,19 @@ end
 -----------------------------------------------------------------------------
 local function CreateBroadcastIntervalSlider()
   if not mainFrame or not customMessageEditBox then return end
-  local sliderIcon = mainFrame:CreateTexture(nil, "OVERLAY")
-  sliderIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\tool")
-  sliderIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  sliderIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  sliderIcon:SetPoint("TOPLEFT", customMessageEditBox, "BOTTOMLEFT", 0, -10)
-  local sliderLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  sliderLabel:SetText("Interval:")
-  sliderLabel:SetPoint("LEFT", sliderIcon, "RIGHT", 3, 0)
-  AutoLFM.Core.Utils.SetFontColor(sliderLabel, "white")
+  local sliderIcon, sliderLabel = AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = mainFrame,
+    texture = "Icons\\tool",
+    label = "Interval:",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = customMessageEditBox,
+      relativePoint = "BOTTOMLEFT",
+      x = 0,
+      y = -10
+    }
+  })
   broadcastIntervalSlider = CreateFrame("Slider", nil, mainFrame)
   broadcastIntervalSlider:SetWidth(145)
   broadcastIntervalSlider:SetHeight(17)
@@ -225,39 +233,51 @@ end
 
 local function CreateStatsList(lastAnchor)
   if not mainFrame or not lastAnchor then return end
-  local durationIcon = mainFrame:CreateTexture(nil, "OVERLAY")
-  durationIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\bag")
-  durationIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  durationIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  durationIcon:SetPoint("TOPLEFT", lastAnchor, "BOTTOMLEFT", 0, -7)
-  local durationLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  durationLabel:SetText("Duration: ")
-  durationLabel:SetPoint("LEFT", durationIcon, "RIGHT", 3, 0)
-  AutoLFM.Core.Utils.SetFontColor(durationLabel, "white")
+  local durationIcon, durationLabel = AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = mainFrame,
+    texture = "Icons\\bag",
+    label = "Duration: ",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = lastAnchor,
+      relativePoint = "BOTTOMLEFT",
+      x = 0,
+      y = -7
+    }
+  })
   durationValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   durationValueText:SetText("00:00")
   durationValueText:SetPoint("LEFT", durationLabel, "RIGHT", 0, 0)
-  local sentIcon = mainFrame:CreateTexture(nil, "OVERLAY")
-  sentIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\book")
-  sentIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  sentIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  sentIcon:SetPoint("TOPLEFT", durationIcon, "BOTTOMLEFT", 0, -7)
-  local sentLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  sentLabel:SetText("Sent: ")
-  sentLabel:SetPoint("LEFT", sentIcon, "RIGHT", 3, 0)
-  AutoLFM.Core.Utils.SetFontColor(sentLabel, "white")
+  local sentIcon, sentLabel = AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = mainFrame,
+    texture = "Icons\\book",
+    label = "Sent: ",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = durationIcon,
+      relativePoint = "BOTTOMLEFT",
+      x = 0,
+      y = -7
+    }
+  })
   sentValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   sentValueText:SetText("0")
   sentValueText:SetPoint("LEFT", sentLabel, "RIGHT", 0, 0)
-  local nextIcon = mainFrame:CreateTexture(nil, "OVERLAY")
-  nextIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\chat")
-  nextIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  nextIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  nextIcon:SetPoint("TOPLEFT", sentIcon, "BOTTOMLEFT", 0, -7)
-  local nextLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  nextLabel:SetText("Next: ")
-  nextLabel:SetPoint("LEFT", nextIcon, "RIGHT", 3, 0)
-  AutoLFM.Core.Utils.SetFontColor(nextLabel, "white")
+  local nextIcon, nextLabel = AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = mainFrame,
+    texture = "Icons\\chat",
+    label = "Next: ",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = sentIcon,
+      relativePoint = "BOTTOMLEFT",
+      x = 0,
+      y = -7
+    }
+  })
   nextValueText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   nextValueText:SetText("--")
   nextValueText:SetPoint("LEFT", nextLabel, "RIGHT", 0, 0)
@@ -281,17 +301,19 @@ end
 
 local function CreateMinimapList(lastAnchor)
   if not mainFrame or not lastAnchor then return end
-
-  local minimapIcon = mainFrame:CreateTexture(nil, "OVERLAY")
-  minimapIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\minimap")
-  minimapIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  minimapIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  minimapIcon:SetPoint("TOPLEFT", lastAnchor, "BOTTOMLEFT", 0, -7)
-
-  local minimapTitle = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  minimapTitle:SetText("Minimap button:")
-  minimapTitle:SetPoint("LEFT", minimapIcon, "RIGHT", 3, 0)
-  AutoLFM.Core.Utils.SetFontColor(minimapTitle, "white")
+  local minimapIcon = AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = mainFrame,
+    texture = "Icons\\minimap",
+    label = "Minimap button:",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = lastAnchor,
+      relativePoint = "BOTTOMLEFT",
+      x = 0,
+      y = -7
+    }
+  })
 
   local isVisible = AutoLFM_MinimapButton and AutoLFM_MinimapButton:IsShown()
   minimapRadioGroup = AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup({
@@ -486,15 +508,19 @@ local function CreateChannelsFrame(lastAnchor)
   channelsFrame:SetBackdropColor(0.1, 0.1, 0.1, 0.3)
   channelsFrame:SetPoint("TOPLEFT", lastAnchor, "TOPRIGHT", 130, 0)
   channelsFrame:Show()
-  local channelIcon = channelsFrame:CreateTexture(nil, "OVERLAY")
-  channelIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\channel")
-  channelIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  channelIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  channelIcon:SetPoint("TOPLEFT", channelsFrame, "TOPLEFT", 0, 0)
-  local titleText = channelsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  titleText:SetText("Channels:")
-  titleText:SetPoint("LEFT", channelIcon, "RIGHT", 3, 0)
-  AutoLFM.Core.Utils.SetFontColor(titleText, "white")
+  AutoLFM.UI.PanelBuilder.CreateIconWithLabel({
+    parent = channelsFrame,
+    texture = "Icons\\channel",
+    label = "Channels:",
+    labelColor = "white",
+    point = {
+      point = "TOPLEFT",
+      relativeTo = channelsFrame,
+      relativePoint = "TOPLEFT",
+      x = 0,
+      y = 0
+    }
+  })
 end
 
 -----------------------------------------------------------------------------
