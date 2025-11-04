@@ -27,13 +27,13 @@ local function OnGroupRosterChange()
       end
       
       if result and result.playStopSound then
-        pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_STOP)
+        pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. AutoLFM.Core.Constants.SOUNDS.STOP)
       end
     else
       AutoLFM.Logic.Broadcaster.UpdateMessage()
     end
   elseif mode == "dungeon" then
-    if currentCount >= AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_DUNGEON then
+    if currentCount >= AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON then
       local result = AutoLFM.Logic.Broadcaster.HandleGroupFull("dungeon")
       
       if result and result.needsUIUpdate then
@@ -44,7 +44,7 @@ local function OnGroupRosterChange()
       end
       
       if result and result.playStopSound then
-        pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_STOP)
+        pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. AutoLFM.Core.Constants.SOUNDS.STOP)
       end
     else
       AutoLFM.Logic.Broadcaster.UpdateMessage()

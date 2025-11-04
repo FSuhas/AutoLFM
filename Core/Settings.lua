@@ -7,22 +7,9 @@ if not AutoLFM.Core then AutoLFM.Core = {} end
 if not AutoLFM.Core.Settings then AutoLFM.Core.Settings = {} end
 
 -----------------------------------------------------------------------------
--- Constants
+-- Local References
 -----------------------------------------------------------------------------
-AutoLFM.Core.Settings.DEFAULTS = {
-  MINIMAP_ANGLE = 235,
-  MINIMAP_HIDDEN = false,
-  BROADCAST_INTERVAL = 60,
-  MISC_MODULES = {
-    fpsDisplay = false,
-    restedXP = false,
-    autoInvite = false,
-    guildSpam = false,
-    autoMarker = false
-  }
-}
-
-local DEFAULTS = AutoLFM.Core.Settings.DEFAULTS
+local DEFAULTS = AutoLFM.Core.Constants.DEFAULTS
 
 -----------------------------------------------------------------------------
 -- Private State
@@ -44,14 +31,14 @@ local function EnsureCharData()
   if not V2_Settings[characterID] then
     V2_Settings[characterID] = {
       selectedChannels = {},
-      minimapBtnHidden = DEFAULTS.MINIMAP_HIDDEN,
+      minimapBtnHidden = AutoLFM.Core.Constants.DEFAULTS.MINIMAP_HIDDEN,
       dungeonFilters = {},
-      broadcastInterval = DEFAULTS.BROADCAST_INTERVAL,
+      broadcastInterval = AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL,
       miscModules = {},
       miscModulesData = {}
     }
     
-    for key, value in pairs(DEFAULTS.MISC_MODULES) do
+    for key, value in pairs(AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES) do
       V2_Settings[characterID].miscModules[key] = value
     end
   end
@@ -63,7 +50,7 @@ local function EnsureMiscModules(charData)
   if not charData then return end
   if not charData.miscModules then charData.miscModules = {} end
   
-  for key, defaultValue in pairs(DEFAULTS.MISC_MODULES) do
+  for key, defaultValue in pairs(AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES) do
     if charData.miscModules[key] == nil then
       charData.miscModules[key] = defaultValue
     end
@@ -144,12 +131,12 @@ end
 
 function AutoLFM.Core.Settings.LoadMinimap()
   if not EnsureCharData() then
-    return { hidden = DEFAULTS.MINIMAP_HIDDEN }
+    return { hidden = AutoLFM.Core.Constants.DEFAULTS.MINIMAP_HIDDEN }
   end
   
   local charData = GetCharData()
   if not charData then
-    return { hidden = DEFAULTS.MINIMAP_HIDDEN }
+    return { hidden = AutoLFM.Core.Constants.DEFAULTS.MINIMAP_HIDDEN }
   end
   
   return {
@@ -184,15 +171,15 @@ function AutoLFM.Core.Settings.SaveInterval(interval)
   if not EnsureCharData() then return end
   local charData = GetCharData()
   
-  charData.broadcastInterval = interval or DEFAULTS.BROADCAST_INTERVAL
+  charData.broadcastInterval = interval or AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
 end
 
 function AutoLFM.Core.Settings.LoadInterval()
   if not EnsureCharData() then
-    return DEFAULTS.BROADCAST_INTERVAL
+    return AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
   end
   local charData = GetCharData()
-  return charData and charData.broadcastInterval or DEFAULTS.BROADCAST_INTERVAL
+  return charData and charData.broadcastInterval or AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
 end
 
 -----------------------------------------------------------------------------
@@ -208,7 +195,7 @@ end
 
 function AutoLFM.Core.Settings.LoadMiscModule(moduleName)
   if not EnsureCharData() then
-    return DEFAULTS.MISC_MODULES[moduleName] or false
+    return AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES[moduleName] or false
   end
   local charData = GetCharData()
   EnsureMiscModules(charData)
@@ -221,7 +208,7 @@ function AutoLFM.Core.Settings.GetAllMiscModules()
   local charData = GetCharData()
   if not charData then
     charData = { miscModules = {} }
-    for key, value in pairs(DEFAULTS.MISC_MODULES) do
+    for key, value in pairs(AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES) do
       charData.miscModules[key] = value
     end
   end

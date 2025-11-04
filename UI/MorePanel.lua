@@ -7,12 +7,6 @@ if not AutoLFM.UI then AutoLFM.UI = {} end
 if not AutoLFM.UI.MorePanel then AutoLFM.UI.MorePanel = {} end
 
 -----------------------------------------------------------------------------
--- Constants
------------------------------------------------------------------------------
-AutoLFM.UI.MorePanel.MAX_MESSAGE_LENGTH = 150
-AutoLFM.UI.MorePanel.UPDATE_THROTTLE = 0.1
-
------------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
 local mainFrame = nil
@@ -42,7 +36,7 @@ end
 -- Utilities
 -----------------------------------------------------------------------------
 local function SnapToStep(value)
-  local roundedValue = math.floor(value / AutoLFM.Logic.Broadcaster.INTERVAL_STEP + 0.5) * AutoLFM.Logic.Broadcaster.INTERVAL_STEP
+  local roundedValue = math.floor(value / AutoLFM.Core.Constants.INTERVAL_STEP + 0.5) * AutoLFM.Core.Constants.INTERVAL_STEP
   return roundedValue
 end
 
@@ -58,7 +52,7 @@ local function CreateMainPanel(parentFrame)
   mainFrame:SetWidth(292)
   mainFrame:SetHeight(253)
   mainFrame:SetBackdrop({
-    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBackground",
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
     tile = true,
     tileSize = 16,
     insets = { left = 4, right = 4, top = 4, bottom = 4 }
@@ -88,15 +82,15 @@ local function CreateCustomMessageEditBox()
 
   customMessageEditBox = CreateFrame("EditBox", "AutoLFM_EditBox", mainFrame)
   customMessageEditBox:SetPoint("TOPLEFT", editboxIcon, "BOTTOMLEFT", 0, -5)
-  customMessageEditBox:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.EDITBOX_WIDTH)
-  customMessageEditBox:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.EDITBOX_HEIGHT)
+  customMessageEditBox:SetWidth(AutoLFM.Core.Constants.EDITBOX_WIDTH)
+  customMessageEditBox:SetHeight(AutoLFM.Core.Constants.EDITBOX_HEIGHT)
   customMessageEditBox:SetAutoFocus(false)
   customMessageEditBox:SetFontObject(GameFontNormal)
-  customMessageEditBox:SetMaxLetters(AutoLFM.UI.MorePanel.MAX_MESSAGE_LENGTH)
+  customMessageEditBox:SetMaxLetters(AutoLFM.Core.Constants.MAX_MESSAGE_LENGTH)
   customMessageEditBox:SetText("")
   customMessageEditBox:SetBackdrop({
-    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBackground",
-    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBorder",
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
+    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBorder",
     tile = true,
     tileSize = 8,
     edgeSize = 16,
@@ -171,10 +165,10 @@ local function CreateBroadcastIntervalSlider()
     parent = mainFrame,
     width = 145,
     height = 17,
-    minValue = AutoLFM.Logic.Broadcaster.INTERVAL_MIN,
-    maxValue = AutoLFM.Logic.Broadcaster.INTERVAL_MAX,
+    minValue = AutoLFM.Core.Constants.INTERVAL_MIN,
+    maxValue = AutoLFM.Core.Constants.INTERVAL_MAX,
     initialValue = savedInterval,
-    valueStep = AutoLFM.Logic.Broadcaster.INTERVAL_STEP,
+    valueStep = AutoLFM.Core.Constants.INTERVAL_STEP,
     point = {
       point = "LEFT",
       relativeTo = sliderLabel,
@@ -360,17 +354,17 @@ local function CreateMinimapList(lastAnchor)
 
   local resetIcon = resetButton:CreateTexture(nil, "ARTWORK")
   resetIcon:SetAllPoints(resetButton)
-  resetIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonRotationLeft")
+  resetIcon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Icons\\buttonRotationLeft")
 
   local resetHL = resetButton:CreateTexture(nil, "HIGHLIGHT")
   resetHL:SetAllPoints(resetButton)
-  resetHL:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonHighlight")
+  resetHL:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Icons\\buttonHighlight")
   resetHL:SetBlendMode("ADD")
 
   local resetText = CreateFrame("Button", nil, mainFrame)
   resetText:SetPoint("LEFT", resetButton, "RIGHT", 0, 0)
   resetText:SetWidth(55)
-  resetText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
+  resetText:SetHeight(AutoLFM.Core.Constants.BUTTON_HEIGHT)
 
   local resetLabel = resetText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   resetLabel:SetPoint("LEFT", resetText, "LEFT", 5, 0)
@@ -423,8 +417,8 @@ local function CreateChannelCheckbox(parentFrame, channelName, lastButton)
     end
   end)
   if not button then return nil end
-  button:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  button:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
+  button:SetWidth(AutoLFM.Core.Constants.ICON_SIZE)
+  button:SetHeight(AutoLFM.Core.Constants.ICON_SIZE)
   if lastButton then
     button:SetPoint("TOPLEFT", lastButton, "BOTTOMLEFT", 0, -4)
   else
@@ -496,7 +490,7 @@ local function CreateChannelsFrame(lastAnchor)
   channelsFrame:SetWidth(135)
   channelsFrame:SetHeight(100)
   channelsFrame:SetBackdrop({
-    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tooltipBackground",
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
     tile = true,
     tileSize = 16,
     insets = { left = 4, right = 4, top = 4, bottom = 0 }
@@ -535,7 +529,7 @@ function AutoLFM.UI.MorePanel.Create(parentFrame)
     UpdateStatsDisplay()
     UpdateMinimapRadioButtons()
     local now = GetTime()
-    if now - lastSliderUpdate < AutoLFM.UI.MorePanel.UPDATE_THROTTLE then return end
+    if now - lastSliderUpdate < AutoLFM.Core.Constants.UPDATE_THROTTLE then return end
     lastSliderUpdate = now
     if broadcastIntervalSlider then
       local currentValue = broadcastIntervalSlider:GetValue()

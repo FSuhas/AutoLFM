@@ -4,7 +4,7 @@
   <img src="AutoLFM.png" alt="AutoLFM Illustration"/>
 </p>
 
-## 📖 Description
+## 📜 Description
 
 **AutoLFM** is a powerful World of Warcraft 1.12 (Vanilla) addon that automates the process of broadcasting "Looking For More" (LFM) messages for dungeons, raids, quests and more. This addon helps group leaders efficiently recruit party members without manual spam.
 
@@ -14,31 +14,28 @@ The interface design is inspired by and matches Turtle WoW's native LFG system.
 
 ## ✨ Features
 
-- 🎯 **Smart Content Selection**
-  - Browse and select from all Vanilla and customs dungeons/raids
-  - Add quest links directly from your quest log
-  - Color-coded level filtering
+### 🎯 Content Selection
 
-- 🎭 **Role Management**
-  - Tank, Healer, DPS role indicators
-  - Visual role selector with icons
-  - Automatic message formatting
+- Browse all Vanilla and Turtle WoW custom instances (dungeons and raids)
+- Multi-selection dungeons support (up to 4) and variable group sizes for applicable raids (10-40 slider)
+- Smart filtering by level color: auto-sorting by player level relevance with level ranges displayed
+- Quest log integration: add quest/item/chat links via Shift+Click
+- 5-tab navigation system with quick access via `/lfm` command or minimap button
 
-- ⚙️ **Customizable Broadcasting**
-  - Adjustable broadcast interval (30-120 seconds)
-  - Multiple channel support (LookingForGroup, World, etc.)
-  - Custom message additions
-  - Live message preview
+### 📢 Broadcasting & Messages
 
-- 🎨 **Intuitive Interface**
-  - Clean tabbed navigation (Dungeons/Raids/Quests/More)
-  - Minimap button with draggable positioning
-  - Eye-catching broadcast animation
+- Adjustable broadcast interval (30-120s) with multiple channel support (LookingForGroup, World, etc.)
+- Automatic start/stop based on group status with live message preview
+- Role management: Tank/Healer/DPS visual selector with automatic message formatting
+- Custom message editor: add personal text with smart message building from all selections
+- Real-time statistics: duration timer, message count, next broadcast countdown
 
-- 📊 **Statistics Tracking**
-  - Broadcast duration timer
-  - Message count
-  - Next message countdown
+### 🎨 Interface & Controls
+
+- Eye-catching broadcast animation with color indicators for selection status
+- Draggable minimap button with position memory
+- One-click clear all selections via Clear tab with smart detection
+- Tooltip guidance throughout the interface
 
 ## 📥 Installation
 
@@ -46,7 +43,7 @@ Use Addon install system from TurtleWoW launcher.
 
 Or, manually: download the latest release and extract the `AutoLFM` folder to your `Interface\AddOns` directory
 
-## 🎮 Usage
+## 🖱️ Usage
 
 ### Quick Start
 
@@ -68,7 +65,7 @@ Or, manually: download the latest release and extract the `AutoLFM` folder to yo
 /lfm api                # Show api commands
 ```
 
-## 🏗️ Architecture
+## 📁 Architecture
 
 ```
 AutoLFM/
@@ -80,9 +77,10 @@ AutoLFM/
 │
 ├── Core/                        # Core systems
 │   ├── Commands.lua             # Slash commands system (/lfm)
+│   ├── Constants.lua            # Centralized constants, paths, colors, and limits
 │   ├── Events.lua               # WoW event handling (PARTY_MEMBERS_CHANGED, etc.)
 │   ├── Settings.lua             # SavedVariables management per character
-│   └── Utils.lua                # Utilities, constants, colors, chat output
+│   └── Utils.lua                # Utilities and chat output functions
 │
 ├── Logic/                       # Business logic
 │   ├── Broadcaster.lua          # Message building and broadcasting engine
@@ -122,52 +120,19 @@ AutoLFM/
 └── README.md                    # This file
 ```
 
-## 🎨 Features Detail
+## 🧩 Extensions
 
-### Dungeon Panel
-- **Smart filtering** by level color (gray/green/yellow/orange/red)
-- **Auto-sorting** by player level relevance
-- **Multi-selection** (up to 4 dungeons)
-- **Level ranges** displayed for each dungeon
-
-### Raid Panel
-- **Single selection** (one raid at a time)
-- **Variable group sizes** for applicable raids
-- **Dynamic slider** for 10-40 player raids
-- **Fixed sizes** for specific content
-
-### Quest Panel
-- **Direct integration** with quest log
-- **Shift+Click** to add quest links
-- **Item links** from bags (Shift+Click)
-- **Chat links** from chat frame (Shift+Click)
-
-### More Panel
-- **Interval control** with visual slider
-- **Channel management** with checkboxes
-- **Statistics display** (duration, sent, next)
-- **Minimap controls** (show/hide/reset)
-- **Custom message** editor
-
-### Clear Tab
-- **One-click clear** all selections (dungeons, raids, roles, messages)
-- **Visual feedback** with color indicators (gray/orange/red)
-- **Smart detection** of active selections
-- **Tooltip** confirmation on hover
-
-## 🔌 Extensions
-
-### Misc Modules
+### 🔧 Misc Modules
 Optional utility modules.
 
 **📖 [Complete Misc Modules Documentation →](Misc/README.md)**
 
-### Public API
+### 🔌 Public API
 AutoLFM exposes a comprehensive public API for integration with other addons.
 
 **📖 [Complete API Documentation →](API/README.md)**
 
-## ⚙️ Configuration
+## 💾 Configuration
 Settings are automatically saved per character in `SavedVariables/AutoLFM.lua`.
 
 Configuration includes:
@@ -176,7 +141,7 @@ Configuration includes:
 - Dungeon level filters
 - Misc modules states and settings
 
-## 📝 Information
+## ℹ️ Information
 - **WoW Version**: 1.12.1 (Interface 11200)
 - **Lua Version**: 5.0
 - **External Libraries**: None

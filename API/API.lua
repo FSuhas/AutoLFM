@@ -96,10 +96,10 @@ function AutoLFM.API.GetPlayerCount()
   if mode == "raid" then
     desiredTotal = AutoLFM.Logic.Content.GetRaidSize()
     if desiredTotal < 1 then
-      desiredTotal = AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_RAID
+      desiredTotal = AutoLFM.Core.Constants.GROUP_SIZE_RAID
     end
   elseif mode == "dungeon" then
-    desiredTotal = AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_DUNGEON
+    desiredTotal = AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON
   end
   
   local missing = desiredTotal - currentInGroup

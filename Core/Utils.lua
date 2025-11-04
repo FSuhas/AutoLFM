@@ -7,39 +7,6 @@ if not AutoLFM.Core then AutoLFM.Core = {} end
 if not AutoLFM.Core.Utils then AutoLFM.Core.Utils = {} end
 
 -----------------------------------------------------------------------------
--- Constants
------------------------------------------------------------------------------
-AutoLFM.Core.Utils.CONSTANTS = {
-  GROUP_SIZE_DUNGEON = 5,
-  GROUP_SIZE_RAID = 10,
-  TEXTURE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\",
-  CHAT_PREFIX = "|cff808080[|r|cffffffffAuto|r|cff0070ddL|r|cffffffffF|r|cffff0000M|r|cff808080]|r "
-}
-
-AutoLFM.Core.Utils.COLOR_PRESETS = {
-  yellow = {r = 1, g = 1, b = 0},
-  gold = {r = 1, g = 0.82, b = 0},
-  white = {r = 1, g = 1, b = 1},
-  green = {r = 0.25, g = 0.75, b = 0.25},
-  red = {r = 1, g = 0, b = 0},
-  orange = {r = 1, g = 0.5, b = 0.25},
-  gray = {r = 0.5, g = 0.5, b = 0.5},
-  blue = {r = 0.3, g = 0.6, b = 1},
-  disabled = {r = 0.5, g = 0.5, b = 0.5}
-}
-
-local CHAT_COLORS = {
-  yellow = "ffff00",
-  gold = "ffd100",
-  white = "ffffff",
-  green = "40bf40",
-  red = "ff0000",
-  orange = "ff8040",
-  gray = "808080",
-  blue = "0070dd"
-}
-
------------------------------------------------------------------------------
 -- String Utilities
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Utils.SplitString(delim, text)
@@ -158,7 +125,7 @@ end
 
 function AutoLFM.Core.Utils.GetColorPreset(colorName)
   if not colorName then return {r = 1, g = 1, b = 1} end
-  return AutoLFM.Core.Utils.COLOR_PRESETS[colorName] or {r = 1, g = 1, b = 1}
+  return AutoLFM.Core.Constants.COLOR_PRESETS[colorName] or {r = 1, g = 1, b = 1}
 end
 
 function AutoLFM.Core.Utils.SetFontColor(fontString, colorIdentifier)
@@ -192,7 +159,7 @@ function AutoLFM.Core.Utils.ColorizeText(text, colorKey)
   if not text then return "" end
   if not colorKey then return text end
   
-  local hex = CHAT_COLORS[colorKey]
+  local hex = AutoLFM.Core.Constants.CHAT_COLORS[colorKey]
   if not hex then return text end
   
   return "|cff" .. hex .. text .. "|r"
@@ -211,7 +178,7 @@ function AutoLFM.Core.Utils.Print(message, colorKey)
   local text = AutoLFM.Core.Utils.ColorizeText(message, colorKey or "yellow")
   
   if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
-    DEFAULT_CHAT_FRAME:AddMessage(AutoLFM.Core.Utils.CONSTANTS.CHAT_PREFIX .. text)
+    DEFAULT_CHAT_FRAME:AddMessage(AutoLFM.Core.Constants.CHAT_PREFIX .. text)
   end
 end
 

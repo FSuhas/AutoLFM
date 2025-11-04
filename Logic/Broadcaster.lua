@@ -7,14 +7,6 @@ if not AutoLFM.Logic then AutoLFM.Logic = {} end
 if not AutoLFM.Logic.Broadcaster then AutoLFM.Logic.Broadcaster = {} end
 
 -----------------------------------------------------------------------------
--- Constants
------------------------------------------------------------------------------
-AutoLFM.Logic.Broadcaster.INTERVAL_MIN = 30
-AutoLFM.Logic.Broadcaster.INTERVAL_MAX = 120
-AutoLFM.Logic.Broadcaster.INTERVAL_STEP = 10
-AutoLFM.Logic.Broadcaster.INTERVAL_DEFAULT = 60
-
------------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
 local isActive = false
@@ -56,7 +48,7 @@ local function BuildDungeonSegment()
   local selectedDungeons = AutoLFM.Logic.Content.GetSelectedDungeons()
   if not selectedDungeons then return {}, 0 end
   
-  local counts = CalculateGroupCounts("dungeon", AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_DUNGEON)
+  local counts = CalculateGroupCounts("dungeon", AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON)
   
   if counts.missing <= 0 then
     return {}, 0
@@ -85,7 +77,7 @@ local function BuildRaidSegment()
   
   local currentRaidSize = AutoLFM.Logic.Content.GetRaidSize()
   if currentRaidSize == 0 then
-    currentRaidSize = raid.sizeMin or AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_RAID
+    currentRaidSize = raid.sizeMin or AutoLFM.Core.Constants.GROUP_SIZE_RAID
   end
   
   local counts = CalculateGroupCounts("raid", currentRaidSize)
@@ -248,8 +240,8 @@ local validationRules = {
     local currentCount = AutoLFM.Logic.Selection.GetGroupCount()
     
     if mode == "dungeon" then
-      if currentCount >= AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_DUNGEON then
-        return false, "Your dungeon group is already full (" .. AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_DUNGEON .. "/" .. AutoLFM.Core.Utils.CONSTANTS.GROUP_SIZE_DUNGEON .. ")"
+      if currentCount >= AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON then
+        return false, "Your dungeon group is already full (" .. AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON .. "/" .. AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON .. ")"
       end
     elseif mode == "raid" then
       local raidSize = AutoLFM.Logic.Content.GetRaidSize()
@@ -465,7 +457,7 @@ end
 -- Broadcast Loop
 -----------------------------------------------------------------------------
 local function GetBroadcastInterval()
-  local interval = AutoLFM.Logic.Broadcaster.INTERVAL_DEFAULT
+  local interval = AutoLFM.Core.Constants.INTERVAL_DEFAULT
   
   if AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider then
     local broadcastSlider = AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider()
@@ -474,8 +466,8 @@ local function GetBroadcastInterval()
     end
   end
   
-  if not interval or interval < AutoLFM.Logic.Broadcaster.INTERVAL_MIN then
-    interval = AutoLFM.Logic.Broadcaster.INTERVAL_DEFAULT
+  if not interval or interval < AutoLFM.Core.Constants.INTERVAL_MIN then
+    interval = AutoLFM.Core.Constants.INTERVAL_DEFAULT
   end
   
   return interval
@@ -511,7 +503,7 @@ end
 local function OnBroadcastUpdate()
   local currentTime = GetTime()
   
-  if currentTime - lastUpdateCheck < AutoLFM.UI.MorePanel.UPDATE_THROTTLE then
+  if currentTime - lastUpdateCheck < AutoLFM.Core.Constants.UPDATE_THROTTLE then
     return
   end
   lastUpdateCheck = currentTime
