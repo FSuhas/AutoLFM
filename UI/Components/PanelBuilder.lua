@@ -24,23 +24,6 @@ AutoLFM.UI.PanelBuilder.LAYOUT = {
   bottomZoneHeight = 30
 }
 
-AutoLFM.UI.PanelBuilder.CONSTANTS = {
-  ROW_HEIGHT = 20,
-  CHECKBOX_SIZE = 20,
-  ICON_SIZE = 16,
-  EDITBOX_HEIGHT = 28,
-  EDITBOX_WIDTH = 285,
-  PANEL_CONTENT_WIDTH = 295,
-  PANEL_CONTENT_HEIGHT = 253,
-  BUTTON_HEIGHT = 20,
-  BUTTON_WIDTH_SMALL = 60,
-  BUTTON_WIDTH_MEDIUM = 80,
-  BUTTON_WIDTH_LARGE = 110,
-  SPACING_SMALL = 5,
-  SPACING_MEDIUM = 10,
-  SPACING_LARGE = 20
-}
-
 -----------------------------------------------------------------------------
 -- Panel Structure Creation
 -----------------------------------------------------------------------------
@@ -171,7 +154,7 @@ end
 function AutoLFM.UI.PanelBuilder.UpdateScrollHeight(contentFrame, visibleCount, rowHeight)
   if not contentFrame then return end
   
-  rowHeight = rowHeight or AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT
+  rowHeight = rowHeight or AutoLFM.Core.Constants.ROW_HEIGHT
   local contentHeight = visibleCount * rowHeight
   contentFrame:SetHeight(math.max(contentHeight, 1))
 end
@@ -194,7 +177,7 @@ function AutoLFM.UI.PanelBuilder.SetupRowHover(frame, checkbox, label, rightLabe
   
   frame:SetScript("OnEnter", function()
     frame:SetBackdrop({
-      bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "white",
+      bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "white",
       insets = {left = 1, right = 1, top = 1, bottom = 1}
     })
     frame:SetBackdropColor(originalR, originalG, originalB, 0.3)
@@ -253,13 +236,13 @@ function AutoLFM.UI.PanelBuilder.CreateSelectableRow(config)
   if not config or not config.parent then return nil end
   
   local clickableFrame = CreateFrame("Button", config.frameName, config.parent)
-  clickableFrame:SetHeight(config.rowHeight or AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT)
+  clickableFrame:SetHeight(config.rowHeight or AutoLFM.Core.Constants.ROW_HEIGHT)
   clickableFrame:SetWidth(config.rowWidth or 300)
   clickableFrame:SetPoint("TOPLEFT", config.parent, "TOPLEFT", 0, -(config.yOffset or 0))
   
   local checkbox = CreateFrame("CheckButton", config.checkboxName, clickableFrame, "UICheckButtonTemplate")
-  checkbox:SetWidth(config.checkboxSize or AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
-  checkbox:SetHeight(config.checkboxSize or AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
+  checkbox:SetWidth(config.checkboxSize or AutoLFM.Core.Constants.CHECKBOX_SIZE)
+  checkbox:SetHeight(config.checkboxSize or AutoLFM.Core.Constants.CHECKBOX_SIZE)
   checkbox:SetPoint("LEFT", clickableFrame, "LEFT", 0, 0)
   
   if config.isChecked ~= nil then
@@ -300,7 +283,7 @@ function AutoLFM.UI.PanelBuilder.CreateSelectableRow(config)
       local b = clickableFrame.originalB or (config.color and config.color.b) or 1
       
       clickableFrame:SetBackdrop({
-        bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "white",
+        bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "white",
         insets = {left = 1, right = 1, top = 1, bottom = 1},
       })
       clickableFrame:SetBackdropColor(r, g, b, 0.3)
@@ -475,10 +458,10 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.UI.PanelBuilder.CreateIconWithLabel(config)
   if not config or not config.parent then return nil, nil end
-  local size = config.size or AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE
+  local size = config.size or AutoLFM.Core.Constants.ICON_SIZE
   local labelOffset = config.labelOffset or 3
   local icon = config.parent:CreateTexture(nil, "OVERLAY")
-  icon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. (config.texture or "Icons\\generic"))
+  icon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. (config.texture or "Icons\\generic"))
   icon:SetWidth(size)
   icon:SetHeight(size)
   if config.point then
@@ -521,10 +504,10 @@ function AutoLFM.UI.PanelBuilder.CreateSlider(config)
   slider:SetValue(config.initialValue or config.minValue or 0)
   slider:SetValueStep(config.valueStep or 1)
   slider:SetOrientation("HORIZONTAL")
-  slider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
+  slider:SetThumbTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BUTTON)
   slider:SetBackdrop({
-    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBackground",
-    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBorder",
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BACKGROUND,
+    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BORDER,
     tile = true,
     tileSize = 8,
     edgeSize = 8,
@@ -574,8 +557,8 @@ function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
     local btnConfig = config.buttons[i]
     if btnConfig and btnConfig.key and btnConfig.label then
       local radio = CreateFrame("CheckButton", nil, config.parent, "UIRadioButtonTemplate")
-      radio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-      radio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
+      radio:SetWidth(AutoLFM.Core.Constants.ICON_SIZE)
+      radio:SetHeight(AutoLFM.Core.Constants.ICON_SIZE)
 
       if i == 1 and config.anchor then
         radio:SetPoint(config.anchor.point or "TOPLEFT", config.anchor.relativeTo or config.parent, config.anchor.relativePoint or "TOPLEFT", config.anchor.x or 0, config.anchor.y or 0)
@@ -591,7 +574,7 @@ function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
       local labelButton = CreateFrame("Button", nil, config.parent)
       labelButton:SetPoint("LEFT", radio, "RIGHT", 0, 0)
       labelButton:SetWidth(config.labelWidth or 55)
-      labelButton:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
+      labelButton:SetHeight(AutoLFM.Core.Constants.BUTTON_HEIGHT)
 
       local label = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
       label:SetPoint("LEFT", labelButton, "LEFT", 5, 0)

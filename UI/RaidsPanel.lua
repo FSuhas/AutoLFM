@@ -152,7 +152,7 @@ function AutoLFM.UI.RaidsPanel.Display(parent)
     clickableFrames, checkButtons = {}, {}
     local yOffset = 0
 
-    local raids = AutoLFM.Logic.Content.RAIDS or {}
+    local raids = AutoLFM.Core.Constants.RAIDS or {}
     local numRaids = table.getn(raids)
 
     for index = 1, numRaids do

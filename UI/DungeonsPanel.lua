@@ -20,8 +20,8 @@ local filterLabelFrame, filterLabelText
 -----------------------------------------------------------------------------
 
 local function EachColor(callback)
-  if AutoLFM.Logic.Content.COLORS then
-    for i, color in ipairs(AutoLFM.Logic.Content.COLORS) do
+  if AutoLFM.Core.Constants.PRIORITY_COLORS then
+    for i, color in ipairs(AutoLFM.Core.Constants.PRIORITY_COLORS) do
       if color then callback(color, i) end
     end
   end
@@ -60,7 +60,7 @@ end
 
 function AutoLFM.UI.DungeonsPanel.ShouldShowDungeonPriority(priority)
   if not priority then return true end
-  for _, c in ipairs(AutoLFM.Logic.Content.COLORS or {}) do
+  for _, c in ipairs(AutoLFM.Core.Constants.PRIORITY_COLORS or {}) do
     if c.priority == priority then return filterStates[c.key] or false end
   end
   return true
@@ -72,7 +72,7 @@ function AutoLFM.UI.DungeonsPanel.ResetFilters()
 end
 
 local function HasDisabledFilter()
-  for _, c in ipairs(AutoLFM.Logic.Content.COLORS or {}) do
+  for _, c in ipairs(AutoLFM.Core.Constants.PRIORITY_COLORS or {}) do
     if not filterStates[c.key] then return true end
   end
   return false
@@ -96,8 +96,8 @@ end
 
 local function CreateFilterCheckbox(parent, color, xOffset)
   local cb = CreateFrame("CheckButton", "DungeonFilter_" .. color.key, parent, "UICheckButtonTemplate")
-  cb:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
-  cb:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.CHECKBOX_SIZE)
+  cb:SetWidth(AutoLFM.Core.Constants.CHECKBOX_SIZE)
+  cb:SetHeight(AutoLFM.Core.Constants.CHECKBOX_SIZE)
   cb:SetPoint("LEFT", parent, "LEFT", xOffset, 0)
 
   TintTexture(cb:GetNormalTexture(), color.r, color.g, color.b)
@@ -120,7 +120,7 @@ local function CreateColorFilterUI(parent)
 
   filterLabelFrame = CreateFrame("Button", nil, frame)
   filterLabelFrame:SetWidth(50)
-  filterLabelFrame:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
+  filterLabelFrame:SetHeight(AutoLFM.Core.Constants.BUTTON_HEIGHT)
   filterLabelFrame:SetPoint("LEFT", frame, "LEFT", 0, 0)
 
   filterLabelText = filterLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -218,7 +218,7 @@ local function UpdateRowVisibility()
         f:Show()
         f:ClearAllPoints()
         f:SetPoint("TOPLEFT", f:GetParent(), "TOPLEFT", 0, -yOffset)
-        yOffset = yOffset + AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT
+        yOffset = yOffset + AutoLFM.Core.Constants.ROW_HEIGHT
         visible = visible + 1
       else f:Hide() end
     end
@@ -241,14 +241,14 @@ function AutoLFM.UI.DungeonsPanel.Display(parent)
     if e and e.dungeon then
       local row = CreateDungeonRow(parent, e.dungeon, e.priority, yOffset)
       if row and AutoLFM.UI.DungeonsPanel.ShouldShowDungeonPriority(e.priority) then
-        yOffset = yOffset + AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT
+        yOffset = yOffset + AutoLFM.Core.Constants.ROW_HEIGHT
         visible = visible + 1
       else row:Hide() end
     end
   end
 
   if parent.SetHeight then
-    parent:SetHeight(math.max(visible * AutoLFM.UI.PanelBuilder.CONSTANTS.ROW_HEIGHT, 1))
+    parent:SetHeight(math.max(visible * AutoLFM.Core.Constants.ROW_HEIGHT, 1))
   end
 end
 

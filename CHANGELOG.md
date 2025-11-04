@@ -1,5 +1,10 @@
 # AutoLFM Changelog
 
+## [2.20] - add Constants.lua
+
+- Centralized all constants in Constants.lua
+- Main readme restructuration
+
 ## [2.19] - Code refactoring
 
 - Centralized utility functions to Core/Utils.lua (truncate, setfontcolor, ...)

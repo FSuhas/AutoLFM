@@ -40,7 +40,7 @@ local function UpdateTabVisualState(index, isActive)
   local texture = isActive and "tabActive" or "tabInactive"
   local r, g, b = 1, isActive and 1 or 0.82, isActive and 1 or 0
   
-  tab.bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. texture)
+  tab.bg:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. texture)
   
   if tab.text then
     tab.text:SetTextColor(r, g, b)
@@ -83,9 +83,9 @@ local function CreateTab(tabConfig, index, anchorTo)
   local bg = tab:CreateTexture(nil, "BACKGROUND")
   
   if isIconTab then
-    bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tabIcon")
+    bg:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "tabIcon")
   else
-    bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. (index == 1 and "tabActive" or "tabInactive"))
+    bg:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. (index == 1 and "tabActive" or "tabInactive"))
   end
   
   bg:SetAllPoints()
@@ -97,7 +97,7 @@ local function CreateTab(tabConfig, index, anchorTo)
     highlight:SetPoint("CENTER", tab, "CENTER", 0, 0)
     highlight:SetWidth(70)
     highlight:SetHeight(24)
-    highlight:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "tabHighlight")
+    highlight:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "tabHighlight")
     highlight:Hide()
   end
   
@@ -106,7 +106,7 @@ local function CreateTab(tabConfig, index, anchorTo)
   
   if isIconTab then
     icon = tab:CreateTexture(nil, "OVERLAY")
-    icon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\" .. tabConfig.icon)
+    icon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Icons\\" .. tabConfig.icon)
     icon:SetWidth(24)
     icon:SetHeight(24)
     icon:SetPoint("CENTER", tab, "CENTER", 0, 0)

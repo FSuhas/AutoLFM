@@ -9,6 +9,7 @@
 #--------------------------------------------------
 # Engine
 #--------------------------------------------------
+Core\Constants.lua
 Core\AutoLFM_WelcomePopup.lua
 Core\Utils.lua
 Core\Settings.lua

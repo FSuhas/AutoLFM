@@ -34,7 +34,7 @@ local function AnimateIcons()
     currentFrameIndex = 1
   end
   
-  local iconPath = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Eyes\\" .. AutoLFM.UI.IconAnimation.SEQUENCE[currentFrameIndex]
+  local iconPath = AutoLFM.Core.Constants.TEXTURE_PATH .. "Eyes\\" .. AutoLFM.UI.IconAnimation.SEQUENCE[currentFrameIndex]
   
   if AutoLFM_MinimapButton and AutoLFM_MinimapButton.icon then
     AutoLFM_MinimapButton.icon:SetTexture(iconPath)
@@ -48,7 +48,7 @@ end
 local function ResetIcons()
   currentFrameIndex = 1
   
-  local defaultIconPath = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Eyes\\eye07"
+  local defaultIconPath = AutoLFM.Core.Constants.TEXTURE_PATH .. "Eyes\\eye07"
   
   if AutoLFM_MinimapButton and AutoLFM_MinimapButton.icon then
     AutoLFM_MinimapButton.icon:SetTexture(defaultIconPath)
