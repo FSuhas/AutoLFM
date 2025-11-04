@@ -102,7 +102,7 @@ function AutoLFM.UI.PanelBuilder.CreateLabel(panelData, text)
   local labelText = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   labelText:SetPoint("LEFT", labelButton, "LEFT", 0, 0)
   labelText:SetText(text)
-  labelText:SetTextColor(1, 1, 1)
+  AutoLFM.Core.Utils.SetFontColor(labelText, "white")
   
   return labelButton, labelText
 end
@@ -118,8 +118,7 @@ function AutoLFM.UI.PanelBuilder.CreateClickableLabel(panelData, text, onClickFu
   local labelText = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   labelText:SetPoint("LEFT", labelButton, "LEFT", 0, 0)
   labelText:SetText(text)
-  labelText:SetTextColor(1, 1, 1)
-  
+  AutoLFM.Core.Utils.SetFontColor(labelText, "white")
   if onClickFunc then
     labelButton:SetScript("OnClick", function()
       onClickFunc(labelButton, labelText)
@@ -452,6 +451,178 @@ function AutoLFM.UI.PanelBuilder.HideFrames(frameCollection)
       frame:Hide()
     end
   end
+end
+
+-----------------------------------------------------------------------------
+-- Label Highlight Utilities
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.AttachLabelHighlight(button, label, normalColor, hoverColor)
+  if not button or not label then return end
+  normalColor = normalColor or "gold"
+  hoverColor = hoverColor or "blue"
+  button:SetScript("OnEnter", function()
+    AutoLFM.Core.Utils.SetFontColor(label, hoverColor)
+    button:LockHighlight()
+  end)
+  button:SetScript("OnLeave", function()
+    AutoLFM.Core.Utils.SetFontColor(label, normalColor)
+    button:UnlockHighlight()
+  end)
+end
+
+-----------------------------------------------------------------------------
+-- Icon With Label Creation
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.CreateIconWithLabel(config)
+  if not config or not config.parent then return nil, nil end
+  local size = config.size or AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE
+  local labelOffset = config.labelOffset or 3
+  local icon = config.parent:CreateTexture(nil, "OVERLAY")
+  icon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. (config.texture or "Icons\\generic"))
+  icon:SetWidth(size)
+  icon:SetHeight(size)
+  if config.point then
+    icon:SetPoint(
+      config.point.point or "TOPLEFT",
+      config.point.relativeTo or config.parent,
+      config.point.relativePoint or "TOPLEFT",
+      config.point.x or 0,
+      config.point.y or 0
+    )
+  end
+  local labelFontString = nil
+  if config.label then
+    labelFontString = config.parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    labelFontString:SetText(config.label)
+    labelFontString:SetPoint("LEFT", icon, "RIGHT", labelOffset, 0)
+    AutoLFM.Core.Utils.SetFontColor(labelFontString, config.labelColor or "white")
+  end
+  return icon, labelFontString
+end
+
+-----------------------------------------------------------------------------
+-- Slider
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.CreateSlider(config)
+  if not config or not config.parent then return nil end
+  local slider = CreateFrame("Slider", config.name, config.parent)
+  slider:SetWidth(config.width or 145)
+  slider:SetHeight(config.height or 17)
+  if config.point then
+    slider:SetPoint(
+      config.point.point or "TOPLEFT",
+      config.point.relativeTo or config.parent,
+      config.point.relativePoint or "TOPLEFT",
+      config.point.x or 0,
+      config.point.y or 0
+    )
+  end
+  slider:SetMinMaxValues(config.minValue or 0, config.maxValue or 100)
+  slider:SetValue(config.initialValue or config.minValue or 0)
+  slider:SetValueStep(config.valueStep or 1)
+  slider:SetOrientation("HORIZONTAL")
+  slider:SetThumbTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderButtonHorizontal")
+  slider:SetBackdrop({
+    bgFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBackground",
+    edgeFile = AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "sliderBorder",
+    tile = true,
+    tileSize = 8,
+    edgeSize = 8,
+    insets = {left = 3, right = 3, top = 6, bottom = 6}
+  })
+  if config.onValueChanged then
+    slider:SetScript("OnValueChanged", function()
+      local value = slider:GetValue()
+      if value then
+        config.onValueChanged(value)
+      end
+    end)
+  end
+  return slider
+end
+
+-----------------------------------------------------------------------------
+-- Radio Button Group
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
+  if not config or not config.parent or not config.buttons then return nil end
+
+  local group = {
+    radioButtons = {},
+    labels = {}
+  }
+
+  function group.Update(checkedKey)
+    for key, button in pairs(group.radioButtons) do
+      if button then
+        button:SetChecked(key == checkedKey)
+      end
+    end
+  end
+
+  function group.GetChecked()
+    for key, button in pairs(group.radioButtons) do
+      if button and button:GetChecked() then
+        return key
+      end
+    end
+    return nil
+  end
+
+  local lastRadio = nil
+  for i = 1, table.getn(config.buttons) do
+    local btnConfig = config.buttons[i]
+    if btnConfig and btnConfig.key and btnConfig.label then
+      local radio = CreateFrame("CheckButton", nil, config.parent, "UIRadioButtonTemplate")
+      radio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
+      radio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
+
+      if i == 1 and config.anchor then
+        radio:SetPoint(config.anchor.point or "TOPLEFT", config.anchor.relativeTo or config.parent, config.anchor.relativePoint or "TOPLEFT", config.anchor.x or 0, config.anchor.y or 0)
+      elseif lastRadio then
+        local spacing = config.spacing or -4
+        radio:SetPoint("TOPLEFT", lastRadio, "BOTTOMLEFT", 0, spacing)
+      end
+
+      if btnConfig.checked then
+        radio:SetChecked(true)
+      end
+
+      local labelButton = CreateFrame("Button", nil, config.parent)
+      labelButton:SetPoint("LEFT", radio, "RIGHT", 0, 0)
+      labelButton:SetWidth(config.labelWidth or 55)
+      labelButton:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
+
+      local label = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      label:SetPoint("LEFT", labelButton, "LEFT", 5, 0)
+      label:SetText(btnConfig.label)
+      AutoLFM.Core.Utils.SetFontColor(label, config.labelColor or "gold")
+
+      local hoverColor = config.hoverColor or "blue"
+      AutoLFM.UI.PanelBuilder.AttachLabelHighlight(labelButton, label, config.labelColor or "gold", hoverColor)
+      AutoLFM.UI.PanelBuilder.AttachLabelHighlight(radio, label, config.labelColor or "gold", hoverColor)
+
+      labelButton:SetScript("OnClick", function()
+        radio:Click()
+      end)
+
+      radio:SetScript("OnClick", function()
+        if btnConfig.onClick then
+          btnConfig.onClick()
+        end
+        group.Update(btnConfig.key)
+        if config.onUpdate then
+          config.onUpdate(btnConfig.key)
+        end
+      end)
+
+      group.radioButtons[btnConfig.key] = radio
+      group.labels[btnConfig.key] = label
+      lastRadio = radio
+    end
+  end
+
+  return group
 end
 
 -----------------------------------------------------------------------------

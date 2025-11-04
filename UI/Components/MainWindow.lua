@@ -137,55 +137,6 @@ end
 -----------------------------------------------------------------------------
 -- Message Preview
 -----------------------------------------------------------------------------
-local function TruncateText(text, maxWidth, fontString)
-  if not text then return "", false end
-  
-  fontString:SetText(text)
-  local textWidth = fontString:GetStringWidth()
-  
-  if textWidth <= maxWidth then
-    return text, false
-  end
-  
-  local ellipsis = " |cFFFFFFFF[...]|r"
-  fontString:SetText(" [...]")
-  local ellipsisWidth = fontString:GetStringWidth()
-  local availableWidth = maxWidth - ellipsisWidth
-  
-  local len = string.len(text)
-  local left = 1
-  local right = len
-  local result = text
-  
-  while left <= right do
-    local mid = math.floor((left + right) / 2)
-    local truncated = string.sub(text, 1, mid)
-    fontString:SetText(truncated)
-    local width = fontString:GetStringWidth()
-    
-    if width <= availableWidth then
-      result = truncated
-      left = mid + 1
-    else
-      right = mid - 1
-    end
-  end
-  
-  local lastSpace = 1
-  for i = string.len(result), 1, -1 do
-    local char = string.sub(result, i, i)
-    if char == " " then
-      lastSpace = i
-      break
-    end
-  end
-  
-  if lastSpace > 1 and lastSpace > string.len(result) * 0.7 then
-    result = string.sub(result, 1, lastSpace - 1)
-  end
-  
-  return result .. ellipsis, true
-end
 
 function AutoLFM.UI.MainWindow.CreateMessagePreview()
   if not mainFrame then return nil end
@@ -249,7 +200,7 @@ function AutoLFM.UI.MainWindow.UpdateMessagePreview()
   
   local message = AutoLFM.Logic.Broadcaster.GetMessage and AutoLFM.Logic.Broadcaster.GetMessage() or ""
   if message and message ~= "" then
-    local truncated, isTruncated = TruncateText(message, 290, messageText)
+    local truncated, isTruncated = AutoLFM.Core.Utils.TruncateByWidth(message, 290, messageText, " |cFFFFFFFF[...]|r")
     messageText:SetText(truncated)
     
     if messagePreviewFrame and messagePreviewFrame.previewButton then
