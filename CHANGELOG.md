@@ -1,5 +1,18 @@
 # AutoLFM Changelog
 
+## [2.20] - add Constants.lua
+
+- Centralized all constants in Constants.lua
+- Main readme restructuration
+
+## [2.19] - Code refactoring
+
+- Centralized utility functions to Core/Utils.lua (truncate, setfontcolor, ...)
+- Label hover behavior: created AttachLabelHighlight utility
+- CreateRadioButtonGroup
+- CreateIconWithLabel: unified icon+label creation
+- CreateSlider: unified slider creation
+
 ## [2.18] - FuBar plugin 1.0
 
 - FuBarPlugin v1.0

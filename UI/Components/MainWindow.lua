@@ -7,12 +7,6 @@ if not AutoLFM.UI then AutoLFM.UI = {} end
 if not AutoLFM.UI.MainWindow then AutoLFM.UI.MainWindow = {} end
 
 -----------------------------------------------------------------------------
--- Constants
------------------------------------------------------------------------------
-AutoLFM.UI.MainWindow.SOUND_START = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_RoleCheck.ogg"
-AutoLFM.UI.MainWindow.SOUND_STOP = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\LFG_Denied.ogg"
-
------------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
 local mainFrame = nil
@@ -40,13 +34,13 @@ function AutoLFM.UI.MainWindow.CreateFrame()
   mainTexture:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 0, 0)
   mainTexture:SetWidth(512)
   mainTexture:SetHeight(512)
-  mainTexture:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "mainFrame")
+  mainTexture:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "mainFrame")
   
   local mainIcon = mainFrame:CreateTexture(nil, "LOW")
   mainIcon:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 7, -4)
   mainIcon:SetWidth(64)
   mainIcon:SetHeight(64)
-  mainIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Eyes\\eye01")
+  mainIcon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Eyes\\eye01")
   mainIconTexture = mainIcon
   
   local mainTitle = mainFrame:CreateFontString(nil, "MEDIUM", "GameFontNormal")
@@ -80,19 +74,19 @@ local function CreateRoleButton(roleName, xPos, texCoordStart)
   btn:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", xPos, -52)
   btn:SetWidth(54)
   btn:SetHeight(54)
-  btn:SetHighlightTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "rolesHighlight")
+  btn:SetHighlightTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "rolesHighlight")
   
   local bg = btn:CreateTexture(nil, "BACKGROUND")
   bg:SetPoint("TOPLEFT", btn, "TOPLEFT", -12, 14)
   bg:SetWidth(84)
   bg:SetHeight(84)
-  bg:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "rolesBackground")
+  bg:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "rolesBackground")
   bg:SetTexCoord(texCoordStart, texCoordStart + 0.2968, 0, 0.5937)
   bg:SetVertexColor(1, 1, 1, 0.6)
   
   local icon = btn:CreateTexture(nil, "BORDER")
   icon:SetAllPoints(btn)
-  icon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "roles" .. roleName)
+  icon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "roles" .. roleName)
   
   local check = AutoLFM.UI.PanelBuilder.CreateCheckbox(mainFrame, nil, function()
     if AutoLFM.Logic.Selection.ToggleRole then
@@ -137,55 +131,6 @@ end
 -----------------------------------------------------------------------------
 -- Message Preview
 -----------------------------------------------------------------------------
-local function TruncateText(text, maxWidth, fontString)
-  if not text then return "", false end
-  
-  fontString:SetText(text)
-  local textWidth = fontString:GetStringWidth()
-  
-  if textWidth <= maxWidth then
-    return text, false
-  end
-  
-  local ellipsis = " |cFFFFFFFF[...]|r"
-  fontString:SetText(" [...]")
-  local ellipsisWidth = fontString:GetStringWidth()
-  local availableWidth = maxWidth - ellipsisWidth
-  
-  local len = string.len(text)
-  local left = 1
-  local right = len
-  local result = text
-  
-  while left <= right do
-    local mid = math.floor((left + right) / 2)
-    local truncated = string.sub(text, 1, mid)
-    fontString:SetText(truncated)
-    local width = fontString:GetStringWidth()
-    
-    if width <= availableWidth then
-      result = truncated
-      left = mid + 1
-    else
-      right = mid - 1
-    end
-  end
-  
-  local lastSpace = 1
-  for i = string.len(result), 1, -1 do
-    local char = string.sub(result, i, i)
-    if char == " " then
-      lastSpace = i
-      break
-    end
-  end
-  
-  if lastSpace > 1 and lastSpace > string.len(result) * 0.7 then
-    result = string.sub(result, 1, lastSpace - 1)
-  end
-  
-  return result .. ellipsis, true
-end
 
 function AutoLFM.UI.MainWindow.CreateMessagePreview()
   if not mainFrame then return nil end
@@ -210,11 +155,11 @@ function AutoLFM.UI.MainWindow.CreateMessagePreview()
   
   local previewIcon = previewButton:CreateTexture(nil, "ARTWORK")
   previewIcon:SetAllPoints(previewButton)
-  previewIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "preview")
+  previewIcon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "preview")
   
   local previewIconHL = previewButton:CreateTexture(nil, "HIGHLIGHT")
   previewIconHL:SetAllPoints(previewButton)
-  previewIconHL:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "preview")
+  previewIconHL:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "preview")
   previewIconHL:SetBlendMode("ADD")
   
   previewButton:SetScript("OnClick", function()
@@ -249,7 +194,7 @@ function AutoLFM.UI.MainWindow.UpdateMessagePreview()
   
   local message = AutoLFM.Logic.Broadcaster.GetMessage and AutoLFM.Logic.Broadcaster.GetMessage() or ""
   if message and message ~= "" then
-    local truncated, isTruncated = TruncateText(message, 290, messageText)
+    local truncated, isTruncated = AutoLFM.Core.Utils.TruncateByWidth(message, 290, messageText, " |cFFFFFFFF[...]|r")
     messageText:SetText(truncated)
     
     if messagePreviewFrame and messagePreviewFrame.previewButton then
@@ -292,7 +237,7 @@ function AutoLFM.UI.MainWindow.CreateStartButton()
         AutoLFM.Logic.Broadcaster.Stop()
       end
       broadcastButton:SetText("Start")
-      pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_STOP)
+      pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. AutoLFM.Core.Constants.SOUNDS.STOP)
     else
       if AutoLFM.UI.MorePanel.EnsureChannelUIExists then
         AutoLFM.UI.MorePanel.EnsureChannelUIExists()
@@ -303,7 +248,7 @@ function AutoLFM.UI.MainWindow.CreateStartButton()
         
         if startSuccess then
           broadcastButton:SetText("Stop")
-          pcall(PlaySoundFile, AutoLFM.UI.MainWindow.SOUND_START)
+          pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. AutoLFM.Core.Constants.SOUNDS.START)
         end
       end
     end
