@@ -247,12 +247,6 @@ end
 -------------------------------------------------------------------------------
 -- API
 -------------------------------------------------------------------------------
-M.Init = function()
-  if M.ShouldShow() then
-    M.Show()
-  end
-end
-
 M.ShouldShow = function()
   if not (AutoLFM.Core and AutoLFM.Core.Settings) then
     return false
@@ -285,4 +279,9 @@ M.Show = function()
 
     M.FadeFrame(popupFrame,"IN",0.5)
     waitingActive = true
+end
+M.Init = function()
+  if M.ShouldShow() then
+    M.Show()
+  end
 end
