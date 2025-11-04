@@ -51,12 +51,7 @@ local function CreateMainPanel(parentFrame)
   mainFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 25, -155)
   mainFrame:SetWidth(292)
   mainFrame:SetHeight(253)
-  mainFrame:SetBackdrop({
-    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
-    tile = true,
-    tileSize = 16,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 }
-  })
+  mainFrame:SetBackdrop(AutoLFM.UI.PanelBuilder.BACKDROPS.PANEL)
   mainFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.5)
   return mainFrame
 end
@@ -88,14 +83,7 @@ local function CreateCustomMessageEditBox()
   customMessageEditBox:SetFontObject(GameFontNormal)
   customMessageEditBox:SetMaxLetters(AutoLFM.Core.Constants.MAX_MESSAGE_LENGTH)
   customMessageEditBox:SetText("")
-  customMessageEditBox:SetBackdrop({
-    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
-    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBorder",
-    tile = true,
-    tileSize = 8,
-    edgeSize = 16,
-    insets = { left = 8, right = 2, top = 2, bottom = 2 }
-  })
+  customMessageEditBox:SetBackdrop(AutoLFM.UI.PanelBuilder.BACKDROPS.TOOLTIP)
   customMessageEditBox:SetBackdropColor(0, 0, 0, 0.8)
   customMessageEditBox:SetBackdropBorderColor(1, 0.82, 0, 1)
   customMessageEditBox:SetJustifyH("CENTER")
@@ -489,12 +477,7 @@ local function CreateChannelsFrame(lastAnchor)
   channelsFrame = CreateFrame("Frame", "AutoLFM_ChannelSelector", mainFrame)
   channelsFrame:SetWidth(135)
   channelsFrame:SetHeight(100)
-  channelsFrame:SetBackdrop({
-    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
-    tile = true,
-    tileSize = 16,
-    insets = { left = 4, right = 4, top = 4, bottom = 0 }
-  })
+  channelsFrame:SetBackdrop(AutoLFM.UI.PanelBuilder.BACKDROPS.PANEL)
   channelsFrame:SetBackdropColor(0.1, 0.1, 0.1, 0.3)
   channelsFrame:SetPoint("TOPLEFT", lastAnchor, "TOPRIGHT", 130, 0)
   channelsFrame:Show()

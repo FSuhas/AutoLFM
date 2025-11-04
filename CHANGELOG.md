@@ -1,8 +1,9 @@
 # AutoLFM Changelog
 
-## [2.22] - Cached Dungeons list
+## [2.22] - Cached Dungeons list, Backdrops
 
 - Dungeons list only refreshed if player level up
+- Backdrop Presets
 
 
 ## [2.21] - Reorganize Init and Settings

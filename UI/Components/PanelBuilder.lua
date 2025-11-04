@@ -7,7 +7,7 @@ if not AutoLFM.UI then AutoLFM.UI = {} end
 if not AutoLFM.UI.PanelBuilder then AutoLFM.UI.PanelBuilder = {} end
 
 -----------------------------------------------------------------------------
--- Constants
+-- Layout
 -----------------------------------------------------------------------------
 AutoLFM.UI.PanelBuilder.LAYOUT = {
   panelTop = -157,
@@ -22,6 +22,34 @@ AutoLFM.UI.PanelBuilder.LAYOUT = {
   bottomZoneX = -10,
   bottomZoneWidth = 300,
   bottomZoneHeight = 30
+}
+
+-----------------------------------------------------------------------------
+-- Backdrops
+-----------------------------------------------------------------------------
+AutoLFM.UI.PanelBuilder.BACKDROPS = {
+  TOOLTIP = {
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
+    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBorder",
+    tile = true,
+    tileSize = 8,
+    edgeSize = 16,
+    insets = {left = 8, right = 2, top = 2, bottom = 2}
+  },
+  PANEL = {
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
+    tile = true,
+    tileSize = 16,
+    insets = {left = 4, right = 4, top = 4, bottom = 4}
+  },
+  SLIDER = {
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BACKGROUND,
+    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BORDER,
+    tile = true,
+    tileSize = 8,
+    edgeSize = 8,
+    insets = {left = 3, right = 3, top = 6, bottom = 6}
+  }
 }
 
 -----------------------------------------------------------------------------
@@ -505,14 +533,7 @@ function AutoLFM.UI.PanelBuilder.CreateSlider(config)
   slider:SetValueStep(config.valueStep or 1)
   slider:SetOrientation("HORIZONTAL")
   slider:SetThumbTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BUTTON)
-  slider:SetBackdrop({
-    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BACKGROUND,
-    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BORDER,
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = {left = 3, right = 3, top = 6, bottom = 6}
-  })
+  slider:SetBackdrop(AutoLFM.UI.PanelBuilder.BACKDROPS.SLIDER)
   if config.onValueChanged then
     slider:SetScript("OnValueChanged", function()
       local value = slider:GetValue()
