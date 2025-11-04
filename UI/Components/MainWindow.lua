@@ -62,6 +62,8 @@ function AutoLFM.UI.MainWindow.Init()
   AutoLFM.UI.MainWindow.MessagePreview.Init()
   AutoLFM.UI.MainWindow.StartButton.Init()
   
+  AutoLFM.UI.DarkUI.RegisterFrame(mainFrame)
+  
   return mainFrame
 end
 
@@ -108,6 +110,7 @@ local function CreateRoleButton(roleName, xPos, texCoordStart)
   
   roleButtons[roleName] = btn
   roleCheckboxes[roleName] = check
+  btn.rolesBackground = bg
   
   return btn, check
 end

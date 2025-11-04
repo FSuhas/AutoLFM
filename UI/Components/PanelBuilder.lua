@@ -29,15 +29,15 @@ AutoLFM.UI.PanelBuilder.LAYOUT = {
 -----------------------------------------------------------------------------
 AutoLFM.UI.PanelBuilder.BACKDROPS = {
   TOOLTIP = {
-    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
-    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBorder",
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.TOOLTIP_BACKGROUND,
+    edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.TOOLTIP_BORDER,
     tile = true,
     tileSize = 8,
     edgeSize = 16,
     insets = {left = 8, right = 2, top = 2, bottom = 2}
   },
   PANEL = {
-    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. "tooltipBackground",
+    bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.TOOLTIP_BACKGROUND,
     tile = true,
     tileSize = 16,
     insets = {left = 4, right = 4, top = 4, bottom = 4}

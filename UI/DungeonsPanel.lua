@@ -10,7 +10,6 @@ if not AutoLFM.UI.DungeonsPanel.Filters then AutoLFM.UI.DungeonsPanel.Filters = 
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
-
 local mainFrame, scrollFrame, contentFrame, filterFrame
 local filterCheckboxes, clickableFrames, checkButtons, dungeonRows = {}, {}, {}, {}
 local filterStates = {}
@@ -19,7 +18,6 @@ local filterLabelFrame, filterLabelText
 -----------------------------------------------------------------------------
 -- Helpers
 -----------------------------------------------------------------------------
-
 local function EachColor(callback)
   if AutoLFM.Core.Constants.PRIORITY_COLORS then
     for i, color in ipairs(AutoLFM.Core.Constants.PRIORITY_COLORS) do
@@ -41,7 +39,6 @@ end
 -----------------------------------------------------------------------------
 -- Dungeon Filter Management
 -----------------------------------------------------------------------------
-
 function AutoLFM.UI.DungeonsPanel.Filters.Init()
   local saved = AutoLFM.Core.Settings.LoadFilters() or {}
   EachColor(function(c) filterStates[c.key] = saved[c.key] ~= false end)
@@ -88,7 +85,6 @@ function AutoLFM.UI.DungeonsPanel.GetAllFilterStates() return filterStates end
 -----------------------------------------------------------------------------
 -- Filter System UI
 -----------------------------------------------------------------------------
-
 local function UpdateFilterLabelColor()
   if not filterLabelText then return end
   local colorName = HasDisabledFilter() and "gold" or "white"
@@ -171,8 +167,7 @@ end
 
 -----------------------------------------------------------------------------
 -- Dungeon List
------------------------------------------------------------------------------
-
+------------------
 local function OnDungeonCheckboxClick(cb, tag)
   if cb and tag and AutoLFM.Logic.Content.ToggleDungeon then
     local checked = cb:GetChecked()
@@ -262,7 +257,6 @@ function AutoLFM.UI.DungeonsPanel.UncheckDungeon(tag) local cb = tag and checkBu
 -----------------------------------------------------------------------------
 -- Panel Management
 -----------------------------------------------------------------------------
-
 function AutoLFM.UI.DungeonsPanel.Init()
   AutoLFM.UI.DungeonsPanel.Filters.Init()
   
@@ -278,6 +272,8 @@ function AutoLFM.UI.DungeonsPanel.Init()
   if scrollFrame.UpdateScrollChildRect then scrollFrame:UpdateScrollChildRect() end
   filterFrame = CreateColorFilterUI(p.bottomZone)
   filterFrame:Show()
+  
+  AutoLFM.UI.DarkUI.RegisterFrame(mainFrame)
   
   AutoLFM.UI.DungeonsPanel.Register()
 end

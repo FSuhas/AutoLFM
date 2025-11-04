@@ -36,6 +36,7 @@ The interface design is inspired by and matches Turtle WoW's native LFG system.
 - Draggable minimap button with position memory
 - One-click clear all selections via Clear tab with smart detection
 - Tooltip guidance throughout the interface
+- Optional dark mode (ShaguTweaks integration)
 
 ## 📥 Installation
 
@@ -99,6 +100,7 @@ AutoLFM/
 │
 ├── UI/                          # User interface
 │   ├── Components/              # Reusable UI components
+│   │   ├── DarkUI.lua           # Dark mode theme system
 │   │   ├── IconAnimation.lua    # Eye animation during broadcast
 │   │   ├── LinkIntegration.lua  # Quest/Item links integration (Shift+Click)
 │   │   ├── MainWindow.lua       # Main frame, roles selector, preview
@@ -140,6 +142,7 @@ Configuration includes:
 - Broadcast interval and channels
 - Minimap button position
 - Dungeon level filters
+- Dark mode preference
 - Misc modules states and settings
 
 ## ℹ️ Information

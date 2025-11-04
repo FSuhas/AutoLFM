@@ -311,6 +311,8 @@ function AutoLFM.UI.RaidsPanel.Init()
     AutoLFM.UI.RaidsPanel.Display(contentFrame)
     AutoLFM.UI.RaidsPanel.CreateSizeSlider(panelData.bottomZone)
 
+    AutoLFM.UI.DarkUI.RegisterFrame(mainFrame)
+
     AutoLFM.UI.RaidsPanel.Register()
 end
 

@@ -111,6 +111,8 @@ function AutoLFM.UI.MinimapButton.Init()
   else
     AutoLFM_MinimapButton:Show()
   end
+  
+  AutoLFM.UI.DarkUI.RegisterFrame(AutoLFM_MinimapButton)
 end
 
 -----------------------------------------------------------------------------

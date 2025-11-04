@@ -291,6 +291,8 @@ function AutoLFM.UI.QuestsPanel.Init()
     UpdateInfoLabelState()
   end)
 
+  AutoLFM.UI.DarkUI.RegisterFrame(mainFrame)
+
   AutoLFM.UI.QuestsPanel.Register()
 end
 

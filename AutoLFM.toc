@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
 ## Notes: Automated LFM Message
-## Version: 2.22
+## Version: 2.23
 ## Author: Gondoleon, NSO73
 ## DefaultState: Enabled
 ## SavedVariables: V2_Settings
@@ -22,6 +22,7 @@ API\API.lua
 #--------------------------------------------------
 # UI
 #--------------------------------------------------
+UI\Components\DarkUI.lua
 UI\Components\IconAnimation.lua
 UI\Components\LinkIntegration.lua
 UI\Components\MainWindow.lua

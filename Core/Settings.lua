@@ -30,6 +30,7 @@ local function EnsureCharData()
       minimapBtnHidden = AutoLFM.Core.Constants.DEFAULTS.MINIMAP_HIDDEN,
       minimapBtnX = nil,
       minimapBtnY = nil,
+      darkMode = AutoLFM.Core.Constants.DEFAULTS.DARK_MODE,
       selectedChannels = {},
       broadcastInterval = AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL,
       miscModules = {},
@@ -152,6 +153,42 @@ function AutoLFM.Core.Settings.LoadMinimap()
     posX = charData.minimapBtnX,
     posY = charData.minimapBtnY
   }
+end
+
+-----------------------------------------------------------------------------
+-- Dark Mode
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Settings.SaveDarkMode(isEnabled)
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  charData.darkMode = (isEnabled == true)
+end
+
+function AutoLFM.Core.Settings.LoadDarkMode()
+  if not EnsureCharData() then
+    return AutoLFM.Core.Constants.DEFAULTS.DARK_MODE
+  end
+  
+  local charData = GetCharData()
+  if not charData then
+    return AutoLFM.Core.Constants.DEFAULTS.DARK_MODE
+  end
+  
+  if charData.darkMode == nil then
+    local initialValue = AutoLFM.Core.Constants.DEFAULTS.DARK_MODE
+    if initialValue == nil then
+      if ShaguTweaks and ShaguTweaks.DarkMode then
+        initialValue = true
+      else
+        initialValue = false
+      end
+    end
+    charData.darkMode = initialValue
+    return initialValue
+  end
+  
+  return (charData.darkMode == true)
 end
 
 -----------------------------------------------------------------------------
