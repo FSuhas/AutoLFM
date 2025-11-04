@@ -24,8 +24,7 @@ local lastSliderUpdate = 0
 local durationValueText = nil
 local sentValueText = nil
 local nextValueText = nil
-local showRadio = nil
-local hideRadio = nil
+local minimapRadioGroup = nil
 local channelButtons = {}
 
 -----------------------------------------------------------------------------
@@ -269,99 +268,104 @@ end
 -- Minimap Controls
 -----------------------------------------------------------------------------
 local function UpdateMinimapRadioButtons()
-  if not showRadio or not hideRadio then return end
+  if not minimapRadioGroup then return end
   if not AutoLFM_MinimapButton then return end
+
   local isVisible = AutoLFM_MinimapButton:IsShown()
-  showRadio:SetChecked(isVisible)
-  hideRadio:SetChecked(not isVisible)
+  if isVisible then
+    minimapRadioGroup.Update("show")
+  else
+    minimapRadioGroup.Update("hide")
+  end
 end
 
 local function CreateMinimapList(lastAnchor)
   if not mainFrame or not lastAnchor then return end
+
   local minimapIcon = mainFrame:CreateTexture(nil, "OVERLAY")
   minimapIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\minimap")
   minimapIcon:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   minimapIcon:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
   minimapIcon:SetPoint("TOPLEFT", lastAnchor, "BOTTOMLEFT", 0, -7)
+
   local minimapTitle = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   minimapTitle:SetText("Minimap button:")
   minimapTitle:SetPoint("LEFT", minimapIcon, "RIGHT", 3, 0)
   AutoLFM.Core.Utils.SetFontColor(minimapTitle, "white")
+
   local isVisible = AutoLFM_MinimapButton and AutoLFM_MinimapButton:IsShown()
-  showRadio = CreateFrame("CheckButton", nil, mainFrame, "UIRadioButtonTemplate")
-  showRadio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  showRadio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  showRadio:SetPoint("TOPLEFT", minimapIcon, "BOTTOMLEFT", 10, -5)
-  showRadio:SetChecked(isVisible)
-  local showText = CreateFrame("Button", nil, mainFrame)
-  showText:SetPoint("LEFT", showRadio, "RIGHT", 0, 0)
-  showText:SetWidth(55)
-  showText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
-  local showLabel = showText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  showLabel:SetPoint("LEFT", showText, "LEFT", 5, 0)
-  showLabel:SetText("Show")
-  AutoLFM.Core.Utils.SetFontColor(showLabel, "gold")
-  showText:SetScript("OnClick", function()
-    showRadio:Click()
-  end)
-  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(showText, showLabel, "gold", "blue")
-  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(showRadio, showLabel, "gold", "blue")
-  showRadio:SetScript("OnClick", function()
-    if AutoLFM_MinimapButton and not AutoLFM_MinimapButton:IsShown() then
-      AutoLFM_MinimapButton:Show()
-      AutoLFM.Core.Settings.SaveMinimapHidden(false)
-    end
-    UpdateMinimapRadioButtons()
-  end)
-  hideRadio = CreateFrame("CheckButton", nil, mainFrame, "UIRadioButtonTemplate")
-  hideRadio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  hideRadio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
-  hideRadio:SetPoint("TOPLEFT", showRadio, "BOTTOMLEFT", 0, -4)
-  hideRadio:SetChecked(not isVisible)
-  local hideText = CreateFrame("Button", nil, mainFrame)
-  hideText:SetPoint("LEFT", hideRadio, "RIGHT", 0, 0)
-  hideText:SetWidth(55)
-  hideText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
-  local hideLabel = hideText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  hideLabel:SetPoint("LEFT", hideText, "LEFT", 5, 0)
-  hideLabel:SetText("Hide")
-  AutoLFM.Core.Utils.SetFontColor(hideLabel, "gold")
-  hideText:SetScript("OnClick", function()
-    hideRadio:Click()
-  end)
-  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(hideText, hideLabel, "gold", "blue")
-  AutoLFM.UI.PanelBuilder.AttachLabelHighlight(hideRadio, hideLabel, "gold", "blue")
-  hideRadio:SetScript("OnClick", function()
-    if AutoLFM_MinimapButton and AutoLFM_MinimapButton:IsShown() then
-      AutoLFM_MinimapButton:Hide()
-      AutoLFM.Core.Settings.SaveMinimapHidden(true)
-    end
-    UpdateMinimapRadioButtons()
-  end)
+  minimapRadioGroup = AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup({
+    parent = mainFrame,
+    anchor = {
+      point = "TOPLEFT",
+      relativeTo = minimapIcon,
+      relativePoint = "BOTTOMLEFT",
+      x = 10,
+      y = -5
+    },
+    buttons = {
+      {
+        key = "show",
+        label = "Show",
+        checked = isVisible,
+        onClick = function()
+          if AutoLFM_MinimapButton and not AutoLFM_MinimapButton:IsShown() then
+            AutoLFM_MinimapButton:Show()
+            AutoLFM.Core.Settings.SaveMinimapHidden(false)
+          end
+        end
+      },
+      {
+        key = "hide",
+        label = "Hide",
+        checked = not isVisible,
+        onClick = function()
+          if AutoLFM_MinimapButton and AutoLFM_MinimapButton:IsShown() then
+            AutoLFM_MinimapButton:Hide()
+            AutoLFM.Core.Settings.SaveMinimapHidden(true)
+          end
+        end
+      }
+    },
+    labelWidth = 55,
+    labelColor = "gold",
+    hoverColor = "blue",
+    spacing = -4
+  })
+  if not minimapRadioGroup then return nil end
+
+  local lastRadio = minimapRadioGroup.radioButtons["hide"]
   local resetButton = CreateFrame("Button", nil, mainFrame)
   resetButton:SetWidth(20)
   resetButton:SetHeight(20)
-  resetButton:SetPoint("TOPLEFT", hideRadio, "BOTTOMLEFT", -2, -4)
+  resetButton:SetPoint("TOPLEFT", lastRadio, "BOTTOMLEFT", -2, -4)
+
   local resetIcon = resetButton:CreateTexture(nil, "ARTWORK")
   resetIcon:SetAllPoints(resetButton)
   resetIcon:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonRotationLeft")
+
   local resetHL = resetButton:CreateTexture(nil, "HIGHLIGHT")
   resetHL:SetAllPoints(resetButton)
   resetHL:SetTexture(AutoLFM.Core.Utils.CONSTANTS.TEXTURE_PATH .. "Icons\\buttonHighlight")
   resetHL:SetBlendMode("ADD")
+
   local resetText = CreateFrame("Button", nil, mainFrame)
   resetText:SetPoint("LEFT", resetButton, "RIGHT", 0, 0)
   resetText:SetWidth(55)
   resetText:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
+
   local resetLabel = resetText:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   resetLabel:SetPoint("LEFT", resetText, "LEFT", 5, 0)
   resetLabel:SetText("Reset")
   AutoLFM.Core.Utils.SetFontColor(resetLabel, "gold")
+
   resetText:SetScript("OnClick", function()
     resetButton:Click()
   end)
+
   AutoLFM.UI.PanelBuilder.AttachLabelHighlight(resetText, resetLabel, "gold", "blue")
   AutoLFM.UI.PanelBuilder.AttachLabelHighlight(resetButton, resetLabel, "gold", "blue")
+
   resetButton:SetScript("OnClick", function()
     AutoLFM.Core.Settings.ResetMinimapPos()
     if AutoLFM_MinimapButton and AutoLFM.UI.MinimapButton.ResetPosition then
@@ -371,6 +375,7 @@ local function CreateMinimapList(lastAnchor)
     end
     UpdateMinimapRadioButtons()
   end)
+
   UpdateMinimapRadioButtons()
   return minimapIcon
 end

@@ -469,6 +469,91 @@ function AutoLFM.UI.PanelBuilder.AttachLabelHighlight(button, label, normalColor
     button:UnlockHighlight()
   end)
 end
+
+-----------------------------------------------------------------------------
+-- Radio Button Group
+-----------------------------------------------------------------------------
+function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
+  if not config or not config.parent or not config.buttons then return nil end
+
+  local group = {
+    radioButtons = {},
+    labels = {}
+  }
+
+  function group.Update(checkedKey)
+    for key, button in pairs(group.radioButtons) do
+      if button then
+        button:SetChecked(key == checkedKey)
+      end
+    end
+  end
+
+  function group.GetChecked()
+    for key, button in pairs(group.radioButtons) do
+      if button and button:GetChecked() then
+        return key
+      end
+    end
+    return nil
+  end
+
+  local lastRadio = nil
+  for i = 1, table.getn(config.buttons) do
+    local btnConfig = config.buttons[i]
+    if btnConfig and btnConfig.key and btnConfig.label then
+      local radio = CreateFrame("CheckButton", nil, config.parent, "UIRadioButtonTemplate")
+      radio:SetWidth(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
+      radio:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.ICON_SIZE)
+
+      if i == 1 and config.anchor then
+        radio:SetPoint(config.anchor.point or "TOPLEFT", config.anchor.relativeTo or config.parent, config.anchor.relativePoint or "TOPLEFT", config.anchor.x or 0, config.anchor.y or 0)
+      elseif lastRadio then
+        local spacing = config.spacing or -4
+        radio:SetPoint("TOPLEFT", lastRadio, "BOTTOMLEFT", 0, spacing)
+      end
+
+      if btnConfig.checked then
+        radio:SetChecked(true)
+      end
+
+      local labelButton = CreateFrame("Button", nil, config.parent)
+      labelButton:SetPoint("LEFT", radio, "RIGHT", 0, 0)
+      labelButton:SetWidth(config.labelWidth or 55)
+      labelButton:SetHeight(AutoLFM.UI.PanelBuilder.CONSTANTS.BUTTON_HEIGHT)
+
+      local label = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      label:SetPoint("LEFT", labelButton, "LEFT", 5, 0)
+      label:SetText(btnConfig.label)
+      AutoLFM.Core.Utils.SetFontColor(label, config.labelColor or "gold")
+
+      local hoverColor = config.hoverColor or "blue"
+      AutoLFM.UI.PanelBuilder.AttachLabelHighlight(labelButton, label, config.labelColor or "gold", hoverColor)
+      AutoLFM.UI.PanelBuilder.AttachLabelHighlight(radio, label, config.labelColor or "gold", hoverColor)
+
+      labelButton:SetScript("OnClick", function()
+        radio:Click()
+      end)
+
+      radio:SetScript("OnClick", function()
+        if btnConfig.onClick then
+          btnConfig.onClick()
+        end
+        group.Update(btnConfig.key)
+        if config.onUpdate then
+          config.onUpdate(btnConfig.key)
+        end
+      end)
+
+      group.radioButtons[btnConfig.key] = radio
+      group.labels[btnConfig.key] = label
+      lastRadio = radio
+    end
+  end
+
+  return group
+end
+
 -----------------------------------------------------------------------------
 -- Tooltip Utilities
 -----------------------------------------------------------------------------
