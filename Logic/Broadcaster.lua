@@ -513,7 +513,7 @@ local function OnBroadcastUpdate()
   end
 end
 
-function AutoLFM.Logic.Broadcaster.InitLoop()
+function AutoLFM.Logic.Broadcaster.Init()
   if broadcastFrame then
     broadcastFrame:SetScript("OnUpdate", nil)
     broadcastFrame = nil

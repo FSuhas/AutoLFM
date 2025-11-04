@@ -5,12 +5,14 @@
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
 if not AutoLFM.UI.MainWindow then AutoLFM.UI.MainWindow = {} end
+if not AutoLFM.UI.MainWindow.RoleSelector then AutoLFM.UI.MainWindow.RoleSelector = {} end
+if not AutoLFM.UI.MainWindow.MessagePreview then AutoLFM.UI.MainWindow.MessagePreview = {} end
+if not AutoLFM.UI.MainWindow.StartButton then AutoLFM.UI.MainWindow.StartButton = {} end
 
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
 local mainFrame = nil
-local mainIconTexture = nil
 local messagePreviewFrame = nil
 local messageText = nil
 local roleButtons = {}
@@ -20,7 +22,7 @@ local broadcastButton = nil
 -----------------------------------------------------------------------------
 -- Main Frame Creation
 -----------------------------------------------------------------------------
-function AutoLFM.UI.MainWindow.CreateFrame()
+function AutoLFM.UI.MainWindow.Init()
   if mainFrame then return mainFrame end
   
   mainFrame = CreateFrame("Frame", "AutoLFM_MainFrame", UIParent)
@@ -41,7 +43,8 @@ function AutoLFM.UI.MainWindow.CreateFrame()
   mainIcon:SetWidth(64)
   mainIcon:SetHeight(64)
   mainIcon:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Eyes\\eye01")
-  mainIconTexture = mainIcon
+  
+  AutoLFM_MainIconTexture = mainIcon
   
   local mainTitle = mainFrame:CreateFontString(nil, "MEDIUM", "GameFontNormal")
   mainTitle:SetPoint("TOP", mainFrame, "TOP", 0, -18)
@@ -53,15 +56,17 @@ function AutoLFM.UI.MainWindow.CreateFrame()
     HideUIPanel(mainFrame)
   end)
   
+  AutoLFM_MainFrame = mainFrame
+  
+  AutoLFM.UI.MainWindow.RoleSelector.Init()
+  AutoLFM.UI.MainWindow.MessagePreview.Init()
+  AutoLFM.UI.MainWindow.StartButton.Init()
+  
   return mainFrame
 end
 
 function AutoLFM.UI.MainWindow.GetFrame()
   return mainFrame
-end
-
-function AutoLFM.UI.MainWindow.GetIconTexture()
-  return mainIconTexture
 end
 
 -----------------------------------------------------------------------------
@@ -107,7 +112,7 @@ local function CreateRoleButton(roleName, xPos, texCoordStart)
   return btn, check
 end
 
-function AutoLFM.UI.MainWindow.CreateRoleSelector()
+function AutoLFM.UI.MainWindow.RoleSelector.Init()
   if not mainFrame then return end
   
   CreateRoleButton("Tank", 74, 0.2968)
@@ -132,7 +137,7 @@ end
 -- Message Preview
 -----------------------------------------------------------------------------
 
-function AutoLFM.UI.MainWindow.CreateMessagePreview()
+function AutoLFM.UI.MainWindow.MessagePreview.Init()
   if not mainFrame then return nil end
   if messagePreviewFrame then return messagePreviewFrame end
   
@@ -185,8 +190,6 @@ function AutoLFM.UI.MainWindow.CreateMessagePreview()
   
   messagePreviewFrame.previewButton = previewButton
   messagePreviewFrame:Show()
-  
-  return messagePreviewFrame
 end
 
 function AutoLFM.UI.MainWindow.UpdateMessagePreview()
@@ -219,7 +222,7 @@ end
 -----------------------------------------------------------------------------
 -- Broadcast Button
 -----------------------------------------------------------------------------
-function AutoLFM.UI.MainWindow.CreateStartButton()
+function AutoLFM.UI.MainWindow.StartButton.Init()
   if not mainFrame then return nil end
   if broadcastButton then return broadcastButton end
   
@@ -253,8 +256,6 @@ function AutoLFM.UI.MainWindow.CreateStartButton()
       end
     end
   end)
-  
-  return broadcastButton
 end
 
 function AutoLFM.UI.MainWindow.GetBroadcastToggleButton()

@@ -157,5 +157,10 @@ function AutoLFM.UI.ClearTab.OnTabClick()
   AutoLFM.UI.ClearTab.UpdateIcon()
 end
 
+function AutoLFM.UI.ClearTab.Init()
+  -- ClearTab has no panel to create, it's just an action button
+  AutoLFM.UI.ClearTab.Register()
+end
+
 function AutoLFM.UI.ClearTab.Register()
 end

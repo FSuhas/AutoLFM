@@ -516,9 +516,10 @@ end
 -----------------------------------------------------------------------------
 -- Public Functions
 -----------------------------------------------------------------------------
-function AutoLFM.UI.MorePanel.Create(parentFrame)
-  if not parentFrame then return nil end
+function AutoLFM.UI.MorePanel.Init()
   if mainFrame then return mainFrame end
+  local parentFrame = AutoLFM.UI.MainWindow.GetFrame()
+  if not parentFrame then return nil end
   CreateMainPanel(parentFrame)
   CreateCustomMessageEditBox()
   local sliderAnchor = CreateBroadcastIntervalSlider()
@@ -541,7 +542,8 @@ function AutoLFM.UI.MorePanel.Create(parentFrame)
       end
     end
   end)
-  return mainFrame
+  
+  AutoLFM.UI.MorePanel.Register()
 end
 
 function AutoLFM.UI.MorePanel.Show()

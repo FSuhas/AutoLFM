@@ -5,6 +5,7 @@
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
 if not AutoLFM.UI.TabNavigation then AutoLFM.UI.TabNavigation = {} end
+if not AutoLFM.UI.TabNavigation.Tabs then AutoLFM.UI.TabNavigation.Tabs = {} end
 
 -----------------------------------------------------------------------------
 -- Constants
@@ -181,7 +182,7 @@ end
 -----------------------------------------------------------------------------
 -- Tab System Management
 -----------------------------------------------------------------------------
-function AutoLFM.UI.TabNavigation.CreateTabs()
+function AutoLFM.UI.TabNavigation.Tabs.Init()
   local mainFrame = AutoLFM.UI.MainWindow.GetFrame()
   if not mainFrame then return end
   
@@ -301,5 +302,7 @@ local function ShowPanelByTabIndex(tabIndex)
 end
 
 function AutoLFM.UI.TabNavigation.Init()
+  AutoLFM.UI.TabNavigation.Tabs.Init()
   AutoLFM.UI.TabNavigation.RegisterCallback(ShowPanelByTabIndex)
+  AutoLFM.UI.TabNavigation.SwitchTo(1)
 end
