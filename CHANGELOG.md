@@ -1,6 +1,11 @@
 # AutoLFM Changelog
 
-## [2.20] - add Constants.lua
+## [2.21] - Reorganize Init and Settings
+
+- Reorganize Init and Settings
+- Match patterns for WelcomePopup
+
+## [2.20] - Add Constants.lua
 
 - Centralized all constants in Constants.lua
 - Main readme restructuration
@@ -30,7 +35,6 @@
 
 - FuBarPlugin v0.1 (need design)
 - (Previous commits: refactoring Raids & Quests Panels)
-
 
 ## [2.14] - Addon API example
 

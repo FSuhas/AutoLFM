@@ -82,9 +82,9 @@ local function OnPlayerLogin()
 end
 
 -----------------------------------------------------------------------------
--- Setup Event Handlers
+-- Init Event Handlers
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Events.Setup()
+function AutoLFM.Core.Events.Init()
   if not AutoLFM_MainFrame then return end
   
   AutoLFM_MainFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")

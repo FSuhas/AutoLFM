@@ -4,6 +4,7 @@
 
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.API then AutoLFM.API = {} end
+if not AutoLFM.API.Monitoring then AutoLFM.API.Monitoring = {} end
 
 -----------------------------------------------------------------------------
 -- Constants
@@ -439,7 +440,7 @@ local function CheckPlayerCountChanged()
   end
 end
 
-function AutoLFM.API.InitMonitoring()
+function AutoLFM.API.Monitoring.Init()
   if monitoringFrame then
     return true
   end
@@ -455,6 +456,4 @@ function AutoLFM.API.InitMonitoring()
   end)
   
   lastPlayerCount = AutoLFM.API.GetPlayerCount()
-  
-  return true
 end

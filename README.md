@@ -111,7 +111,8 @@ AutoLFM/
 │   ├── DungeonsPanel.lua        # Dungeon list with level filters
 │   ├── MorePanel.lua            # Settings (interval, channels, minimap, stats)
 │   ├── QuestsPanel.lua          # Quest log integration panel
-│   └── RaidsPanel.lua           # Raid list with size controls
+│   ├── RaidsPanel.lua           # Raid list with size controls
+│   └── WelcomePopup.lua         # First-time welcome popup with typing animation
 │
 ├── AutoLFM.png                  # Addon preview image
 ├── AutoLFM.toc                  # Addon manifest
@@ -122,7 +123,7 @@ AutoLFM/
 
 ## 🧩 Extensions
 
-### 🔧 Misc Modules
+### 📦 Misc Modules
 Optional utility modules.
 
 **📖 [Complete Misc Modules Documentation →](Misc/README.md)**
