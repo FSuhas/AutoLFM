@@ -82,6 +82,25 @@ local function OnPlayerLogin()
 end
 
 -----------------------------------------------------------------------------
+-- Player Level Up
+-----------------------------------------------------------------------------
+local function OnPlayerLevelUp()
+  if AutoLFM.Logic.Content.InvalidateCache then
+    AutoLFM.Logic.Content.InvalidateCache()
+  end
+  
+  local dungeonContent = AutoLFM.UI.DungeonsPanel.GetContentFrame()
+  if AutoLFM.UI.DungeonsPanel.Display and dungeonContent then
+    AutoLFM.UI.DungeonsPanel.Display(dungeonContent)
+    
+    local dungeonScroll = AutoLFM.UI.DungeonsPanel.GetScrollFrame()
+    if dungeonScroll and dungeonScroll.UpdateScrollChildRect then
+      dungeonScroll:UpdateScrollChildRect()
+    end
+  end
+end
+
+-----------------------------------------------------------------------------
 -- Init Event Handlers
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Events.Init()
@@ -90,6 +109,7 @@ function AutoLFM.Core.Events.Init()
   AutoLFM_MainFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
   AutoLFM_MainFrame:RegisterEvent("RAID_ROSTER_UPDATE")
   AutoLFM_MainFrame:RegisterEvent("PLAYER_LOGIN")
+  AutoLFM_MainFrame:RegisterEvent("PLAYER_LEVEL_UP")
   
   AutoLFM_MainFrame:SetScript("OnEvent", function()
     local success, err = pcall(function()
@@ -97,6 +117,8 @@ function AutoLFM.Core.Events.Init()
         OnGroupRosterChange()
       elseif event == "PLAYER_LOGIN" then
         OnPlayerLogin()
+      elseif event == "PLAYER_LEVEL_UP" then
+        OnPlayerLevelUp()
       end
     end)
     
