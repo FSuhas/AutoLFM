@@ -54,6 +54,10 @@ local function UpdateTabVisualState(index, isActive)
   if isActive and tab.highlight then
     tab.highlight:Hide()
   end
+  
+  if AutoLFM.UI.DarkUI and AutoLFM.UI.DarkUI.RefreshFrame and tab.btn then
+    AutoLFM.UI.DarkUI.RefreshFrame(tab.btn)
+  end
 end
 
 local function CreateTab(tabConfig, index, anchorTo)
@@ -191,6 +195,10 @@ function AutoLFM.UI.TabNavigation.Tabs.Init()
   for i = 1, table.getn(AutoLFM.UI.TabNavigation.TABS) do
     local tabConfig = AutoLFM.UI.TabNavigation.TABS[i]
     prevTab = CreateTab(tabConfig, i, prevTab)
+    
+    if prevTab and AutoLFM.UI.DarkUI and AutoLFM.UI.DarkUI.RegisterFrame then
+      AutoLFM.UI.DarkUI.RegisterFrame(prevTab)
+    end
   end
   
   currentTab = 1

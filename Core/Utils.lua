@@ -175,7 +175,7 @@ end
 function AutoLFM.Core.Utils.Print(message, colorKey)
   if not message then return end
   
-  local text = AutoLFM.Core.Utils.ColorizeText(message, colorKey or "yellow")
+  local text = AutoLFM.Core.Utils.ColorizeText(message, colorKey or "gold")
   
   if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
     DEFAULT_CHAT_FRAME:AddMessage(AutoLFM.Core.Constants.CHAT_PREFIX .. text)

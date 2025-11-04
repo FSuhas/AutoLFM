@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.23] - DarkUI
+
+- Add ShaguTweaks DarkUI theme
+
 ## [2.22] - Cached Dungeons list, Backdrops
 
 - Dungeons list only refreshed if player level up
