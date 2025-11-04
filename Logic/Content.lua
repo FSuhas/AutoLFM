@@ -14,6 +14,8 @@ if not AutoLFM.Logic.Content then AutoLFM.Logic.Content = {} end
 local selectedDungeons = {}
 local selectedRaids = {}
 local raidSize = 0
+local cachedSortedDungeons = nil
+local cachedPlayerLevel = nil
 
 -----------------------------------------------------------------------------
 -- Private Helpers
@@ -331,6 +333,11 @@ function AutoLFM.Logic.Content.GetSortedDungeons(playerLevel)
     playerLevel = UnitLevel("player") or 1
   end
   
+  if cachedSortedDungeons and cachedPlayerLevel == playerLevel then
+    return cachedSortedDungeons
+  end
+  
+  cachedPlayerLevel = playerLevel
   local sorted = {}
   
   for i = 1, table.getn(AutoLFM.Core.Constants.DUNGEONS) do
@@ -353,7 +360,13 @@ function AutoLFM.Logic.Content.GetSortedDungeons(playerLevel)
     end
   end)
   
+  cachedSortedDungeons = sorted
   return sorted
+end
+
+function AutoLFM.Logic.Content.InvalidateCache()
+  cachedSortedDungeons = nil
+  cachedPlayerLevel = nil
 end
 
 -----------------------------------------------------------------------------

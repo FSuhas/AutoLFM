@@ -1,5 +1,10 @@
 # AutoLFM Changelog
 
+## [2.22] - Cached Dungeons list
+
+- Dungeons list only refreshed if player level up
+
+
 ## [2.21] - Reorganize Init and Settings
 
 - Reorganize Init and Settings

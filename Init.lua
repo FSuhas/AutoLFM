@@ -79,7 +79,6 @@ function AutoLFM.Init.Run()
 
   Call("Core.Events.Init")
 
-
   Call("Misc.AutoInvite.Init")
   Call("Misc.AutoMarker.Init")
   Call("Misc.FPSDisplay.Init")
