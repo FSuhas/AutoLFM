@@ -20,24 +20,25 @@ local cachedPlayerLevel = nil
 -----------------------------------------------------------------------------
 -- Private Helpers
 -----------------------------------------------------------------------------
+local greenThresholds = {
+  [1] = 4,
+  [2] = 5,
+  [3] = 6,
+  [4] = 7,
+  [5] = 8
+}
 local function CalculateLevelPriority(playerLevel, minLevel, maxLevel)
   if not playerLevel or not minLevel or not maxLevel then return 5 end
   if minLevel < 1 or maxLevel < 1 or minLevel > maxLevel then return 5 end
-  
-  local avg = math.floor((minLevel + maxLevel) / 2)
-  local diff = avg - playerLevel
-  
-  local greenThresholds = {
-    [1] = 4,
-    [2] = 5,
-    [3] = 6,
-    [4] = 7,
-    [5] = 8
-  }
-  
   local thresholdIndex = math.min(math.floor(playerLevel / 10) + 1, 5)
   local greenThreshold = greenThresholds[thresholdIndex] or 8
-  
+  local diff
+  if minLevel == maxLevel then
+    diff = minLevel - playerLevel
+  else
+    local avg = math.floor((minLevel + maxLevel) / 2)
+    diff = avg - playerLevel
+  end
   if diff >= 5 then return 4 end
   if diff >= 3 then return 3 end
   if diff >= -2 then return 2 end
