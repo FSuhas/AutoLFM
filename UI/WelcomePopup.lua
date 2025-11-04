@@ -248,7 +248,7 @@ M.Show = function()
 end
 
 
-SLASH_LFMWELCOME1 = "/lfmw"
-SlashCmdList["LFMWELCOME"] = function(msg)
-    M.Show()
-end
+-- SLASH_LFMWELCOME1 = "/lfmw"
+-- SlashCmdList["LFMWELCOME"] = function(msg)
+--     M.Show()
+-- end
