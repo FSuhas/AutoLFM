@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.19] - Code refactoring
+
+- Centralized utility functions to Core/Utils.lua (truncate, setfontcolor, ...)
+
 ## [2.18] - FuBar plugin 1.0
 
 - FuBarPlugin v1.0

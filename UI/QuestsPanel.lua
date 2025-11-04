@@ -97,9 +97,9 @@ end
 local function UpdateInfoLabelState()
   if not questInfoLabelText then return end
   if HasSelectedQuest() then
-    questInfoLabelText:SetTextColor(1, 0.82, 0)
+    AutoLFM.Core.Utils.SetFontColor(questInfoLabelText, "gold")
   else
-    questInfoLabelText:SetTextColor(0.5, 0.5, 0.5)
+    AutoLFM.Core.Utils.SetFontColor(questInfoLabelText, "gray")
   end
 end
 
@@ -128,17 +128,6 @@ end
 -----------------------------------------------------------------------------
 -- Text Utilities
 -----------------------------------------------------------------------------
-local function TruncateText(text, maxLength)
-  if not text then return "" end
-  if string.len(text) <= maxLength then return text end
-
-  local truncated = string.sub(text, 1, maxLength)
-  local lastSpace = string.find(truncated, " [^ ]*$")
-  if lastSpace then
-    truncated = string.sub(truncated, 1, lastSpace - 1)
-  end
-  return truncated .. "..."
-end
 
 -----------------------------------------------------------------------------
 -- Quest Button Creation
@@ -234,7 +223,7 @@ local function UpdateQuestList()
 
       local displayTitle = q.title or "Unknown Quest"
       displayTitle = string.gsub(displayTitle, "^%[%d+%+?[dr]?%]%s*", "")
-      displayTitle = "[" .. q.level .. "] " .. TruncateText(displayTitle, 25)
+      displayTitle = "[" .. q.level .. "] " .. AutoLFM.Core.Utils.TruncateByLength(displayTitle, 25)
 
       local rightLabel = q.tag and "(" .. tostring(q.tag) .. ")" or ""
 
@@ -242,10 +231,9 @@ local function UpdateQuestList()
       local r, g, b = AutoLFM.Logic.Content.GetColor(priority, true)
 
       btn.text:SetText(displayTitle)
-      btn.text:SetTextColor(r, g, b)
-
+      AutoLFM.Core.Utils.SetFontColor(btn.text, priority)
       btn.levelText:SetText(rightLabel)
-      btn.levelText:SetTextColor(r, g, b)
+      AutoLFM.Core.Utils.SetFontColor(btn.levelText, priority)
 
       btn.originalR = r
       btn.originalG = g
@@ -284,13 +272,13 @@ function AutoLFM.UI.QuestsPanel.Create(parentFrame)
   questInfoLabelButton, questInfoLabelText = AutoLFM.UI.PanelBuilder.CreateClickableLabel(
     panelData,
     "Uncheck all quests",
-    function() if HasSelectedQuest() then UncheckAllQuestCheckboxes() end end,
-    function(_, text) if HasSelectedQuest() then text:SetTextColor(1, 0, 0) end end,
+    function() if HasSelectedQuest() then AutoLFM.UI.QuestsPanel.UncheckAllQuestCheckboxes() end end,
+    function(_, text) if HasSelectedQuest() then AutoLFM.Core.Utils.SetFontColor(text, "red") end end,
     function() UpdateInfoLabelState() end
   )
 
   questInfoLabelButton:SetWidth(questInfoLabelText:GetStringWidth() + 5)
-  questInfoLabelText:SetTextColor(0.5, 0.5, 0.5)
+  AutoLFM.Core.Utils.SetFontColor(questInfoLabelText, "gray")
   questInfoLabelFrame = panelData.bottomZone
   UpdateInfoLabelState()
 

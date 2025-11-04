@@ -47,10 +47,10 @@ local function SetFixedSizeState()
   raidSizeValueEditBox:Hide()
   
   raidSizeValueText:SetText("10")
-  raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
+  AutoLFM.Core.Utils.SetFontColor(raidSizeValueText, "gray")
   raidSizeValueText:Show()
   
-  if raidSizeLabelText then raidSizeLabelText:SetTextColor(1, 1, 1) end
+  if raidSizeLabelText then AutoLFM.Core.Utils.SetFontColor(raidSizeLabelText, "white") end
   
   if AutoLFM.Logic.Content.SetRaidSize then AutoLFM.Logic.Content.SetRaidSize(10) end
 end
@@ -65,12 +65,12 @@ local function SetVariableSizeState(sizeState)
   raidSizeSlider:Show()
   
   raidSizeValueEditBox:SetText(tostring(sizeState.currentSize))
-  raidSizeValueEditBox:SetTextColor(1, 1, 0)
+  AutoLFM.Core.Utils.SetFontColor(raidSizeValueEditBox, "yellow")
   raidSizeValueEditBox:Show()
   raidSizeValueEditBox:SetFocus()
   raidSizeValueEditBox:HighlightText()
   
-  if raidSizeLabelText then raidSizeLabelText:SetTextColor(1, 0.82, 0) end
+  if raidSizeLabelText then AutoLFM.Core.Utils.SetFontColor(raidSizeLabelText, "gold") end
 end
 
 local function UpdateSizeControlsForRaid(raidTag)
@@ -212,12 +212,12 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   raidSizeLabelText = raidSizeLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   raidSizeLabelText:SetPoint("LEFT", raidSizeLabelFrame, "LEFT", 0, 0)
   raidSizeLabelText:SetText("Raid size:")
-  raidSizeLabelText:SetTextColor(1, 1, 1)
+  AutoLFM.Core.Utils.SetFontColor(raidSizeLabelText, "white")
   
   raidSizeValueText = raidSizeControlFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   raidSizeValueText:SetPoint("LEFT", raidSizeLabelFrame, "RIGHT", -4, 0)
   raidSizeValueText:SetText("10")
-  raidSizeValueText:SetTextColor(0.5, 0.5, 0.5)
+  AutoLFM.Core.Utils.SetFontColor(raidSizeValueText, "gray")
   raidSizeValueText:Show()
   
   raidSizeValueEditBox = CreateFrame("EditBox", "AutoLFM_RaidSizeEditBox", raidSizeControlFrame)
@@ -229,7 +229,7 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   raidSizeValueEditBox:SetAutoFocus(false)
   raidSizeValueEditBox:SetMaxLetters(2)
   raidSizeValueEditBox:SetText("10")
-  raidSizeValueEditBox:SetTextColor(1, 1, 0)
+  AutoLFM.Core.Utils.SetFontColor(raidSizeValueEditBox, "yellow")
   raidSizeValueEditBox:Hide()
   
   raidSizeSlider = CreateFrame("Slider", nil, raidSizeControlFrame)
@@ -259,7 +259,7 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   
   raidSizeLabelFrame:SetScript("OnEnter", function()
     if raidSizeValueEditBox and raidSizeValueEditBox:IsShown() then
-      raidSizeLabelText:SetTextColor(0.3, 0.6, 1)
+      AutoLFM.Core.Utils.SetFontColor(raidSizeLabelText, "blue")
       GameTooltip:SetOwner(this, "ANCHOR_NONE")
       GameTooltip:SetPoint("BOTTOMLEFT", raidSizeControlFrame, "TOPLEFT", -10, -5)
       GameTooltip:SetText("Edit raid size", 1, 1, 1)
@@ -268,7 +268,7 @@ function AutoLFM.UI.RaidsPanel.CreateSizeSlider(bottomZone)
   end)
   
   raidSizeLabelFrame:SetScript("OnLeave", function()
-    raidSizeLabelText:SetTextColor(1, 1, 1)
+    AutoLFM.Core.Utils.SetFontColor(raidSizeLabelText, "white")
     GameTooltip:Hide()
   end)
   

@@ -126,14 +126,6 @@ local function CalculateLevelPriority(playerLevel, minLevel, maxLevel)
   return 5
 end
 
-local function ColorToHex(r, g, b)
-  if not r or not g or not b then return "ff808080" end
-  return string.format("ff%02x%02x%02x", 
-    math.floor(r * 255), 
-    math.floor(g * 255), 
-    math.floor(b * 255))
-end
-
 -----------------------------------------------------------------------------
 -- Color Utilities
 -----------------------------------------------------------------------------
@@ -198,7 +190,7 @@ function AutoLFM.Logic.Content.CreateQuestLink(questID, level, title)
   local playerLevel = UnitLevel("player") or 1
   local priority = AutoLFM.Logic.Content.CalculateQuestPriority(playerLevel, level)
   local r, g, b = AutoLFM.Logic.Content.GetColor(priority, true)
-  local colorCode = ColorToHex(r, g, b)
+  local colorCode = AutoLFM.Core.Utils.RGBToHex(r, g, b)
   
   return string.format(
     AutoLFM.Logic.Content.LINK_FORMATS.QUEST, 

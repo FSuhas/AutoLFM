@@ -102,7 +102,7 @@ function AutoLFM.UI.PanelBuilder.CreateLabel(panelData, text)
   local labelText = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   labelText:SetPoint("LEFT", labelButton, "LEFT", 0, 0)
   labelText:SetText(text)
-  labelText:SetTextColor(1, 1, 1)
+  AutoLFM.Core.Utils.SetFontColor(labelText, "white")
   
   return labelButton, labelText
 end
@@ -118,8 +118,7 @@ function AutoLFM.UI.PanelBuilder.CreateClickableLabel(panelData, text, onClickFu
   local labelText = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   labelText:SetPoint("LEFT", labelButton, "LEFT", 0, 0)
   labelText:SetText(text)
-  labelText:SetTextColor(1, 1, 1)
-  
+  AutoLFM.Core.Utils.SetFontColor(labelText, "white")
   if onClickFunc then
     labelButton:SetScript("OnClick", function()
       onClickFunc(labelButton, labelText)

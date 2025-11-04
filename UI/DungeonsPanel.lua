@@ -89,10 +89,9 @@ function AutoLFM.UI.DungeonsPanel.GetAllFilterStates() return filterStates end
 -----------------------------------------------------------------------------
 
 local function UpdateFilterLabelColor()
-  if filterLabelText then
-    local r, g, b = HasDisabledFilter() and 1 or 1, HasDisabledFilter() and 0.82 or 1, HasDisabledFilter() and 0 or 1
-    filterLabelText:SetTextColor(r, g, b)
-  end
+  if not filterLabelText then return end
+  local colorName = HasDisabledFilter() and "gold" or "white"
+  AutoLFM.Core.Utils.SetFontColor(filterLabelText, colorName)
 end
 
 local function CreateFilterCheckbox(parent, color, xOffset)
@@ -127,7 +126,7 @@ local function CreateColorFilterUI(parent)
   filterLabelText = filterLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   filterLabelText:SetPoint("LEFT", filterLabelFrame, "LEFT", 0, 0)
   filterLabelText:SetText("Filters:")
-  filterLabelText:SetTextColor(1, 1, 1)
+  AutoLFM.Core.Utils.SetFontColor(filterLabelText, "white")
 
   filterLabelFrame:SetScript("OnClick", function()
     if HasDisabledFilter() then
@@ -142,7 +141,7 @@ local function CreateColorFilterUI(parent)
 
   filterLabelFrame:SetScript("OnEnter", function()
     if HasDisabledFilter() then
-      filterLabelText:SetTextColor(0.3, 0.6, 1)
+      AutoLFM.Core.Utils.SetFontColor(filterLabelText, "blue")
       GameTooltip:SetOwner(this, "ANCHOR_NONE")
       GameTooltip:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", -10, -5)
       GameTooltip:SetText("Enable all filters", 1, 1, 1)
