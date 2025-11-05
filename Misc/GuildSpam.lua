@@ -146,12 +146,29 @@ SlashCmdList["MG"] = function(msg)
   
   if not args or table.getn(args) == 0 then
     AutoLFM.Core.Utils.PrintInfo("Legacy command /mg - Use /lfm misc guild instead")
-    AutoLFM.Core.Utils.PrintNote("Usage: /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
+    AutoLFM.Core.Utils.PrintNote("Usage: /mg <message> | /mg interval <sec> | /mg on | /mg off | /mg msg")
     return
   end
   
-  if args[1] == "stop" then
+    if args[1] == "off" then
     AutoLFM.Misc.GuildSpam.Stop()
+    return
+  end
+
+  if args[1] == "on" then
+    local savedMessage = AutoLFM.Core.Settings.LoadMiscModuleData("guildSpam", "message")
+    local savedInterval = AutoLFM.Core.Settings.LoadMiscModuleData("guildSpam", "interval")
+    
+    if not savedMessage or savedMessage == "" then
+      AutoLFM.Core.Utils.PrintWarning("No saved guild message to resume.")
+      return
+    end
+    
+    if savedInterval and tonumber(savedInterval) then
+      interval = tonumber(savedInterval)
+    end
+    
+    AutoLFM.Misc.GuildSpam.Start(savedMessage)
     return
   end
   
@@ -166,9 +183,9 @@ SlashCmdList["MG"] = function(msg)
     return
   end
   
-  if msg == "" then
-    AutoLFM.Core.Utils.PrintInfo("Legacy command /mg - Use /lfm misc guild instead")
-    AutoLFM.Core.Utils.PrintNote("Usage: /mg <message> | /mg stop | /mg interval <sec> | /mg msg")
+    if msg == "" then
+      AutoLFM.Core.Utils.PrintInfo("Legacy command /mg - Use /lfm misc guild instead")
+      AutoLFM.Core.Utils.PrintNote("Usage: /mg <message> | /mg interval <sec> | /mg on | /mg off | /mg msg")
     return
   end
   
