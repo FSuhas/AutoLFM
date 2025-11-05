@@ -4,7 +4,7 @@
 -- Handles addon initialization sequence in proper dependency order.
 -- Uses a local Call() helper to safely invoke namespaced Init functions.
 -- 
--- Call() is safe because:
+-- Call() is safe because: 
 --   - Uses pcall to catch any runtime errors
 --   - Validates module and function existence before invocation
 --   - Provides clear error messages with full path context
@@ -23,28 +23,28 @@ local isInitialized = false
 -- Call function
 -----------------------------------------------------------------------------
 local function Call(fullPath, arg)
-  local lastDot = 0
-  for i = string.len(fullPath), 1, -1 do
-    if string.sub(fullPath, i, i) == "." then lastDot = i break end
+  local parts = {}
+  for part in string.gmatch(fullPath, "[^%.]+") do
+    table.insert(parts, part)
   end
-  if lastDot == 0 then error("[AutoLFM] Invalid path: " .. fullPath) end
   
-  local module, current = AutoLFM, 1
-  while current < lastDot do
-    local dotPos = string.find(fullPath, "%.", current)
-    if dotPos and dotPos < lastDot then
-      module = module and module[string.sub(fullPath, current, dotPos - 1)]
-      current = dotPos + 1
-    else
-      module = module and module[string.sub(fullPath, current, lastDot - 1)]
-      break
+  if table.getn(parts) == 0 then 
+    error("[AutoLFM] Invalid path: " .. fullPath) 
+  end
+  
+  local module = AutoLFM
+  for i = 1, table.getn(parts) - 1 do
+    module = module and module[parts[i]]
+    if not module then 
+      local modulePath = table.concat(parts, ".", 1, i)
+      error("[AutoLFM] Missing module: " .. modulePath) 
     end
   end
-  if not module then error("[AutoLFM] Missing module: " .. string.sub(fullPath, 1, lastDot - 1)) end
   
-  local func = module[string.sub(fullPath, lastDot + 1)]
+  local funcName = parts[table.getn(parts)]
+  local func = module[funcName]
   if not func then error("[AutoLFM] Missing function: " .. fullPath) end
-  
+     
   local ok, result = pcall(func, arg)
   if not ok then error("[AutoLFM] Error: " .. fullPath .. " - " .. tostring(result)) end
   
@@ -87,8 +87,14 @@ function AutoLFM.Init.Run()
   Call("Misc.GuildSpam.Init")
   Call("Misc.RestedXP.Init")
   
-  if AutoLFM.Core.Utils.PrintSuccess then
-    AutoLFM.Core.Utils.PrintSuccess("Loaded successfully! " .. AutoLFM.Color("More info: ", "white") .. AutoLFM.Color("/lfm help", "yellow"))
+  if AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
+    local message = "Loaded successfully! "
+    if AutoLFM.Color then
+      message = message .. AutoLFM.Color("More info: ", "white") .. AutoLFM.Color("/lfm help", "yellow")
+    else
+      message = message .. "More info: /lfm help"
+    end
+    AutoLFM.Core.Utils.PrintSuccess(message)
   end
   
   isInitialized = true

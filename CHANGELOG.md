@@ -1,5 +1,14 @@
 # AutoLFM Changelog
 
+## [2.34] - Refactor UI components for AutoLFM
+
+- Simplified initialization of UI tables in MainWindow and DungeonsPanel.
+- Improved readability by consolidating variable declarations and reducing redundant checks.
+- Enhanced the structure of the Size Controls in RaidsPanel for better clarity and maintainability.
+- Updated function definitions and calls to ensure consistent formatting and style across the codebase.
+- Added checks for nil values before accessing properties to prevent potential errors.
+- Improved tooltip handling and user feedback in the Size Controls.
+
 ## [2.23] - DarkUI
 
 - Add ShaguTweaks DarkUI theme
