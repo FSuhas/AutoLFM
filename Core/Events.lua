@@ -12,20 +12,20 @@ if not AutoLFM.Core.Events then AutoLFM.Core.Events = {} end
 local function OnGroupRosterChange()
   local mode = AutoLFM.Logic.Selection.GetMode()
   local currentCount = AutoLFM.Logic.Selection.GetGroupCount()
-  
+
   if mode == "raid" then
     local raidSize = AutoLFM.Logic.Content.GetRaidSize()
-    
+
     if currentCount >= raidSize then
       local result = AutoLFM.Logic.Broadcaster.HandleGroupFull("raid")
-      
+
       if result and result.needsUIUpdate then
         local button = AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
         if button then
           button:SetText("Start")
         end
       end
-      
+
       if result and result.playStopSound then
         pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. AutoLFM.Core.Constants.SOUNDS.STOP)
       end
@@ -35,14 +35,14 @@ local function OnGroupRosterChange()
   elseif mode == "dungeon" then
     if currentCount >= AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON then
       local result = AutoLFM.Logic.Broadcaster.HandleGroupFull("dungeon")
-      
+
       if result and result.needsUIUpdate then
         local button = AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
         if button then
           button:SetText("Start")
         end
       end
-      
+
       if result and result.playStopSound then
         pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. AutoLFM.Core.Constants.SOUNDS.STOP)
       end
@@ -61,43 +61,24 @@ local function OnPlayerLogin()
   local dungeonContent = AutoLFM.UI.DungeonsPanel.GetContentFrame()
   if AutoLFM.UI.DungeonsPanel.Display and dungeonContent then
     AutoLFM.UI.DungeonsPanel.Display(dungeonContent)
-    
+
     local dungeonScroll = AutoLFM.UI.DungeonsPanel.GetScrollFrame()
     if dungeonScroll and dungeonScroll.UpdateScrollChildRect then
       dungeonScroll:UpdateScrollChildRect()
     end
   end
-  
+
   local raidContent = AutoLFM.UI.RaidsPanel.GetContentFrame()
   if AutoLFM.UI.RaidsPanel.Display and raidContent then
     AutoLFM.UI.RaidsPanel.Display(raidContent)
-    
+
     local raidScroll = AutoLFM.UI.RaidsPanel.GetScrollFrame()
     if raidScroll and raidScroll.UpdateScrollChildRect then
       raidScroll:UpdateScrollChildRect()
     end
   end
-  
-  AutoLFM.UI.DungeonsPanel.UpdateFilterUI()
-end
 
------------------------------------------------------------------------------
--- Player Level Up
------------------------------------------------------------------------------
-local function OnPlayerLevelUp()
-  if AutoLFM.Logic.Content.InvalidateCache then
-    AutoLFM.Logic.Content.InvalidateCache()
-  end
-  
-  local dungeonContent = AutoLFM.UI.DungeonsPanel.GetContentFrame()
-  if AutoLFM.UI.DungeonsPanel.Display and dungeonContent then
-    AutoLFM.UI.DungeonsPanel.Display(dungeonContent)
-    
-    local dungeonScroll = AutoLFM.UI.DungeonsPanel.GetScrollFrame()
-    if dungeonScroll and dungeonScroll.UpdateScrollChildRect then
-      dungeonScroll:UpdateScrollChildRect()
-    end
-  end
+  AutoLFM.UI.DungeonsPanel.UpdateFilterUI()
 end
 
 -----------------------------------------------------------------------------
@@ -105,23 +86,20 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Events.Init()
   if not AutoLFM_MainFrame then return end
-  
+
   AutoLFM_MainFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
   AutoLFM_MainFrame:RegisterEvent("RAID_ROSTER_UPDATE")
   AutoLFM_MainFrame:RegisterEvent("PLAYER_LOGIN")
-  AutoLFM_MainFrame:RegisterEvent("PLAYER_LEVEL_UP")
-  
+
   AutoLFM_MainFrame:SetScript("OnEvent", function()
     local success, err = pcall(function()
       if event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
         OnGroupRosterChange()
       elseif event == "PLAYER_LOGIN" then
         OnPlayerLogin()
-      elseif event == "PLAYER_LEVEL_UP" then
-        OnPlayerLevelUp()
       end
     end)
-    
+
     if not success then
       AutoLFM.Core.Utils.PrintError("Event handler error: " .. tostring(err))
     end
