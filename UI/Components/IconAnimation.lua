@@ -1,15 +1,13 @@
---=============================================================================
--- AutoLFM: Icon Animation
---=============================================================================
 
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
-if not AutoLFM.UI.IconAnimation then AutoLFM.UI.IconAnimation = {} end
+if not AutoLFM.UI.Components then AutoLFM.UI.Components = {} end
+if not AutoLFM.UI.Components.IconAnimation then AutoLFM.UI.Components.IconAnimation = {} end
 
 -----------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------
-AutoLFM.UI.IconAnimation.SEQUENCE = {
+AutoLFM.UI.Components.IconAnimation.SEQUENCE = {
   "eye01", "eye02", "eye03", "eye04", "eye05", "eye06", "eye05", "eye04", "eye03", "eye02",
   "eye01", "eye07", "eye08", "eye09", "eye10", "eye11", "eye10", "eye09", "eye08", "eye07",
   "eye01", "eye02", "eye03", "eye04", "eye05", "eye06", "eye05", "eye04", "eye03", "eye02",
@@ -17,25 +15,24 @@ AutoLFM.UI.IconAnimation.SEQUENCE = {
   "eye01", "eye12", "eye13", "eye14", "eye15", "eye16", "eye15", "eye14", "eye13", "eye12"
 }
 
-AutoLFM.UI.IconAnimation.SPEED = 0.15
+AutoLFM.UI.Components.IconAnimation.SPEED = 0.15
 
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
 local currentFrameIndex = 1
 local animationFrame = nil
-
 -----------------------------------------------------------------------------
 -- Icon Management
 -----------------------------------------------------------------------------
 local function AnimateIcons()
   currentFrameIndex = currentFrameIndex + 1
-  if currentFrameIndex > table.getn(AutoLFM.UI.IconAnimation.SEQUENCE) then
+  if currentFrameIndex > table.getn(AutoLFM.UI.Components.IconAnimation.SEQUENCE) then
     currentFrameIndex = 1
   end
-  
-  local iconPath = AutoLFM.Core.Constants.TEXTURE_PATH .. "Eyes\\" .. AutoLFM.UI.IconAnimation.SEQUENCE[currentFrameIndex]
-  
+
+  local iconPath = AutoLFM.Core.Constants.TEXTURE_PATH .. "Eyes\\" .. AutoLFM.UI.Components.IconAnimation.SEQUENCE[currentFrameIndex]
+
   if AutoLFM_MinimapButton and AutoLFM_MinimapButton.icon then
     AutoLFM_MinimapButton.icon:SetTexture(iconPath)
   end
@@ -44,7 +41,6 @@ local function AnimateIcons()
     AutoLFM_MainIconTexture:SetTexture(iconPath)
   end
 end
-
 local function ResetIcons()
   currentFrameIndex = 1
   
@@ -58,40 +54,36 @@ local function ResetIcons()
     AutoLFM_MainIconTexture:SetTexture(defaultIconPath)
   end
 end
-
 -----------------------------------------------------------------------------
 -- Animation Control
 -----------------------------------------------------------------------------
-function AutoLFM.UI.IconAnimation.Start()
+function AutoLFM.UI.Components.IconAnimation.Start()
   if not animationFrame then
     animationFrame = CreateFrame("Frame")
   end
-  
   animationFrame.lastUpdate = GetTime()
-  
+
   animationFrame:SetScript("OnUpdate", function()
     if not AutoLFM.Logic.Broadcaster.IsActive() then
-      AutoLFM.UI.IconAnimation.Stop()
+      AutoLFM.UI.Components.IconAnimation.Stop()
       return
     end
-    
     if not animationFrame.lastUpdate then
       animationFrame.lastUpdate = GetTime()
       return
     end
-    
+
     local now = GetTime()
-    if now - animationFrame.lastUpdate >= AutoLFM.UI.IconAnimation.SPEED then
+    if now - animationFrame.lastUpdate >= AutoLFM.UI.Components.IconAnimation.SPEED then
       AnimateIcons()
       animationFrame.lastUpdate = now
     end
   end)
 end
 
-function AutoLFM.UI.IconAnimation.Stop()
+function AutoLFM.UI.Components.IconAnimation.Stop()
   if animationFrame then
     animationFrame:SetScript("OnUpdate", nil)
   end
   ResetIcons()
 end
-

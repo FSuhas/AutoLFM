@@ -4,7 +4,8 @@
 
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
-if not AutoLFM.UI.LinkIntegration then AutoLFM.UI.LinkIntegration = {} end
+if not AutoLFM.UI.Components then AutoLFM.UI.Components = {} end
+if not AutoLFM.UI.Components.LinkIntegration then AutoLFM.UI.Components.LinkIntegration = {} end
 
 -----------------------------------------------------------------------------
 -- Private State
@@ -144,7 +145,7 @@ end
 -----------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------
-function AutoLFM.UI.LinkIntegration.Init()
+function AutoLFM.UI.Components.LinkIntegration.Init()
     local success, err = pcall(function()
         HookBagClicks()
         HookQuestLog()

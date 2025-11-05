@@ -25,6 +25,12 @@ local function IsMessageEmpty(msg)
   return not msg or msg == "" or msg == " "
 end
 
+local function NotifyClearTab()
+  if AutoLFM.UI.ClearTab and AutoLFM.UI.ClearTab.UpdateIcon then
+    AutoLFM.UI.ClearTab.UpdateIcon()
+  end
+end
+
 -----------------------------------------------------------------------------
 -- Message Construction
 -----------------------------------------------------------------------------
@@ -163,8 +169,8 @@ function AutoLFM.Logic.Broadcaster.UpdateMessage()
     
     generatedMessage = BuildFinalMessage(contentText, rolesString, missingCount, isRaid, raidData)
     
-    if AutoLFM.UI.MainWindow.UpdateMessagePreview then
-      AutoLFM.UI.MainWindow.UpdateMessagePreview()
+    if AutoLFM.UI.Components.MainWindow.UpdateMessagePreview then
+      AutoLFM.UI.Components.MainWindow.UpdateMessagePreview()
     end
     
     if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
@@ -184,6 +190,7 @@ end
 function AutoLFM.Logic.Broadcaster.SetCustomMessage(message)
   customMessage = message or ""
   AutoLFM.Logic.Broadcaster.UpdateMessage()
+  NotifyClearTab()
 end
 
 function AutoLFM.Logic.Broadcaster.GetCustomMessage()
@@ -191,8 +198,7 @@ function AutoLFM.Logic.Broadcaster.GetCustomMessage()
 end
 
 function AutoLFM.Logic.Broadcaster.ResetCustomMessage()
-  customMessage = ""
-  AutoLFM.Logic.Broadcaster.UpdateMessage()
+  AutoLFM.Logic.Broadcaster.SetCustomMessage("")
 end
 
 -----------------------------------------------------------------------------
@@ -355,8 +361,8 @@ function AutoLFM.Logic.Broadcaster.Start()
     
     AutoLFM.Logic.Broadcaster.SendToChannels(generatedMessage)
     
-    if AutoLFM.UI.IconAnimation.Start then
-      AutoLFM.UI.IconAnimation.Start()
+    if AutoLFM.UI.Components.IconAnimation.Stop then
+      AutoLFM.UI.Components.IconAnimation.Stop()
     end
     
     if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
@@ -493,7 +499,7 @@ local function ExecuteBroadcast()
   if not sendSuccess then
     AutoLFM.Logic.Broadcaster.Stop()
     
-    local broadcastButton = AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
+    local broadcastButton = AutoLFM.UI.Components.MainWindow.GetBroadcastToggleButton()
     if broadcastButton then
       broadcastButton:SetText("Start")
     end

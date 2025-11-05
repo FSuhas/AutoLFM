@@ -1,231 +1,297 @@
 --=============================================================================
--- AutoLFM: Hybrid Settings Manager
+-- AutoLFM: Saved Settings Manager
 --=============================================================================
-
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.Core then AutoLFM.Core = {} end
 if not AutoLFM.Core.Settings then AutoLFM.Core.Settings = {} end
-
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
 local characterID = nil
-local charData = nil
-
-local function GetCharData(safe)
-  if not charData and characterID and V2_Settings then
-    charData = V2_Settings[characterID]
-  end
-  if not charData and safe then
-    AutoLFM.Core.Utils.PrintError("[Settings] Character data missing for " .. tostring(characterID))
-  end
-  return charData
+local function GetCharData()
+  if not V2_Settings or not characterID then return nil end
+  return V2_Settings[characterID]
 end
-
 local function EnsureCharData()
-  if not V2_Settings then V2_Settings = {} end
-  if not characterID then
-    AutoLFM.Core.Utils.PrintError("[Settings] characterID not set")
-    return false
+  if not V2_Settings then
+    V2_Settings = {}
   end
-
+  
+  if not characterID then return false end
+  
   if not V2_Settings[characterID] then
-    local defaults = AutoLFM.Core.Constants.DEFAULTS
     V2_Settings[characterID] = {
       welcomeShown = false,
       dungeonFilters = {},
-      minimapBtnHidden = defaults.MINIMAP_HIDDEN,
+      minimapBtnHidden = AutoLFM.Core.Constants.DEFAULTS.MINIMAP_HIDDEN,
       minimapBtnX = nil,
       minimapBtnY = nil,
-      darkMode = defaults.DARK_MODE,
+      darkMode = AutoLFM.Core.Constants.DEFAULTS.DARK_MODE,
       selectedChannels = {},
-      broadcastInterval = defaults.BROADCAST_INTERVAL,
+      broadcastInterval = AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL,
       miscModules = {},
       miscModulesData = {}
     }
-    for k, v in pairs(defaults.MISC_MODULES) do
-      V2_Settings[characterID].miscModules[k] = v
+    
+    for key, value in pairs(AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES) do
+      V2_Settings[characterID].miscModules[key] = value
     end
   end
-
-  charData = V2_Settings[characterID]
+  
   return true
 end
-
-local function EnsureMiscModules(data)
-  if not data or not data.miscModules then return end
+local function EnsureMiscModules(charData)
+  if not charData then return end
+  if not charData.miscModules then charData.miscModules = {} end
+  
   for key, defaultValue in pairs(AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES) do
-    if data.miscModules[key] == nil then
-      data.miscModules[key] = defaultValue
+    if charData.miscModules[key] == nil then
+      charData.miscModules[key] = defaultValue
     end
   end
 end
-
 -----------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Settings.Init()
-  local name, realm = UnitName("player"), GetRealmName()
+  local name = UnitName("player")
+  local realm = GetRealmName()
   if not name or not realm then return end
+  
   characterID = name .. "-" .. realm
-
+  
   if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  if not charData.dungeonFilters then charData.dungeonFilters = {} end
+  if not charData.miscModulesData then charData.miscModulesData = {} end
 
-  charData.dungeonFilters = charData.dungeonFilters or {}
-  charData.miscModulesData = charData.miscModulesData or {}
   EnsureMiscModules(charData)
+
+  if not Presets then
+    Presets = {}
+  end
+  if not Presets[characterID] then
+    Presets[characterID] = {}
+  end
 end
 
 function AutoLFM.Core.Settings.GetCharacterID()
   return characterID
 end
-
 -----------------------------------------------------------------------------
 -- UI Settings
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Settings.SaveWelcomeShown(shown)
-  local data = GetCharData(true)
-  if data then data.welcomeShown = shown == true end
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  charData.welcomeShown = (shown == true)
 end
-
 function AutoLFM.Core.Settings.LoadWelcomeShown()
-  local data = GetCharData(true)
-  return data and data.welcomeShown == true or false
+  if not EnsureCharData() then return false end
+  local charData = GetCharData()
+  
+  return (charData.welcomeShown == true)
 end
-
 function AutoLFM.Core.Settings.SaveFilters(filters)
-  local data = GetCharData(true)
-  if not data then return end
-  for k, v in pairs(filters) do data.dungeonFilters[k] = v == true end
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  for colorKey, value in pairs(filters) do
+    charData.dungeonFilters[colorKey] = (value == true)
+  end
 end
-
 function AutoLFM.Core.Settings.LoadFilters()
-  local data = GetCharData(true)
-  return data and data.dungeonFilters or {}
+  if not EnsureCharData() then return {} end
+  local charData = GetCharData()
+  return charData and charData.dungeonFilters or {}
 end
-
 -----------------------------------------------------------------------------
 -- Minimap Button
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Settings.SaveMinimapPos(x, y)
-  local data = GetCharData(true)
-  if data then
-    data.minimapBtnX = x
-    data.minimapBtnY = y
-  end
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  charData.minimapBtnX = x
+  charData.minimapBtnY = y
 end
-
-function AutoLFM.Core.Settings.SaveMinimapHidden(hidden)
-  local data = GetCharData(true)
-  if data then data.minimapBtnHidden = hidden == true end
+function AutoLFM.Core.Settings.SaveMinimapHidden(isHidden)
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  charData.minimapBtnHidden = (isHidden == true)
 end
-
 function AutoLFM.Core.Settings.ResetMinimapPos()
-  local data = GetCharData(true)
-  if data then
-    data.minimapBtnX = nil
-    data.minimapBtnY = nil
-  end
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  charData.minimapBtnX = nil
+  charData.minimapBtnY = nil
 end
-
 function AutoLFM.Core.Settings.LoadMinimap()
-  local data = GetCharData(true)
-  local defaults = AutoLFM.Core.Constants.DEFAULTS
+  if not EnsureCharData() then
+    return { hidden = AutoLFM.Core.Constants.DEFAULTS.MINIMAP_HIDDEN }
+  end
+  
+  local charData = GetCharData()
+  if not charData then
+    return { hidden = AutoLFM.Core.Constants.DEFAULTS.MINIMAP_HIDDEN }
+  end
+  
   return {
-    hidden = data and data.minimapBtnHidden == true or defaults.MINIMAP_HIDDEN,
-    posX = data and data.minimapBtnX,
-    posY = data and data.minimapBtnY
+    hidden = (charData.minimapBtnHidden == true),
+    posX = charData.minimapBtnX,
+    posY = charData.minimapBtnY
   }
 end
-
 -----------------------------------------------------------------------------
 -- Dark Mode
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Settings.SaveDarkMode(enabled)
-  local data = GetCharData(true)
-  if data then data.darkMode = enabled == true end
+function AutoLFM.Core.Settings.SaveDarkMode(isEnabled)
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  charData.darkMode = (isEnabled == true)
 end
-
 function AutoLFM.Core.Settings.LoadDarkMode()
-  local data = GetCharData(true)
-  if not data then return AutoLFM.Core.Constants.DEFAULTS.DARK_MODE end
-
-  if data.darkMode == nil then
-    local val = AutoLFM.Core.Constants.DEFAULTS.DARK_MODE
-    if val == nil then val = ShaguTweaks and ShaguTweaks.DarkMode or false end
-    data.darkMode = val
-    return val
+  if not EnsureCharData() then
+    return AutoLFM.Core.Constants.DEFAULTS.DARK_MODE
   end
-  return data.darkMode == true
+  
+  local charData = GetCharData()
+  if not charData then
+    return AutoLFM.Core.Constants.DEFAULTS.DARK_MODE
+  end
+  
+  if charData.darkMode == nil then
+    local initialValue = AutoLFM.Core.Constants.DEFAULTS.DARK_MODE
+    if initialValue == nil then
+      if ShaguTweaks and ShaguTweaks.DarkMode then
+        initialValue = true
+      else
+        initialValue = false
+      end
+    end
+    charData.darkMode = initialValue
+    return initialValue
+  end
+  
+  return (charData.darkMode == true)
 end
-
 -----------------------------------------------------------------------------
 -- Broadcast Settings
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Settings.SaveChannels(channels)
-  local data = GetCharData(true)
-  if not data then return end
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
   local copy = {}
-  for k,v in pairs(channels or {}) do copy[k] = v end
-  data.selectedChannels = copy
+  for k, v in pairs(channels or {}) do copy[k] = v end
+  charData.selectedChannels = copy
 end
-
 function AutoLFM.Core.Settings.LoadChannels()
-  local data = GetCharData(true)
-  return data and data.selectedChannels or {}
+  if not EnsureCharData() then return {} end
+  local charData = GetCharData()
+  return charData and charData.selectedChannels or {}
 end
-
 function AutoLFM.Core.Settings.SaveInterval(interval)
-  local data = GetCharData(true)
-  if data then
-    data.broadcastInterval = interval or AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
-  end
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  charData.broadcastInterval = interval or AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
 end
-
 function AutoLFM.Core.Settings.LoadInterval()
-  local data = GetCharData(true)
-  return data and data.broadcastInterval or AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
+  if not EnsureCharData() then
+    return AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
+  end
+  local charData = GetCharData()
+  return charData and charData.broadcastInterval or AutoLFM.Core.Constants.DEFAULTS.BROADCAST_INTERVAL
 end
-
 -----------------------------------------------------------------------------
 -- Misc Modules
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Settings.SaveMiscModule(name, enabled)
-  local data = GetCharData(true)
-  if not data then return end
-  EnsureMiscModules(data)
-  data.miscModules[name] = enabled == true
+function AutoLFM.Core.Settings.SaveMiscModule(moduleName, isEnabled)
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  EnsureMiscModules(charData)
+  
+  charData.miscModules[moduleName] = (isEnabled == true)
 end
-
-function AutoLFM.Core.Settings.LoadMiscModule(name)
-  local data = GetCharData(true)
-  if not data then return AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES[name] or false end
-  EnsureMiscModules(data)
-  return data.miscModules[name] == true
+function AutoLFM.Core.Settings.LoadMiscModule(moduleName)
+  if not EnsureCharData() then
+    return AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES[moduleName] or false
+  end
+  local charData = GetCharData()
+  EnsureMiscModules(charData)
+  
+  local value = charData.miscModules[moduleName]
+  return (value == true)
 end
-
 function AutoLFM.Core.Settings.GetAllMiscModules()
-  local data = GetCharData(true)
-  if not data then
-    data = { miscModules = {} }
-    for k,v in pairs(AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES) do
-      data.miscModules[k] = v
+  local charData = GetCharData()
+  if not charData then
+    charData = { miscModules = {} }
+    for key, value in pairs(AutoLFM.Core.Constants.DEFAULTS.MISC_MODULES) do
+      charData.miscModules[key] = value
     end
   end
-  EnsureMiscModules(data)
-  return data.miscModules
+  EnsureMiscModules(charData)
+  return charData.miscModules
+end
+function AutoLFM.Core.Settings.SaveMiscModuleData(moduleName, key, value)
+  if not EnsureCharData() then return end
+  local charData = GetCharData()
+  
+  if not charData.miscModulesData then
+    charData.miscModulesData = {}
+  end
+  if not charData.miscModulesData[moduleName] then
+    charData.miscModulesData[moduleName] = {}
+  end
+  
+  charData.miscModulesData[moduleName][key] = value
 end
 
-function AutoLFM.Core.Settings.SaveMiscModuleData(name, key, value)
-  local data = GetCharData(true)
-  if not data then return end
-  data.miscModulesData = data.miscModulesData or {}
-  data.miscModulesData[name] = data.miscModulesData[name] or {}
-  data.miscModulesData[name][key] = value
+-----------------------------------------------------------------------------
+-- Presets Management
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Settings.SavePreset(presetName, presetData)
+  if not Presets then
+    Presets = {}
+  end
+
+  if not characterID then return false end
+
+  if not Presets[characterID] then
+    Presets[characterID] = {}
+  end
+
+  Presets[characterID][presetName] = presetData
+  return true
 end
 
-function AutoLFM.Core.Settings.LoadMiscModuleData(name, key)
-  local data = GetCharData(true)
-  return data and data.miscModulesData and data.miscModulesData[name] and
-         data.miscModulesData[name][key]
+function AutoLFM.Core.Settings.LoadPresets()
+  if not Presets or not characterID then return {} end
+  return Presets[characterID] or {}
+end
+
+function AutoLFM.Core.Settings.DeletePreset(presetName)
+  if not Presets or not characterID then return false end
+
+  if Presets[characterID] and Presets[characterID][presetName] then
+    Presets[characterID][presetName] = nil
+    return true
+  end
+  return false
+end
+
+function AutoLFM.Core.Settings.LoadMiscModuleData(moduleName, key)
+  if not EnsureCharData() then return nil end
+  local charData = GetCharData()
+  if not charData or not charData.miscModulesData then return nil end
+  if not charData.miscModulesData[moduleName] then return nil end
+  
+  return charData.miscModulesData[moduleName][key]
 end

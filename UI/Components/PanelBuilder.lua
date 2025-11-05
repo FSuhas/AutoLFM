@@ -4,12 +4,13 @@
 
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
-if not AutoLFM.UI.PanelBuilder then AutoLFM.UI.PanelBuilder = {} end
+if not AutoLFM.UI.Components then AutoLFM.UI.Components = {} end
+if not AutoLFM.UI.Components.PanelBuilder then AutoLFM.UI.Components.PanelBuilder = {} end
 
 -----------------------------------------------------------------------------
 -- Layout
 -----------------------------------------------------------------------------
-AutoLFM.UI.PanelBuilder.LAYOUT = {
+AutoLFM.UI.Components.PanelBuilder.LAYOUT = {
   panelTop = -157,
   panelLeft = 25,
   panelWidth = 323,
@@ -23,11 +24,10 @@ AutoLFM.UI.PanelBuilder.LAYOUT = {
   bottomZoneWidth = 300,
   bottomZoneHeight = 30
 }
-
 -----------------------------------------------------------------------------
 -- Backdrops
 -----------------------------------------------------------------------------
-AutoLFM.UI.PanelBuilder.BACKDROPS = {
+AutoLFM.UI.Components.PanelBuilder.BACKDROPS = {
   TOOLTIP = {
     bgFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.TOOLTIP_BACKGROUND,
     edgeFile = AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.TOOLTIP_BORDER,
@@ -51,20 +51,19 @@ AutoLFM.UI.PanelBuilder.BACKDROPS = {
     insets = {left = 3, right = 3, top = 6, bottom = 6}
   }
 }
-
 -----------------------------------------------------------------------------
 -- Panel Structure Creation
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.GetConfig()
-  return AutoLFM.UI.PanelBuilder.LAYOUT
+function AutoLFM.UI.Components.PanelBuilder.GetConfig()
+  return AutoLFM.UI.Components.PanelBuilder.LAYOUT
 end
 
-function AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, panelName)
+function AutoLFM.UI.Components.PanelBuilder.CreatePanel(parentFrame, panelName)
   if not parentFrame then return nil end
-  
+
   local panelData = {}
-  local layout = AutoLFM.UI.PanelBuilder.LAYOUT
-  
+  local layout = AutoLFM.UI.Components.PanelBuilder.LAYOUT
+
   panelData.panel = CreateFrame("Frame", panelName, parentFrame)
   panelData.panel:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", layout.panelLeft, layout.panelTop)
   panelData.panel:SetWidth(layout.panelWidth)
@@ -80,10 +79,10 @@ function AutoLFM.UI.PanelBuilder.CreatePanel(parentFrame, panelName)
   return panelData
 end
 
-function AutoLFM.UI.PanelBuilder.AddScrollFrame(panelData, scrollName)
+function AutoLFM.UI.Components.PanelBuilder.AddScrollFrame(panelData, scrollName)
   if not panelData or not panelData.panel then return nil end
-  
-  local layout = AutoLFM.UI.PanelBuilder.LAYOUT
+
+  local layout = AutoLFM.UI.Components.PanelBuilder.LAYOUT
   local scrollFrame = CreateFrame("ScrollFrame", scrollName, panelData.panel, "UIPanelScrollFrameTemplate")
   scrollFrame:SetPoint("TOPLEFT", panelData.panel, "TOPLEFT", layout.contentLeft, layout.contentTop)
   scrollFrame:SetWidth(layout.contentWidth)
@@ -102,9 +101,9 @@ function AutoLFM.UI.PanelBuilder.AddScrollFrame(panelData, scrollName)
   return panelData
 end
 
-function AutoLFM.UI.PanelBuilder.CreateLabel(panelData, text)
+function AutoLFM.UI.Components.PanelBuilder.CreateLabel(panelData, text)
   if not panelData or not panelData.bottomZone then return nil, nil end
-  
+
   local labelButton = CreateFrame("Button", nil, panelData.bottomZone)
   labelButton:SetWidth(150)
   labelButton:SetHeight(20)
@@ -118,9 +117,9 @@ function AutoLFM.UI.PanelBuilder.CreateLabel(panelData, text)
   return labelButton, labelText
 end
 
-function AutoLFM.UI.PanelBuilder.CreateClickableLabel(panelData, text, onClickFunc, onEnterFunc, onLeaveFunc)
+function AutoLFM.UI.Components.PanelBuilder.CreateClickableLabel(panelData, text, onClickFunc, onEnterFunc, onLeaveFunc)
   if not panelData or not panelData.bottomZone then return nil, nil end
-  
+
   local labelButton = CreateFrame("Button", nil, panelData.bottomZone)
   labelButton:SetWidth(150)
   labelButton:SetHeight(20)
@@ -150,15 +149,13 @@ function AutoLFM.UI.PanelBuilder.CreateClickableLabel(panelData, text, onClickFu
   
   return labelButton, labelText
 end
-
 -----------------------------------------------------------------------------
 -- Panel Visibility
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.ShowPanel(panelFrame, scrollFrame)
+function AutoLFM.UI.Components.PanelBuilder.ShowPanel(panelFrame, scrollFrame)
   if panelFrame then
     panelFrame:Show()
   end
-  
   if scrollFrame then
     scrollFrame:Show()
     scrollFrame:SetVerticalScroll(0)
@@ -169,36 +166,34 @@ function AutoLFM.UI.PanelBuilder.ShowPanel(panelFrame, scrollFrame)
   end
 end
 
-function AutoLFM.UI.PanelBuilder.HidePanel(panelFrame, scrollFrame)
+function AutoLFM.UI.Components.PanelBuilder.HidePanel(panelFrame, scrollFrame)
   if panelFrame then
     panelFrame:Hide()
   end
-  
   if scrollFrame then
     scrollFrame:Hide()
   end
 end
 
-function AutoLFM.UI.PanelBuilder.UpdateScrollHeight(contentFrame, visibleCount, rowHeight)
+function AutoLFM.UI.Components.PanelBuilder.UpdateScrollHeight(contentFrame, visibleCount, rowHeight)
   if not contentFrame then return end
-  
+
   rowHeight = rowHeight or AutoLFM.Core.Constants.ROW_HEIGHT
   local contentHeight = visibleCount * rowHeight
   contentFrame:SetHeight(math.max(contentHeight, 1))
 end
 
-function AutoLFM.UI.PanelBuilder.RefreshScroll(scrollFrame)
+function AutoLFM.UI.Components.PanelBuilder.RefreshScroll(scrollFrame)
   if scrollFrame and scrollFrame.UpdateScrollChildRect then
     scrollFrame:UpdateScrollChildRect()
   end
 end
-
 -----------------------------------------------------------------------------
 -- Row Interactions
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.SetupRowHover(frame, checkbox, label, rightLabel, color)
+function AutoLFM.UI.Components.PanelBuilder.SetupRowHover(frame, checkbox, label, rightLabel, color)
   if not frame or not checkbox or not label or not color then return end
-  
+
   local originalR = color.r or 1
   local originalG = color.g or 1
   local originalB = color.b or 1
@@ -226,9 +221,9 @@ function AutoLFM.UI.PanelBuilder.SetupRowHover(frame, checkbox, label, rightLabe
   end)
 end
 
-function AutoLFM.UI.PanelBuilder.SetupClickToToggle(frame, checkbox, onToggleFunc)
+function AutoLFM.UI.Components.PanelBuilder.SetupClickToToggle(frame, checkbox, onToggleFunc)
   if not frame or not checkbox then return end
-  
+
   frame:SetScript("OnClick", function()
     local success, err = pcall(function()
       checkbox:SetChecked(not checkbox:GetChecked())
@@ -243,9 +238,9 @@ function AutoLFM.UI.PanelBuilder.SetupClickToToggle(frame, checkbox, onToggleFun
   end)
 end
 
-function AutoLFM.UI.PanelBuilder.SetupCheckboxClick(checkbox, onToggleFunc)
+function AutoLFM.UI.Components.PanelBuilder.SetupCheckboxClick(checkbox, onToggleFunc)
   if not checkbox or not onToggleFunc then return end
-  
+
   checkbox:SetScript("OnClick", function()
     local success, err = pcall(function()
       onToggleFunc(checkbox:GetChecked())
@@ -256,13 +251,12 @@ function AutoLFM.UI.PanelBuilder.SetupCheckboxClick(checkbox, onToggleFunc)
     end
   end)
 end
-
 -----------------------------------------------------------------------------
 -- Selectable Row Creation (Generic)
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.CreateSelectableRow(config)
+function AutoLFM.UI.Components.PanelBuilder.CreateSelectableRow(config)
   if not config or not config.parent then return nil end
-  
+
   local clickableFrame = CreateFrame("Button", config.frameName, config.parent)
   clickableFrame:SetHeight(config.rowHeight or AutoLFM.Core.Constants.ROW_HEIGHT)
   clickableFrame:SetWidth(config.rowWidth or 300)
@@ -337,12 +331,12 @@ function AutoLFM.UI.PanelBuilder.CreateSelectableRow(config)
       if rightLabel then
         rightLabel:SetTextColor(r, g, b)
       end
-      
+
       checkbox:UnlockHighlight()
-      AutoLFM.UI.PanelBuilder.HideTooltip()
+      AutoLFM.UI.Components.PanelBuilder.HideTooltip()
     end)
   elseif config.color and not config.overrideHover then
-    AutoLFM.UI.PanelBuilder.SetupRowHover(
+    AutoLFM.UI.Components.PanelBuilder.SetupRowHover(
       clickableFrame,
       checkbox,
       label,
@@ -350,17 +344,17 @@ function AutoLFM.UI.PanelBuilder.CreateSelectableRow(config)
       config.color
     )
   end
-  
+
   if config.onCheckboxClick then
-    AutoLFM.UI.PanelBuilder.SetupClickToToggle(
+    AutoLFM.UI.Components.PanelBuilder.SetupClickToToggle(
       clickableFrame,
       checkbox,
       function(isChecked)
         config.onCheckboxClick(checkbox, isChecked)
       end
     )
-    
-    AutoLFM.UI.PanelBuilder.SetupCheckboxClick(
+
+    AutoLFM.UI.Components.PanelBuilder.SetupCheckboxClick(
       checkbox,
       function(isChecked)
         config.onCheckboxClick(checkbox, isChecked)
@@ -374,13 +368,12 @@ function AutoLFM.UI.PanelBuilder.CreateSelectableRow(config)
   
   return clickableFrame
 end
-
 -----------------------------------------------------------------------------
 -- Checkbox Utilities
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.CreateCheckbox(parent, name, onClickCallback)
+function AutoLFM.UI.Components.PanelBuilder.CreateCheckbox(parent, name, onClickCallback)
   if not parent then return nil end
-  
+
   local checkbox = CreateFrame("CheckButton", name, parent, "UICheckButtonTemplate")
   checkbox:SetWidth(20)
   checkbox:SetHeight(20)
@@ -392,9 +385,9 @@ function AutoLFM.UI.PanelBuilder.CreateCheckbox(parent, name, onClickCallback)
   return checkbox
 end
 
-function AutoLFM.UI.PanelBuilder.SetCheckboxColor(checkbox, r, g, b)
+function AutoLFM.UI.Components.PanelBuilder.SetCheckboxColor(checkbox, r, g, b)
   if not checkbox then return end
-  
+
   local normalTexture = checkbox:GetNormalTexture()
   local checkedTexture = checkbox:GetCheckedTexture()
   local disabledCheckedTexture = checkbox:GetDisabledCheckedTexture()
@@ -412,9 +405,9 @@ function AutoLFM.UI.PanelBuilder.SetCheckboxColor(checkbox, r, g, b)
   end
 end
 
-function AutoLFM.UI.PanelBuilder.BatchUpdateCheckboxes(checkboxTable, checkStateFunc)
+function AutoLFM.UI.Components.PanelBuilder.BatchUpdateCheckboxes(checkboxTable, checkStateFunc)
   if not checkboxTable or not checkStateFunc then return end
-  
+
   for key, checkbox in pairs(checkboxTable) do
     if checkbox then
       local isChecked = checkStateFunc(key)
@@ -423,9 +416,9 @@ function AutoLFM.UI.PanelBuilder.BatchUpdateCheckboxes(checkboxTable, checkState
   end
 end
 
-function AutoLFM.UI.PanelBuilder.ClearCheckboxes(checkboxTable)
+function AutoLFM.UI.Components.PanelBuilder.ClearCheckboxes(checkboxTable)
   if not checkboxTable then return end
-  
+
   for _, checkbox in pairs(checkboxTable) do
     if checkbox then
       checkbox:SetChecked(false)
@@ -433,9 +426,9 @@ function AutoLFM.UI.PanelBuilder.ClearCheckboxes(checkboxTable)
   end
 end
 
-function AutoLFM.UI.PanelBuilder.UpdateCheckboxes(checkboxTable, stateCheckFunc)
+function AutoLFM.UI.Components.PanelBuilder.UpdateCheckboxes(checkboxTable, stateCheckFunc)
   if not checkboxTable or not stateCheckFunc then return end
-  
+
   for tag, checkbox in pairs(checkboxTable) do
     if checkbox then
       local isChecked = stateCheckFunc(tag)
@@ -444,9 +437,9 @@ function AutoLFM.UI.PanelBuilder.UpdateCheckboxes(checkboxTable, stateCheckFunc)
   end
 end
 
-function AutoLFM.UI.PanelBuilder.ClearBackdrops(frameCollection)
+function AutoLFM.UI.Components.PanelBuilder.ClearBackdrops(frameCollection)
   if not frameCollection then return end
-  
+
   for _, frame in pairs(frameCollection) do
     if frame and frame.SetBackdrop then
       frame:SetBackdrop(nil)
@@ -454,23 +447,23 @@ function AutoLFM.UI.PanelBuilder.ClearBackdrops(frameCollection)
   end
 end
 
-function AutoLFM.UI.PanelBuilder.HideFrames(frameCollection)
+function AutoLFM.UI.Components.PanelBuilder.HideFrames(frameCollection)
   if not frameCollection then return end
-  
+
   for _, frame in pairs(frameCollection) do
     if frame and frame.Hide then
       frame:Hide()
     end
   end
 end
-
 -----------------------------------------------------------------------------
 -- Label Highlight Utilities
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.AttachLabelHighlight(button, label, normalColor, hoverColor)
+function AutoLFM.UI.Components.PanelBuilder.AttachLabelHighlight(button, label, normalColor, hoverColor)
   if not button or not label then return end
   normalColor = normalColor or "gold"
   hoverColor = hoverColor or "blue"
+
   button:SetScript("OnEnter", function()
     AutoLFM.Core.Utils.SetFontColor(label, hoverColor)
     button:LockHighlight()
@@ -480,11 +473,10 @@ function AutoLFM.UI.PanelBuilder.AttachLabelHighlight(button, label, normalColor
     button:UnlockHighlight()
   end)
 end
-
 -----------------------------------------------------------------------------
 -- Icon With Label Creation
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.CreateIconWithLabel(config)
+function AutoLFM.UI.Components.PanelBuilder.CreateIconWithLabel(config)
   if not config or not config.parent then return nil, nil end
   local size = config.size or AutoLFM.Core.Constants.ICON_SIZE
   local labelOffset = config.labelOffset or 3
@@ -510,11 +502,10 @@ function AutoLFM.UI.PanelBuilder.CreateIconWithLabel(config)
   end
   return icon, labelFontString
 end
-
 -----------------------------------------------------------------------------
 -- Slider
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.CreateSlider(config)
+function AutoLFM.UI.Components.PanelBuilder.CreateSlider(config)
   if not config or not config.parent then return nil end
   local slider = CreateFrame("Slider", config.name, config.parent)
   slider:SetWidth(config.width or 145)
@@ -533,7 +524,7 @@ function AutoLFM.UI.PanelBuilder.CreateSlider(config)
   slider:SetValueStep(config.valueStep or 1)
   slider:SetOrientation("HORIZONTAL")
   slider:SetThumbTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. AutoLFM.Core.Constants.TEXTURES.SLIDER_BUTTON)
-  slider:SetBackdrop(AutoLFM.UI.PanelBuilder.BACKDROPS.SLIDER)
+  slider:SetBackdrop(AutoLFM.UI.Components.PanelBuilder.BACKDROPS.SLIDER)
   if config.onValueChanged then
     slider:SetScript("OnValueChanged", function()
       local value = slider:GetValue()
@@ -544,18 +535,16 @@ function AutoLFM.UI.PanelBuilder.CreateSlider(config)
   end
   return slider
 end
-
 -----------------------------------------------------------------------------
 -- Radio Button Group
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
+function AutoLFM.UI.Components.PanelBuilder.CreateRadioButtonGroup(config)
   if not config or not config.parent or not config.buttons then return nil end
 
   local group = {
     radioButtons = {},
     labels = {}
   }
-
   function group.Update(checkedKey)
     for key, button in pairs(group.radioButtons) do
       if button then
@@ -563,7 +552,6 @@ function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
       end
     end
   end
-
   function group.GetChecked()
     for key, button in pairs(group.radioButtons) do
       if button and button:GetChecked() then
@@ -572,7 +560,6 @@ function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
     end
     return nil
   end
-
   local lastRadio = nil
   for i = 1, table.getn(config.buttons) do
     local btnConfig = config.buttons[i]
@@ -580,36 +567,31 @@ function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
       local radio = CreateFrame("CheckButton", nil, config.parent, "UIRadioButtonTemplate")
       radio:SetWidth(AutoLFM.Core.Constants.ICON_SIZE)
       radio:SetHeight(AutoLFM.Core.Constants.ICON_SIZE)
-
       if i == 1 and config.anchor then
         radio:SetPoint(config.anchor.point or "TOPLEFT", config.anchor.relativeTo or config.parent, config.anchor.relativePoint or "TOPLEFT", config.anchor.x or 0, config.anchor.y or 0)
       elseif lastRadio then
         local spacing = config.spacing or -4
         radio:SetPoint("TOPLEFT", lastRadio, "BOTTOMLEFT", 0, spacing)
       end
-
       if btnConfig.checked then
         radio:SetChecked(true)
       end
-
       local labelButton = CreateFrame("Button", nil, config.parent)
       labelButton:SetPoint("LEFT", radio, "RIGHT", 0, 0)
       labelButton:SetWidth(config.labelWidth or 55)
       labelButton:SetHeight(AutoLFM.Core.Constants.BUTTON_HEIGHT)
-
       local label = labelButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
       label:SetPoint("LEFT", labelButton, "LEFT", 5, 0)
       label:SetText(btnConfig.label)
       AutoLFM.Core.Utils.SetFontColor(label, config.labelColor or "gold")
 
       local hoverColor = config.hoverColor or "blue"
-      AutoLFM.UI.PanelBuilder.AttachLabelHighlight(labelButton, label, config.labelColor or "gold", hoverColor)
-      AutoLFM.UI.PanelBuilder.AttachLabelHighlight(radio, label, config.labelColor or "gold", hoverColor)
+      AutoLFM.UI.Components.PanelBuilder.AttachLabelHighlight(labelButton, label, config.labelColor or "gold", hoverColor)
+      AutoLFM.UI.Components.PanelBuilder.AttachLabelHighlight(radio, label, config.labelColor or "gold", hoverColor)
 
       labelButton:SetScript("OnClick", function()
         radio:Click()
       end)
-
       radio:SetScript("OnClick", function()
         if btnConfig.onClick then
           btnConfig.onClick()
@@ -619,22 +601,19 @@ function AutoLFM.UI.PanelBuilder.CreateRadioButtonGroup(config)
           config.onUpdate(btnConfig.key)
         end
       end)
-
       group.radioButtons[btnConfig.key] = radio
       group.labels[btnConfig.key] = label
       lastRadio = radio
     end
   end
-
   return group
 end
-
 -----------------------------------------------------------------------------
 -- Tooltip Utilities
 -----------------------------------------------------------------------------
-function AutoLFM.UI.PanelBuilder.ShowTooltip(frame, text, anchor)
+function AutoLFM.UI.Components.PanelBuilder.ShowTooltip(frame, text, anchor)
   if not frame or not text then return end
-  
+
   local success, err = pcall(function()
     anchor = anchor or "ANCHOR_RIGHT"
     GameTooltip:SetOwner(frame, anchor)
@@ -647,7 +626,7 @@ function AutoLFM.UI.PanelBuilder.ShowTooltip(frame, text, anchor)
   end
 end
 
-function AutoLFM.UI.PanelBuilder.HideTooltip()
+function AutoLFM.UI.Components.PanelBuilder.HideTooltip()
   pcall(function()
     GameTooltip:Hide()
   end)

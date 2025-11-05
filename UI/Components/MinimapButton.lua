@@ -2,28 +2,28 @@
 -- AutoLFM: Minimap Button
 --=============================================================================
 
+
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.UI then AutoLFM.UI = {} end
-if not AutoLFM.UI.MinimapButton then AutoLFM.UI.MinimapButton = {} end
+if not AutoLFM.UI.Components then AutoLFM.UI.Components = {} end
+if not AutoLFM.UI.Components.MinimapButton then AutoLFM.UI.Components.MinimapButton = {} end
 
 -----------------------------------------------------------------------------
 -- Position Management
 -----------------------------------------------------------------------------
-function AutoLFM.UI.MinimapButton.ResetPosition()
+function AutoLFM.UI.Components.MinimapButton.ResetPosition()
   if not AutoLFM_MinimapButton then return end
-  
+
   AutoLFM_MinimapButton:ClearAllPoints()
   AutoLFM_MinimapButton:SetPoint("LEFT", Minimap, "LEFT", 16, -68)
 end
-
 -----------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------
-function AutoLFM.UI.MinimapButton.Init()
+function AutoLFM.UI.Components.MinimapButton.Init()
   if AutoLFM_MinimapButton then return end
-  
+
   local settings = AutoLFM.Core.Settings.LoadMinimap()
-  
   AutoLFM_MinimapButton = CreateFrame("Button", "AutoLFM_MinimapButton", Minimap)
   AutoLFM_MinimapButton:SetFrameStrata("LOW")
   AutoLFM_MinimapButton:SetWidth(33)
@@ -77,11 +77,11 @@ function AutoLFM.UI.MinimapButton.Init()
       end
     elseif arg1 == "RightButton" and IsControlKeyDown() then
       AutoLFM.Core.Settings.ResetMinimapPos()
-      AutoLFM.UI.MinimapButton.ResetPosition()
+      AutoLFM.UI.Components.MinimapButton.ResetPosition()
       AutoLFM.Core.Utils.PrintSuccess("Minimap button position reset")
     end
   end)
-  
+
   AutoLFM_MinimapButton:SetScript("OnDragStart", function()
     if IsControlKeyDown() then
       this:LockHighlight()
@@ -103,16 +103,16 @@ function AutoLFM.UI.MinimapButton.Init()
     AutoLFM_MinimapButton:ClearAllPoints()
     AutoLFM_MinimapButton:SetPoint("CENTER", UIParent, "BOTTOMLEFT", settings.posX, settings.posY)
   else
-    AutoLFM.UI.MinimapButton.ResetPosition()
+    AutoLFM.UI.Components.MinimapButton.ResetPosition()
   end
-  
+
   if settings.hidden then
     AutoLFM_MinimapButton:Hide()
   else
     AutoLFM_MinimapButton:Show()
   end
-  
-  AutoLFM.UI.DarkUI.RegisterFrame(AutoLFM_MinimapButton)
+
+  AutoLFM.UI.Components.DarkUI.RegisterFrame(AutoLFM_MinimapButton)
 end
 
 -----------------------------------------------------------------------------

@@ -6,8 +6,6 @@ if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.Logic then AutoLFM.Logic = {} end
 if not AutoLFM.Logic.Content then AutoLFM.Logic.Content = {} end
 
-
-
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
@@ -249,6 +247,10 @@ local function ToggleSelection(contentType, tag, isSelected)
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
   end
+
+  if AutoLFM.UI.Components.LineTabs and AutoLFM.UI.Components.LineTabs.UpdateActionIcons then
+    AutoLFM.UI.Components.LineTabs.UpdateActionIcons()
+  end
   
   if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
     AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.CONTENT_CHANGED)
@@ -269,6 +271,10 @@ local function ClearSelection(contentType)
   
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
+  end
+
+  if AutoLFM.UI.Components.LineTabs and AutoLFM.UI.Components.LineTabs.UpdateActionIcons then
+    AutoLFM.UI.Components.LineTabs.UpdateActionIcons()
   end
   
   if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then

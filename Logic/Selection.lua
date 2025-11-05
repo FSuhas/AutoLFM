@@ -141,17 +141,21 @@ local function IsValidRole(role)
   return false
 end
 
-function AutoLFM.Logic.Selection.ToggleRole(role)
+function AutoLFM.Logic.Selection.ToggleRole(role, shouldAdd)
   if not role then return end
   if not IsValidRole(role) then
     AutoLFM.Core.Utils.PrintWarning("Invalid role: " .. tostring(role))
     return
   end
   
-  selectedRoles = ToggleInList(selectedRoles, role)
+  selectedRoles = ToggleInList(selectedRoles, role, shouldAdd)
   
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
+  end
+
+  if AutoLFM.UI.Components.LineTabs and AutoLFM.UI.Components.LineTabs.UpdateActionIcons then
+    AutoLFM.UI.Components.LineTabs.UpdateActionIcons()
   end
   
   if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then
@@ -166,6 +170,10 @@ function AutoLFM.Logic.Selection.ClearRoles()
   
   if AutoLFM.Logic.Broadcaster.UpdateMessage then
     AutoLFM.Logic.Broadcaster.UpdateMessage()
+  end
+
+  if AutoLFM.UI.Components.LineTabs and AutoLFM.UI.Components.LineTabs.UpdateActionIcons then
+    AutoLFM.UI.Components.LineTabs.UpdateActionIcons()
   end
   
   if AutoLFM and AutoLFM.API and type(AutoLFM.API.NotifyDataChanged) == "function" then

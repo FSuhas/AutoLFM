@@ -1,11 +1,6 @@
---=============================================================================
--- AutoLFM: Slash Commands
---=============================================================================
-
 if not AutoLFM then AutoLFM = {} end
 if not AutoLFM.Core then AutoLFM.Core = {} end
 if not AutoLFM.Core.Commands then AutoLFM.Core.Commands = {} end
-
 -----------------------------------------------------------------------------
 -- Helpers
 -----------------------------------------------------------------------------
@@ -18,12 +13,10 @@ local function ErrorCommandPath(...)
   end
   return table.concat(parts, " ")
 end
-
 local function ShowErrorAndHelp(error, helpFunc)
   AutoLFM.Core.Utils.PrintError(error)
   helpFunc()
 end
-
 -----------------------------------------------------------------------------
 -- Main Help
 -----------------------------------------------------------------------------
@@ -35,7 +28,6 @@ local function ShowMainHelp()
   AutoLFM.Core.Utils.Print("/lfm misc" .. AutoLFM.Color(" - Misc modules commands", "white"))
   AutoLFM.Core.Utils.Print("/lfm api" .. AutoLFM.Color(" - API testing commands", "white"))
 end
-
 -----------------------------------------------------------------------------
 -- Command Execution
 -----------------------------------------------------------------------------
@@ -102,11 +94,11 @@ function AutoLFM.Core.Commands.Handle(msg)
       else
         AutoLFM.Core.Utils.PrintWarning("Minimap button already hidden")
       end
-      
+
     elseif cmd2 == "reset" then
-      if AutoLFM_MinimapButton and AutoLFM.UI.MinimapButton.ResetPosition then
+      if AutoLFM_MinimapButton and AutoLFM.UI.Components.MinimapButton.ResetPosition then
         AutoLFM.Core.Settings.ResetMinimapPos()
-        AutoLFM.UI.MinimapButton.ResetPosition()
+        AutoLFM.UI.Components.MinimapButton.ResetPosition()
         AutoLFM.Core.Utils.PrintSuccess("Minimap button position reset")
       else
         AutoLFM.Core.Utils.PrintError("Minimap button not initialized")
@@ -130,21 +122,21 @@ function AutoLFM.Core.Commands.Handle(msg)
     
     if not cmd2 or cmd2 == "help" then
       ShowDarkHelp()
-      
+
     elseif cmd2 == "on" then
-      if not AutoLFM.UI.DarkUI.IsEnabled() then
-        AutoLFM.UI.DarkUI.Enable()
+      if not AutoLFM.UI.Components.DarkUI.IsEnabled() then
+        AutoLFM.UI.Components.DarkUI.Enable()
       else
         AutoLFM.Core.Utils.PrintWarning("Dark mode already enabled")
       end
-      
+
     elseif cmd2 == "off" then
-      if AutoLFM.UI.DarkUI.IsEnabled() then
-        AutoLFM.UI.DarkUI.Disable()
+      if AutoLFM.UI.Components.DarkUI.IsEnabled() then
+        AutoLFM.UI.Components.DarkUI.Disable()
       else
         AutoLFM.Core.Utils.PrintWarning("Dark mode already disabled")
       end
-      
+
     else
       ShowErrorAndHelp("Unknown command: " .. ErrorCommandPath(cmd1, cmd2), ShowDarkHelp)
     end
@@ -435,7 +427,6 @@ function AutoLFM.Core.Commands.Handle(msg)
   AutoLFM.Core.Utils.PrintError("Unknown command: " .. cmd1)
   ShowMainHelp()
 end
-
 -----------------------------------------------------------------------------
 -- Registration
 -----------------------------------------------------------------------------
