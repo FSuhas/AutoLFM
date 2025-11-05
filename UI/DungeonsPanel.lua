@@ -2,10 +2,10 @@
 -- AutoLFM: Dungeons Panel
 --=============================================================================
 
-if not AutoLFM then AutoLFM = {} end
-if not AutoLFM.UI then AutoLFM.UI = {} end
-if not AutoLFM.UI.DungeonsPanel then AutoLFM.UI.DungeonsPanel = {} end
-if not AutoLFM.UI.DungeonsPanel.Filters then AutoLFM.UI.DungeonsPanel.Filters = {} end
+AutoLFM = AutoLFM or {}
+AutoLFM.UI = AutoLFM.UI or {}
+AutoLFM.UI.DungeonsPanel = AutoLFM.UI.DungeonsPanel or {}
+AutoLFM.UI.DungeonsPanel.Filters = AutoLFM.UI.DungeonsPanel.Filters or {}
 
 -----------------------------------------------------------------------------
 -- Private State
@@ -19,15 +19,12 @@ local filterLabelFrame, filterLabelText
 -- Helpers
 -----------------------------------------------------------------------------
 local function EachColor(callback)
-  if AutoLFM.Core.Constants.PRIORITY_COLORS then
-    for i, color in ipairs(AutoLFM.Core.Constants.PRIORITY_COLORS) do
+  local colors = AutoLFM.Core.Constants.PRIORITY_COLORS
+  if colors then
+    for i, color in ipairs(colors) do
       if color then callback(color, i) end
     end
   end
-end
-
-local function TintTexture(tex, r, g, b)
-  if tex then tex:SetVertexColor(r, g, b) end
 end
 
 local function RefreshDisplay()
@@ -45,20 +42,20 @@ function AutoLFM.UI.DungeonsPanel.Filters.Init()
 end
 
 function AutoLFM.UI.DungeonsPanel.ToggleFilter(key, enabled)
-  if key then
-    local state = enabled == true or enabled == 1
-    if filterStates[key] ~= state then
-      filterStates[key] = state
-      if AutoLFM.Core.Settings.SaveFilters then
-        AutoLFM.Core.Settings.SaveFilters(filterStates)
-      end
+  if not key then return end
+  local state = enabled == true or enabled == 1
+  if filterStates[key] ~= state then
+    filterStates[key] = state
+    if AutoLFM.Core.Settings.SaveFilters then
+      AutoLFM.Core.Settings.SaveFilters(filterStates)
     end
   end
 end
 
 function AutoLFM.UI.DungeonsPanel.ShouldShowDungeonPriority(priority)
   if not priority then return true end
-  for _, c in ipairs(AutoLFM.Core.Constants.PRIORITY_COLORS or {}) do
+  local colors = AutoLFM.Core.Constants.PRIORITY_COLORS or {}
+  for _, c in ipairs(colors) do
     if c.priority == priority then return filterStates[c.key] or false end
   end
   return true
@@ -70,7 +67,8 @@ function AutoLFM.UI.DungeonsPanel.ResetFilters()
 end
 
 local function HasDisabledFilter()
-  for _, c in ipairs(AutoLFM.Core.Constants.PRIORITY_COLORS or {}) do
+  local colors = AutoLFM.Core.Constants.PRIORITY_COLORS or {}
+  for _, c in ipairs(colors) do
     if not filterStates[c.key] then return true end
   end
   return false
@@ -80,15 +78,17 @@ function AutoLFM.UI.DungeonsPanel.GetFilterState(key)
   return key and filterStates[key] or false
 end
 
-function AutoLFM.UI.DungeonsPanel.GetAllFilterStates() return filterStates end
+function AutoLFM.UI.DungeonsPanel.GetAllFilterStates()
+  return filterStates
+end
 
 -----------------------------------------------------------------------------
 -- Filter System UI
 -----------------------------------------------------------------------------
 local function UpdateFilterLabelColor()
-  if not filterLabelText then return end
-  local colorName = HasDisabledFilter() and "gold" or "white"
-  AutoLFM.Core.Utils.SetFontColor(filterLabelText, colorName)
+  if filterLabelText then
+    AutoLFM.Core.Utils.SetFontColor(filterLabelText, HasDisabledFilter() and "gold" or "white")
+  end
 end
 
 local function CreateFilterCheckbox(parent, color, xOffset)
@@ -97,9 +97,12 @@ local function CreateFilterCheckbox(parent, color, xOffset)
   cb:SetHeight(AutoLFM.Core.Constants.CHECKBOX_SIZE)
   cb:SetPoint("LEFT", parent, "LEFT", xOffset, 0)
 
-  TintTexture(cb:GetNormalTexture(), color.r, color.g, color.b)
-  TintTexture(cb:GetCheckedTexture(), color.r, color.g, color.b)
-  TintTexture(cb:GetDisabledCheckedTexture(), color.r, color.g, color.b)
+  local function tintTexture(tex)
+    if tex then tex:SetVertexColor(color.r, color.g, color.b) end
+  end
+  tintTexture(cb:GetNormalTexture())
+  tintTexture(cb:GetCheckedTexture())
+  tintTexture(cb:GetDisabledCheckedTexture())
 
   cb:SetChecked(AutoLFM.UI.DungeonsPanel.GetFilterState(color.key))
   cb:SetScript("OnClick", function()
@@ -122,7 +125,7 @@ local function CreateColorFilterUI(parent)
 
   filterLabelText = filterLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   filterLabelText:SetPoint("LEFT", filterLabelFrame, "LEFT", 0, 0)
-  filterLabelText:SetText("Filters:")
+  filterLabelText:SetText("Filters: ")
   AutoLFM.Core.Utils.SetFontColor(filterLabelText, "white")
 
   filterLabelFrame:SetScript("OnClick", function()
@@ -167,11 +170,10 @@ end
 
 -----------------------------------------------------------------------------
 -- Dungeon List
-------------------
+-----------------------------------------------------------------------------
 local function OnDungeonCheckboxClick(cb, tag)
   if cb and tag and AutoLFM.Logic.Content.ToggleDungeon then
-    local checked = cb:GetChecked()
-    AutoLFM.Logic.Content.ToggleDungeon(tag, checked)
+    AutoLFM.Logic.Content.ToggleDungeon(tag, cb:GetChecked())
   end
 end
 
@@ -187,7 +189,7 @@ local function CreateDungeonRow(parent, dungeon, priority, yOffset)
     yOffset = yOffset,
     mainText = dungeon.name,
     rightText = "(" .. dungeon.levelMin .. " - " .. dungeon.levelMax .. ")",
-    color = {r=r,g=g,b=b},
+    color = {r=r, g=g, b=b},
     isChecked = checked,
     onCheckboxClick = function(cb, _) OnDungeonCheckboxClick(cb, dungeon.tag) end,
     customProperties = {dungeonTag=dungeon.tag, priority=priority}
@@ -216,12 +218,17 @@ local function UpdateRowVisibility()
         f:SetPoint("TOPLEFT", f:GetParent(), "TOPLEFT", 0, -yOffset)
         yOffset = yOffset + AutoLFM.Core.Constants.ROW_HEIGHT
         visible = visible + 1
-      else f:Hide() end
+      else
+        f:Hide()
+      end
     end
   end
 
   for _, f in pairs(dungeonRows) do
-    if f then AutoLFM.UI.PanelBuilder.UpdateScrollHeight(f:GetParent(), visible) break end
+    if f then
+      AutoLFM.UI.PanelBuilder.UpdateScrollHeight(f:GetParent(), visible)
+      break
+    end
   end
 end
 
@@ -239,7 +246,9 @@ function AutoLFM.UI.DungeonsPanel.Display(parent)
       if row and AutoLFM.UI.DungeonsPanel.ShouldShowDungeonPriority(e.priority) then
         yOffset = yOffset + AutoLFM.Core.Constants.ROW_HEIGHT
         visible = visible + 1
-      else row:Hide() end
+      else
+        row:Hide()
+      end
     end
   end
 
@@ -265,7 +274,8 @@ function AutoLFM.UI.DungeonsPanel.Init()
   if not parent then return nil end
   local p = AutoLFM.UI.PanelBuilder.CreatePanel(parent, "AutoLFM_DungeonsPanel")
   if not p then return end
-  mainFrame = p.panel mainFrame:Show()
+  mainFrame = p.panel
+  mainFrame:Show()
   p = AutoLFM.UI.PanelBuilder.AddScrollFrame(p, "AutoLFM_ScrollFrame_Dungeons")
   scrollFrame, contentFrame = p.scrollFrame, p.contentFrame
   AutoLFM.UI.DungeonsPanel.Display(contentFrame)
@@ -278,11 +288,15 @@ function AutoLFM.UI.DungeonsPanel.Init()
   AutoLFM.UI.DungeonsPanel.Register()
 end
 
+local function clearRaidsPanelState()
+  if AutoLFM.UI.RaidsPanel.HideSizeControls then AutoLFM.UI.RaidsPanel.HideSizeControls() end
+  if AutoLFM.UI.RaidsPanel.ClearBackdrops then AutoLFM.UI.RaidsPanel.ClearBackdrops() end
+end
+
 function AutoLFM.UI.DungeonsPanel.Show()
   AutoLFM.UI.PanelBuilder.ShowPanel(mainFrame, scrollFrame)
   if filterFrame then filterFrame:Show() end
-  if AutoLFM.UI.RaidsPanel.HideSizeControls then AutoLFM.UI.RaidsPanel.HideSizeControls() end
-  if AutoLFM.UI.RaidsPanel.ClearBackdrops then AutoLFM.UI.RaidsPanel.ClearBackdrops() end
+  clearRaidsPanelState()
 end
 
 function AutoLFM.UI.DungeonsPanel.Hide()
@@ -294,9 +308,6 @@ function AutoLFM.UI.DungeonsPanel.Register()
   AutoLFM.UI.TabNavigation.RegisterPanel("dungeons",
     AutoLFM.UI.DungeonsPanel.Show,
     AutoLFM.UI.DungeonsPanel.Hide,
-    function()
-      if AutoLFM.UI.RaidsPanel.HideSizeControls then AutoLFM.UI.RaidsPanel.HideSizeControls() end
-      if AutoLFM.UI.RaidsPanel.ClearBackdrops then AutoLFM.UI.RaidsPanel.ClearBackdrops() end
-    end
+    clearRaidsPanelState
   )
 end

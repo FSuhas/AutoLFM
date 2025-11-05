@@ -1,5 +1,5 @@
 --=============================================================================
--- AutoLFM: Dark UI
+-- AutoLFM:    Dark UI
 --=============================================================================
 
 if not AutoLFM then AutoLFM = {} end
@@ -9,28 +9,15 @@ if not AutoLFM.UI.DarkUI then AutoLFM.UI.DarkUI = {} end
 -----------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------
-local DARK_COLOR = {r = 0.3, g = 0.3, b = 0.3, a = 0.9}
+local DARK_COLOR = {0.3,   0.3,   0.3,   0.9}
 local SLIDER_TEXTURE_LIGHT = "sliderBackgroundLight"
 
 local BLACKLIST = {
-  ["Eyes\\"] = true,
-  ["preview"] = true,
-  ["rolesTank"] = true,
-  ["rolesHeal"] = true,
-  ["rolesDPS"] = true,
-  ["minimap"] = true,
-  ["tooltipBackground"] = true,
-  ["Button"] = true,
-  ["Check"] = true,
-  ["Radio"] = true,
-  ["Icon"] = true,
+  "Eyes\\",   "preview",   "rolesTank",   "rolesHeal",   "rolesDPS",   
+  "minimap",   "tooltipBackground",   "Button",   "Check",   "Radio",   "Icon"
 }
 
-local WHITELIST = {
-  ["mainFrame"] = true,
-  ["minimapBorder"] = true,
-  ["tabActive"] = true
-}
+local WHITELIST = {"mainFrame",   "minimapBorder",   "tabActive"}
 
 -----------------------------------------------------------------------------
 -- Private State
@@ -38,13 +25,40 @@ local WHITELIST = {
 local enabled = false
 local darkenedFrames = {}
 
+local blacklistPatterns = {}
+local whitelistPatterns = {}
+local blacklistCount = 0
+local whitelistCount = 0
+
+for i,   pattern in ipairs(BLACKLIST) do 
+  blacklistPatterns[i] = pattern 
+  blacklistCount = blacklistCount + 1
+end
+for i,   pattern in ipairs(WHITELIST) do 
+  whitelistPatterns[i] = pattern 
+  whitelistCount = whitelistCount + 1
+end
+
+-----------------------------------------------------------------------------
+-- Utility Functions
+-----------------------------------------------------------------------------
+local function GetTableSize(tbl)
+  local count = 0
+  for _ in pairs(tbl) do
+    count = count + 1
+  end
+  return count
+end
+
 -----------------------------------------------------------------------------
 -- Texture Filtering
 -----------------------------------------------------------------------------
 local function IsWhitelisted(texturePath)
   if not texturePath then return false end
-  for pattern in pairs(WHITELIST) do
-    if string.find(texturePath, pattern) then return true end
+  for i = 1,   whitelistCount do
+    if whitelistPatterns[i] and string.find(texturePath, whitelistPatterns[i]) then 
+      return true 
+    end
   end
   return false
 end
@@ -52,102 +66,85 @@ end
 local function IsBlacklisted(texture)
   if not texture then return true end
   
-  local name = texture:GetName()
   local texturePath = texture:GetTexture()
   if not texturePath then return true end
   if IsWhitelisted(texturePath) then return false end
   
+  local name = texture:GetName()
   if name then
-    for pattern in pairs(BLACKLIST) do
-      if string.find(name, pattern) then return true end
+    for i = 1,   blacklistCount do
+      if blacklistPatterns[i] and string.find(name, blacklistPatterns[i]) then 
+        return true 
+      end
     end
   end
   
-  for pattern in pairs(BLACKLIST) do
-    if string.find(texturePath, pattern) then return true end
+  for i = 1,   blacklistCount do
+    if blacklistPatterns[i] and string.find(texturePath, blacklistPatterns[i]) then 
+      return true 
+    end
   end
   
   return false
 end
 
 local function IsSliderBackdrop(backdrop)
-  if not backdrop then return false end
-  return backdrop.edgeSize == 8 and backdrop.tileSize == 8
+  return backdrop and backdrop.edgeSize == 8 and backdrop.tileSize == 8
 end
 
 -----------------------------------------------------------------------------
 -- Frame Processing
 -----------------------------------------------------------------------------
-local function ProcessBackdropColor(frame)
-  if not frame or not frame.SetBackdropColor or not frame.GetBackdrop then return end
+local function ProcessFrame(frame)
+  if not frame then return end
   
-  local backdrop = frame:GetBackdrop()
-  if not backdrop then return end
+  if frame.SetBackdropColor and frame.GetBackdrop and frame:GetBackdrop() then
+    local _,   _,   _,   a = frame:GetBackdropColor()
+    if a and a > 0 then
+      frame:SetBackdropColor(unpack(DARK_COLOR))
+    end
+  end
   
-  local r, g, b, a = frame:GetBackdropColor()
-  if not a or a <= 0 then return end
+  if frame.SetBackdropBorderColor then
+    frame:SetBackdropBorderColor(unpack(DARK_COLOR))
+  end
   
-  frame:SetBackdropColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
-end
-
-local function ProcessBackdropBorder(frame)
-  if not frame or not frame.SetBackdropBorderColor then return end
-  frame:SetBackdropBorderColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
-end
-
-local function ProcessSliderBackdrop(frame)
-  if not frame or not frame.SetBackdrop or not frame.GetBackdrop then return end
-  if not AutoLFM.Core or not AutoLFM.Core.Constants then return end
-  
-  local backdrop = frame:GetBackdrop()
-  if not backdrop or not IsSliderBackdrop(backdrop) then return end
-  
-  local texturePath = AutoLFM.Core.Constants.TEXTURE_PATH
-  if not texturePath then return end
-  
-  local newBackdrop = {
-    bgFile = texturePath .. SLIDER_TEXTURE_LIGHT,
-    edgeFile = backdrop.edgeFile,
-    tile = true,
-    tileSize = 8,
-    edgeSize = 8,
-    insets = {left = 3, right = 3, top = 6, bottom = 6}
-  }
-  
-  frame:SetBackdrop(newBackdrop)
-  frame:SetBackdropColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
-end
-
-local function ProcessRegions(frame)
-  if not frame or not frame.GetRegions then return end
-  
-  for _, region in pairs({frame:GetRegions()}) do
-    if region and region.SetVertexColor and region:GetObjectType() == "Texture" then
-      local skipRegion = false
-      
-      if region.GetBlendMode and region:GetBlendMode() == "ADD" then
-        skipRegion = true
-      elseif IsBlacklisted(region) then
-        skipRegion = true
-      end
-      
-      if not skipRegion then
-        region:SetVertexColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
+  if frame.SetBackdrop and frame.GetBackdrop then
+    local backdrop = frame:GetBackdrop()
+    if IsSliderBackdrop(backdrop) and AutoLFM.Core and AutoLFM.Core.Constants then
+      local texturePath = AutoLFM.Core.Constants.TEXTURE_PATH
+      if texturePath then
+        frame:SetBackdrop({
+          bgFile = texturePath .. SLIDER_TEXTURE_LIGHT,  
+          edgeFile = backdrop.edgeFile,  
+          tile = true,  
+          tileSize = 8,  
+          edgeSize = 8,  
+          insets = {left = 3,   right = 3,   top = 6,   bottom = 6}
+        })
+        frame:SetBackdropColor(unpack(DARK_COLOR))
       end
     end
   end
-end
-
-local function ProcessRolesBackground(frame)
-  if not frame then return end
-end
-
-local function ProcessChildren(frame, processFunc)
-  if not frame or not frame.GetChildren then return end
   
-  for _, child in pairs({frame:GetChildren()}) do
-    if child then
-      processFunc(child)
+  if frame.GetRegions then
+    local regions = {frame:GetRegions()}
+    for _,   region in pairs(regions) do
+      if region and region.SetVertexColor and region:GetObjectType() == "Texture" then
+        local skipRegion = false
+        
+        if region.GetBlendMode and region:GetBlendMode() == "ADD" then
+          skipRegion = true
+        end
+        
+        if not skipRegion and IsBlacklisted(region) then
+          skipRegion = true
+        end
+        
+        if not skipRegion then
+          region:SetVertexColor(unpack(DARK_COLOR))
+        end
+      end
     end
   end
 end
@@ -156,17 +153,15 @@ end
 -- Core Darkening
 -----------------------------------------------------------------------------
 function AutoLFM.UI.DarkUI.DarkenFrame(frame)
-  if not enabled then return end
-  if not frame then return end
+  if not enabled or not frame then return end
   
-  ProcessRolesBackground(frame)
-  ProcessChildren(frame, AutoLFM.UI.DarkUI.DarkenFrame)
+  ProcessFrame(frame)
   
-  if frame.GetRegions then
-    ProcessBackdropBorder(frame)
-    ProcessBackdropColor(frame)
-    ProcessSliderBackdrop(frame)
-    ProcessRegions(frame)
+  if frame.GetChildren then
+    local children = {frame:GetChildren()}
+    for _,   child in pairs(children) do
+      AutoLFM.UI.DarkUI.DarkenFrame(child)
+    end
   end
 end
 
@@ -175,38 +170,40 @@ end
 -----------------------------------------------------------------------------
 local function ApplyDarkTheme()
   if not enabled then return end
-  
-  for _, frame in pairs(darkenedFrames) do
-    if frame then
-      AutoLFM.UI.DarkUI.DarkenFrame(frame)
+  local frameCount = GetTableSize(darkenedFrames)
+  for i = 1,   frameCount do
+    if darkenedFrames[i] then
+      AutoLFM.UI.DarkUI.DarkenFrame(darkenedFrames[i])
     end
   end
 end
 
 local function ShowReloadMessage()
-  if not AutoLFM or not AutoLFM.Core or not AutoLFM.Core.Utils then return end
-  if not AutoLFM.Color then return end
-  
-  local msg = AutoLFM.Color("You must ", "orange") .. AutoLFM.Color("/reload", "gold") .. AutoLFM.Color(" to apply changes.", "orange")
-  AutoLFM.Core.Utils.PrintSuccess(msg)
+  if AutoLFM and AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Color then
+    local msg = AutoLFM.Color("You must ",   "orange") .. 
+                AutoLFM.Color("/reload",   "gold") .. 
+                AutoLFM.Color(" to apply changes.",   "orange")
+    AutoLFM.Core.Utils.PrintSuccess(msg)
+  end
 end
 
 -----------------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------------
 function AutoLFM.UI.DarkUI.RegisterFrame(frame)
-  if not frame then return end
-  table.insert(darkenedFrames, frame)
-  
-  if enabled then
-    AutoLFM.UI.DarkUI.DarkenFrame(frame)
+  if frame then
+    local currentCount = GetTableSize(darkenedFrames)
+    darkenedFrames[currentCount + 1] = frame
+    if enabled then
+      AutoLFM.UI.DarkUI.DarkenFrame(frame)
+    end
   end
 end
 
 function AutoLFM.UI.DarkUI.RefreshFrame(frame)
-  if not enabled then return end
-  if not frame then return end
-  AutoLFM.UI.DarkUI.DarkenFrame(frame)
+  if enabled and frame then
+    AutoLFM.UI.DarkUI.DarkenFrame(frame)
+  end
 end
 
 function AutoLFM.UI.DarkUI.Enable()
@@ -216,7 +213,6 @@ function AutoLFM.UI.DarkUI.Enable()
   if AutoLFM and AutoLFM.Core and AutoLFM.Core.Settings then
     AutoLFM.Core.Settings.SaveDarkMode(true)
   end
-  
   ShowReloadMessage()
 end
 
@@ -226,7 +222,6 @@ function AutoLFM.UI.DarkUI.Disable()
   if AutoLFM and AutoLFM.Core and AutoLFM.Core.Settings then
     AutoLFM.Core.Settings.SaveDarkMode(false)
   end
-  
   ShowReloadMessage()
 end
 
@@ -242,9 +237,6 @@ function AutoLFM.UI.DarkUI.IsEnabled()
   return enabled
 end
 
------------------------------------------------------------------------------
--- Initialization
------------------------------------------------------------------------------
 function AutoLFM.UI.DarkUI.Init()
   if AutoLFM and AutoLFM.Core and AutoLFM.Core.Settings then
     enabled = AutoLFM.Core.Settings.LoadDarkMode()
