@@ -1,6 +1,14 @@
 # AutoLFM Changelog
 
-## [2.34] - Refactor UI components for AutoLFM
+## [2.25] - Refactor UI components for improved readability and consistency
+
+- Cleaned up whitespace and formatting in MainWindow.lua, DungeonsPanel.lua, and RaidsPanel.lua.
+- Standardized function definitions and variable naming conventions.
+- Enhanced the initialization and display logic for UI panels.
+- Improved tooltip handling and checkbox state management in DungeonsPanel and RaidsPanel.
+- Updated the handling of raid size controls for better user experience.
+
+## [2.24] - Refactor UI components for AutoLFM
 
 - Simplified initialization of UI tables in MainWindow and DungeonsPanel.
 - Improved readability by consolidating variable declarations and reducing redundant checks.
