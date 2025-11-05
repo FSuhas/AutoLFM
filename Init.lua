@@ -43,10 +43,14 @@ local function Call(fullPath, arg)
   
   local funcName = parts[table.getn(parts)]
   local func = module[funcName]
-  if not func then error("[AutoLFM] Missing function: " .. fullPath) end
-     
+  if not func then 
+    error("[AutoLFM] Missing function: " .. fullPath) 
+  end
+  
   local ok, result = pcall(func, arg)
-  if not ok then error("[AutoLFM] Error: " .. fullPath .. " - " .. tostring(result)) end
+  if not ok then 
+    error("[AutoLFM] Error: " .. fullPath .. " - " .. tostring(result)) 
+  end
   
   return result or true
 end
@@ -87,14 +91,8 @@ function AutoLFM.Init.Run()
   Call("Misc.GuildSpam.Init")
   Call("Misc.RestedXP.Init")
   
-  if AutoLFM.Core and AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintSuccess then
-    local message = "Loaded successfully! "
-    if AutoLFM.Color then
-      message = message .. AutoLFM.Color("More info: ", "white") .. AutoLFM.Color("/lfm help", "yellow")
-    else
-      message = message .. "More info: /lfm help"
-    end
-    AutoLFM.Core.Utils.PrintSuccess(message)
+  if AutoLFM.Core.Utils.PrintSuccess then
+    AutoLFM.Core.Utils.PrintSuccess("Loaded successfully! " .. AutoLFM.Color("More info: ", "white") .. AutoLFM.Color("/lfm help", "yellow"))
   end
   
   isInitialized = true
