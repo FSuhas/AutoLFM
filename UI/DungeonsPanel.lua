@@ -212,6 +212,9 @@ function AutoLFM.UI.DungeonsPanel.Display(parent)
     if parent.SetHeight then parent:SetHeight(math.max(visible * AutoLFM.Core.Constants.ROW_HEIGHT, 1)) end
 end
 
+
+function AutoLFM.UI.DungeonsPanel.Refresh() UpdateRowVisibility() if scrollFrame and scrollFrame.UpdateScrollChildRect then scrollFrame:UpdateScrollChildRect() end end
+
 -----------------------------------------------------------------------------
 -- Panel Management
 -----------------------------------------------------------------------------
