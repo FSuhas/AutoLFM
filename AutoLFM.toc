@@ -1,53 +1,73 @@
 ## Interface: 11200
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
-## Notes: Automated LFM Message
-## Version: 2.25
+## Notes: Automated LFM Broadcaster
 ## Author: Gondoleon, NSO73
-## DefaultState: Enabled
-## SavedVariables: V2_Settings
+## SavedVariables: V3_Settings, V3_Presets
+## OptionalDeps: pfQuest, ShaguTweaks
+## Version: 3.0
 
-#--------------------------------------------------
-# Engine
-#--------------------------------------------------
-Core\Constants.lua
-Core\Commands.lua
+#=============================================================================
+# Github Repository: https://github.com/FSuhas/AutoLFM
+#=============================================================================
+
+#=============================================================================
+# Core
+#=============================================================================
+Core\Maestro.lua
 Core\Events.lua
-Core\Settings.lua
+Core\Commands.lua
+Core\Constants.lua
+Core\Persistent.lua
 Core\Utils.lua
+
+#=============================================================================
+# Components
+#=============================================================================
+Components\DarkUI.lua
+Components\Debug.lua
+Components\MinimapButton.lua
+Components\WelcomePopup.lua
+
+#=============================================================================
+# Logic
+#=============================================================================
 Logic\Broadcaster.lua
-Logic\Content.lua
+Logic\MainFrame.lua
+Logic\Message.lua
 Logic\Selection.lua
-API\API.lua
+Logic\Content\AutoInvite.lua
+Logic\Content\Dungeons.lua
+Logic\Content\Messaging.lua
+Logic\Content\Presets.lua
+Logic\Content\Quests.lua
+Logic\Content\Raids.lua
+Logic\Content\Settings.lua
 
-#--------------------------------------------------
-# UI
-#--------------------------------------------------
-UI\Components\DarkUI.lua
-UI\Components\IconAnimation.lua
-UI\Components\LinkIntegration.lua
-UI\Components\MainWindow.lua
-UI\Components\MinimapButton.lua
-UI\Components\PanelBuilder.lua
-UI\Components\TabNavigation.lua
-UI\ClearTab.lua
-UI\DungeonsPanel.lua
-UI\MorePanel.lua
-UI\QuestsPanel.lua
-UI\RaidsPanel.lua
-UI\WelcomePopup.lua
+#=============================================================================
+# UI Utilities
+#=============================================================================
+UI\RowList.lua
+UI\SizeControl.lua
 
-#--------------------------------------------------
-# Misc
-#--------------------------------------------------
-Misc\AutoInvite.lua
-Misc\AutoMarker.lua
-Misc\EasterEgg.lua
-Misc\FPSDisplay.lua
-Misc\FuBarPlugin.lua
-Misc\GuildSpam.lua
-Misc\RestedXP.lua
+#=============================================================================
+# UI Handlers
+#=============================================================================
+UI\MainFrame.lua
+UI\Content\AutoInvite.lua
+UI\Content\Dungeons.lua
+UI\Content\Messaging.lua
+UI\Content\Presets.lua
+UI\Content\Quests.lua
+UI\Content\Raids.lua
+UI\Content\Settings.lua
 
-#--------------------------------------------------
-# Initialization
-#--------------------------------------------------
-Init.lua
+#=============================================================================
+# UI Templates
+#=============================================================================
+UI\Templates\MainFrame.xml
+UI\Templates\AutoInvite.xml
+UI\Templates\Debug.xml
+UI\Templates\Lists.xml
+UI\Templates\Messaging.xml
+UI\Templates\Presets.xml
+UI\Templates\Settings.xml

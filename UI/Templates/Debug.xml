@@ -1,0 +1,181 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+  <!--==========================================================================
+    Debug Window Template
+    ==========================================================================-->
+  <Frame name="AutoLFM_DebugWindow" parent="UIParent" movable="true" enableMouse="true" frameStrata="DIALOG" hidden="true">
+    <Size>
+      <AbsDimension x="400" y="400"/>
+    </Size>
+    <Anchors>
+      <Anchor point="CENTER"/>
+    </Anchors>
+    <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+      <EdgeSize>
+        <AbsValue val="32"/>
+      </EdgeSize>
+      <TileSize>
+        <AbsValue val="32"/>
+      </TileSize>
+      <BackgroundInsets>
+        <AbsInset left="11" right="12" top="12" bottom="11"/>
+      </BackgroundInsets>
+    </Backdrop>
+    <Layers>
+      <Layer level="OVERLAY">
+        <FontString name="$parent_Title" inherits="GameFontNormalLarge" text="AutoLFM Maestro Debug">
+          <Anchors>
+            <Anchor point="TOP">
+              <Offset>
+                <AbsDimension x="0" y="-15"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+    <Frames>
+      <!-- Close Button -->
+      <Button inherits="UIPanelCloseButton">
+        <Anchors>
+          <Anchor point="TOPRIGHT">
+            <Offset>
+              <AbsDimension x="-5" y="-5"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            if AutoLFM.Components.Debug then
+              AutoLFM.Components.Debug.Hide()
+            end
+          </OnClick>
+        </Scripts>
+      </Button>
+      <!-- Clear Button -->
+      <Button name="$parent_ClearButton" inherits="UIPanelButtonTemplate" text="Clear">
+        <Size>
+          <AbsDimension x="80" y="22"/>
+        </Size>
+        <Anchors>
+          <Anchor point="BOTTOM">
+            <Offset>
+              <AbsDimension x="-135" y="15"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            if AutoLFM.Components.Debug then
+              AutoLFM.Components.Debug.Clear()
+            end
+          </OnClick>
+        </Scripts>
+      </Button>
+      <!-- Select All Button -->
+      <Button name="$parent_SelectAllButton" inherits="UIPanelButtonTemplate" text="Select All">
+        <Size>
+          <AbsDimension x="80" y="22"/>
+        </Size>
+        <Anchors>
+          <Anchor point="BOTTOM">
+            <Offset>
+              <AbsDimension x="-45" y="15"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            local editBox = getglobal("AutoLFM_DebugWindow_ScrollFrame_EditBox")
+            if editBox then
+              editBox:HighlightText()
+              editBox:SetFocus()
+            end
+          </OnClick>
+        </Scripts>
+      </Button>
+      <!-- State Button -->
+      <Button name="$parent_StateButton" inherits="UIPanelButtonTemplate" text="State">
+        <Size>
+          <AbsDimension x="80" y="22"/>
+        </Size>
+        <Anchors>
+          <Anchor point="BOTTOM">
+            <Offset>
+              <AbsDimension x="45" y="15"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            if AutoLFM.Components.Debug then
+              AutoLFM.Components.Debug.ShowState()
+            end
+          </OnClick>
+        </Scripts>
+      </Button>
+      <!-- Registry Button -->
+      <Button name="$parent_RegistryButton" inherits="UIPanelButtonTemplate" text="Registry">
+        <Size>
+          <AbsDimension x="80" y="22"/>
+        </Size>
+        <Anchors>
+          <Anchor point="BOTTOM">
+            <Offset>
+              <AbsDimension x="135" y="15"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            if AutoLFM.Components.Debug then
+              AutoLFM.Components.Debug.ShowRegistry()
+            end
+          </OnClick>
+        </Scripts>
+      </Button>
+      <!-- Scroll Frame -->
+      <ScrollFrame name="$parent_ScrollFrame" inherits="UIPanelScrollFrameTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="20" y="-40"/>
+            </Offset>
+          </Anchor>
+          <Anchor point="BOTTOMRIGHT">
+            <Offset>
+              <AbsDimension x="-35" y="45"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <ScrollChild>
+          <EditBox name="$parent_EditBox" multiLine="true" autoFocus="false">
+            <Size>
+              <AbsDimension x="340" y="300"/>
+            </Size>
+            <FontString inherits="GameFontNormalSmall"/>
+            <Scripts>
+              <OnEscapePressed>
+                this:ClearFocus()
+              </OnEscapePressed>
+            </Scripts>
+          </EditBox>
+        </ScrollChild>
+      </ScrollFrame>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        if AutoLFM.Components.Debug then
+          AutoLFM.Components.Debug.OnFrameLoad(this)
+        end
+      </OnLoad>
+      <OnMouseDown>
+        if arg1 == "LeftButton" then
+          this:StartMoving()
+        end
+      </OnMouseDown>
+      <OnMouseUp>
+        this:StopMovingOrSizing()
+      </OnMouseUp>
+    </Scripts>
+  </Frame>
+</Ui>
