@@ -1,535 +1,463 @@
 --=============================================================================
 -- AutoLFM: Broadcaster
+--   Automated message broadcasting with statistics and dry run support
 --=============================================================================
+AutoLFM = AutoLFM or {}
+AutoLFM.Logic = AutoLFM.Logic or {}
+AutoLFM.Logic.Broadcaster = {}
 
-if not AutoLFM then AutoLFM = {} end
-if not AutoLFM.Logic then AutoLFM.Logic = {} end
-if not AutoLFM.Logic.Broadcaster then AutoLFM.Logic.Broadcaster = {} end
+--=============================================================================
+-- PRIVATE STATE
+--=============================================================================
+local isRunning = false
+local broadcastTimer = nil
+local lastBroadcastTime = 0
+local messagesSent = 0
+local sessionStartTime = 0
 
------------------------------------------------------------------------------
--- Private State
------------------------------------------------------------------------------
-local isActive = false
-local lastTimestamp = 0
-local messageCount = 0
-local searchStartTime = 0
-local generatedMessage = ""
-local customMessage = ""
-local broadcastFrame = nil
-local lastUpdateCheck = 0
-
------------------------------------------------------------------------------
--- Helpers
------------------------------------------------------------------------------
-local function IsMessageEmpty(msg)
-  return not msg or msg == "" or msg == " "
+--- Gets the current broadcast interval from state
+--- @return number - Broadcast interval in seconds
+local function getBroadcastInterval()
+  return AutoLFM.Core.Maestro.GetState("Broadcaster.Interval") or AutoLFM.Core.Constants.DEFAULT_BROADCAST_INTERVAL or 60
 end
 
------------------------------------------------------------------------------
--- Message Construction
------------------------------------------------------------------------------
-local function BuildContentList(tags)
-  if not tags or table.getn(tags) == 0 then return nil end
-  return table.concat(tags, " or ")
-end
-
-local function CalculateGroupCounts(mode, targetSize)
-  local currentCount = AutoLFM.Logic.Selection.GetGroupCount()
-  local missingCount = targetSize - currentCount
-  
-  return {
-    current = currentCount,
-    target = targetSize,
-    missing = missingCount
-  }
-end
-
-local function BuildDungeonSegment()
-  local selectedDungeons = AutoLFM.Logic.Content.GetSelectedDungeons()
-  if not selectedDungeons then return {}, 0 end
-  
-  local counts = CalculateGroupCounts("dungeon", AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON)
-  
-  if counts.missing <= 0 then
-    return {}, 0
-  end
-  
-  local dungeonList = {}
-  for i = 1, table.getn(selectedDungeons) do
-    table.insert(dungeonList, selectedDungeons[i])
-  end
-  
-  return dungeonList, counts.missing
-end
-
-local function BuildRaidSegment()
-  local selectedRaids = AutoLFM.Logic.Content.GetSelectedRaids()
-  if not selectedRaids or table.getn(selectedRaids) == 0 then
-    return nil, 0, 0, 0
-  end
-  
-  local raidTag = selectedRaids[1]
-  local raid = AutoLFM.Logic.Content.GetRaidByTag(raidTag)
-  
-  if not raid then
-    return nil, 0, 0, 0
-  end
-  
-  local currentRaidSize = AutoLFM.Logic.Content.GetRaidSize()
-  if currentRaidSize == 0 then
-    currentRaidSize = raid.sizeMin or AutoLFM.Core.Constants.GROUP_SIZE_RAID
-  end
-  
-  local counts = CalculateGroupCounts("raid", currentRaidSize)
-  
-  return raidTag, counts.missing, counts.target, counts.current
-end
-
------------------------------------------------------------------------------
--- Message Formatting
------------------------------------------------------------------------------
-local function FormatDungeonMessage(contentText, rolesString, missingCount)
-  if not contentText then return "" end
-  
-  local message = "LF" .. missingCount .. "M for " .. contentText
-  
-  if rolesString and rolesString ~= "" then
-    message = message .. " " .. rolesString
-  end
-  
-  return message
-end
-
-local function FormatRaidMessage(raidTag, rolesString, missingCount, currentCount, raidSize)
-  if not raidTag then return "" end
-  
-  local message = raidTag .. " LF" .. missingCount .. "M"
-  
-  if rolesString and rolesString ~= "" then
-    message = message .. " " .. rolesString
-  end
-  
-  message = message .. " " .. currentCount .. "/" .. raidSize
-  
-  return message
-end
-
-local function BuildFinalMessage(contentText, rolesString, missingCount, isRaid, raidData)
-  local hasCustom = customMessage and customMessage ~= ""
-  
-  if not contentText and not rolesString then
-    return customMessage or ""
-  end
-  
-  if not contentText then
-    local message = rolesString or ""
-    return hasCustom and (message .. " " .. customMessage) or message
-  end
-  
-  local message
-  if isRaid and raidData then
-    message = FormatRaidMessage(contentText, rolesString, missingCount, raidData.current, raidData.size)
-  else
-    message = FormatDungeonMessage(contentText, rolesString, missingCount)
-  end
-  
-  return hasCustom and (message .. " " .. customMessage) or message
-end
-
------------------------------------------------------------------------------
--- Message Update
------------------------------------------------------------------------------
-function AutoLFM.Logic.Broadcaster.UpdateMessage()
-  local success, err = pcall(function()
-    local rolesString = AutoLFM.Logic.Selection.GetRolesString()
-    local raidTag, raidMissingCount, raidSize, raidCurrentCount = BuildRaidSegment()
-    local isRaid = raidTag ~= nil
-    local contentText
-    local missingCount = 0
-    local raidData = nil
-    
-    if isRaid then
-      contentText = raidTag
-      missingCount = raidMissingCount
-      raidData = {
-        current = raidCurrentCount,
-        size = raidSize
-      }
-    else
-      local dungeonList, dungeonMissingCount = BuildDungeonSegment()
-      contentText = BuildContentList(dungeonList)
-      missingCount = dungeonMissingCount
-    end
-    
-    generatedMessage = BuildFinalMessage(contentText, rolesString, missingCount, isRaid, raidData)
-    
-    if AutoLFM.UI.MainWindow.UpdateMessagePreview then
-      AutoLFM.UI.MainWindow.UpdateMessagePreview()
-    end
-    
-    if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
-      AutoLFM.API.NotifyDataChanged()
-    end
-  end)
-  
-  if not success then
-    AutoLFM.Core.Utils.PrintError("Failed to update message: " .. tostring(err))
-  end
-end
-
-function AutoLFM.Logic.Broadcaster.GetMessage()
-  return generatedMessage or ""
-end
-
-function AutoLFM.Logic.Broadcaster.SetCustomMessage(message)
-  customMessage = message or ""
-  AutoLFM.Logic.Broadcaster.UpdateMessage()
-end
-
-function AutoLFM.Logic.Broadcaster.GetCustomMessage()
-  return customMessage or ""
-end
-
-function AutoLFM.Logic.Broadcaster.ResetCustomMessage()
-  customMessage = ""
-  AutoLFM.Logic.Broadcaster.UpdateMessage()
-end
-
------------------------------------------------------------------------------
--- Validation
------------------------------------------------------------------------------
-local validationRules = {
-  message = function()
-    if IsMessageEmpty(generatedMessage) then
-      return false, "The LFM message is empty"
-    end
-    return true, nil
-  end,
-  
-  channels = function()
-    local selectedChannels = AutoLFM.Logic.Selection.GetChannels()
-    if not selectedChannels or not next(selectedChannels) then
-      return false, "No channel selected"
-    end
-    
-    for channelName, _ in pairs(selectedChannels) do
-      if channelName ~= "Hardcore" and not AutoLFM.Logic.Selection.IsChannelAvailable(channelName) then
-        return false, "Channel '" .. channelName .. "' is invalid or closed"
-      end
-    end
-    
-    return true, nil
-  end,
-  
-  content = function()
-    local selectedRaids = AutoLFM.Logic.Content.GetSelectedRaids()
-    local selectedDungeons = AutoLFM.Logic.Content.GetSelectedDungeons()
-    local hasUserMessage = customMessage and customMessage ~= ""
-    
-    if not hasUserMessage then
-      if table.getn(selectedRaids) == 0 and table.getn(selectedDungeons) == 0 then
-        return false, "No dungeon/raid selected or no custom message set"
-      end
-    end
-    
-    return true, nil
-  end,
-  
-  groupSize = function()
-    local mode = AutoLFM.Logic.Selection.GetMode()
-    local currentCount = AutoLFM.Logic.Selection.GetGroupCount()
-    
-    if mode == "dungeon" then
-      if currentCount >= AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON then
-        return false, "Your dungeon group is already full (" .. AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON .. "/" .. AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON .. ")"
-      end
-    elseif mode == "raid" then
-      local raidSize = AutoLFM.Logic.Content.GetRaidSize()
-      if currentCount >= raidSize then
-        return false, "Your raid group is already full (" .. raidSize .. "/" .. raidSize .. ")"
-      end
-    end
-    
-    return true, nil
-  end
+-- Sound file paths
+local SOUND_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\"
+local SOUNDS = {
+  START = "Start.ogg",
+  STOP = "Stop.ogg",
+  FULL = "Full.ogg"
 }
 
-function AutoLFM.Logic.Broadcaster.Validate()
-  local errors = {}
-  
-  for ruleName, validator in pairs(validationRules) do
-    local isValid, errorMsg = validator()
-    
-    if not isValid and errorMsg then
-      table.insert(errors, errorMsg)
-    end
-  end
-  
-  if table.getn(errors) > 0 then
-    return false, errors
-  end
-  
-  return true, nil
+--=============================================================================
+-- STATISTICS MANAGEMENT
+--=============================================================================
+
+--- Resets broadcast statistics to zero
+local function resetStats()
+  messagesSent = 0
+  sessionStartTime = GetTime()
+  lastBroadcastTime = 0
+
+  -- Update Maestro states
+  AutoLFM.Core.Maestro.SetState("Broadcaster.MessagesSent", 0)
+  AutoLFM.Core.Maestro.SetState("Broadcaster.SessionStartTime", sessionStartTime)
+
+  AutoLFM.Core.Utils.LogInfo("Statistics reset")
 end
 
------------------------------------------------------------------------------
--- Broadcast Operations
------------------------------------------------------------------------------
-function AutoLFM.Logic.Broadcaster.SendToChannels(message)
+--- Increments the message counter and updates state
+local function incrementMessageCount()
+  messagesSent = messagesSent + 1
+  AutoLFM.Core.Maestro.SetState("Broadcaster.MessagesSent", messagesSent)
+end
+
+--- Updates the last broadcast timestamp and state
+local function updateLastBroadcastTime()
+  lastBroadcastTime = GetTime()
+  AutoLFM.Core.Maestro.SetState("Broadcaster.LastBroadcastTime", lastBroadcastTime)
+end
+
+--=============================================================================
+-- CONVERT TO RAID
+--=============================================================================
+
+--- Converts party to raid if group size exceeds 5 and target size is > 5
+--- @return boolean - True if conversion was attempted or already in raid
+local function convertToRaid()
+  local groupType = AutoLFM.Core.Events.GetGroupType()
+  local groupSize = AutoLFM.Core.Events.GetGroupSize()
+
+  -- Already in raid, nothing to do
+  if groupType == "raid" then
+    return true
+  end
+
+  -- Solo, can't convert
+  if groupType == "solo" then
+    return false
+  end
+
+  -- Get target size from selection
+  local selectionMode = AutoLFM.Core.Maestro.GetState("Selection.Mode")
+  local targetSize = 5 -- Default to dungeon size
+
+  if selectionMode == "raid" then
+    targetSize = AutoLFM.Core.Maestro.GetState("Selection.RaidSize") or 40
+  elseif selectionMode == "custom" then
+    targetSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or 5
+  end
+
+  -- Check if we need to convert (target size > 5 and group is party)
+  if targetSize > 5 and groupType == "party" then
+    -- Check if we're the party leader
+    if not AutoLFM.Core.Events.IsGroupLeader() then
+      AutoLFM.Core.Utils.LogWarning("Cannot convert to raid: not party leader")
+      return false
+    end
+
+    -- Convert to raid (WoW API function)
+    local success, err = pcall(ConvertToRaid)
+    if not success then
+      AutoLFM.Core.Utils.LogError("Failed to convert to raid: " .. tostring(err))
+      return false
+    end
+
+    AutoLFM.Core.Utils.LogAction("Converted party to raid (target size: " .. targetSize .. ")")
+    AutoLFM.Core.Utils.Print("Converted party to raid")
+    return true
+  end
+
+  return false
+end
+
+--=============================================================================
+-- MESSAGE BROADCASTING
+--=============================================================================
+
+--- Sends a message to a specific channel
+--- @param channelName string - The name of the channel
+--- @param message string - The message to send
+local function sendToChannel(channelName, message)
+  local channelID = GetChannelName(channelName)
+
+  if channelID > 0 then
+    SendChatMessage(message, "CHANNEL", nil, channelID)
+    AutoLFM.Core.Utils.LogAction("Broadcast to " .. channelName .. ": " .. message)
+    return true
+  else
+    AutoLFM.Core.Utils.LogWarning("Not in channel: " .. channelName)
+    return false
+  end
+end
+
+--- Sends a message to the Hardcore channel (special handling)
+--- @param message string - The message to send
+local function sendToHardcoreChannel(message)
+  local success, err = pcall(SendChatMessage, message, "Hardcore")
+  if success then
+    AutoLFM.Core.Utils.LogAction("Broadcast to Hardcore: " .. message)
+    return true
+  else
+    AutoLFM.Core.Utils.LogWarning("Failed to send to Hardcore: " .. tostring(err))
+    return false
+  end
+end
+
+--- Sends the broadcast message to all selected channels
+--- Respects dry run mode (sends to chat instead of channels)
+--- @return boolean - True if message was sent successfully
+local function broadcastMessage()
+  -- Get the message to broadcast
+  local message = AutoLFM.Logic.Message.GetMessage()
+
   if not message or message == "" then
+    AutoLFM.Core.Utils.LogWarning("No message to broadcast (empty selection)")
     return false
   end
-  
-  local selectedChannels = AutoLFM.Logic.Selection.GetChannels()
-  if not selectedChannels or not next(selectedChannels) then
+
+  -- Check if dry run mode is enabled
+  local isDryRun = AutoLFM.Core.Maestro.GetState("Settings.DryRun") or false
+
+  -- Get selected channels
+  local channels = AutoLFM.Core.Maestro.GetState("Channels.ActiveChannels") or {}
+
+  if table.getn(channels) == 0 and not isDryRun then
+    AutoLFM.Core.Utils.LogWarning("No channels selected for broadcast")
     return false
   end
-  
-  local sentCount = 0
-  local hadErrors = false
 
-  for channelName, _ in pairs(selectedChannels) do
-    if channelName == "Hardcore" then
-      local hardcoreMessage = message
-      local success, err = pcall(SendChatMessage, hardcoreMessage, "Hardcore")
-      
-      if success then
-        sentCount = sentCount + 1
-        -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Hardcore]|r " .. message)
-      else
-        hadErrors = true
-        AutoLFM.Core.Utils.PrintError("Failed to send on Hardcore: " .. tostring(err))
-      end
+  if isDryRun then
+    -- Dry run: print to chat instead of sending
+    local dryRunPrefix = AutoLFM.Core.Utils.ColorText("[DRY RUN]", "YELLOW")
+    AutoLFM.Core.Utils.Print(dryRunPrefix .. " " .. message)
+    AutoLFM.Core.Utils.LogAction("Dry run broadcast: " .. message)
+  else
+    -- Real broadcast: send to all selected channels
+    for i = 1, table.getn(channels) do
+      local channelName = channels[i]
 
-    else
-      local channelId = AutoLFM.Logic.Selection.GetChannelId(channelName)
-      if channelId then
-        local success, err = pcall(SendChatMessage, message, "CHANNEL", nil, channelId)
-        if success then
-          sentCount = sentCount + 1
-        else
-          hadErrors = true
-          AutoLFM.Core.Utils.PrintError("Failed to send on " .. channelName .. ": " .. tostring(err))
-        end
+      -- Special handling for Hardcore channel
+      if channelName == "Hardcore" then
+        sendToHardcoreChannel(message)
       else
-        hadErrors = true
-        AutoLFM.Core.Utils.PrintError("The channel " .. channelName .. " is invalid or closed")
+        sendToChannel(channelName, message)
       end
     end
   end
 
-  if sentCount == 0 then
-    AutoLFM.Core.Utils.PrintError("Message not sent: all channels are invalid")
-    return false
-  end
+  -- Update statistics
+  incrementMessageCount()
+  updateLastBroadcastTime()
 
-  messageCount = (messageCount or 0) + 1
-  lastTimestamp = GetTime()
-  
-  if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
-     AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.MESSAGE_SENT)
-  end
-  
   return true
 end
 
+--=============================================================================
+-- TIMER MANAGEMENT
+--=============================================================================
 
-function AutoLFM.Logic.Broadcaster.Start()
-  local success, result = pcall(function()
-    local isValid, errors = AutoLFM.Logic.Broadcaster.Validate()
-    
-    if not isValid then
-      AutoLFM.Core.Utils.PrintError("Broadcast cannot start:")
-      for i = 1, table.getn(errors) do
-        AutoLFM.Core.Utils.PrintError("  - " .. errors[i])
-      end
-      return false
+--- Timer tick handler - broadcasts message at regular intervals
+local function onTimerTick()
+  if not isRunning then
+    return
+  end
+
+  local currentTime = GetTime()
+  local timeSinceLastBroadcast = currentTime - lastBroadcastTime
+  local interval = getBroadcastInterval()
+
+  -- Check if it's time to broadcast
+  if timeSinceLastBroadcast >= interval then
+    broadcastMessage()
+  end
+
+  -- Update time remaining state (for UI display)
+  local timeRemaining = interval - timeSinceLastBroadcast
+  if timeRemaining < 0 then
+    timeRemaining = 0
+  end
+  AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", timeRemaining)
+end
+
+--- Starts the broadcast timer
+local function startTimer()
+  if broadcastTimer then
+    return -- Already running
+  end
+
+  -- Create timer frame
+  broadcastTimer = CreateFrame("Frame", "AutoLFM_BroadcastTimer")
+  broadcastTimer:SetScript("OnUpdate", function()
+    -- OnUpdate fires every frame, so we throttle it to ~1 second
+    if not this.lastUpdate or GetTime() - this.lastUpdate >= 1 then
+      this.lastUpdate = GetTime()
+      onTimerTick()
     end
-    
-    isActive = true
-    lastTimestamp = GetTime()
-    searchStartTime = GetTime()
-    messageCount = 0
-    
-    AutoLFM.Core.Utils.PrintSuccess("Broadcast started")
-    
-    AutoLFM.Logic.Broadcaster.SendToChannels(generatedMessage)
-    
-    if AutoLFM.UI.IconAnimation.Start then
-      AutoLFM.UI.IconAnimation.Start()
-    end
-    
-    if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
-      AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.BROADCAST_START)
-    end
-    
-    return true
   end)
-  
-  if not success then
-    AutoLFM.Core.Utils.PrintError("Failed to start broadcast: " .. tostring(result))
-    return false
-  end
-  
-  return result
+
+  AutoLFM.Core.Utils.LogInfo("Broadcast timer started")
 end
 
-function AutoLFM.Logic.Broadcaster.Stop()
-  isActive = false
-  AutoLFM.Core.Utils.PrintWarning("Broadcast stopped")
-  
-  if AutoLFM.UI.IconAnimation.Stop then
-    AutoLFM.UI.IconAnimation.Stop()
+--- Stops the broadcast timer
+local function stopTimer()
+  if broadcastTimer then
+    broadcastTimer:SetScript("OnUpdate", nil)
+    broadcastTimer = nil
+    AutoLFM.Core.Utils.LogInfo("Broadcast timer stopped")
   end
-  
-  if AutoLFM.API and AutoLFM.API.NotifyDataChanged then
-    AutoLFM.API.NotifyDataChanged(AutoLFM.API.EVENTS.BROADCAST_STOP)
-  end
-  
-  messageCount = 0
 end
 
-function AutoLFM.Logic.Broadcaster.IsActive()
-  return isActive or false
+--=============================================================================
+-- START/STOP (PRIVATE)
+--=============================================================================
+
+--- Starts broadcasting (sends immediately, then at regular intervals)
+--- @private Internal use only - use Toggle() instead
+local function start()
+  if isRunning then
+    AutoLFM.Core.Utils.LogWarning("Broadcaster already running")
+    return
+  end
+
+  local isDryRun = AutoLFM.Core.Maestro.GetState("Settings.DryRun") or false
+
+  -- Force refresh group size before starting
+  if AutoLFM.Core.Events and AutoLFM.Core.Events.RefreshGroupSize then
+    AutoLFM.Core.Events.RefreshGroupSize()
+  end
+
+  -- Reset statistics
+  resetStats()
+
+  -- Set running state
+  isRunning = true
+  AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", true)
+
+  -- Play start sound
+  pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.START)
+
+  -- Log success (isDryRun already retrieved above)
+  if isDryRun then
+    AutoLFM.Core.Utils.PrintSuccess("Broadcast started in DRY RUN mode (messages will print to chat)")
+  else
+    AutoLFM.Core.Utils.PrintSuccess("Broadcast started")
+  end
+
+  -- Send first broadcast immediately
+  broadcastMessage()
+
+  -- Start timer for subsequent broadcasts
+  startTimer()
 end
 
+--- Stops broadcasting
+--- @private Internal use only - use Toggle() instead
+local function stop()
+  if not isRunning then
+    AutoLFM.Core.Utils.LogWarning("Broadcaster not running")
+    return
+  end
+
+  -- Stop timer
+  stopTimer()
+
+  -- Clear running state
+  isRunning = false
+  AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", false)
+  AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", 0)
+
+  -- Play stop sound
+  pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.STOP)
+
+  -- Log success
+  AutoLFM.Core.Utils.PrintSuccess("Broadcast stopped")
+
+  -- Show statistics
+  local sessionDuration = GetTime() - sessionStartTime
+  local minutes = math.floor(sessionDuration / 60)
+  AutoLFM.Core.Utils.Print(string.format("Session stats: %d messages in %d minutes", messagesSent, minutes))
+end
+
+--=============================================================================
+-- PUBLIC API
+--=============================================================================
+
+--- Toggles broadcasting on/off
+function AutoLFM.Logic.Broadcaster.Toggle()
+  if isRunning then
+    stop()
+  else
+    start()
+  end
+end
+
+--- Returns whether broadcaster is currently running
+--- @return boolean - True if broadcasting is active
+function AutoLFM.Logic.Broadcaster.IsRunning()
+  return isRunning
+end
+
+--- Gets current broadcast statistics
+--- @return table - Statistics object with messagesSent, sessionStartTime, isRunning
 function AutoLFM.Logic.Broadcaster.GetStats()
   return {
-    isActive = isActive or false,
-    lastTimestamp = lastTimestamp or 0,
-    messageCount = messageCount or 0,
-    searchStartTimestamp = searchStartTime or 0
+    messagesSent = messagesSent,
+    sessionStartTime = sessionStartTime,
+    lastBroadcastTime = lastBroadcastTime,
+    isRunning = isRunning
   }
 end
 
-function AutoLFM.Logic.Broadcaster.FormatDuration()
-  local stats = AutoLFM.Logic.Broadcaster.GetStats()
-  
-  if stats.isActive and stats.searchStartTimestamp and stats.searchStartTimestamp > 0 then
-    local duration = GetTime() - stats.searchStartTimestamp
-    local minutes = math.floor(duration / 60)
-    local seconds = math.floor(math.mod(duration, 60))
-    return string.format("%02d:%02d", minutes, seconds)
-  end
-  
-  return "00:00"
-end
-
------------------------------------------------------------------------------
--- Group State Management
------------------------------------------------------------------------------
-local function ClearAllSelections()
-  if AutoLFM.Logic.Content.ClearDungeons then
-    AutoLFM.Logic.Content.ClearDungeons()
-  end
-  
-  if AutoLFM.Logic.Content.ClearRaids then
-    AutoLFM.Logic.Content.ClearRaids()
-  end
-  
-  if AutoLFM.Logic.Selection.ClearRoles then
-    AutoLFM.Logic.Selection.ClearRoles()
-  end
-  
-  if AutoLFM.Logic.Broadcaster.ResetCustomMessage then
-    AutoLFM.Logic.Broadcaster.ResetCustomMessage()
-  end
-  
-  if AutoLFM.Logic.Broadcaster.UpdateMessage then
-    AutoLFM.Logic.Broadcaster.UpdateMessage()
-  end
-end
-
-function AutoLFM.Logic.Broadcaster.HandleGroupFull(contentType)
-  if AutoLFM.Logic.Broadcaster.IsActive() then
-    AutoLFM.Logic.Broadcaster.Stop()
-  end
-  
-  ClearAllSelections()
-  
-  return {
-    needsUIUpdate = true,
-    playStopSound = true
-  }
-end
-
------------------------------------------------------------------------------
--- Broadcast Loop
------------------------------------------------------------------------------
-local function GetBroadcastInterval()
-  local interval = AutoLFM.Core.Constants.INTERVAL_DEFAULT
-  
-  if AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider then
-    local broadcastSlider = AutoLFM.UI.MorePanel.GetBroadcastIntervalSlider()
-    if broadcastSlider and broadcastSlider.GetValue then
-      interval = broadcastSlider:GetValue()
-    end
-  end
-  
-  if not interval or interval < AutoLFM.Core.Constants.INTERVAL_MIN then
-    interval = AutoLFM.Core.Constants.INTERVAL_DEFAULT
-  end
-  
-  return interval
-end
-
-local function ShouldExecuteBroadcast(currentTime)
-  if not isActive then return false end
-  if not lastTimestamp or lastTimestamp <= 0 then return false end
-  
-  local interval = GetBroadcastInterval()
-  local timeElapsed = currentTime - lastTimestamp
-  
-  return timeElapsed >= interval
-end
-
-local function ExecuteBroadcast()
-  if IsMessageEmpty(generatedMessage) then
+--- Called when group size changes - updates message and checks for raid conversion
+--- @param newSize number - New group size
+function AutoLFM.Logic.Broadcaster.OnGroupSizeChanged(newSize)
+  if not isRunning then
     return
   end
-  
-  local sendSuccess = AutoLFM.Logic.Broadcaster.SendToChannels(generatedMessage)
-  
-  if not sendSuccess then
-    AutoLFM.Logic.Broadcaster.Stop()
-    
-    local broadcastButton = AutoLFM.UI.MainWindow.GetBroadcastToggleButton()
-    if broadcastButton then
-      broadcastButton:SetText("Start")
-    end
-  end
-end
 
-local function OnBroadcastUpdate()
-  local currentTime = GetTime()
-  
-  if currentTime - lastUpdateCheck < AutoLFM.Core.Constants.UPDATE_THROTTLE then
+  -- Message will auto-update via Logic.Message listener
+  -- Just log the change
+  AutoLFM.Core.Utils.LogAction("Group size changed to " .. newSize .. " (message will auto-update)")
+
+  -- Check if we need to convert to raid
+  local selectionMode = AutoLFM.Core.Maestro.GetState("Selection.Mode")
+  local targetSize = 5
+
+  if selectionMode == "raid" then
+    targetSize = AutoLFM.Core.Maestro.GetState("Selection.RaidSize") or 40
+  elseif selectionMode == "custom" then
+    targetSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or 5
+  end
+
+  -- If group is full, stop broadcasting
+  if newSize >= targetSize then
+    AutoLFM.Core.Utils.Print("Group is full! Stopping broadcast.")
+    -- Play full sound before stopping
+    pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.FULL)
+    stop()
     return
   end
-  lastUpdateCheck = currentTime
+
+  -- Try to convert to raid if needed
+  convertToRaid()
+end
+
+--=============================================================================
+-- MAESTRO DECLARATIONS
+--=============================================================================
+
+--- Command: Toggle broadcasting on/off
+AutoLFM.Core.Maestro.RegisterCommand("Broadcaster.Toggle", function()
+  AutoLFM.Logic.Broadcaster.Toggle()
+end, { id = "C21" })
+
+--- State: Is broadcaster running
+AutoLFM.Core.SafeRegisterState("Broadcaster.IsRunning", false, { id = "S14" })
+
+--- State: Messages sent this session
+AutoLFM.Core.SafeRegisterState("Broadcaster.MessagesSent", 0, { id = "S15" })
+
+--- State: Session start time (GetTime())
+AutoLFM.Core.SafeRegisterState("Broadcaster.SessionStartTime", 0, { id = "S16" })
+
+--- State: Last broadcast time (GetTime())
+AutoLFM.Core.SafeRegisterState("Broadcaster.LastBroadcastTime", 0, { id = "S17" })
+
+--- State: Time remaining until next broadcast (seconds)
+AutoLFM.Core.SafeRegisterState("Broadcaster.TimeRemaining", 0, { id = "S18" })
+
+--- State: Broadcast interval in seconds
+AutoLFM.Core.SafeRegisterState("Broadcaster.Interval", 60, { id = "S19" })
+
+--=============================================================================
+-- PUBLIC API (ADDITIONAL)
+--=============================================================================
+
+--- Sets the broadcast interval
+--- @param interval number - Interval in seconds (30-7200)
+function AutoLFM.Logic.Broadcaster.SetInterval(interval)
+  local clampedInterval = math.max(AutoLFM.Core.Constants.MIN_BROADCAST_INTERVAL, math.min(AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL, interval))
+  local oldInterval = AutoLFM.Core.Maestro.GetState("Broadcaster.Interval") or 60
   
-  if ShouldExecuteBroadcast(currentTime) then
-    ExecuteBroadcast()
+  if oldInterval == clampedInterval then return end
+
+  AutoLFM.Core.Maestro.SetState("Broadcaster.Interval", clampedInterval)
+  AutoLFM.Core.Utils.LogInfo("Broadcast interval set to " .. clampedInterval .. " seconds")
+
+  if AutoLFM.Core.Persistent and AutoLFM.Core.Persistent.SetBroadcastInterval then
+    AutoLFM.Core.Persistent.SetBroadcastInterval(clampedInterval)
   end
 end
 
-function AutoLFM.Logic.Broadcaster.Init()
-  if broadcastFrame then
-    broadcastFrame:SetScript("OnUpdate", nil)
-    broadcastFrame = nil
-  end
-  
-  broadcastFrame = CreateFrame("Frame")
-  lastUpdateCheck = 0
-  
-  broadcastFrame:SetScript("OnUpdate", function()
-    local success, err = pcall(OnBroadcastUpdate)
-    
-    if not success then
-      if not broadcastFrame.hasErrored then
-        AutoLFM.Core.Utils.PrintError("Broadcast loop error: " .. tostring(err))
-        broadcastFrame.hasErrored = true
+--- Gets the current broadcast interval
+--- @return number - Interval in seconds
+function AutoLFM.Logic.Broadcaster.GetInterval()
+  return getBroadcastInterval()
+end
+
+--=============================================================================
+-- INITIALIZATION
+--=============================================================================
+
+AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
+  -- Listen to group size changes
+  AutoLFM.Core.Maestro.Listen(
+    "Broadcaster.OnGroupSizeChanged",
+    "Group.SizeChanged",
+    function(payload)
+      if payload and payload.size then
+        AutoLFM.Logic.Broadcaster.OnGroupSizeChanged(payload.size)
       end
-    end
-  end)
-end
+    end,
+    { id = "L02" }
+  )
+
+  local savedInterval = AutoLFM.Core.Persistent.GetBroadcastInterval()
+  if savedInterval then
+    AutoLFM.Core.Maestro.SetState("Broadcaster.Interval", savedInterval)
+  end
+end, {
+  id = "I14",
+  dependencies = { "Logic.Message", "Logic.Content.Messaging", "Core.Events" }
+})

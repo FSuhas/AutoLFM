@@ -1,0 +1,132 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+  <!--==========================================================================
+    AutoInvite Content Panel
+    ==========================================================================-->
+  <Frame name="AutoLFM_Content_AutoInvite" parent="AutoLFM_MainFrame_ContentContainer" hidden="true">
+    <Size>
+      <AbsDimension x="298" y="252"/>
+    </Size>
+    <Anchors>
+      <Anchor point="TOPLEFT"/>
+    </Anchors>
+    <Frames>
+      <ScrollFrame name="$parent_ScrollFrame" inherits="UIPanelScrollFrameTemplate">
+        <Size>
+          <AbsDimension x="295" y="252"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="3" y="0"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <ScrollChild>
+          <Frame name="$parent_ScrollChild">
+            <Size>
+              <AbsDimension x="280" y="200"/>
+            </Size>
+            <Anchors>
+              <Anchor point="TOPLEFT"/>
+            </Anchors>
+            <Layers>
+              <Layer level="ARTWORK">
+                <FontString name="$parent_Title" inherits="GameFontNormalLarge">
+                  <Anchors>
+                    <Anchor point="TOP">
+                      <Offset>
+                        <AbsDimension x="0" y="-10"/>
+                      </Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+                <FontString name="$parent_StatusLabel" inherits="GameFontNormal">
+                  <Anchors>
+                    <Anchor point="TOPLEFT">
+                      <Offset>
+                        <AbsDimension x="10" y="-50"/>
+                      </Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+                <FontString name="$parent_KeywordLabel" inherits="GameFontNormal">
+                  <Anchors>
+                    <Anchor point="TOPLEFT">
+                      <Offset>
+                        <AbsDimension x="10" y="-100"/>
+                      </Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
+            <Frames>
+              <Button name="AutoLFM_AutoInvite_EnableButton" inherits="UIPanelButtonTemplate">
+                <Size>
+                  <AbsDimension x="100" y="22"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="150" y="-45"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.AutoInvite.OnEnableClick()
+                  </OnClick>
+                </Scripts>
+              </Button>
+              <EditBox name="AutoLFM_AutoInvite_KeywordInput" inherits="InputBoxTemplate">
+                <Size>
+                  <AbsDimension x="120" y="20"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="130" y="-100"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnEnterPressed>
+                    AutoLFM.UI.Content.AutoInvite.OnKeywordChange()
+                    this:ClearFocus()
+                  </OnEnterPressed>
+                  <OnEscapePressed>
+                    this:ClearFocus()
+                  </OnEscapePressed>
+                </Scripts>
+              </EditBox>
+              <CheckButton name="AutoLFM_AutoInvite_ConfirmCheck" inherits="UICheckButtonTemplate">
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="10" y="-140"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.AutoInvite.OnConfirmClick()
+                  </OnClick>
+                </Scripts>
+              </CheckButton>
+            </Frames>
+          </Frame>
+        </ScrollChild>
+      </ScrollFrame>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        AutoLFM.UI.Content.AutoInvite.OnLoad(this)
+      </OnLoad>
+      <OnShow>
+        AutoLFM.UI.Content.AutoInvite.OnShow(this)
+      </OnShow>
+    </Scripts>
+  </Frame>
+
+</Ui>
