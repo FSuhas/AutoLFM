@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> [AutoLFM v3 available for beta testing.](https://github.com/FSuhas/AutoLFM/issues/44)
+
 # AutoLFM - Automated LFM Broadcaster for WoW Vanilla 1.12 (TurtleWoW)
 
 <p align="center">
