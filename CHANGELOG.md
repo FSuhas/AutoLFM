@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.26] - V3 Beta available
+
+- Added informations about the V3 beta testing availability.
+
 ## [2.25] - Refactor UI components for improved readability and consistency
 
 - Cleaned up whitespace and formatting in MainWindow.lua, DungeonsPanel.lua, and RaidsPanel.lua.
