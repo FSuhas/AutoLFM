@@ -8,10 +8,20 @@ AutoLFM.Components = AutoLFM.Components or {}
 AutoLFM.Components.Debug = {}
 
 --=============================================================================
--- PRIVATE STATE
+-- CONSTANTS
 --=============================================================================
 
-local debugFrame = nil
+local DEBUG_WINDOW_WIDTH = 460
+local DEBUG_WINDOW_HEIGHT = 400
+local DEBUG_LINE_HEIGHT = 14
+local DEBUG_BUTTON_HEIGHT = 22
+local DEBUG_BUTTON_WIDTH = 80
+local SCROLL_BAR_WIDTH = 20
+
+--=============================================================================
+-- PRIVATE STATE
+--=============================================================================
+local debugFrame, scrollFrame, editBox
 local logBuffer = {}
 local isEnabled = false
 
@@ -56,54 +66,57 @@ local function formatLogLine(category, message)
   return timestamp .. " " .. coloredCategory .. " " .. message
 end
 
---- Adds a log line to the buffer (no limit)
+--- Adds a log line to the buffer (max 500 lines)
 --- @param line string - Formatted log line to add
 local function addToBuffer(line)
   table.insert(logBuffer, line)
+  
+  -- Keep only last 500 lines to prevent memory bloat
+  if table.getn(logBuffer) > 500 then
+    table.remove(logBuffer, 1)
+  end
 end
 
 --- Updates the debug window display with current buffer contents
+--- Dynamically resizes scroll frame based on content
+--- Auto-scrolls to bottom when new logs are added
 local function updateDisplay()
   if not debugFrame or not debugFrame:IsVisible() then
       return
   end
 
-  local scrollFrame = getglobal("AutoLFM_DebugWindow_ScrollFrame")
-  local editBox = getglobal("AutoLFM_DebugWindow_ScrollFrame_EditBox")
-
   if not scrollFrame or not editBox then
       return
   end
 
-  -- Set text content
+  -- Set text content (keep color codes for EditBox)
   local text = table.concat(logBuffer, "\n")
   editBox:SetText(text)
 
-  -- Calculate required height for content
+  -- Calculate content height based on line count
   local lineCount = table.getn(logBuffer)
-  local lineHeight = AutoLFM.Core.Constants.DEBUG_LINE_HEIGHT
-  local contentHeight = lineCount * lineHeight + 20  -- Extra padding
-
-  -- Get scroll frame height
-  local scrollHeight = scrollFrame:GetHeight()
-
-  -- Set EditBox height to larger of content or visible area
-  if contentHeight < scrollHeight then
-    editBox:SetHeight(scrollHeight)
-  else
-    editBox:SetHeight(contentHeight)
+  if lineCount == 0 then
+    lineCount = 1
   end
+  
+  -- Set EditBox dimensions to match content
+  -- Width: scrollFrame width minus a margin
+  local scrollWidth = scrollFrame:GetWidth()
+  editBox:SetWidth(scrollWidth - 5)
+  
+  -- Height: line count * line height
+  local contentHeight = lineCount * DEBUG_LINE_HEIGHT
+  editBox:SetHeight(contentHeight)
 
-  -- Update scroll child rect
+  -- Update scroll frame to track new child rect
   scrollFrame:UpdateScrollChildRect()
-
-  -- Scroll to bottom
-  local scrollBar = getglobal("AutoLFM_DebugWindow_ScrollFrameScrollBar")
-  if scrollBar then
-    local _, maxValue = scrollBar:GetMinMaxValues()
-    if maxValue and maxValue > 0 then
-      scrollBar:SetValue(maxValue)
-    end
+  
+  -- Scroll to bottom: set vertical scroll to the maximum possible value
+  local maxScroll = editBox:GetHeight() - scrollFrame:GetHeight()
+  if maxScroll > 0 then
+    scrollFrame:SetVerticalScroll(maxScroll)
+  else
+    scrollFrame:SetVerticalScroll(0)
   end
 end
 
@@ -130,7 +143,8 @@ local function log(category, message, ...)
   local line = formatLogLine(category, formattedMessage)
   addToBuffer(line)
 
-  if isEnabled then
+  -- Always update display if window is visible, don't wait for isEnabled
+  if debugFrame and debugFrame:IsVisible() then
       updateDisplay()
   end
 end
@@ -288,11 +302,6 @@ function AutoLFM.Components.Debug.Clear()
   -- Clear buffer
   logBuffer = {}
 
-  -- Update display (will handle all UI reset)
-  local scrollFrame = getglobal("AutoLFM_DebugWindow_ScrollFrame")
-  local editBox = getglobal("AutoLFM_DebugWindow_ScrollFrame_EditBox")
-  local scrollBar = getglobal("AutoLFM_DebugWindow_ScrollFrameScrollBar")
-
   if not scrollFrame or not editBox then
       return
   end
@@ -303,13 +312,9 @@ function AutoLFM.Components.Debug.Clear()
   -- Reset to minimum height
   editBox:SetHeight(scrollFrame:GetHeight())
 
-  -- Reset scroll position
+  -- Reset scroll position to top
   scrollFrame:SetVerticalScroll(0)
   scrollFrame:SetHorizontalScroll(0)
-
-  if scrollBar then
-    scrollBar:SetValue(0)
-  end
 
   -- Update scroll child rect
   scrollFrame:UpdateScrollChildRect()
@@ -320,6 +325,9 @@ end
 
 --- Displays the Maestro command and listener registry in the debug window
 function AutoLFM.Components.Debug.ShowRegistry()
+  -- Clear previous content
+  logBuffer = {}
+  
   local titleColor = AutoLFM.Core.Utils.GetColor("WHITE")
   local commandColor = AutoLFM.Core.Utils.GetColor("BLUE")
   local eventColor = AutoLFM.Core.Utils.GetColor("CYAN")
@@ -374,13 +382,17 @@ function AutoLFM.Components.Debug.ShowRegistry()
       AutoLFM.Components.Debug.LogRegistry("  |cff888888[" .. entry.id .. "]|r " .. entry.key)
   end
 
-  if isEnabled then
+  -- Force update
+  if debugFrame and debugFrame:IsVisible() then
       updateDisplay()
   end
 end
 
 --- Displays the Maestro state in the debug window
 function AutoLFM.Components.Debug.ShowState()
+  -- Clear previous content
+  logBuffer = {}
+  
   local titleColor = AutoLFM.Core.Utils.GetColor("WHITE")
   local stateColor = AutoLFM.Core.Utils.GetColor("GREEN")
 
@@ -444,51 +456,149 @@ function AutoLFM.Components.Debug.ShowState()
     AutoLFM.Components.Debug.LogState("|cff888888(No states registered)|r")
   end
 
-  if isEnabled then
-    updateDisplay()
+  -- Force update
+  if debugFrame and debugFrame:IsVisible() then
+      updateDisplay()
   end
 end
 
 --=============================================================================
--- FRAME CREATION
+-- FRAME CREATION (PURE LUA)
 --=============================================================================
 
---- Creates and initializes the debug window frame from XML template
+--- Creates the debug window frame entirely in Lua (no XML)
 function AutoLFM.Components.Debug.CreateFrame()
   if debugFrame then
       return
   end
 
-  -- Get frame created from XML template
-  debugFrame = getglobal("AutoLFM_DebugWindow")
+  -- Main window frame (simple frame, no template)
+  debugFrame = CreateFrame("Frame", "AutoLFM_DebugWindow", UIParent)
+  debugFrame:SetWidth(DEBUG_WINDOW_WIDTH)
+  debugFrame:SetHeight(DEBUG_WINDOW_HEIGHT)
+  debugFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+  debugFrame:EnableMouse(true)
+  debugFrame:SetMovable(true)
+  debugFrame:SetClampedToScreen(true)
+  debugFrame:SetFrameStrata("DIALOG")
+  debugFrame:Hide()
 
-  if not debugFrame then
-      if AutoLFM.Core.Utils and AutoLFM.Core.Utils.PrintError then
-          AutoLFM.Core.Utils.PrintError("Debug window template not found")
-      end
-      return
-  end
+  -- Add backdrop (dialog box style)
+  debugFrame:SetBackdrop({
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+    tile = true,
+    tileSize = 32,
+    edgeSize = 32,
+    insets = { left = 11, right = 12, top = 12, bottom = 11 }
+  })
+  debugFrame:SetBackdropColor(0, 0, 0, 0.8)
 
-  -- Get editbox for dynamic sizing
-  local scrollFrame = getglobal("AutoLFM_DebugWindow_ScrollFrame")
-  local editBox = getglobal("AutoLFM_DebugWindow_ScrollFrame_EditBox")
+  -- Title
+  local title = debugFrame:CreateFontString(nil, "OVERLAY")
+  title:SetFont("Fonts\\FRIZQT__.TTF", 16)
+  title:SetTextColor(1, 0.84, 0)  -- Gold color
+  title:SetText("AutoLFM Maestro Debug")
+  title:SetPoint("TOP", debugFrame, "TOP", 0, -15)
 
-  if scrollFrame and editBox then
-      editBox:SetWidth(scrollFrame:GetWidth())
-      editBox:SetHeight(scrollFrame:GetHeight())
-  end
+  -- Close button
+  local closeBtn = CreateFrame("Button", nil, debugFrame, "UIPanelCloseButton")
+  closeBtn:SetPoint("TOPRIGHT", debugFrame, "TOPRIGHT", -5, -5)
+  closeBtn:SetScript("OnClick", function()
+    if AutoLFM.Components.Debug then
+      AutoLFM.Components.Debug.Hide()
+    end
+  end)
+
+  -- Scroll frame for content (simple frame, no template)
+  scrollFrame = CreateFrame("ScrollFrame", nil, debugFrame)
+  scrollFrame:SetPoint("TOPLEFT", debugFrame, "TOPLEFT", 20, -40)
+  scrollFrame:SetPoint("BOTTOMRIGHT", debugFrame, "BOTTOMRIGHT", -35, 45)
+
+  -- Create a simple scrollbar using OnMouseWheel
+  scrollFrame:EnableMouseWheel(true)
+  scrollFrame:SetScript("OnMouseWheel", function()
+    local current = scrollFrame:GetVerticalScroll()
+    local delta = 20 * (arg1 > 0 and -1 or 1)
+    scrollFrame:SetVerticalScroll(math.max(0, current + delta))
+  end)
+
+  -- EditBox (read-only display)
+  editBox = CreateFrame("EditBox", nil, scrollFrame)
+  editBox:SetMultiLine(true)
+  editBox:SetAutoFocus(false)
+  editBox:SetMaxLetters(0)  -- No character limit
+  editBox:EnableMouse(true)  -- Allow mouse interaction
+  editBox:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  editBox:SetScript("OnEscapePressed", function()
+    this:ClearFocus()
+  end)
+  scrollFrame:SetScrollChild(editBox)
+
+  -- Clear button
+  local clearBtn = CreateFrame("Button", nil, debugFrame, "UIPanelButtonTemplate")
+  clearBtn:SetWidth(DEBUG_BUTTON_WIDTH)
+  clearBtn:SetHeight(DEBUG_BUTTON_HEIGHT)
+  clearBtn:SetPoint("BOTTOM", debugFrame, "BOTTOM", -138, 15)
+  clearBtn:SetText("Clear")
+  clearBtn:SetScript("OnClick", function()
+    if AutoLFM.Components.Debug then
+      AutoLFM.Components.Debug.Clear()
+    end
+  end)
+
+  -- Select All button
+  local selectAllBtn = CreateFrame("Button", nil, debugFrame, "UIPanelButtonTemplate")
+  selectAllBtn:SetWidth(DEBUG_BUTTON_WIDTH)
+  selectAllBtn:SetHeight(DEBUG_BUTTON_HEIGHT)
+  selectAllBtn:SetPoint("BOTTOM", debugFrame, "BOTTOM", -46, 15)
+  selectAllBtn:SetText("Select All")
+  selectAllBtn:SetScript("OnClick", function()
+    if editBox then
+      editBox:HighlightText()
+      editBox:SetFocus()
+    end
+  end)
+
+  -- State button
+  local stateBtn = CreateFrame("Button", nil, debugFrame, "UIPanelButtonTemplate")
+  stateBtn:SetWidth(DEBUG_BUTTON_WIDTH)
+  stateBtn:SetHeight(DEBUG_BUTTON_HEIGHT)
+  stateBtn:SetPoint("BOTTOM", debugFrame, "BOTTOM", 46, 15)
+  stateBtn:SetText("State")
+  stateBtn:SetScript("OnClick", function()
+    if AutoLFM.Components.Debug then
+      AutoLFM.Components.Debug.ShowState()
+    end
+  end)
+
+  -- Registry button
+  local registryBtn = CreateFrame("Button", nil, debugFrame, "UIPanelButtonTemplate")
+  registryBtn:SetWidth(DEBUG_BUTTON_WIDTH)
+  registryBtn:SetHeight(DEBUG_BUTTON_HEIGHT)
+  registryBtn:SetPoint("BOTTOM", debugFrame, "BOTTOM", 138, 15)
+  registryBtn:SetText("Registry")
+  registryBtn:SetScript("OnClick", function()
+    if AutoLFM.Components.Debug then
+      AutoLFM.Components.Debug.ShowRegistry()
+    end
+  end)
+
+  -- Mouse drag handling
+  debugFrame:SetScript("OnMouseDown", function()
+    if arg1 == "LeftButton" then
+      this:StartMoving()
+    end
+  end)
+
+  debugFrame:SetScript("OnMouseUp", function()
+    this:StopMovingOrSizing()
+  end)
 
   -- Register with DarkUI if available
   if AutoLFM.Components.DarkUI and AutoLFM.Components.DarkUI.RegisterFrame then
       AutoLFM.Components.DarkUI.RegisterFrame(debugFrame)
   end
-end
-
---- XML OnLoad callback for debug window frame
---- @param frame frame - The debug window frame
-function AutoLFM.Components.Debug.OnFrameLoad(frame)
-  -- Called from XML when frame is loaded
-  debugFrame = frame
 end
 
 --=============================================================================

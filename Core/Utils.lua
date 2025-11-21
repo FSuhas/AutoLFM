@@ -7,6 +7,11 @@ AutoLFM.Core = AutoLFM.Core or {}
 AutoLFM.Core.Utils = {}
 
 --=============================================================================
+-- FORWARD DECLARATIONS
+--=============================================================================
+local BuildLookupTables  -- Forward declaration for lazy loading function
+
+--=============================================================================
 -- COLOR LOOKUP TABLE (PERFORMANCE OPTIMIZATION)
 --=============================================================================
 local COLORS_BY_NAME = {}
@@ -23,15 +28,23 @@ end
 -- COLOR HELPER FUNCTIONS
 --=============================================================================
 
+--- Helper function to apply color to an element using a custom application function
+--- @param element frame - The UI element to colorize
+--- @param colorName string - The name of the color to apply
+--- @param applyFunc function - Function that takes (element, color) and applies the color
+local function applyColorToElement(element, colorName, applyFunc)
+  if not element then return end
+  local color = AutoLFM.Core.Utils.GetColor(colorName)
+  applyFunc(element, color)
+end
+
 --- Retrieves a color object by name from the color lookup table
 --- @param colorName string - The name of the color (e.g., "RED", "GREEN", "YELLOW")
 --- @return table - Color object with r, g, b, hex, name fields. Returns GRAY if color not found.
 function AutoLFM.Core.Utils.GetColor(colorName)
-  if type(colorName) == "string" then
-      local color = COLORS_BY_NAME[colorName]
-      if color then return color end
+  if type(colorName) == "string" and COLORS_BY_NAME[colorName] then
+    return COLORS_BY_NAME[colorName]
   end
-  -- Fallback to GRAY (index 5), not GREEN (index 1)
   return COLORS_BY_NAME["GRAY"] or AutoLFM.Core.Constants.COLORS[5]
 end
 
@@ -49,9 +62,9 @@ end
 --- @param element frame - The UI element (FontString) to colorize
 --- @param colorName string - The name of the color to apply
 function AutoLFM.Core.Utils.SetTextColorByName(element, colorName)
-  if not element then return end
-  local color = AutoLFM.Core.Utils.GetColor(colorName)
-  element:SetTextColor(color.r, color.g, color.b)
+  applyColorToElement(element, colorName, function(elem, color)
+    elem:SetTextColor(color.r, color.g, color.b)
+  end)
 end
 
 --- Sets vertex color for a texture by color name
@@ -59,9 +72,9 @@ end
 --- @param colorName string - The name of the color to apply
 --- @param alpha number - Optional alpha transparency (0.0-1.0), defaults to 1.0
 function AutoLFM.Core.Utils.SetVertexColorByName(texture, colorName, alpha)
-  if not texture then return end
-  local color = AutoLFM.Core.Utils.GetColor(colorName)
-  texture:SetVertexColor(color.r, color.g, color.b, alpha or 1)
+  applyColorToElement(texture, colorName, function(elem, color)
+    elem:SetVertexColor(color.r, color.g, color.b, alpha or 1)
+  end)
 end
 
 --- Sets color for all checkbox textures (normal, checked, disabled) by color name
@@ -69,17 +82,16 @@ end
 --- @param colorName string - The name of the color to apply
 --- @param alpha number - Optional alpha transparency (0.0-1.0), defaults to 1.0
 function AutoLFM.Core.Utils.SetCheckboxColorByName(checkbox, colorName, alpha)
-  if not checkbox then return end
-  local color = AutoLFM.Core.Utils.GetColor(colorName)
-  alpha = alpha or 1
+  applyColorToElement(checkbox, colorName, function(elem, color)
+    alpha = alpha or 1
+    local normalTex = elem:GetNormalTexture()
+    local checkedTex = elem:GetCheckedTexture()
+    local disabledCheckedTex = elem:GetDisabledCheckedTexture()
 
-  local normalTex = checkbox:GetNormalTexture()
-  local checkedTex = checkbox:GetCheckedTexture()
-  local disabledCheckedTex = checkbox:GetDisabledCheckedTexture()
-
-  if normalTex then normalTex:SetVertexColor(color.r, color.g, color.b, alpha) end
-  if checkedTex then checkedTex:SetVertexColor(color.r, color.g, color.b, alpha) end
-  if disabledCheckedTex then disabledCheckedTex:SetVertexColor(color.r, color.g, color.b, alpha) end
+    if normalTex then normalTex:SetVertexColor(color.r, color.g, color.b, alpha) end
+    if checkedTex then checkedTex:SetVertexColor(color.r, color.g, color.b, alpha) end
+    if disabledCheckedTex then disabledCheckedTex:SetVertexColor(color.r, color.g, color.b, alpha) end
+  end)
 end
 
 --=============================================================================
@@ -94,29 +106,25 @@ end
 --- @param maxLevel number - Maximum level for the content
 --- @return table - Color object (RED, ORANGE, YELLOW, GREEN, or GRAY)
 function AutoLFM.Core.Utils.GetColorForLevel(playerLevel, minLevel, maxLevel)
-  if not playerLevel or not minLevel or not maxLevel then
-  return AutoLFM.Core.Utils.GetColor("GRAY")
+  -- Validation
+  if not (playerLevel and minLevel and maxLevel and minLevel >= 1 and maxLevel >= minLevel) then
+    return AutoLFM.Core.Utils.GetColor("GRAY")
   end
 
-  if minLevel < 1 or maxLevel < 1 or minLevel > maxLevel then
-  return AutoLFM.Core.Utils.GetColor("GRAY")
-  end
+  -- Calculate level difference
+  local avgLevel = (minLevel == maxLevel) and minLevel or math.floor((minLevel + maxLevel) / 2)
+  local diff = avgLevel - playerLevel
 
-  local thresholdIndex = math.min(math.floor(playerLevel / 10) + 1, 5)
-  local greenThreshold = AutoLFM.Core.Constants.GREEN_THRESHOLDS[thresholdIndex] or 8
-
-  local diff
-  if minLevel == maxLevel then
-  diff = minLevel - playerLevel
-  else
-  local avg = math.floor((minLevel + maxLevel) / 2)
-  diff = avg - playerLevel
-  end
-
+  -- Fixed thresholds for RED, ORANGE, YELLOW
   if diff >= 5 then return AutoLFM.Core.Utils.GetColor("RED") end
   if diff >= 3 then return AutoLFM.Core.Utils.GetColor("ORANGE") end
   if diff >= -2 then return AutoLFM.Core.Utils.GetColor("YELLOW") end
-  if diff >= -greenThreshold then return AutoLFM.Core.Utils.GetColor("GREEN") end
+
+  -- Dynamic GREEN threshold based on player level
+  local thresholdIndex = math.min(math.floor(playerLevel / 10) + 1, 5)
+  local greenThreshold = -(AutoLFM.Core.Constants.GREEN_THRESHOLDS[thresholdIndex] or 8)
+
+  if diff >= greenThreshold then return AutoLFM.Core.Utils.GetColor("GREEN") end
   return AutoLFM.Core.Utils.GetColor("GRAY")
 end
 
@@ -256,64 +264,38 @@ end
 --- @param name string - The dungeon name to search for
 --- @return number|nil - The dungeon index (1-based), or nil if not found
 function AutoLFM.Core.Utils.GetDungeonIndexByName(name)
-  if not name or type(name) ~= "string" then
-    return nil
-  end
-
-  local dungeonInfo = AutoLFM.Core.Constants.DUNGEONS_BY_NAME[name]
-  if dungeonInfo then
-    return dungeonInfo.index
-  end
-
-  return nil
+  BuildLookupTables()
+  if not name or type(name) ~= "string" then return nil end
+  local info = AutoLFM.Core.Constants.DUNGEONS_BY_NAME[name]
+  return info and info.index
 end
 
 --- Finds a dungeon's name by its index
 --- @param index number - The dungeon index (1-based)
 --- @return string|nil - The dungeon name, or nil if index is invalid
 function AutoLFM.Core.Utils.GetDungeonNameByIndex(index)
-  if not index or type(index) ~= "number" then
-    return nil
-  end
-
+  if not index or type(index) ~= "number" then return nil end
   local dungeon = AutoLFM.Core.Constants.DUNGEONS[index]
-  if dungeon then
-    return dungeon.name
-  end
-
-  return nil
+  return dungeon and dungeon.name
 end
 
 --- Finds a raid's index by its name using O(1) lookup table
 --- @param name string - The raid name to search for
 --- @return number|nil - The raid index (1-based), or nil if not found
 function AutoLFM.Core.Utils.GetRaidIndexByName(name)
-  if not name or type(name) ~= "string" then
-    return nil
-  end
-
-  local raidInfo = AutoLFM.Core.Constants.RAIDS_BY_NAME[name]
-  if raidInfo then
-    return raidInfo.index
-  end
-
-  return nil
+  BuildLookupTables()
+  if not name or type(name) ~= "string" then return nil end
+  local info = AutoLFM.Core.Constants.RAIDS_BY_NAME[name]
+  return info and info.index
 end
 
 --- Finds a raid's name by its index
 --- @param index number - The raid index (1-based)
 --- @return string|nil - The raid name, or nil if index is invalid
 function AutoLFM.Core.Utils.GetRaidNameByIndex(index)
-  if not index or type(index) ~= "number" then
-    return nil
-  end
-
+  if not index or type(index) ~= "number" then return nil end
   local raid = AutoLFM.Core.Constants.RAIDS[index]
-  if raid then
-    return raid.name
-  end
-
-  return nil
+  return raid and raid.name
 end
 
 --=============================================================================
@@ -339,7 +321,32 @@ local function FindWordBreak(text, targetPos)
   return targetPos
 end
 
---- Truncates text to fit a single line using binary search
+--- Iteratively finds longest substring that fits in width
+--- @param text string - The text to truncate
+--- @param maxWidth number - Maximum width in pixels
+--- @param fontString frame - FontString to measure text width
+--- @return string - Longest substring that fits
+local function iterativeFit(text, maxWidth, fontString)
+  local len = string.len(text)
+  local result = text
+  
+  -- Start from full text and reduce until it fits
+  fontString:SetText(result)
+  while fontString:GetStringWidth() > maxWidth and string.len(result) > 0 do
+    result = string.sub(result, 1, string.len(result) - 1)
+    fontString:SetText(result)
+  end
+
+  -- Try to break at word boundary if reasonable (70% threshold)
+  local breakPos = FindWordBreak(result, string.len(result))
+  if breakPos > string.len(result) * 0.7 then
+    result = string.sub(result, 1, breakPos)
+  end
+
+  return result
+end
+
+--- Truncates text to fit a single line using iterative approach
 --- @param text string - The text to truncate
 --- @param maxWidth number - Maximum width in pixels
 --- @param fontString frame - FontString to measure text width
@@ -350,36 +357,9 @@ local function truncateToSingleLine(text, maxWidth, fontString, ellipsis)
   local ellipsisWidth = fontString:GetStringWidth()
   local availableWidth = maxWidth - ellipsisWidth
 
-  if availableWidth <= 0 then
-    return ellipsis
-  end
+  if availableWidth <= 0 then return ellipsis, true end
 
-  local len = string.len(text)
-  local left, right = 1, len
-  local result = text
-
-  -- Binary search for longest substring that fits
-  while left <= right do
-    local mid = math.floor((left + right) / 2)
-    local truncated = string.sub(text, 1, mid)
-    fontString:SetText(truncated)
-    local width = fontString:GetStringWidth()
-
-    if width <= availableWidth then
-      result = truncated
-      left = mid + 1
-    else
-      right = mid - 1
-    end
-  end
-
-  -- Try to break at last word boundary if reasonable
-  local breakPos = FindWordBreak(result, string.len(result))
-  if breakPos > string.len(result) * 0.7 then
-    result = string.sub(result, 1, breakPos)
-  end
-
-  -- Single line truncation always means text was truncated
+  local result = iterativeFit(text, availableWidth, fontString)
   return result .. ellipsis, true
 end
 
@@ -393,7 +373,7 @@ local function truncateToTwoLines(text, maxWidth, fontString, ellipsis)
   local len = string.len(text)
   local midPoint = math.floor(len / 2)
 
-  -- Try to split text in half and see if each half fits
+  -- Try to split text in half
   local breakPos = FindWordBreak(text, midPoint)
   if breakPos == 0 then breakPos = midPoint end
 
@@ -412,36 +392,13 @@ local function truncateToTwoLines(text, maxWidth, fontString, ellipsis)
   local line2Width = fontString:GetStringWidth()
 
   if line1Width <= maxWidth and line2Width <= maxWidth then
-    -- Text fits on 2 lines without truncation
     return line1 .. "\n" .. line2, false
   end
 
-  -- Doesn't fit on 2 lines, need to truncate
-  -- Binary search for first line
-  local left, right = 1, len
-  local result1 = ""
+  -- Use iterative fit for first line
+  local result1 = iterativeFit(text, maxWidth, fontString)
 
-  while left <= right do
-    local mid = math.floor((left + right) / 2)
-    local candidate = string.sub(text, 1, mid)
-    fontString:SetText(candidate)
-    local width = fontString:GetStringWidth()
-
-    if width <= maxWidth then
-      result1 = candidate
-      left = mid + 1
-    else
-      right = mid - 1
-    end
-  end
-
-  -- Break at word boundary if possible
-  local breakPos1 = FindWordBreak(result1, string.len(result1))
-  if breakPos1 > string.len(result1) * 0.7 then
-    result1 = string.sub(result1, 1, breakPos1)
-  end
-
-  -- Binary search for second line with ellipsis
+  -- Use iterative fit for second line with ellipsis
   local remaining = string.sub(text, string.len(result1) + 1)
   while string.sub(remaining, 1, 1) == " " do
     remaining = string.sub(remaining, 2)
@@ -451,34 +408,12 @@ local function truncateToTwoLines(text, maxWidth, fontString, ellipsis)
   local ellipsisWidth = fontString:GetStringWidth()
   local availableWidth2 = maxWidth - ellipsisWidth
 
-  left, right = 1, string.len(remaining)
-  local result2 = ""
+  local result2 = iterativeFit(remaining, availableWidth2, fontString)
 
-  while left <= right do
-    local mid = math.floor((left + right) / 2)
-    local candidate = string.sub(remaining, 1, mid)
-    fontString:SetText(candidate)
-    local width = fontString:GetStringWidth()
-
-    if width <= availableWidth2 then
-      result2 = candidate
-      left = mid + 1
-    else
-      right = mid - 1
-    end
-  end
-
-  -- Break at word boundary if possible
-  local breakPos2 = FindWordBreak(result2, string.len(result2))
-  if breakPos2 > string.len(result2) * 0.7 then
-    result2 = string.sub(result2, 1, breakPos2)
-  end
-
-  -- Text was truncated, return with ellipsis
   return result1 .. "\n" .. result2 .. ellipsis, true
 end
 
---- Truncates text to fit within a specific pixel width using binary search
+--- Truncates text to fit within a specific pixel width using iterative approach
 --- @param text string - The text to truncate
 --- @param maxWidth number - Maximum width in pixels per line
 --- @param fontString frame - FontString to measure text width
@@ -510,11 +445,14 @@ function AutoLFM.Core.Utils.TruncateByWidth(text, maxWidth, fontString, ellipsis
 end
 
 --=============================================================================
--- LOOKUP TABLE BUILDERS
+-- LOOKUP TABLE BUILDERS (LAZY LOADING)
 --=============================================================================
+local lookupTablesBuilt = false
 
---- Builds dungeon and raid lookup tables for O(1) name-based access
-local function BuildLookupTables()
+--- Builds dungeon and raid lookup tables for O(1) name-based access (lazy loading)
+BuildLookupTables = function()
+  if lookupTablesBuilt then return end
+  lookupTablesBuilt = true
   -- Build dungeon lookup table
   for i = 1, table.getn(AutoLFM.Core.Constants.DUNGEONS) do
     local dungeon = AutoLFM.Core.Constants.DUNGEONS[i]
@@ -534,6 +472,11 @@ local function BuildLookupTables()
   end
 end
 
+--- Public function to ensure lookup tables are built (for external modules)
+function AutoLFM.Core.Utils.EnsureLookupTables()
+  BuildLookupTables()
+end
+
 --=============================================================================
 -- INITIALIZATION
 --=============================================================================
@@ -541,9 +484,4 @@ end
 -- Build color lookup table immediately (before any other module loads)
 BuildColorLookupTable()
 
-AutoLFM.Core.SafeRegisterInit("Core.Utils", function()
-  BuildLookupTables()
-end, {
-  id = "I03",
-  dependencies = {}
-})
+AutoLFM.Core.SafeRegisterInit("Core.Utils", function() end, { id = "I03" })

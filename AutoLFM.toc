@@ -1,6 +1,15 @@
 ## Interface: 11200
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
+<<<<<<< HEAD
+<<<<<<< HEAD
 ## Notes: Automated LFM Broadcaster
+=======
+## Notes: Automated LFM Message
+## Version: 2.26
+>>>>>>> 7a99af1 (2.26 - V3 beta announce)
+=======
+## Notes: Automated LFM Broadcaster
+>>>>>>> 36beda8 (V3-beta2)
 ## Author: Gondoleon, NSO73
 ## SavedVariables: V3_Settings, V3_Presets
 ## OptionalDeps: pfQuest, ShaguTweaks
@@ -14,9 +23,9 @@
 # Core
 #=============================================================================
 Core\Maestro.lua
-Core\Events.lua
-Core\Commands.lua
+Core\Cache.lua
 Core\Constants.lua
+Core\Events.lua
 Core\Persistent.lua
 Core\Utils.lua
 
@@ -25,6 +34,7 @@ Core\Utils.lua
 #=============================================================================
 Components\DarkUI.lua
 Components\Debug.lua
+Components\EyeAnimation.lua
 Components\MinimapButton.lua
 Components\WelcomePopup.lua
 
@@ -32,6 +42,7 @@ Components\WelcomePopup.lua
 # Logic
 #=============================================================================
 Logic\Broadcaster.lua
+Logic\Group.lua
 Logic\MainFrame.lua
 Logic\Message.lua
 Logic\Selection.lua
@@ -66,7 +77,6 @@ UI\Content\Settings.lua
 #=============================================================================
 UI\Templates\MainFrame.xml
 UI\Templates\AutoInvite.xml
-UI\Templates\Debug.xml
 UI\Templates\Lists.xml
 UI\Templates\Messaging.xml
 UI\Templates\Presets.xml

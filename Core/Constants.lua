@@ -24,13 +24,19 @@ AutoLFM.Core.Constants.MAX_PARTY_SIZE = 5
 -- BROADCAST CONSTANTS
 --=============================================================================
 AutoLFM.Core.Constants.MIN_BROADCAST_INTERVAL = 30
-AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL = 120  -- 2 minutes (slider max)
+AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL = 120
 AutoLFM.Core.Constants.DEFAULT_BROADCAST_INTERVAL = 60
 
 --=============================================================================
 -- SELECTION CONSTANTS
 --=============================================================================
 AutoLFM.Core.Constants.MAX_DUNGEONS = 3
+AutoLFM.Core.Constants.MAX_DUNGEON_GROUP_SIZE = 5
+
+--=============================================================================
+-- TIMER CONSTANTS
+--=============================================================================
+AutoLFM.Core.Constants.TIMER_UPDATE_INTERVAL = 1  -- Update timer every 1 second
 
 --=============================================================================
 -- CHAT PREFIX
@@ -135,9 +141,7 @@ AutoLFM.Core.Constants.RAIDS = {
 AutoLFM.Core.Constants.DEBUG_LINE_HEIGHT = 14
 
 --=============================================================================
--- LOOKUP TABLES (PERFORMANCE OPTIMIZATION)
---   O(1) lookup by name instead of O(n) linear search
---   Built by Core/Utils.lua initialization
+-- LOOKUP TABLES (built on-demand by Core/Utils.lua lazy loading)
 --=============================================================================
 AutoLFM.Core.Constants.DUNGEONS_BY_NAME = {}
 AutoLFM.Core.Constants.RAIDS_BY_NAME = {}

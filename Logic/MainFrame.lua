@@ -151,21 +151,6 @@ function AutoLFM.Logic.MainFrame.UpdateContent()
 end
 
 --=============================================================================
--- BUTTON ACTIONS
---   Placeholder functions for future implementation
---=============================================================================
-
---- Clears all selections (placeholder for future implementation)
-function AutoLFM.Logic.MainFrame.ClearAll()
-  AutoLFM.Core.Utils.LogWarning("Clear All - Not implemented yet")
-end
-
---- Adds current selection as a preset (placeholder for future implementation)
-function AutoLFM.Logic.MainFrame.AddPreset()
-  AutoLFM.Core.Utils.LogWarning("Add Preset - Not implemented yet")
-end
-
---=============================================================================
 -- CONTENT FRAME MANAGEMENT
 --   Content frames are defined in XML, logic manages their visibility
 --=============================================================================
@@ -225,10 +210,4 @@ AutoLFM.Core.SafeRegisterInit("MainFrame", function()
       AutoLFM.UI.MainFrame.UpdateMessagePreview(newMessage)
     end
   end)
-
-  -- Initialize message preview with current value
-  local currentMessage = AutoLFM.Core.Maestro.GetState("Message.ToBroadcast")
-  if AutoLFM.UI.MainFrame and AutoLFM.UI.MainFrame.UpdateMessagePreview and currentMessage then
-    AutoLFM.UI.MainFrame.UpdateMessagePreview(currentMessage)
-  end
 end, { id = "I11" })

@@ -10,18 +10,26 @@ AutoLFM.Logic.Message = {}
 -- PRIVATE HELPERS
 --=============================================================================
 
---- Builds role text for message
+--- Checks if group is full and returns missing count
+--- @param targetSize number - Target group size
+--- @return number, boolean - Missing count and whether group is full
+local function calculateMissing(targetSize)
+  local currentSize = AutoLFM.Logic.Group.GetSize()
+  local missing = targetSize - currentSize
+  return missing, missing <= 0
+end
+
+--- Gets formatted roles text (e.g., "Tank & Heal", "All")
 --- @param roles table - Array of role strings ("TANK", "HEAL", "DPS")
---- @param includeNeed boolean - If true, prefix with "Need " (e.g., "Need Tank & Heal")
---- @return string - Role text (e.g., "Tank & Heal", "Need Tank & Heal", "All", "Need All")
-local function buildRolesText(roles, includeNeed)
+--- @return string - Role text without "Need" prefix
+local function getRolesText(roles)
   if not roles or table.getn(roles) == 0 then
     return ""
   end
 
-  -- If all 3 roles selected, return "All" or "Need All"
+  -- If all 3 roles selected, return "All"
   if table.getn(roles) == 3 then
-    return includeNeed and "Need All" or "All"
+    return "All"
   end
 
   -- Build ordered list of role names (always Tank -> Heal -> DPS)
@@ -45,8 +53,18 @@ local function buildRolesText(roles, includeNeed)
     return ""
   end
 
-  local result = table.concat(parts, " & ")
-  return includeNeed and "Need " .. result or result
+  return table.concat(parts, " & ")
+end
+
+--- Formats roles text for broadcast message (e.g., "Need Tank & Heal", "Need All")
+--- @param roles table - Array of role strings ("TANK", "HEAL", "DPS")
+--- @return string - Role text with "Need" prefix
+local function formatRolesForMessage(roles)
+  local rolesText = getRolesText(roles)
+  if rolesText == "" then
+    return ""
+  end
+  return "Need " .. rolesText
 end
 
 --- Builds dungeon message
@@ -57,21 +75,17 @@ local function buildDungeonMessage()
     return ""
   end
 
-  -- Get current group size
-  local currentSize = AutoLFM.Core.Events.GetGroupSize()
-  local targetSize = 5  -- Dungeons are always 5-man
-  local missing = targetSize - currentSize
+  AutoLFM.Core.Utils.EnsureLookupTables()
 
-  -- If group is full, don't show LFM
-  if missing <= 0 then
+  local targetSize = AutoLFM.Core.Constants.MAX_DUNGEON_GROUP_SIZE
+  local missing, isFull = calculateMissing(targetSize)
+  if isFull then
     return ""
   end
 
-  -- Get roles
   local roles = AutoLFM.Core.Maestro.GetState("Selection.Roles") or {}
-  local rolesText = buildRolesText(roles, true)
+  local rolesText = formatRolesForMessage(roles)
 
-  -- Build dungeon tags list by finding dungeons by name (O(1) lookup)
   local dungeonTags = {}
   for i = 1, table.getn(dungeonNames) do
     local dungeonName = dungeonNames[i]
@@ -112,6 +126,9 @@ local function buildRaidMessage()
     return ""
   end
 
+  -- Trigger lazy loading of lookup tables
+  AutoLFM.Core.Utils.EnsureLookupTables()
+
   -- Find the raid by name (O(1) lookup)
   local raidInfo = AutoLFM.Core.Constants.RAIDS_BY_NAME[raidName]
   if not raidInfo then
@@ -120,19 +137,20 @@ local function buildRaidMessage()
 
   local raid = raidInfo.data
 
-  -- Get current group size and target size
-  local currentSize = AutoLFM.Core.Events.GetGroupSize()
+  -- Get target size and calculate missing
   local targetSize = AutoLFM.Core.Maestro.GetState("Selection.RaidSize") or raid.size or 40
-  local missing = targetSize - currentSize
-
+  local missing, isFull = calculateMissing(targetSize)
+  
   -- If raid is full, don't show LFM
-  if missing <= 0 then
+  if isFull then
     return ""
   end
+  
+  local currentSize = AutoLFM.Logic.Group.GetSize()
 
   -- Get roles
   local roles = AutoLFM.Core.Maestro.GetState("Selection.Roles") or {}
-  local rolesText = buildRolesText(roles, true)
+  local rolesText = formatRolesForMessage(roles)
 
   -- Format message: "MC LF5M Need Tank & Heal 35/40" or "MC LF5M 35/40"
   local message
@@ -159,24 +177,17 @@ local function buildCustomMessage()
     return ""
   end
 
-  -- Get current group size
-  local currentSize = AutoLFM.Core.Events.GetGroupSize()
-  local targetSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or 5
-  local missing = targetSize - currentSize
+  local targetSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or AutoLFM.Core.Constants.MAX_DUNGEON_GROUP_SIZE
+  local missing, isFull = calculateMissing(targetSize)
+  local currentSize = AutoLFM.Logic.Group.GetSize()
 
-  -- Debug log
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogDebug then
-    AutoLFM.Core.Utils.LogDebug("buildCustomMessage: currentSize=" .. currentSize .. ", targetSize=" .. targetSize .. ", missing=" .. missing)
-  end
-
-  -- If group is full, don't show LFM
-  if missing <= 0 then
+  if isFull then
     return ""
   end
 
   -- Get roles
   local roles = AutoLFM.Core.Maestro.GetState("Selection.Roles") or {}
-  local rolesText = buildRolesText(roles, true)
+  local rolesText = getRolesText(roles)
 
   -- Replace variables in message
   local message = customMessage
@@ -204,7 +215,7 @@ local function buildMessage()
   -- If mode is "none", check for details text or roles
   local detailsText = AutoLFM.Core.Maestro.GetState("Selection.DetailsText") or ""
   local roles = AutoLFM.Core.Maestro.GetState("Selection.Roles") or {}
-  local rolesText = buildRolesText(roles, true)
+  local rolesText = formatRolesForMessage(roles)
 
   -- Combine roles and details text
   local parts = {}
@@ -243,7 +254,7 @@ function AutoLFM.Logic.Message.ReplaceVariables(message, currentSize, targetSize
   if not message or message == "" then return "" end
 
   local missing = targetSize - currentSize
-  local rolesText = buildRolesText(roles or {}, false)
+  local rolesText = getRolesText(roles or {})
   
   local result = message
   result = string.gsub(result, "{MIS}", tostring(missing))
@@ -257,7 +268,7 @@ end
 --=============================================================================
 -- STATE DECLARATIONS
 --=============================================================================
-AutoLFM.Core.SafeRegisterState("Message.ToBroadcast", "", { id = "S09" })
+AutoLFM.Core.SafeRegisterState("Message.ToBroadcast", "", { id = "S16" })
 
 --=============================================================================
 -- INITIALIZATION
@@ -299,5 +310,5 @@ AutoLFM.Core.SafeRegisterInit("Logic.Message", function()
   AutoLFM.Logic.Message.RebuildMessage()
 end, {
   id = "I13",
-  dependencies = { "Logic.Selection", "Core.Events" }  -- Wait for Selection (I04) and Events (I01)
+  dependencies = { "Logic.Selection", "Logic.Group", "Core.Events" }
 })

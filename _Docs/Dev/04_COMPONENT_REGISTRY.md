@@ -17,16 +17,16 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **C01** | `MainFrame.Toggle` | Logic.MainFrame | Toggle main window visibility |
 | **C02** | `Debug.Toggle` | Components.Debug | Toggle debug window visibility |
 | **C06** | `Selection.ToggleDungeon` | Logic.Selection | Toggle dungeon selection (FIFO max 3) |
-| **C06** | `Selection.ClearDungeons` | Logic.Selection | Clear all dungeon selections |
-| **C07** | `Selection.ClearRaid` | Logic.Selection | Clear raid selection |
 | **C07** | `Selection.ToggleRaid` | Logic.Selection | Toggle raid selection (exclusive) |
 | **C08** | `Selection.SetRaidSize` | Logic.Selection | Set custom raid size (1-40) |
-| **C09** | `Selection.ClearRoles` | Logic.Selection | Clear all role selections |
 | **C09** | `Selection.ToggleRole` | Logic.Selection | Toggle role selection (TANK/HEAL/DPS) |
-| **C10** | `Selection.SetCustomMessage` | Logic.Selection | Set custom broadcast message |
-| **C11** | `Selection.ClearCustomMessage` | Logic.Selection | Clear custom message |
-| **C12** | `Selection.SetCustomGroupSize` | Logic.Selection | Set custom group size for custom messages (1-40) |
-| **C13** | `Selection.SetDetailsText` | Logic.Selection | Set details text (appended to auto-generated messages) |
+| **C10** | `Selection.ClearRoles` | Logic.Selection | Clear all role selections |
+| **C11** | `Selection.SetCustomMessage` | Logic.Selection | Set custom broadcast message |
+| **C12** | `Selection.ClearCustomMessage` | Logic.Selection | Clear custom message |
+| **C13** | `Selection.SetCustomGroupSize` | Logic.Selection | Set custom group size for custom messages (1-40) |
+| **C14** | `Selection.ClearDungeons` | Logic.Selection | Clear all dungeon selections |
+| **C15** | `Selection.ClearRaid` | Logic.Selection | Clear raid selection |
+| **C16** | `Selection.SetDetailsText` | Logic.Selection | Set details text (appended to auto-generated messages) |
 | **C17** | `Selection.ClearAll` | Logic.Selection | Clear all selections (dungeons/raids/roles/custom/details) |
 | **C21** | `Broadcaster.Toggle` | Logic.Broadcaster | Toggle broadcasting on/off |
 | **C23** | `Channels.ToggleChannel` | Logic.Content.Messaging | Toggle channel selection |
@@ -37,8 +37,7 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **C30** | `Presets.Delete` | Logic.Content.Presets | Delete a saved preset |
 | **C31** | `AutoInvite.Enable` | Logic.AutoInvite | Enable auto-invite |
 | **C32** | `AutoInvite.Disable` | Logic.AutoInvite | Disable auto-invite |
-| **C33** | `AutoInvite.SetKeyword` | Logic.AutoInvite | Set auto-invite keyword |
-| **C34** | `AutoInvite.ToggleConfirm` | Logic.AutoInvite | Toggle confirmation requirement |
+| **C36** | `AutoInvite.SetKeywords` | Logic.AutoInvite | Set auto-invite keywords |
 
 ---
 
@@ -70,7 +69,6 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **L09** | `UI.Messaging.OnChannelsChanged` | E05 (Channels.Changed) | UI.Content.Messaging | Update messaging UI when channels change |
 | **L10** | `UI.Messaging.OnSelectionChanged` | E01 (Selection.Changed) | UI.Content.Messaging | Update messaging UI when selection changes |
 | **L11** | `UI.Presets.OnChanged` | E07 (Presets.Changed) | UI.Content.Presets | Update presets UI when presets list changes |
-| **L12** | `UI.AutoInvite.OnChanged` | E06 (AutoInvite.Changed) | UI.Content.AutoInvite | Update auto-invite UI when settings change |
 | **L16** | `AutoInvite.OnWhisper` | E04 (Chat.WhisperReceived) | Logic.AutoInvite | Process whispers for auto-invite |
 | **L17** | `AutoInvite.OnLeaderChanged` | E03 (Group.LeaderChanged) | Logic.AutoInvite | Handle leader changes for auto-invite |
 
@@ -82,7 +80,7 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 
 | ID | Name | Module | Dependencies | Description |
 |----|-----|--------|--------------|-------------|
-| **I01** | `Core.Events` | Core.Events | - | Initialize WoW event listeners, register events (E02-E04), states (S11-S13) |
+| **I01** | `Core.Events` | Core.Events | - | Initialize WoW event listeners, register events (E02-E04), states (S10-S12) |
 | **I02** | `Core.Persistent` | Core.Persistent | - | Initialize SavedVariables |
 | **I03** | `Core.Utils` | Core.Utils | - | Initialize utility functions |
 | **I06** | `Debug` | Components.Debug | - | Register debug command (C02) |
@@ -91,19 +89,21 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **I09** | `Components.WelcomePopup` | Components.WelcomePopup | - | Initialize welcome popup |
 | **I11** | `MainFrame` | Logic.MainFrame | - | Register main frame command (C01) |
 | **I12** | `Logic.Selection` | Logic.Selection | - | Register selection commands (C06-C17), event (E01), states (S01-S08) |
-| **I13** | `Logic.Message` | Logic.Message | Logic.Selection, Events | Register message listeners (L01, L03), state (S09) |
-| **I14** | `Logic.Broadcaster` | Logic.Broadcaster | Logic.Message, Messaging, Events | Initialize broadcaster, register command (C21), states (S14-S19), listener (L02) |
-| **I15** | `Logic.Content.Settings` | Logic.Content.Settings | - | Initialize settings panel |
-| **I16** | `Logic.Content.Messaging` | Logic.Content.Messaging | - | Initialize messaging, register command (C23), event (E05), state (S10) |
-| **I17** | `Logic.Content.Presets` | Logic.Content.Presets | - | Initialize presets, register commands (C28-C30), events (E07-E08) |
-| **I18** | `Logic.AutoInvite` | Logic.AutoInvite | - | Initialize auto-invite, register commands (C31-C34), event (E06), listeners (L16-L17) |
+| **I13** | `Logic.Message` | Logic.Message | Logic.Selection, Logic.Group, Core.Events | Register message listeners (L01, L03), state (S16) |
+| **I14** | `Logic.Broadcaster` | Logic.Broadcaster | Logic.Message, Logic.Content.Messaging, Core.Events | Initialize broadcaster, register command (C21), states (S20-S25), listener (L02) |
+| **I15** | `Logic.Content.Settings` | Logic.Content.Settings | Core.Persistent | Initialize settings panel, register state (S30), load dry run from persistent |
+| **I16** | `Logic.Content.Messaging` | Logic.Content.Messaging | Core.Persistent | Initialize messaging, register command (C23), event (E05), state (S15) |
+| **I17** | `Logic.Content.Presets` | Logic.Content.Presets | Core.Persistent, Logic.Selection | Initialize presets, register commands (C28-C30), events (E07-E08) |
+| **I18** | `Logic.AutoInvite` | Logic.AutoInvite | Core.Events | Initialize auto-invite, register commands (C31-C32, C34), event (E06), listeners (L16-L17) |
+| **I19** | `Logic.Content.Dungeons` | Logic.Content.Dungeons | - | Initialize dungeons cache builder |
+| **I20** | `Logic.Group` | Logic.Group | Core.Events | Initialize group management logic |
 | **I21** | `UI.MainFrame` | UI.MainFrame | - | Initialize main frame UI |
 | **I22** | `UI.Dungeons` | UI.Content.Dungeons | - | Initialize dungeons UI, register listener (L06) |
 | **I23** | `UI.Raids` | UI.Content.Raids | - | Initialize raids UI, register listener (L07) |
 | **I24** | `UI.Quests` | UI.Content.Quests | - | Initialize quests UI, register command (C26-C27), listener (L08) |
-| **I25** | `UI.Messaging` | UI.Content.Messaging | - | Initialize messaging UI, register listeners (L09-L10) |
-| **I26** | `UI.Content.Presets` | UI.Content.Presets | - | Initialize presets UI, register listener (L11) |
-| **I27** | `UI.Content.AutoInvite` | UI.Content.AutoInvite | - | Initialize auto-invite UI, register listener (L12) |
+| **I25** | `UI.Messaging` | UI.Content.Messaging | Logic.Content.Messaging, Logic.Broadcaster | Initialize messaging UI, register listeners (L09-L10) |
+| **I26** | `Components.EyeAnimation` | Components.EyeAnimation | Logic.Broadcaster | Initialize eye animation system, auto-triggers on broadcast state change |
+| **I27** | `UI.Content.Presets` | UI.Content.Presets | Logic.Content.Presets | Initialize presets UI, register listener (L11) |
 
 ---
 
@@ -112,24 +112,35 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | ID | Name | Module | Type | Default | Description |
 |----|-----|--------|------|---------|-------------|
 | **S01** | `Selection.Mode` | Logic.Selection | string | "none" | Current mode: "none", "dungeons", "raid", "custom" |
-| **S02** | `Selection.DungeonNames` | Logic.Selection | table | {} | Array of selected dungeon names (strings) |
-| **S03** | `Selection.RaidName` | Logic.Selection | string/nil | nil | Selected raid name (nil if none) |
-| **S04** | `Selection.RaidSize` | Logic.Selection | number | 40 | Custom raid size (1-40) |
-| **S05** | `Selection.Roles` | Logic.Selection | table | {} | Array of selected roles ("TANK", "HEAL", "DPS") |
-| **S06** | `Selection.CustomMessage` | Logic.Selection | string | "" | Custom broadcast message text |
-| **S07** | `Selection.CustomGroupSize` | Logic.Selection | number | 5 | Custom group size for custom messages with variables (1-40) |
-| **S08** | `Selection.DetailsText` | Logic.Selection | string | "" | Details text appended to auto-generated messages |
-| **S09** | `Message.ToBroadcast` | Logic.Message | string | "" | Generated broadcast message |
-| **S10** | `Channels.ActiveChannels` | Logic.Content.Messaging | table | {} | Array of active channel names |
-| **S11** | `Group.Size` | Core.Events | number | 1 | Current group size (1-40) |
-| **S12** | `Group.Type` | Core.Events | string | "solo" | Current group type: "solo", "party", "raid" |
-| **S13** | `Group.IsLeader` | Core.Events | boolean | false | Is player party/raid leader |
-| **S14** | `Broadcaster.IsRunning` | Logic.Broadcaster | boolean | false | Is broadcaster currently active |
-| **S15** | `Broadcaster.MessagesSent` | Logic.Broadcaster | number | 0 | Number of messages sent this session |
-| **S16** | `Broadcaster.SessionStartTime` | Logic.Broadcaster | number | 0 | GetTime() when broadcast started |
-| **S17** | `Broadcaster.LastBroadcastTime` | Logic.Broadcaster | number | 0 | GetTime() when last message was sent |
-| **S18** | `Broadcaster.TimeRemaining` | Logic.Broadcaster | number | 0 | Seconds until next broadcast |
-| **S19** | `Broadcaster.Interval` | Logic.Broadcaster | number | 60 | Broadcast interval in seconds (30-7200, configurable via UI slider) |
+| **S02** | `Selection.Roles` | Logic.Selection | table | {} | Array of selected roles ("TANK", "HEAL", "DPS") |
+| **S03** | `Selection.DungeonNames` | Logic.Selection | table | {} | Array of selected dungeon names (strings) |
+| **S04** | `Selection.RaidName` | Logic.Selection | string/nil | nil | Selected raid name (nil if none) |
+| **S05** | `Selection.RaidSize` | Logic.Selection | number | 40 | Custom raid size (1-40) |
+| **S06** | `Selection.DetailsText` | Logic.Selection | string | "" | Details text appended to auto-generated messages |
+| **S07** | `Selection.CustomMessage` | Logic.Selection | string | "" | Custom broadcast message text |
+| **S08** | `Selection.CustomGroupSize` | Logic.Selection | number | 5 | Custom group size for custom messages with variables (1-40) |
+| **S09** | - | - | - | - | *Spare* |
+| **S10** | `Group.Type` | Logic.Group (declared in Core.Events) | string | "solo" | Current group type: "solo", "party", "raid" |
+| **S11** | `Group.Size` | Logic.Group (declared in Core.Events) | number | 1 | Current group size (1-40) |
+| **S12** | `Group.IsLeader` | Logic.Group (declared in Core.Events) | boolean | false | Is player party/raid leader |
+| **S13** | - | - | - | - | *Spare* |
+| **S14** | - | - | - | - | *Spare* |
+| **S15** | `Channels.ActiveChannels` | Logic.Content.Messaging | table | {} | Array of active channel names |
+| **S16** | `Message.ToBroadcast` | Logic.Message | string | "" | Generated broadcast message |
+| **S17** | - | - | - | - | *Spare* |
+| **S18** | - | - | - | - | *Spare* |
+| **S19** | - | - | - | - | *Spare* |
+| **S20** | `Broadcaster.IsRunning` | Logic.Broadcaster | boolean | false | Is broadcaster currently active |
+| **S21** | `Broadcaster.Interval` | Logic.Broadcaster | number | 60 | Broadcast interval in seconds (30-7200, configurable via UI slider) |
+| **S22** | `Broadcaster.MessagesSent` | Logic.Broadcaster | number | 0 | Number of messages sent this session |
+| **S23** | `Broadcaster.SessionStartTime` | Logic.Broadcaster | number | 0 | GetTime() when broadcast started |
+| **S24** | `Broadcaster.LastBroadcastTime` | Logic.Broadcaster | number | 0 | GetTime() when last message was sent |
+| **S25** | `Broadcaster.TimeRemaining` | Logic.Broadcaster | number | 0 | Seconds until next broadcast |
+| **S26** | - | - | - | - | *Spare* |
+| **S27** | - | - | - | - | *Spare* |
+| **S28** | - | - | - | - | *Spare* |
+| **S29** | - | - | - | - | *Spare* |
+| **S30** | `Settings.DryRun` | Logic.Content.Settings | boolean | false | Dry run mode enabled/disabled (broadcasts print to chat instead of sending) |
 
 ---
 
@@ -187,5 +198,32 @@ RegisterState("Selection.Mode", "none", { id = "S01" })
 RegisterEvent("Selection.Changed")  -- Auto: E01
 RegisterEvent("Group.SizeChanged")  -- Auto: E02
 ```
+
+---
+
+## Special Implementation Notes
+
+### Debug Window & Checkbox Synchronization (C02 / UI.Content.Settings)
+
+The debug window checkbox in the Settings panel is kept synchronized with the actual debug window state:
+
+**Behaviors:**
+1. **Tab Switch**: When switching to the Settings tab, the checkbox reflects whether the debug window is actually open (via `SyncDebugCheckbox()` in `RestoreState()`)
+2. **Command `/lfm debug`**: Dispatches `Debug.Toggle` → calls `Show()` or `Hide()` → calls `SyncSettingsCheckbox(true/false)` to update the checkbox
+3. **Close Button**: The X button calls `Hide()` → calls `SyncSettingsCheckbox(false)` to uncheck the checkbox
+4. **Frame OnHide**: Even if the frame is hidden externally, the `OnHide` script triggers `Hide()` → checkbox is unchecked
+
+**Implementation Details:**
+- `Components.Debug.Show()`: Calls `SyncSettingsCheckbox(true)` before logging
+- `Components.Debug.Hide()`: Calls `SyncSettingsCheckbox(false)` before logging
+- `UI.Content.Settings.SyncDebugCheckbox()`: Reads the actual `AutoLFM_DebugWindow` frame state and sets checkbox accordingly
+- `UI.Templates.Debug.xml OnHide`: Added to catch frame hide events and sync checkbox
+
+**Code Locations:**
+- Debug component: `Components/Debug.lua` (Show, Hide, SyncSettingsCheckbox)
+- Settings UI: `UI/Content/Settings.lua` (OnDebugToggle, SyncDebugCheckbox, RestoreState)
+- Debug template: `UI/Templates/Debug.xml` (OnHide script)
+
+---
 
 [← Back to README](README.md)

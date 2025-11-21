@@ -17,18 +17,31 @@ local INITIAL_WAIT = 0.5
 --=============================================================================
 -- STATE
 --=============================================================================
-local popupFrame, titleLabel, labels = nil, nil, {}
 local padding, textPadding = 24, 8
-local titleLineHeight, textLineHeight = 0, 0
+local extraMargin = 24
 
-local titleBlockIndex, titleLetterIndex = 1, 0
-local currentLine, coloredLetterIndex = 1, 0
-
-local typingElapsed, fadeElapsed, fadeTotal = 0, 0, 0
-local fadeMode, fadeFunc
-local waitBeforeStart, waitBeforeFade = 0, 0
-local typingActive, fadeActive, waitingActive = false, false, false
-local lastUpdate = nil
+local state = {
+  popupFrame = nil,
+  titleLabel = nil,
+  labels = {},
+  titleLineHeight = 0,
+  textLineHeight = 0,
+  titleBlockIndex = 1,
+  titleLetterIndex = 0,
+  currentLine = 1,
+  coloredLetterIndex = 0,
+  typingElapsed = 0,
+  fadeElapsed = 0,
+  fadeTotal = 0,
+  fadeMode = nil,
+  fadeFunc = nil,
+  waitBeforeStart = 0,
+  waitBeforeFade = 0,
+  typingActive = false,
+  fadeActive = false,
+  waitingActive = false,
+  lastUpdate = nil
+}
 
 --=============================================================================
 -- DATA
@@ -146,8 +159,11 @@ end
 --- @param onFinish function - Callback when fade completes
 local function fadeFrame(frame, mode, duration, onFinish)
   if not frame then return end
-  fadeMode, fadeElapsed, fadeTotal = mode, 0, duration
-  fadeFunc, fadeActive = onFinish, true
+  state.fadeMode = mode
+  state.fadeElapsed = 0
+  state.fadeTotal = duration
+  state.fadeFunc = onFinish
+  state.fadeActive = true
   frame:SetAlpha(mode == "IN" and 0 or 1)
   if mode == "IN" then frame:Show() end
 end
@@ -167,22 +183,22 @@ local function createPopup()
   })
   frame:SetBackdropColor(0, 0, 0, 0.75)
   frame:SetPoint("CENTER", UIParent, "CENTER", 0, 250)
-  frame:SetWidth(50)
+  frame:SetWidth(padding * 2 + extraMargin)
   frame:Hide()
 
   local tmp = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
   tmp:SetText("M")
-  titleLineHeight = tmp:GetHeight() or 20
+  state.titleLineHeight = tmp:GetHeight() or 20
   tmp:SetFont("Fonts\\FRIZQT__.TTF", 14)
-  textLineHeight = tmp:GetHeight() or 14
+  state.textLineHeight = tmp:GetHeight() or 14
   tmp:Hide()
 
-  frame:SetHeight(titleLineHeight + padding * 2)
+  frame:SetHeight(state.titleLineHeight + padding * 2)
 
-  titleLabel = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-  titleLabel:SetFont("Fonts\\FRIZQT__.TTF", 22, "OUTLINE")
-  titleLabel:SetJustifyH("CENTER")
-  titleLabel:SetPoint("TOP", frame, "TOP", 0, -padding)
+  state.titleLabel = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+  state.titleLabel:SetFont("Fonts\\FRIZQT__.TTF", 22, "OUTLINE")
+  state.titleLabel:SetJustifyH("CENTER")
+  state.titleLabel:SetPoint("TOP", frame, "TOP", 0, -padding)
 
   for i = 1, table.getn(messages) do
     local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -190,8 +206,12 @@ local function createPopup()
     lbl:SetJustifyH("CENTER")
     lbl:SetText("")
     lbl:SetWidth(600)
-    lbl:SetPoint("TOP", frame, "TOP", 0, -padding - titleLineHeight - (i - 1) * (textLineHeight + textPadding - 2))
-    labels[i] = lbl
+    if i == 1 then
+      lbl:SetPoint("TOP", state.titleLabel, "BOTTOM", 0, -textPadding)
+    else
+      lbl:SetPoint("TOP", state.labels[i-1], "BOTTOM", 0, -textPadding)
+    end
+    state.labels[i] = lbl
   end
 
   return frame
@@ -204,96 +224,96 @@ end
 --- OnUpdate handler for typing animation and fade effects
 local function onUpdate()
   local now = GetTime()
-  local elapsed = lastUpdate and (now - lastUpdate) or 0
-  lastUpdate = now
+  local elapsed = state.lastUpdate and (now - state.lastUpdate) or 0
+  state.lastUpdate = now
 
-  if fadeActive then
-    fadeElapsed = fadeElapsed + elapsed
-    local progress = fadeElapsed / fadeTotal
+  if state.fadeActive then
+    state.fadeElapsed = state.fadeElapsed + elapsed
+    local progress = state.fadeElapsed / state.fadeTotal
     if progress >= 1 then
-      popupFrame:SetAlpha(fadeMode == "IN" and 1 or 0)
-      fadeActive = false
-      if fadeFunc then fadeFunc() end
+      state.popupFrame:SetAlpha(state.fadeMode == "IN" and 1 or 0)
+      state.fadeActive = false
+      if state.fadeFunc then state.fadeFunc() end
     else
-      popupFrame:SetAlpha(fadeMode == "IN" and progress or (1 - progress))
+      state.popupFrame:SetAlpha(state.fadeMode == "IN" and progress or (1 - progress))
     end
     return
   end
 
-  if waitingActive then
-    waitBeforeStart = waitBeforeStart + elapsed
-    if waitBeforeStart > INITIAL_WAIT then
-      waitingActive = false
-      typingActive = true
-      titleBlockIndex, titleLetterIndex = 1, 0
-      currentLine, coloredLetterIndex = 1, 0
+  if state.waitingActive then
+    state.waitBeforeStart = state.waitBeforeStart + elapsed
+    if state.waitBeforeStart > INITIAL_WAIT then
+      state.waitingActive = false
+      state.typingActive = true
+      state.titleBlockIndex, state.titleLetterIndex = 1, 0
+      state.currentLine, state.coloredLetterIndex = 1, 0
     end
     return
   end
 
-  if typingActive then
-    typingElapsed = typingElapsed + elapsed
-    if typingElapsed > TYPING_SPEED then
-      typingElapsed = 0
+  if state.typingActive then
+    state.typingElapsed = state.typingElapsed + elapsed
+    if state.typingElapsed > TYPING_SPEED then
+      state.typingElapsed = 0
 
-      if titleBlocks[titleBlockIndex] then
-        local block = titleBlocks[titleBlockIndex]
-        if titleLetterIndex < string.len(block.text) then
-          titleLetterIndex = titleLetterIndex + 1
-          titleLabel:SetText(getPartialTitleText(titleBlockIndex, titleLetterIndex))
+      if titleBlocks[state.titleBlockIndex] then
+        local block = titleBlocks[state.titleBlockIndex]
+        if state.titleLetterIndex < string.len(block.text) then
+          state.titleLetterIndex = state.titleLetterIndex + 1
+          state.titleLabel:SetText(getPartialTitleText(state.titleBlockIndex, state.titleLetterIndex))
         else
-          titleBlockIndex = titleBlockIndex + 1
-          titleLetterIndex = 0
+          state.titleBlockIndex = state.titleBlockIndex + 1
+          state.titleLetterIndex = 0
         end
       else
-        local msg = messages[currentLine]
-        local lbl = labels[currentLine]
+        local msg = messages[state.currentLine]
+        local lbl = state.labels[state.currentLine]
         if msg and lbl then
-          coloredLetterIndex = coloredLetterIndex + 1
-          lbl:SetText(getPartialColoredText(msg, coloredLetterIndex))
+          state.coloredLetterIndex = state.coloredLetterIndex + 1
+          lbl:SetText(getPartialColoredText(msg, state.coloredLetterIndex))
           
-          if coloredLetterIndex >= getTotalChars(msg) then
-            coloredLetterIndex = 0
-            currentLine = currentLine + 1
+          if state.coloredLetterIndex >= getTotalChars(msg) then
+            state.coloredLetterIndex = 0
+            state.currentLine = state.currentLine + 1
           end
         end
       end
 
-      local maxWidth = titleLabel:GetStringWidth()
-      local totalHeight = titleLineHeight + padding * 2
+      local maxWidth = state.titleLabel:GetStringWidth()
+      local totalHeight = state.titleLineHeight + padding * 2
       local lastIndex = 0
-      
-      for i, lbl in ipairs(labels) do
+
+      for i, lbl in ipairs(state.labels) do
         if lbl:GetText() ~= "" then lastIndex = i end
       end
-      
-      for i, lbl in ipairs(labels) do
+
+      for i, lbl in ipairs(state.labels) do
         local t = lbl:GetText() or ""
         if t ~= "" then
           local w = lbl:GetStringWidth()
           if w > maxWidth then maxWidth = w end
-          totalHeight = totalHeight + textLineHeight + (i ~= lastIndex and (textPadding - 2) or 2)
+          totalHeight = totalHeight + state.textLineHeight + (i ~= lastIndex and textPadding or 2)
         end
       end
 
-      popupFrame:SetWidth(maxWidth + padding * 2)
-      popupFrame:SetHeight(totalHeight)
+      state.popupFrame:SetWidth(maxWidth + padding * 2 + extraMargin)
+      state.popupFrame:SetHeight(totalHeight + padding * 2)
 
-      if not messages[currentLine] then
-        typingActive = false
-        waitBeforeFade = 0
+      if not messages[state.currentLine] then
+        state.typingActive = false
+        state.waitBeforeFade = 0
       end
     end
     return
   end
 
-  if not typingActive and not fadeActive and not waitingActive then
-    waitBeforeFade = waitBeforeFade + elapsed
-    if waitBeforeFade > DISPLAY_DURATION then
-      fadeFrame(popupFrame, "OUT", FADE_DURATION, function()
-        popupFrame:Hide()
+  if not state.typingActive and not state.fadeActive and not state.waitingActive then
+    state.waitBeforeFade = state.waitBeforeFade + elapsed
+    if state.waitBeforeFade > DISPLAY_DURATION then
+      fadeFrame(state.popupFrame, "OUT", FADE_DURATION, function()
+        state.popupFrame:Hide()
         AutoLFM.Core.Persistent.SetWelcomeShown(true)
-        popupFrame:SetScript("OnUpdate", nil)
+        state.popupFrame:SetScript("OnUpdate", nil)
       end)
     end
   end
@@ -305,22 +325,22 @@ end
 
 --- Shows the welcome popup with typing animation
 function AutoLFM.Components.WelcomePopup.Show()
-  popupFrame = popupFrame or createPopup()
-  if not popupFrame then return end
+  state.popupFrame = state.popupFrame or createPopup()
+  if not state.popupFrame then return end
 
-  lastUpdate = nil
-  titleBlockIndex, titleLetterIndex = 1, 0
-  currentLine, coloredLetterIndex = 1, 0
-  typingElapsed, fadeElapsed, waitBeforeFade, waitBeforeStart = 0, 0, 0, 0
-  fadeActive, typingActive, waitingActive = false, false, true
+  state.lastUpdate = nil
+  state.titleBlockIndex, state.titleLetterIndex = 1, 0
+  state.currentLine, state.coloredLetterIndex = 1, 0
+  state.typingElapsed, state.fadeElapsed, state.waitBeforeFade, state.waitBeforeStart = 0, 0, 0, 0
+  state.fadeActive, state.typingActive, state.waitingActive = false, false, true
 
-  popupFrame:SetAlpha(0)
-  popupFrame:SetHeight(titleLineHeight + padding * 2)
-  popupFrame:SetWidth(50)
-  popupFrame:Show()
-  popupFrame:SetScript("OnUpdate", onUpdate)
+  state.popupFrame:SetAlpha(0)
+  state.popupFrame:SetHeight(state.titleLineHeight + padding * 2)
+  state.popupFrame:SetWidth(padding * 2 + extraMargin)
+  state.popupFrame:Show()
+  state.popupFrame:SetScript("OnUpdate", onUpdate)
 
-  fadeFrame(popupFrame, "IN", FADE_DURATION)
+  fadeFrame(state.popupFrame, "IN", FADE_DURATION)
 end
 
 --=============================================================================

@@ -66,11 +66,10 @@ function AutoLFM.UI.Content.Dungeons.CreateRows(scrollChild)
   AutoLFM.UI.RowList.SetupHover(checkbox, row, color, elements)
 
   if checkbox then
-    -- Sync checkbox state with selection (read from Maestro State)
     local selectedDungeonNames = AutoLFM.Core.Maestro.GetState("Selection.DungeonNames") or {}
     local isSelected = false
-    for i = 1, table.getn(selectedDungeonNames) do
-      if selectedDungeonNames[i] == dungeon.name then
+    for j = 1, table.getn(selectedDungeonNames) do
+      if selectedDungeonNames[j] == dungeon.name then
         isSelected = true
         break
       end

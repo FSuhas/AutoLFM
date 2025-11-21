@@ -123,7 +123,7 @@
                 <Anchors>
                   <Anchor point="TOPLEFT">
                     <Offset>
-                      <AbsDimension x="5" y="-55"/>
+                      <AbsDimension x="5" y="-58"/>
                     </Offset>
                   </Anchor>
                 </Anchors>
@@ -225,31 +225,33 @@
                   </Layer>
                 </Layers>
               </Frame>
-              <!-- Usage Icon (hidden by default, shown in Custom mode) -->
+              <!-- Usage Icon Tooltip (hidden by default, shown in Custom mode) - MUST be defined BEFORE buttons that anchor to it -->
               <Frame name="$parent_UsageIcon" hidden="true" enableMouse="true">
                 <Size>
-                  <AbsDimension x="24" y="24"/>
+                  <AbsDimension x="18" y="18"/>
                 </Size>
                 <Anchors>
                   <Anchor point="TOPRIGHT" relativeTo="AutoLFM_Content_Messaging_ScrollFrame_ScrollChild" relativePoint="TOPRIGHT">
                     <Offset>
-                      <AbsDimension x="-5" y="-33"/>
+                      <AbsDimension x="-5" y="-35"/>
                     </Offset>
                   </Anchor>
                 </Anchors>
                 <Layers>
                   <Layer level="ARTWORK">
-                    <Texture name="$parent_Texture" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\Tooltip">
+                    <Texture name="$parent_Texture" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\Var">
                       <Size>
-                        <AbsDimension x="22" y="22"/>
+                        <AbsDimension x="16" y="16"/>
                       </Size>
                       <Anchors>
                         <Anchor point="CENTER"/>
                       </Anchors>
                     </Texture>
-                    <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\TooltipHighlight" hidden="true">
+                  </Layer>
+                  <Layer level="OVERLAY">
+                    <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarHighlight" hidden="true">
                       <Size>
-                        <AbsDimension x="22" y="22"/>
+                        <AbsDimension x="16" y="16"/>
                       </Size>
                       <Anchors>
                         <Anchor point="CENTER"/>
@@ -266,6 +268,199 @@
                   </OnLeave>
                 </Scripts>
               </Frame>
+              <!-- Variable Buttons (hidden by default, shown in Custom mode) -->
+              <!-- VarM Button (anchors left of Tooltip) -->
+              <Button name="$parent_VarMButton" hidden="true" enableMouse="true">
+                <Size>
+                  <AbsDimension x="18" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="RIGHT" relativeTo="$parent_UsageIcon" relativePoint="LEFT">
+                    <Offset>
+                      <AbsDimension x="-1" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <Texture name="$parent_Texture" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarM">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                  <Layer level="OVERLAY">
+                    <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarHighlight" hidden="true">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                    <Texture name="$parent_ClickArea" file="" alpha="0">
+                      <Size>
+                        <AbsDimension x="18" y="18"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                </Layers>
+                <Scripts>
+                  <OnEnter>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonEnter(this)
+                  </OnEnter>
+                  <OnLeave>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonLeave(this)
+                  </OnLeave>
+                  <OnClick>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonClick(this)
+                  </OnClick>
+                </Scripts>
+              </Button>
+              <!-- VarT Button (anchors left of VarM) -->
+              <Button name="$parent_VarTButton" hidden="true" enableMouse="true">
+                <Size>
+                  <AbsDimension x="18" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="RIGHT" relativeTo="$parent_VarMButton" relativePoint="LEFT">
+                    <Offset>
+                      <AbsDimension x="-1" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <Texture name="$parent_Texture" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarT">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                  <Layer level="OVERLAY">
+                    <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarHighlight" hidden="true">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                </Layers>
+                <Scripts>
+                  <OnEnter>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonEnter(this)
+                  </OnEnter>
+                  <OnLeave>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonLeave(this)
+                  </OnLeave>
+                  <OnClick>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonClick(this)
+                  </OnClick>
+                </Scripts>
+              </Button>
+              <!-- VarC Button (anchors left of VarT) -->
+              <Button name="$parent_VarCButton" hidden="true" enableMouse="true">
+                <Size>
+                  <AbsDimension x="18" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="RIGHT" relativeTo="$parent_VarTButton" relativePoint="LEFT">
+                    <Offset>
+                      <AbsDimension x="-1" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <Texture name="$parent_Texture" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarC">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                  <Layer level="OVERLAY">
+                    <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarHighlight" hidden="true">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                </Layers>
+                <Scripts>
+                  <OnEnter>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonEnter(this)
+                  </OnEnter>
+                  <OnLeave>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonLeave(this)
+                  </OnLeave>
+                  <OnClick>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonClick(this)
+                  </OnClick>
+                </Scripts>
+              </Button>
+              <!-- VarR Button (leftmost, anchors left of VarC) -->
+              <Button name="$parent_VarRButton" hidden="true" enableMouse="true">
+                <Size>
+                  <AbsDimension x="18" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="RIGHT" relativeTo="$parent_VarCButton" relativePoint="LEFT">
+                    <Offset>
+                      <AbsDimension x="-1" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <Texture name="$parent_Texture" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarR">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                  <Layer level="OVERLAY">
+                    <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\VarHighlight" hidden="true">
+                      <Size>
+                        <AbsDimension x="16" y="16"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </Texture>
+                  </Layer>
+                </Layers>
+                <Scripts>
+                  <OnEnter>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonEnter(this)
+                  </OnEnter>
+                  <OnLeave>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonLeave(this)
+                  </OnLeave>
+                  <OnClick>
+                    AutoLFM.UI.Content.Messaging.OnVarButtonClick(this)
+                  </OnClick>
+                </Scripts>
+              </Button>
               <!-- EditBox Container (created in Lua) -->
               <!-- Group Size Control Line (hidden by default, shown in Custom mode) -->
               <Frame name="$parent_GroupSizeControl" hidden="true">

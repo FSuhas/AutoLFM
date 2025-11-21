@@ -4,11 +4,10 @@
 --=============================================================================
 AutoLFM = AutoLFM or {}
 AutoLFM.Core = AutoLFM.Core or {}
-AutoLFM.Core.Maestro = AutoLFM.Core.Maestro or {}
+AutoLFM.Core.Maestro = {}
 
 --=============================================================================
 -- SAFE REGISTRATION
---   Allows init registration before Maestro is loaded
 --=============================================================================
 local pendingInits = {}
 local pendingStates = {}
@@ -52,44 +51,37 @@ end
 --=============================================================================
 -- PRIVATE STATE
 --=============================================================================
-local commands = {}
-local commandsRegistry = {}
-local commandCounter = 0
-local events = {}
-local eventsRegistry = {}
-local eventCounter = 0
-local listeners = {}
-local listenersRegistry = {}
-local listenerCounter = 0
-local initHandlers = {}
-local initRegistry = {}
-local initCounter = 0
+local commands, commandsRegistry, commandCounter = {}, {}, 0
+local events, eventsRegistry, eventCounter = {}, {}, 0
+local listeners, listenersRegistry, listenerCounter = {}, {}, 0
+local initHandlers, initRegistry, initCounter = {}, {}, 0
 local stateCounter = 0
 local isInitialized = false
 
+--- Generates or validates an ID, updating the counter if needed
+--- @param providedId string|nil - Optional provided ID (e.g., "C01")
+--- @param prefix string - ID prefix (e.g., "C", "E", "L", "I", "S")
+--- @param counter number - Current counter value
+--- @return string, number - The ID and updated counter
+local function getOrGenerateId(providedId, prefix, counter)
+  if not providedId then
+    counter = counter + 1
+    return prefix .. string.format("%02d", counter), counter
+  end
+  local idNum = tonumber(string.sub(providedId, 2))
+  if idNum and idNum > counter then
+    counter = idNum
+  end
+  return providedId, counter
+end
+
 --=============================================================================
 -- STATE MANAGEMENT
---   Centralized state storage with encapsulation and event emission
---
---   3-Level Architecture:
---     1. Runtime State: Volatile data (lost on /reload)
---     2. Business State: In-memory data managed by Logic modules
---     3. Persistent State: Saved to AutoLFMData (handled by Core.Persistent)
---
---   Principles:
---     - Private state in modules (local variables)
---     - Public API via Get/Set functions
---     - All modifications via Maestro commands
---     - Automatic event emission on state changes
 --=============================================================================
-
---- State storage registry
---- Each namespace contains: { value = any, subscribers = { function1, function2, ... } }
 local stateRegistry = {}
 
 --=============================================================================
 -- COMMAND BUS
---   Central dispatcher for addon commands with event logging
 --=============================================================================
 
 --- Registers a command with its handler function
@@ -99,24 +91,13 @@ local stateRegistry = {}
 --- @return number - The order ID assigned to this command
 function AutoLFM.Core.Maestro.RegisterCommand(key, handler, options)
   if commands[key] then
-      error("Maestro: Command '" .. key .. "' already registered")
-      return
+    error("Maestro: Command '" .. key .. "' already registered")
+    return
   end
 
   local opts = options or {}
-
-  -- Use provided ID or auto-generate
-  local commandId = opts.id
-  if not commandId then
-      commandCounter = commandCounter + 1
-      commandId = "C" .. string.format("%02d", commandCounter)
-  else
-      -- Update counter if provided ID is numeric and higher
-      local idNum = tonumber(string.sub(commandId, 2))
-      if idNum and idNum > commandCounter then
-          commandCounter = idNum
-      end
-  end
+  local commandId
+  commandId, commandCounter = getOrGenerateId(opts.id, "C", commandCounter)
 
   commands[key] = {
       handler = handler,
@@ -131,10 +112,6 @@ function AutoLFM.Core.Maestro.RegisterCommand(key, handler, options)
   })
   return commandId
 end
-
------------------------------------------------------------------------------
--- Generate Event Name from Command Key
------------------------------------------------------------------------------
 
 --- Generates a human-readable event name from a command key
 --- @param key string - Command key (e.g., "MainFrame.Toggle")
@@ -222,7 +199,6 @@ end
 
 --=============================================================================
 -- EVENT SYSTEM
---   Event registration and listener management for loose coupling
 --=============================================================================
 
 --- Registers an event that can be emitted via Dispatch()
@@ -232,24 +208,13 @@ end
 --- @return string - The ID assigned to this event (e.g., "E01")
 function AutoLFM.Core.Maestro.RegisterEvent(key, options)
   if events[key] then
-      error("Maestro: Event '" .. key .. "' already registered")
-      return
+    error("Maestro: Event '" .. key .. "' already registered")
+    return
   end
 
   local opts = options or {}
-
-  -- Use provided ID or auto-generate
-  local eventId = opts.id
-  if not eventId then
-      eventCounter = eventCounter + 1
-      eventId = "E" .. string.format("%02d", eventCounter)
-  else
-      -- Update counter if provided ID is numeric and higher
-      local idNum = tonumber(string.sub(eventId, 2))
-      if idNum and idNum > eventCounter then
-          eventCounter = idNum
-      end
-  end
+  local eventId
+  eventId, eventCounter = getOrGenerateId(opts.id, "E", eventCounter)
 
   events[key] = {
       listeners = {},
@@ -283,22 +248,11 @@ function AutoLFM.Core.Maestro.Listen(listenerId, eventKey, callback, options)
       return
   end
 
-  -- Add listener to event
   table.insert(events[eventKey].listeners, callback)
 
-  -- Use provided ID or auto-generate
   local opts = options or {}
-  local listenId = opts.id
-  if not listenId then
-      listenerCounter = listenerCounter + 1
-      listenId = "L" .. string.format("%02d", listenerCounter)
-  else
-      -- Update counter if provided ID is numeric and higher
-      local idNum = tonumber(string.sub(listenId, 2))
-      if idNum and idNum > listenerCounter then
-          listenerCounter = idNum
-      end
-  end
+  local listenId
+  listenId, listenerCounter = getOrGenerateId(opts.id, "L", listenerCounter)
 
   -- Store in listeners registry
   listeners[listenerId] = {
@@ -317,7 +271,6 @@ end
 
 --=============================================================================
 -- INITIALIZATION SYSTEM
---   Dependency-aware initialization with topological sorting
 --=============================================================================
 
 --- Registers an initialization handler with optional dependencies
@@ -328,25 +281,14 @@ end
 --- @return number - The order ID assigned to this handler
 function AutoLFM.Core.Maestro.RegisterInit(id, handler, options)
   if initHandlers[id] then
-      error("Maestro: Init handler '" .. id .. "' already registered")
-      return
+    error("Maestro: Init handler '" .. id .. "' already registered")
+    return
   end
 
   local opts = options or {}
   local deps = opts.dependencies or {}
-
-  -- Use provided ID or auto-generate
-  local initId = opts.id
-  if not initId then
-      initCounter = initCounter + 1
-      initId = "I" .. string.format("%02d", initCounter)
-  else
-      -- Update counter if provided ID is numeric and higher
-      local idNum = tonumber(string.sub(initId, 2))
-      if idNum and idNum > initCounter then
-          initCounter = idNum
-      end
-  end
+  local initId
+  initId, initCounter = getOrGenerateId(opts.id, "I", initCounter)
 
   initHandlers[id] = {
       handler = handler,
@@ -362,10 +304,6 @@ function AutoLFM.Core.Maestro.RegisterInit(id, handler, options)
   })
   return initId
 end
-
------------------------------------------------------------------------------
--- Process Pending Registrations (SafeRegisterState / SafeRegisterInit)
------------------------------------------------------------------------------
 
 --- Processes all state handlers registered via SafeRegisterState before Maestro loaded
 local function flushPendingStates()
@@ -384,10 +322,6 @@ local function flushPendingInits()
   end
   pendingInits = {}
 end
-
------------------------------------------------------------------------------
--- Topological Sort (Kahn's algorithm)
------------------------------------------------------------------------------
 
 --- Builds the dependency graph for topological sort
 --- @param handlers table - Map of {id = {handler, dependencies}} entries
@@ -570,19 +504,8 @@ function AutoLFM.Core.Maestro.RegisterState(namespace, initialValue, options)
   end
 
   local opts = options or {}
-
-  -- Use provided ID or auto-generate
-  local stateId = opts.id
-  if not stateId then
-      stateCounter = stateCounter + 1
-      stateId = "S" .. string.format("%02d", stateCounter)
-  else
-      -- Update counter if provided ID is numeric and higher
-      local idNum = tonumber(string.sub(stateId, 2))
-      if idNum and idNum > stateCounter then
-          stateCounter = idNum
-      end
-  end
+  local stateId
+  stateId, stateCounter = getOrGenerateId(opts.id, "S", stateCounter)
 
   stateRegistry[namespace] = {
     value = initialValue,
@@ -685,7 +608,6 @@ end
 
 --=============================================================================
 -- REGISTRY DATA GETTER
---   Provides access to internal registries for debugging
 --=============================================================================
 
 --- Returns all registries for debugging
