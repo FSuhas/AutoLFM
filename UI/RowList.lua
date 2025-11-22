@@ -54,10 +54,14 @@ function AutoLFM.UI.RowList.SetupHover(element, row, color, elements, options)
     end
   end
   
-    -- Default gold color for hover background
-    local goldColor = AutoLFM.Core.Utils.GetColor("GOLD")
-    if goldColor then
-      row:SetBackdropColor(goldColor.r, goldColor.g, goldColor.b, 0.3)
+    -- Use the provided color for hover background (or fallback to gold)
+    local hoverColor = color
+    if not hoverColor or type(hoverColor) ~= "table" or not hoverColor.r then
+      hoverColor = AutoLFM.Core.Utils.GetColor("GOLD")
+    end
+    
+    if hoverColor then
+      row:SetBackdropColor(hoverColor.r, hoverColor.g, hoverColor.b, 0.3)
     end
 
   -- Show tooltip if provided
@@ -81,11 +85,11 @@ function AutoLFM.UI.RowList.SetupHover(element, row, color, elements, options)
 
   element:SetScript("OnLeave", function()
     -- Restore original color for all elements
-    local restoreColor = color or AutoLFM.Core.Utils.GetColor("GOLD")
+    local restoreColor = color
     
     -- Fallback to gold if restoreColor is invalid
-    if not restoreColor or type(restoreColor) ~= "table" then
-      restoreColor = {r = 1, g = 0.82, b = 0}
+    if not restoreColor or type(restoreColor) ~= "table" or not restoreColor.r then
+      restoreColor = AutoLFM.Core.Utils.GetColor("GOLD")
     end
     
     for _, elem in ipairs(elements) do

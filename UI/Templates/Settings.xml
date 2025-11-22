@@ -47,6 +47,7 @@
         <Layers>
           <Layer level="ARTWORK">
             <FontString name="$parent_Header" inherits="GameFontNormal" text="Dungeon filters:" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
               <Size>
                 <AbsDimension x="120" y="24"/>
               </Size>
@@ -165,6 +166,7 @@
         <Layers>
           <Layer level="ARTWORK">
             <FontString name="$parent_Header" inherits="GameFontNormal" text="Minimap button:" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
               <Size>
                 <AbsDimension x="120" y="24"/>
               </Size>
@@ -288,6 +290,7 @@
         <Layers>
           <Layer level="ARTWORK">
             <FontString name="$parent_Header" inherits="GameFontNormal" text="DarkUI (Shagu):" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
               <Size>
                 <AbsDimension x="120" y="24"/>
               </Size>
@@ -411,6 +414,7 @@
         <Layers>
           <Layer level="ARTWORK">
             <FontString name="$parent_Header" inherits="GameFontNormal" text="Preview layout:" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
               <Size>
                 <AbsDimension x="120" y="24"/>
               </Size>
@@ -512,6 +516,7 @@
         <Layers>
           <Layer level="ARTWORK">
             <FontString name="$parent_Header" inherits="GameFontNormal" text="Input message:" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
               <Size>
                 <AbsDimension x="120" y="24"/>
               </Size>
@@ -613,6 +618,7 @@
         <Layers>
           <Layer level="ARTWORK">
             <FontString name="$parent_Header" inherits="GameFontNormal" text="Presets display:" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
               <Size>
                 <AbsDimension x="120" y="24"/>
               </Size>
@@ -714,6 +720,7 @@
         <Layers>
           <Layer level="ARTWORK">
             <FontString name="$parent_Header" inherits="GameFontNormal" text="Default panel:" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
               <Size>
                 <AbsDimension x="120" y="24"/>
               </Size>

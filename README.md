@@ -8,21 +8,25 @@
 </p>
 
 ## :bug: Known issues:
-- [ ] Fix checking saved state dry run/debug
-- [ ] Fix scroll debug frame
-- [ ] Fix preview icon missing truncate preview message 2 lines
-- [ ] Fix ConvertToRaid() when at least 2 players and groupsize > 5
-- [ ] Fix background WelcomePopup
+- [] Fix scroll debug frame
 
 ## :blue_book: To do:
 - [ ] Write readme/documentation
-- [ ] Rework visual AutoInvite content
 - [ ] Reorganize/rename Maestro ID
-- [ ] Add eye icon animation
-- [ ] Add button to insert VAR in custom editbox
-- [ ] Remove test slash command
+- [ ] Reorganize debug colors
+- [ ] Check print indications and colors
 - [ ] Add correct API from Maestro state
 - [ ] Add FuBar plugin
 
 ## :heavy_check_mark: Done:
+- [x] Rework visual AutoInvite content
+- [x] Remove test slash command
+- [x] Fix preview icon missing truncate preview message 2 lines
+- [x] Fix ConvertToRaid() when at least 2 players and groupsize > 5
+- [x] Reorganize state ID Maestro
+- [x] Add eye icon animation
+- [x] Add button to insert VAR in custom editbox
+- [x] Clean editbox params (no more dynamic size)
+- [x] Fix checking saved state dry run/debug
+- [x] Fix background WelcomePopup
 - [x] Exit editbox focus when Escape or click on other function

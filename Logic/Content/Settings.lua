@@ -147,11 +147,16 @@ end
 -----------------------------------------------------------------------------
 --- Toggles dry run mode for testing without actually sending messages
 --- When enabled, addon simulates actions but doesn't perform actual chat/whisper operations
---- Session-only setting (not persisted between game sessions)
+--- Toggle dry run mode - persisted between sessions
 --- @param isEnabled boolean - True to enable dry run mode, false to disable
 function AutoLFM.Logic.Content.Settings.ToggleDryRun(isEnabled)
-  -- Update Maestro state (not persisted between sessions)
+  -- Update Maestro state
   AutoLFM.Core.Maestro.SetState("Settings.DryRun", isEnabled)
+
+  -- Save to persistent storage
+  if AutoLFM.Core.Persistent and AutoLFM.Core.Persistent.SetDryRun then
+    AutoLFM.Core.Persistent.SetDryRun(isEnabled)
+  end
 
   -- Log the change
   local action = isEnabled and "Enabled" or "Disabled"
@@ -162,7 +167,7 @@ end
 -- State Declarations
 -----------------------------------------------------------------------------
 --- State: Dry run mode enabled/disabled
-AutoLFM.Core.SafeRegisterState("Settings.DryRun", false, { id = "S20" })
+AutoLFM.Core.SafeRegisterState("Settings.DryRun", false, { id = "S30" })
 
 -----------------------------------------------------------------------------
 -- Auto-register initialization
@@ -171,7 +176,11 @@ AutoLFM.Core.SafeRegisterInit("Logic.Content.Settings", function()
   AutoLFM.Logic.Content.Settings.LoadSettings()
   AutoLFM.Logic.Content.Settings.Init()
 
-  -- Dry run state defaults to false (session-only, not persisted)
+  -- Load dry run state from persistent storage
+  if AutoLFM.Core.Persistent and AutoLFM.Core.Persistent.GetDryRun then
+    local dryRunEnabled = AutoLFM.Core.Persistent.GetDryRun()
+    AutoLFM.Core.Maestro.SetState("Settings.DryRun", dryRunEnabled)
+  end
 end, {
   id = "I15",
   dependencies = {"Core.Persistent"} -- Must run after Persistent

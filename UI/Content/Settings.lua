@@ -108,6 +108,16 @@ function AutoLFM.UI.Content.Settings.OnShow(frame)
 end
 
 -----------------------------------------------------------------------------
+-- OnShow: Refresh the panel when shown
+-----------------------------------------------------------------------------
+--- XML OnShow callback - restores saved option states when panel is shown
+--- @param frame frame - The Settings panel frame
+function AutoLFM.UI.Content.Settings.OnShow(frame)
+  applyColors(AutoLFM.UI.RowList.GetScrollChild(panel))
+  AutoLFM.UI.Content.Settings.RestoreState()
+end
+
+-----------------------------------------------------------------------------
 -- Create Default Panel Dropdown
 -----------------------------------------------------------------------------
 --- Creates the default panel dropdown menu using WoW's native dropdown system
@@ -380,6 +390,28 @@ function AutoLFM.UI.Content.Settings.OnDebugToggle(isEnabled)
   end
 end
 
+--- Syncs the debug checkbox with the actual debug window state
+--- Called after tab changes to ensure checkbox reflects if debug window is open
+function AutoLFM.UI.Content.Settings.SyncDebugCheckbox()
+  if not panel then return end
+
+  local scrollChild = AutoLFM.UI.RowList.GetScrollChild(panel)
+  if not scrollChild then return end
+
+  local debugCheckbox = getglobal(scrollChild:GetName().."_Debug")
+  if debugCheckbox then
+      -- Check if debug window is actually visible
+      local isDebugWindowOpen = false
+      if AutoLFM.Components.Debug then
+          local debugFrame = getglobal("AutoLFM_DebugWindow")
+          if debugFrame and debugFrame:IsVisible() then
+              isDebugWindowOpen = true
+          end
+      end
+      debugCheckbox:SetChecked(isDebugWindowOpen and 1 or nil)
+  end
+end
+
 -----------------------------------------------------------------------------
 -- Public API - Update Filter Checkbox (called directly by Logic layer)
 -----------------------------------------------------------------------------
@@ -457,9 +489,8 @@ function AutoLFM.UI.Content.Settings.RestoreState()
       local dryRunCheckbox = getglobal(scrollChild:GetName().."_DryRun")
       if dryRunCheckbox then dryRunCheckbox:SetChecked(dryRun and 1 or nil) end
 
-      -- Restore debug (always false on load)
-      local debugCheckbox = getglobal(scrollChild:GetName().."_Debug")
-      if debugCheckbox then debugCheckbox:SetChecked(nil) end
+      -- Restore debug checkbox to reflect actual window state
+      AutoLFM.UI.Content.Settings.SyncDebugCheckbox()
   end
 
   isRestoringState = false

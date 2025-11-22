@@ -14,12 +14,6 @@ local initFrame = nil
 local lastGroupSize = 0  -- Track group size changes
 
 --=============================================================================
--- TEST MODE STATE
---=============================================================================
-local testModeEnabled = false
-local simulatedGroupSize = 1
-
---=============================================================================
 -- EVENT HANDLERS
 --=============================================================================
 -----------------------------------------------------------------------------
@@ -57,7 +51,6 @@ local function onPlayerLevelUp()
 
   if AutoLFM_MainFrame and AutoLFM_MainFrame:IsVisible() then
     if AutoLFM.Core.Maestro then
-      AutoLFM.Core.Maestro.Dispatch("DungeonsList.Refresh")
       AutoLFM.Core.Maestro.Dispatch("QuestsList.Refresh")
     end
   end
@@ -81,8 +74,8 @@ local function onGroupRosterChange()
   local partyCount = GetNumPartyMembers()
 
   -- Debug log
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogDebug then
-    AutoLFM.Core.Utils.LogDebug("onGroupRosterChange: raidCount=" .. tostring(raidCount) .. ", partyCount=" .. tostring(partyCount))
+  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
+    AutoLFM.Core.Utils.LogInfo("onGroupRosterChange: raidCount=" .. tostring(raidCount) .. ", partyCount=" .. tostring(partyCount))
   end
 
   if raidCount and raidCount > 0 then
@@ -100,8 +93,8 @@ local function onGroupRosterChange()
   end
 
   -- Debug log
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogDebug then
-    AutoLFM.Core.Utils.LogDebug("onGroupRosterChange: currentSize=" .. currentSize .. ", lastGroupSize=" .. lastGroupSize .. ", groupType=" .. groupType)
+  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
+    AutoLFM.Core.Utils.LogInfo("onGroupRosterChange: currentSize=" .. currentSize .. ", lastGroupSize=" .. lastGroupSize .. ", groupType=" .. groupType)
   end
 
   -- Only process if size actually changed (prevents duplicate triggers)
@@ -112,18 +105,13 @@ local function onGroupRosterChange()
 
     lastGroupSize = currentSize
 
-    -- Call Broadcaster to handle group size changes
-    if AutoLFM.Logic.Broadcaster then
-      AutoLFM.Logic.Broadcaster.OnGroupSizeChanged(currentSize)
-    end
-
     -- Update Maestro states
     if AutoLFM.Core.Maestro then
-      AutoLFM.Core.Maestro.SetState("Group.Size", currentSize)
       AutoLFM.Core.Maestro.SetState("Group.Type", groupType)
+      AutoLFM.Core.Maestro.SetState("Group.Size", currentSize)
     end
 
-    -- Dispatch Maestro event for UI updates
+    -- Dispatch Maestro event for listeners (e.g., Broadcaster)
     if AutoLFM.Core.Maestro then
       AutoLFM.Core.Maestro.Dispatch("Group.SizeChanged", { size = currentSize })
     end
@@ -267,8 +255,8 @@ function AutoLFM.Core.Events.Init()
 
   -- Update initial Maestro states
   if AutoLFM.Core.Maestro then
-    AutoLFM.Core.Maestro.SetState("Group.Size", initialSize)
     AutoLFM.Core.Maestro.SetState("Group.Type", initialType)
+    AutoLFM.Core.Maestro.SetState("Group.Size", initialSize)
     AutoLFM.Core.Maestro.SetState("Group.IsLeader", UnitIsPartyLeader("player") or false)
   end
 
@@ -277,46 +265,7 @@ function AutoLFM.Core.Events.Init()
   end
 end
 
---- Gets current group size (1 for solo, 2-5 for party, 6-40 for raid)
---- @return number - Current group size
-function AutoLFM.Core.Events.GetGroupSize()
-  -- Return simulated size if test mode is enabled
-  if testModeEnabled then
-    return simulatedGroupSize
-  end
 
-  local raidCount = GetNumRaidMembers()
-  local partyCount = GetNumPartyMembers()
-
-  if raidCount and raidCount > 0 then
-    return raidCount
-  elseif partyCount and partyCount > 0 then
-    return partyCount + 1
-  else
-    return 1
-  end
-end
-
---- Gets current group type
---- @return string - "solo", "party", or "raid"
-function AutoLFM.Core.Events.GetGroupType()
-  local raidCount = GetNumRaidMembers()
-  local partyCount = GetNumPartyMembers()
-
-  if raidCount and raidCount > 0 then
-    return "raid"
-  elseif partyCount and partyCount > 0 then
-    return "party"
-  else
-    return "solo"
-  end
-end
-
---- Checks if player is party/raid leader
---- @return boolean - True if player is leader
-function AutoLFM.Core.Events.IsGroupLeader()
-  return UnitIsPartyLeader("player") or false
-end
 
 --- Forces a refresh of the group size (useful when starting broadcaster)
 function AutoLFM.Core.Events.RefreshGroupSize()
@@ -324,52 +273,40 @@ function AutoLFM.Core.Events.RefreshGroupSize()
 end
 
 --=============================================================================
--- TEST MODE API
+-- SLASH COMMANDS
 --=============================================================================
 
---- Enables test mode for simulating group size changes
-function AutoLFM.Core.Events.EnableTestMode()
-  testModeEnabled = true
-  simulatedGroupSize = 1
-end
+--- Handles slash command input and routes to appropriate actions
+--- @param msg string - Command arguments (empty for toggle, "debug" for debug window)
+local function handleSlashCommand(msg)
+  -- Ensure msg is a string
+  msg = msg or ""
 
---- Disables test mode and returns to real group size
-function AutoLFM.Core.Events.DisableTestMode()
-  testModeEnabled = false
-  simulatedGroupSize = 1
-end
+  -- Extract the command (first word, case-insensitive)
+  local cmd = string.lower(string.sub(msg, 1, string.find(msg .. " ", " ") - 1))
 
---- Checks if test mode is currently enabled
---- @return boolean - True if test mode is active
-function AutoLFM.Core.Events.IsTestModeEnabled()
-  return testModeEnabled
-end
+  if cmd == "" then
+      -- Toggle main window
+      AutoLFM.Core.Maestro.Dispatch("MainFrame.Toggle")
 
---- Sets the simulated group size (only works in test mode)
---- @param size number - The simulated group size (1-40)
-function AutoLFM.Core.Events.SetSimulatedGroupSize(size)
-  if not testModeEnabled then
-    return
+  elseif cmd == "debug" then
+      -- Toggle debug window
+      AutoLFM.Core.Maestro.Dispatch("Debug.Toggle")
+      
+  else
+      -- Show help in chat
+      AutoLFM.Core.Utils.PrintTitle("=== AutoLFM Commands ===")
+      AutoLFM.Core.Utils.Print("  /lfm - Toggle main window")
+      AutoLFM.Core.Utils.Print("  /lfm debug - Toggle debug window")
   end
-
-  if size < 1 then size = 1 end
-  if size > 40 then size = 40 end
-
-  simulatedGroupSize = size
-end
-
---- Gets the simulated group size (for test mode)
---- @return number - The current simulated size
-function AutoLFM.Core.Events.GetSimulatedGroupSize()
-  return simulatedGroupSize
 end
 
 --=============================================================================
 -- STATE DECLARATIONS
 --=============================================================================
+AutoLFM.Core.SafeRegisterState("Group.Type", "solo", { id = "S10" })
 AutoLFM.Core.SafeRegisterState("Group.Size", 1, { id = "S11" })
-AutoLFM.Core.SafeRegisterState("Group.Type", "solo", { id = "S12" })
-AutoLFM.Core.SafeRegisterState("Group.IsLeader", false, { id = "S13" })
+AutoLFM.Core.SafeRegisterState("Group.IsLeader", false, { id = "S12" })
 
 --=============================================================================
 -- EVENT DECLARATIONS
@@ -393,3 +330,10 @@ initFrame:SetScript("OnEvent", function()
   AutoLFM.Core.Maestro.RunInit()
   initFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end)
+
+--=============================================================================
+-- SLASH COMMAND REGISTRATION
+--=============================================================================
+
+SLASH_AUTOLFM1 = "/lfm"
+SlashCmdList["AUTOLFM"] = handleSlashCommand

@@ -42,6 +42,10 @@ local customMessageLabel
 local usageIcon
 local usageIconTexture
 local usageIconHighlight
+local varRButton
+local varCButton
+local varTButton
+local varMButton
 local groupSizeControl
 local groupSizeSlider
 local groupSizeControlEditBox
@@ -218,42 +222,6 @@ end
 -- EDITBOX FUNCTIONS
 --=============================================================================
 
---- Calculates the length of text with variables expanded
-local function calculateExpandedLength(text)
-  if not text or text == "" then return 0 end
-  
-  -- Replace variables with estimated max lengths
-  local expanded = text
-  expanded = string.gsub(expanded, "{ROL}", "Tank, Healer, DPS")  -- ~18 chars max
-  expanded = string.gsub(expanded, "{CUR}", "40")  -- 2 chars max
-  expanded = string.gsub(expanded, "{TAR}", "40")  -- 2 chars max
-  expanded = string.gsub(expanded, "{MIS}", "40")  -- 2 chars max
-  
-  return string.len(expanded)
-end
-
---- Updates editbox max letters based on generated message length
-local function updateEditBoxMaxLetters()
-  if not customMessageEditBox then return end
-  
-  local currentMode = getCurrentMode()
-  local usedLength = 0
-  
-  if currentMode == MODE_DETAILS then
-    -- Details mode: generated message + links
-    local message = AutoLFM.Core.Maestro.GetState("Message.ToBroadcast") or ""
-    local detailsText = AutoLFM.Core.Maestro.GetState("Selection.DetailsText") or ""
-    usedLength = string.len(message) - string.len(detailsText)
-  else
-    -- Custom mode: calculate expanded variable length
-    local customMessage = customMessageEditBox:GetText() or ""
-    usedLength = calculateExpandedLength(customMessage) - string.len(customMessage)
-  end
-  
-  local maxLetters = CHAT_MESSAGE_MAX_LENGTH - usedLength
-  customMessageEditBox:SetMaxLetters(math.max(1, maxLetters))
-end
-
 --- Updates editbox placeholder visibility based on text content
 local function updatePlaceholder()
   if not customMessageEditBox or not customMessagePlaceholder then return end
@@ -264,79 +232,6 @@ local function updatePlaceholder()
   end
 end
 
---- Creates the custom message editbox with container, backdrop, and scripts
---- Sets up multiline editbox with placeholder text, auto-height adjustment, and text validation
---- @param scrollChild frame - Parent scroll child frame to anchor the editbox to
-local function createEditBox(scrollChild)
-  -- Create container frame
-  customMessageContainer = CreateFrame("Frame", "AutoLFM_Content_Messaging_EditBox_Container", scrollChild)
-  customMessageContainer:SetWidth(EDITBOX_WIDTH)
-  customMessageContainer:SetHeight(EDITBOX_HEIGHT)
-  customMessageContainer:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 5, -55)
-  customMessageContainer:SetFrameLevel(scrollChild:GetFrameLevel() + 1)
-
-  -- Set backdrop
-  customMessageContainer:SetBackdrop({
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = false,
-    edgeSize = 12,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 }
-  })
-  customMessageContainer:SetBackdropBorderColor(1, 0.82, 0, 0.8)
-
-  -- Create background texture
-  local bg = customMessageContainer:CreateTexture(nil, "BACKGROUND")
-  bg:SetAllPoints()
-  bg:SetTexture(0, 0, 0, 0.6)
-
-  -- Create editbox
-  customMessageEditBox = CreateFrame("EditBox", customMessageContainer:GetName() .. "_EditBox", customMessageContainer)
-  customMessageEditBox:SetWidth(290)
-  customMessageEditBox:SetHeight(EDITBOX_HEIGHT)
-  customMessageEditBox:SetPoint("TOPLEFT", customMessageContainer, "TOPLEFT")
-  customMessageEditBox:SetAutoFocus(false)
-  customMessageEditBox:SetMultiLine(true)
-  customMessageEditBox:SetMaxLetters(CHAT_MESSAGE_MAX_LENGTH)
-  customMessageEditBox:SetFontObject(GameFontNormalSmall)
-  customMessageEditBox:SetTextInsets(5, 5, 5, 8)
-  customMessageEditBox:SetSpacing(EDITBOX_SPACING)
-
-  -- Set editbox scripts
-  customMessageEditBox:SetScript("OnTextChanged", function()
-    local text = this:GetText()
-    if text and string.find(text, "\n") then
-      this:SetText(string.gsub(text, "\n", ""))
-    end
-    updatePlaceholder()
-    updateEditBoxMaxLetters()
-
-    -- Skip dispatch if we're restoring from State (prevent loop)
-    if isRestoringFromState then return end
-
-    -- Dispatch appropriate command based on current mode
-    if not text then text = "" end
-    local currentMode = getCurrentMode()
-    if currentMode == MODE_CUSTOM then
-      -- Custom mode: full message with variables
-      AutoLFM.Core.Maestro.Dispatch("Selection.SetCustomMessage", text)
-    else
-      -- Details mode: text appended to auto-generated message
-      AutoLFM.Core.Maestro.Dispatch("Selection.SetDetailsText", text)
-    end
-  end)
-
-  customMessageEditBox:SetScript("OnEscapePressed", function()
-    this:ClearFocus()
-  end)
-
-  -- Create placeholder text
-  customMessagePlaceholder = customMessageEditBox:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  customMessagePlaceholder:SetPoint("CENTER", customMessageEditBox, "CENTER")
-  customMessagePlaceholder:SetText(PLACEHOLDER_DETAILS)
-
-  updatePlaceholder()
-end
-
 --- Caches references to all Messaging panel UI elements for quick access
 --- Retrieves and stores references to sliders, icons, radios, editboxes, and labels
 local function initializeUIReferences()
@@ -345,6 +240,10 @@ local function initializeUIReferences()
   usageIcon = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_UsageIcon")
   usageIconTexture = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_UsageIcon_Texture")
   usageIconHighlight = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_UsageIcon_Highlight")
+  varRButton = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_VarRButton")
+  varCButton = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_VarCButton")
+  varTButton = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_VarTButton")
+  varMButton = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_VarMButton")
   groupSizeControl = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_GroupSizeControl")
   groupSizeSlider = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_GroupSizeControl_Slider")
   groupSizeControlEditBox = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_GroupSizeControl_EditBox")
@@ -391,7 +290,7 @@ local function setupGroupSizeControls()
 
   if groupSizeControl and customMessageContainer then
     groupSizeControl:ClearAllPoints()
-    groupSizeControl:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -8)
+    groupSizeControl:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -4)
   end
 end
 
@@ -505,6 +404,10 @@ local function updateModeUI(isCustomMode, clearOnModeSwitch)
   end
 
   setFrameVisibility(usageIcon, isCustomMode)
+  setFrameVisibility(varRButton, isCustomMode)
+  setFrameVisibility(varCButton, isCustomMode)
+  setFrameVisibility(varTButton, isCustomMode)
+  setFrameVisibility(varMButton, isCustomMode)
   setFrameVisibility(groupSizeControl, isCustomMode)
   
   -- Update scroll after visibility changes
@@ -628,11 +531,10 @@ function AutoLFM.UI.Content.Messaging.OnEditBoxTextChanged(editBox)
     editBox:SetText(string.gsub(text, "\n", ""))
   end
   
-  -- Update placeholder and editbox
+  -- Update placeholder
   customMessageEditBox = editBox
   customMessagePlaceholder = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer_Placeholder")
   updatePlaceholder()
-  updateEditBoxMaxLetters()
   
   -- Skip dispatch if we're restoring from State
   if isRestoringFromState then return end
@@ -684,7 +586,6 @@ function AutoLFM.UI.Content.Messaging.UpdateModeDisplay(clearOnModeSwitch)
 
   updateModeUI(isCustomMode, clearOnModeSwitch)
   repositionChannelsIcon(isCustomMode)
-  updateEditBoxMaxLetters()
 end
 
 --- Handles group size slider value changes - updates the editbox display
@@ -707,10 +608,7 @@ end
 --- Handles usage icon mouse enter - shows tooltip with variable examples
 --- @param frame frame - The usage icon frame
 function AutoLFM.UI.Content.Messaging.OnUsageIconEnter(frame)
-  -- Hide normal icon and show highlight texture
-  if usageIconTexture then
-    usageIconTexture:Hide()
-  end
+  -- Show highlight texture over the icon
   if usageIconHighlight then
     usageIconHighlight:Show()
   end
@@ -739,15 +637,64 @@ end
 --- Handles usage icon mouse leave - hides tooltip
 --- @param frame frame - The usage icon frame
 function AutoLFM.UI.Content.Messaging.OnUsageIconLeave(frame)
-  -- Show normal icon and hide highlight texture
-  if usageIconTexture then
-    usageIconTexture:Show()
-  end
+  -- Hide highlight texture (keep icon visible)
   if usageIconHighlight then
     usageIconHighlight:Hide()
   end
 
   GameTooltip:Hide()
+end
+
+--- Handles variable button mouse enter - shows highlight
+--- @param frame frame - The variable button frame
+function AutoLFM.UI.Content.Messaging.OnVarButtonEnter(frame)
+  local highlight = getUIElement(frame:GetName() .. "_Highlight")
+  if highlight then
+    highlight:Show()
+  end
+end
+
+--- Handles variable button mouse leave - hides highlight
+--- @param frame frame - The variable button frame
+function AutoLFM.UI.Content.Messaging.OnVarButtonLeave(frame)
+  local highlight = getUIElement(frame:GetName() .. "_Highlight")
+  if highlight then
+    highlight:Hide()
+  end
+end
+
+--- Handles variable button clicks - inserts variable into editbox
+--- Maps button name to corresponding variable
+--- @param frame frame - The variable button frame
+function AutoLFM.UI.Content.Messaging.OnVarButtonClick(frame)
+  -- Ensure customMessageEditBox is initialized
+  if not customMessageEditBox then
+    customMessageEditBox = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer_EditBox")
+  end
+  
+  if not customMessageEditBox then return end
+  
+  -- Map button name to variable
+  local buttonName = frame:GetName()
+  local variable = ""
+  
+  if string.find(buttonName, "VarRButton", 1, true) then
+    variable = "{ROL}"
+  elseif string.find(buttonName, "VarCButton", 1, true) then
+    variable = "{CUR}"
+  elseif string.find(buttonName, "VarTButton", 1, true) then
+    variable = "{TAR}"
+  elseif string.find(buttonName, "VarMButton", 1, true) then
+    variable = "{MIS}"
+  end
+  
+  if variable ~= "" then
+    -- Get current text and append variable
+    local currentText = customMessageEditBox:GetText()
+    local newText = currentText .. variable
+    customMessageEditBox:SetText(newText)
+    customMessageEditBox:SetFocus()
+  end
 end
 
 --=============================================================================

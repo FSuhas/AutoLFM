@@ -16,13 +16,13 @@ local MAX_DUNGEONS = AutoLFM.Core.Constants.MAX_DUNGEONS or 3
 -- STATE DECLARATIONS (MUST BE FIRST)
 --=============================================================================
 AutoLFM.Core.SafeRegisterState("Selection.Mode", "none", { id = "S01" })
-AutoLFM.Core.SafeRegisterState("Selection.DungeonNames", {}, { id = "S02" })
-AutoLFM.Core.SafeRegisterState("Selection.RaidName", nil, { id = "S03" })
-AutoLFM.Core.SafeRegisterState("Selection.RaidSize", 40, { id = "S04" })
-AutoLFM.Core.SafeRegisterState("Selection.Roles", {}, { id = "S05" })
-AutoLFM.Core.SafeRegisterState("Selection.CustomMessage", "", { id = "S06" })
-AutoLFM.Core.SafeRegisterState("Selection.CustomGroupSize", 5, { id = "S07" })
-AutoLFM.Core.SafeRegisterState("Selection.DetailsText", "", { id = "S08" })
+AutoLFM.Core.SafeRegisterState("Selection.Roles", {}, { id = "S02" })
+AutoLFM.Core.SafeRegisterState("Selection.DungeonNames", {}, { id = "S03" })
+AutoLFM.Core.SafeRegisterState("Selection.RaidName", nil, { id = "S04" })
+AutoLFM.Core.SafeRegisterState("Selection.RaidSize", 40, { id = "S05" })
+AutoLFM.Core.SafeRegisterState("Selection.DetailsText", "", { id = "S06" })
+AutoLFM.Core.SafeRegisterState("Selection.CustomMessage", "", { id = "S07" })
+AutoLFM.Core.SafeRegisterState("Selection.CustomGroupSize", 5, { id = "S08" })
 
 --=============================================================================
 -- PRIVATE HELPERS
@@ -167,7 +167,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearDungeons", function()
   AutoLFM.Core.Utils.LogAction("Cleared all dungeons")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C06" })
+end, { id = "C14" })
 
 --=============================================================================
 -- COMMANDS - RAIDS
@@ -292,7 +292,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRaid", function()
   AutoLFM.Core.Utils.LogAction("Cleared raid")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C07" })
+end, { id = "C15" })
 
 --=============================================================================
 -- COMMANDS - ROLES

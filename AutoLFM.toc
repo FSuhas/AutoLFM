@@ -14,9 +14,9 @@
 # Core
 #=============================================================================
 Core\Maestro.lua
-Core\Events.lua
-Core\Commands.lua
+Core\Cache.lua
 Core\Constants.lua
+Core\Events.lua
 Core\Persistent.lua
 Core\Utils.lua
 
@@ -25,6 +25,7 @@ Core\Utils.lua
 #=============================================================================
 Components\DarkUI.lua
 Components\Debug.lua
+Components\EyeAnimation.lua
 Components\MinimapButton.lua
 Components\WelcomePopup.lua
 
@@ -32,6 +33,7 @@ Components\WelcomePopup.lua
 # Logic
 #=============================================================================
 Logic\Broadcaster.lua
+Logic\Group.lua
 Logic\MainFrame.lua
 Logic\Message.lua
 Logic\Selection.lua
@@ -66,7 +68,6 @@ UI\Content\Settings.lua
 #=============================================================================
 UI\Templates\MainFrame.xml
 UI\Templates\AutoInvite.xml
-UI\Templates\Debug.xml
 UI\Templates\Lists.xml
 UI\Templates\Messaging.xml
 UI\Templates\Presets.xml

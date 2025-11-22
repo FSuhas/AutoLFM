@@ -218,7 +218,6 @@ end
 --=============================================================================
 -- CHANNEL SELECTION MANAGEMENT
 --=============================================================================
-local selectedChannels = {}  -- { ["LookingForGroup"] = true, ["World"] = true, ... }
 
 -----------------------------------------------------------------------------
 -- Toggle Channel Selection
@@ -233,24 +232,34 @@ function AutoLFM.Logic.Content.Messaging.ToggleChannel(channelName)
     return
   end
 
-  -- Toggle selection
-  if selectedChannels[channelName] then
-    selectedChannels[channelName] = nil
-    if AutoLFM.Core and AutoLFM.Core.Utils then
-      AutoLFM.Core.Utils.LogAction("Channel deselected: " .. channelName)
+  -- Get current channels from Maestro State
+  local channelsList = AutoLFM.Core.Maestro.GetState("Channels.ActiveChannels") or {}
+  
+  -- Check if channel is already selected
+  local isSelected = false
+  local newChannelsList = {}
+  
+  for i = 1, table.getn(channelsList) do
+    if channelsList[i] == channelName then
+      isSelected = true
+      -- Don't add to new list (remove it)
+      if AutoLFM.Core and AutoLFM.Core.Utils then
+        AutoLFM.Core.Utils.LogAction("Channel deselected: " .. channelName)
+      end
+    else
+      table.insert(newChannelsList, channelsList[i])
     end
-  else
-    selectedChannels[channelName] = true
+  end
+  
+  -- If not selected, add it
+  if not isSelected then
+    table.insert(newChannelsList, channelName)
     -- Join the channel
     AutoLFM.Logic.Content.Messaging.JoinChannel(channelName)
   end
 
   -- Update state
-  local channelsList = {}
-  for name, _ in pairs(selectedChannels) do
-    table.insert(channelsList, name)
-  end
-  AutoLFM.Core.Maestro.SetState("Channels.ActiveChannels", channelsList)
+  AutoLFM.Core.Maestro.SetState("Channels.ActiveChannels", newChannelsList)
 
   -- Save to persistent storage
   if AutoLFM.Core and AutoLFM.Core.Persistent then
@@ -299,7 +308,7 @@ end, { id = "C23" })
 AutoLFM.Core.Maestro.RegisterEvent("Channels.Changed", { id = "E05" })
 
 --- State: Active channels list
-AutoLFM.Core.SafeRegisterState("Channels.ActiveChannels", {}, { id = "S10" })
+AutoLFM.Core.SafeRegisterState("Channels.ActiveChannels", {}, { id = "S15" })
 
 -----------------------------------------------------------------------------
 -- Load Saved Channels
@@ -311,16 +320,16 @@ local function loadSavedChannels()
   local savedChannels = AutoLFM.Core.Persistent.GetSelectedChannels()
   if not savedChannels or type(savedChannels) ~= "table" then return end
 
-  -- Restore selected channels
+  -- Join all saved channels
   for i = 1, table.getn(savedChannels) do
     local channelName = savedChannels[i]
     if channelName and channelName ~= "" then
-      selectedChannels[channelName] = true
       -- Join the channel
       AutoLFM.Logic.Content.Messaging.JoinChannel(channelName)
     end
   end
 
+  -- Update Maestro state with saved channels
   AutoLFM.Core.Maestro.SetState("Channels.ActiveChannels", savedChannels)
 end
 

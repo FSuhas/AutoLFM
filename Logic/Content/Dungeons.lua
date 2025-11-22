@@ -8,11 +8,6 @@ AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Dungeons = {}
 
 --=============================================================================
--- PRIVATE STATE
---=============================================================================
-local cachedDungeons = nil
-
---=============================================================================
 -- PRIVATE HELPERS
 --=============================================================================
 
@@ -22,7 +17,7 @@ local cachedDungeons = nil
 --- @return table - Color object with r, g, b, hex, name, priority fields
 local function getDungeonColor(dungeon, playerLevel)
   if not dungeon or not dungeon.levelMin or not playerLevel then
-  return AutoLFM.Core.Utils.GetColorForLevel(1, AutoLFM.Core.Constants.INVALID_LEVEL, AutoLFM.Core.Constants.INVALID_LEVEL)
+    return AutoLFM.Core.Utils.GetColorForLevel(1, AutoLFM.Core.Constants.INVALID_LEVEL, AutoLFM.Core.Constants.INVALID_LEVEL)
   end
 
   return AutoLFM.Core.Utils.GetColorForLevel(playerLevel, dungeon.levelMin, dungeon.levelMax)
@@ -92,34 +87,39 @@ end
 --- @param changedState boolean - Optional new state of the filter (for logging)
 --- @return table - Array of {index, dungeon, color} sorted by priority and level
 function AutoLFM.Logic.Content.Dungeons.GetSortedDungeons(changedColorId, changedState)
-  if not cachedDungeons then
-  cachedDungeons = buildSortedDungeons(changedColorId, changedState)
-  end
-  return cachedDungeons
+  return AutoLFM.Core.Cache.Get("Dungeons", changedColorId, changedState)
 end
 
 --- Clears the cached sorted dungeon list
 --- Call this when player level changes or filters are updated
 function AutoLFM.Logic.Content.Dungeons.ClearCache()
-  cachedDungeons = nil
+  AutoLFM.Core.Cache.Clear("Dungeons")
 end
 
 --- Refreshes the dungeon list and UI
 --- @param changedColorId string - Optional color filter that changed (for logging)
 --- @param changedState boolean - Optional new state of the filter (for logging)
 function AutoLFM.Logic.Content.Dungeons.RefreshList(changedColorId, changedState)
-  AutoLFM.Logic.Content.Dungeons.ClearCache()
-
-  local sorted = buildSortedDungeons(changedColorId, changedState)
-  cachedDungeons = sorted
+  AutoLFM.Core.Cache.Clear("Dungeons")
 
   if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogAction then
-  AutoLFM.Core.Utils.LogAction("Refresh Dungeons list")
+    AutoLFM.Core.Utils.LogAction("Refresh Dungeons list")
   end
 
   -- Refresh UI directly (no Maestro needed for UI-only operations)
   if AutoLFM.UI.Content.Dungeons and AutoLFM.UI.Content.Dungeons.Refresh then
-  AutoLFM.UI.Content.Dungeons.Refresh()
+    AutoLFM.UI.Content.Dungeons.Refresh()
   end
 end
+
+--=============================================================================
+-- INITIALIZATION
+--=============================================================================
+
+AutoLFM.Core.SafeRegisterInit("Logic.Content.Dungeons", function()
+  -- Register cache builder for dungeons
+  if AutoLFM.Core.Cache then
+    AutoLFM.Core.Cache.Register("Dungeons", buildSortedDungeons)
+  end
+end, { id = "I19" })
 

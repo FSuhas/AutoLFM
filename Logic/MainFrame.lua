@@ -225,10 +225,4 @@ AutoLFM.Core.SafeRegisterInit("MainFrame", function()
       AutoLFM.UI.MainFrame.UpdateMessagePreview(newMessage)
     end
   end)
-
-  -- Initialize message preview with current value
-  local currentMessage = AutoLFM.Core.Maestro.GetState("Message.ToBroadcast")
-  if AutoLFM.UI.MainFrame and AutoLFM.UI.MainFrame.UpdateMessagePreview and currentMessage then
-    AutoLFM.UI.MainFrame.UpdateMessagePreview(currentMessage)
-  end
 end, { id = "I11" })

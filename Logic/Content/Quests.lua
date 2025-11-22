@@ -8,11 +8,6 @@ AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Quests = {}
 
 --=============================================================================
--- PRIVATE STATE
---=============================================================================
-local cachedQuests = nil
-
---=============================================================================
 -- PRIVATE HELPERS
 --=============================================================================
 
@@ -22,7 +17,7 @@ local cachedQuests = nil
 --- @return table - Color object with r, g, b, hex, name, priority fields
 local function getQuestColor(questLevel, playerLevel)
   if not questLevel or not playerLevel then
-  return AutoLFM.Core.Utils.GetColorForLevel(1, AutoLFM.Core.Utils.INVALID_LEVEL, AutoLFM.Core.Utils.INVALID_LEVEL)
+    return AutoLFM.Core.Utils.GetColorForLevel(1, AutoLFM.Core.Constants.INVALID_LEVEL, AutoLFM.Core.Constants.INVALID_LEVEL)
   end
 
   return AutoLFM.Core.Utils.GetColorForLevel(playerLevel, questLevel, questLevel)
@@ -76,15 +71,6 @@ local function buildSortedQuests()
   end)
 
   return quests
-end
-
---- Returns cached sorted quest list, building it if not cached
---- @return table - Array of {index, name, level, tag, zone, color} sorted by level
-local function getSortedQuests()
-  if not cachedQuests then
-  cachedQuests = buildSortedQuests()
-  end
-  return cachedQuests
 end
 
 --=============================================================================
@@ -229,13 +215,13 @@ end, { id = "C26" })
 --- Returns quests from quest log sorted by level (uses cache)
 --- @return table - Array of {index, name, level, tag, zone, color} sorted by level
 function AutoLFM.Logic.Content.Quests.GetSortedQuests()
-  return getSortedQuests()
+  return AutoLFM.Core.Cache.Get("Quests")
 end
 
 --- Clears the cached quest list
 --- Call this when quest log is updated or player levels up
 function AutoLFM.Logic.Content.Quests.ClearCache()
-  cachedQuests = nil
+  AutoLFM.Core.Cache.Clear("Quests")
 end
 
 --- Checks if a quest link is in any message (details or custom)
@@ -245,4 +231,13 @@ function AutoLFM.Logic.Content.Quests.IsQuestSelected(questIndex)
   local link = AutoLFM.Logic.Content.Quests.CreateQuestLink(questIndex)
   if not link then return false end
   return isQuestLinkInMessage(link)
+end
+
+--=============================================================================
+-- INITIALIZATION
+--=============================================================================
+
+--- Register cache builder for quests
+if AutoLFM.Core.Cache then
+  AutoLFM.Core.Cache.Register("Quests", buildSortedQuests)
 end

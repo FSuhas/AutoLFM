@@ -39,7 +39,7 @@
         </Texture>
       </Layer>
       <Layer level="OVERLAY">
-        <Texture file="Interface\AddOns\AutoLFM\UI\Textures\Eye\Eye00">
+        <Texture name="$parent_Icon" file="Interface\AddOns\AutoLFM\UI\Textures\Eye\Eye00">
           <Size>
             <AbsDimension x="64" y="64"/>
           </Size>

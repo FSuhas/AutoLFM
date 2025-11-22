@@ -42,6 +42,12 @@ function AutoLFM.UI.MainFrame.OnShow(frame)
   if AutoLFM.Components.DarkUI and AutoLFM.Components.DarkUI.IsEnabled() then
   AutoLFM.Components.DarkUI.DarkenFrame(frame)
   end
+  
+  -- Force update message preview with current state
+  local currentMessage = AutoLFM.Core.Maestro.GetState("Message.ToBroadcast")
+  if AutoLFM.UI.MainFrame.UpdateMessagePreview and currentMessage then
+    AutoLFM.UI.MainFrame.UpdateMessagePreview(currentMessage)
+  end
 
   PlaySound("GAMEDIALOGOPEN")
 end
