@@ -152,35 +152,12 @@ local function handleSlashCommand(msg)
       else
         AutoLFM.Core.Utils.PrintError("Usage: /lfm setsize <1-40>")
       end
-
-  elseif cmd == "test" then
-      -- Test WoW API functions
-      DEFAULT_CHAT_FRAME:AddMessage("|cFF00FF00=== WoW API Test ===|r")
-
-      -- Test GetAddOnInfo
-      local numAddOns = GetNumAddOns()
-      DEFAULT_CHAT_FRAME:AddMessage("|cFFFFFF00Total addons installed: " .. numAddOns .. "|r")
-
-      -- List first 5 addons
-      DEFAULT_CHAT_FRAME:AddMessage("|cFFFFFF00First 5 addons:|r")
-      for i = 1, math.min(5, numAddOns) do
-          local name, title, notes, enabled, loadable, reason, security = GetAddOnInfo(i)
-          local status = enabled and "|cFF00FF00Enabled|r" or "|cFFFF0000Disabled|r"
-          DEFAULT_CHAT_FRAME:AddMessage("  " .. i .. ". " .. name .. " - " .. status)
-      end
-
-      -- Test RandomRoll
-      local roll = math.random(1, 100)
-      DEFAULT_CHAT_FRAME:AddMessage("|cFFFFFF00Random roll (1-100): |r" .. roll)
-
-      DEFAULT_CHAT_FRAME:AddMessage("|cFF00FF00API test complete!|r")
-
+      
   else
       -- Show help in chat
       AutoLFM.Core.Utils.PrintTitle("=== AutoLFM Commands ===")
       AutoLFM.Core.Utils.Print("  /lfm - Toggle main window")
       AutoLFM.Core.Utils.Print("  /lfm debug - Toggle debug window")
-      AutoLFM.Core.Utils.Print("  /lfm test - Test WoW API functions")
       AutoLFM.Core.Utils.Print("")
       AutoLFM.Core.Utils.PrintTitle("=== Test Mode Commands ===")
       AutoLFM.Core.Utils.Print("  /lfm testmode - Enable/disable test mode")
