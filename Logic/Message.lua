@@ -14,8 +14,7 @@ AutoLFM.Logic.Message = {}
 --- @param targetSize number - Target group size
 --- @return number, boolean - Missing count and whether group is full
 local function calculateMissing(targetSize)
-  -- Use Maestro state directly to avoid dependency issues
-  local currentSize = AutoLFM.Core.Maestro.GetState("Group.Size") or 1
+  local currentSize = AutoLFM.Logic.Group.GetSize()
   local missing = targetSize - currentSize
   return missing, missing <= 0
 end
@@ -72,43 +71,30 @@ end
 --- @return string - Formatted dungeon message
 local function buildDungeonMessage()
   local dungeonNames = AutoLFM.Core.Maestro.GetState("Selection.DungeonNames")
-  AutoLFM.Core.Utils.LogInfo("buildDungeonMessage: dungeonNames count = " .. (dungeonNames and table.getn(dungeonNames) or 0))
-  
   if not dungeonNames or table.getn(dungeonNames) == 0 then
     return ""
   end
 
-  -- Trigger lazy loading of lookup tables
   AutoLFM.Core.Utils.EnsureLookupTables()
 
-  local targetSize = 5  -- Dungeons are always 5-man
+  local targetSize = 5
   local missing, isFull = calculateMissing(targetSize)
-  
-  AutoLFM.Core.Utils.LogInfo("buildDungeonMessage: missing=" .. missing .. ", isFull=" .. tostring(isFull))
-  
-  -- If group is full, don't show LFM
   if isFull then
     return ""
   end
 
-  -- Get roles
   local roles = AutoLFM.Core.Maestro.GetState("Selection.Roles") or {}
   local rolesText = formatRolesForMessage(roles)
 
-  -- Build dungeon tags list by finding dungeons by name (O(1) lookup)
   local dungeonTags = {}
   for i = 1, table.getn(dungeonNames) do
     local dungeonName = dungeonNames[i]
     local dungeonInfo = AutoLFM.Core.Constants.DUNGEONS_BY_NAME[dungeonName]
     if dungeonInfo then
       table.insert(dungeonTags, dungeonInfo.data.tag)
-    else
-      AutoLFM.Core.Utils.LogWarning("buildDungeonMessage: dungeon not found in lookup: " .. dungeonName)
     end
   end
 
-  AutoLFM.Core.Utils.LogInfo("buildDungeonMessage: dungeonTags count = " .. table.getn(dungeonTags))
-  
   if table.getn(dungeonTags) == 0 then
     return ""
   end
@@ -160,7 +146,7 @@ local function buildRaidMessage()
     return ""
   end
   
-  local currentSize = AutoLFM.Core.Maestro.GetState("Group.Size") or 1
+  local currentSize = AutoLFM.Logic.Group.GetSize()
 
   -- Get roles
   local roles = AutoLFM.Core.Maestro.GetState("Selection.Roles") or {}
@@ -193,14 +179,8 @@ local function buildCustomMessage()
 
   local targetSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or 5
   local missing, isFull = calculateMissing(targetSize)
-  local currentSize = AutoLFM.Core.Maestro.GetState("Group.Size") or 1
+  local currentSize = AutoLFM.Logic.Group.GetSize()
 
-  -- Debug log
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
-    AutoLFM.Core.Utils.LogInfo("buildCustomMessage: currentSize=" .. currentSize .. ", targetSize=" .. targetSize .. ", missing=" .. missing)
-  end
-
-  -- If group is full, don't show LFM
   if isFull then
     return ""
   end
@@ -267,12 +247,6 @@ end
 function AutoLFM.Logic.Message.RebuildMessage()
   local message = buildMessage()
   AutoLFM.Core.Maestro.SetState("Message.ToBroadcast", message)
-  
-  if message and message ~= "" then
-    AutoLFM.Core.Utils.LogInfo("Message rebuilt: " .. message)
-  else
-    AutoLFM.Core.Utils.LogInfo("Message cleared (no selection)")
-  end
 end
 
 --- Replaces variables in custom message (for preview/presets)
@@ -336,5 +310,5 @@ AutoLFM.Core.SafeRegisterInit("Logic.Message", function()
   AutoLFM.Logic.Message.RebuildMessage()
 end, {
   id = "I13",
-  dependencies = { "Logic.Selection", "Core.Events" }  -- Wait for Selection (I04) and Events (I01)
+  dependencies = { "Logic.Selection", "Logic.Group", "Core.Events" }
 })

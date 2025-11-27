@@ -16,14 +16,14 @@ AutoLFM.UI.RowList = {}
 --- @param row frame - The row frame to configure
 function AutoLFM.UI.RowList.SetupRowBackdrop(row)
   if not row then
-  return
+    return
   end
 
   row:SetBackdrop({
-  bgFile = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\White",
-  tile = true,
-  tileSize = 8,
-  insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    bgFile = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\White",
+    tile = true,
+    tileSize = 8,
+    insets = { left = 0, right = 0, top = 0, bottom = 0 }
   })
   row:SetBackdropColor(0, 0, 0, 0)
   row:EnableMouse(true)
@@ -38,49 +38,49 @@ end
 --- @param options table - Optional {tooltipZone=string} for tooltip display
 function AutoLFM.UI.RowList.SetupHover(element, row, color, elements, options)
   if not element or not row then
-  return
+    return
   end
 
   elements = elements or {}
   options = options or {}
 
   element:SetScript("OnEnter", function()
-  -- Set all elements to white
-  for _, elem in ipairs(elements) do
-    AutoLFM.Core.Utils.SetTextColorByName(elem, "WHITE")
-    -- Special handling for editboxes that might be hidden
-    if elem and elem.IsVisible and not elem:IsVisible() then
-      -- Skip hidden elements
+    -- Set all elements to white
+    for _, elem in ipairs(elements) do
+      AutoLFM.Core.Utils.SetTextColorByName(elem, "WHITE")
+      -- Special handling for editboxes that might be hidden
+      if elem and elem.IsVisible and not elem:IsVisible() then
+        -- Skip hidden elements
+      end
     end
-  end
-  
+
     -- Use the provided color for hover background (or fallback to gold)
     local hoverColor = color
     if not hoverColor or type(hoverColor) ~= "table" or not hoverColor.r then
       hoverColor = AutoLFM.Core.Utils.GetColor("GOLD")
     end
-    
+
     if hoverColor then
       row:SetBackdropColor(hoverColor.r, hoverColor.g, hoverColor.b, 0.3)
     end
 
-  -- Show tooltip if provided
-  if options.tooltipZone then
-    local scale = UIParent:GetEffectiveScale()
-    local x, y = GetCursorPosition()
-    x, y = x / scale, y / scale
+    -- Show tooltip if provided
+    if options.tooltipZone then
+      local scale = UIParent:GetEffectiveScale()
+      local x, y = GetCursorPosition()
+      x, y = x / scale, y / scale
 
-    GameTooltip:SetOwner(this, "ANCHOR_NONE")
-    GameTooltip:ClearAllPoints()
-    GameTooltip:SetPoint("TOPLEFT", "UIParent", "BOTTOMLEFT", x + 10, y - 10)
-    local whiteColor = AutoLFM.Core.Utils.GetColor("WHITE")
-    if whiteColor then
-      GameTooltip:SetText(options.tooltipZone, whiteColor.r, whiteColor.g, whiteColor.b)
-    else
-      GameTooltip:SetText(options.tooltipZone, 1, 1, 1)
+      GameTooltip:SetOwner(this, "ANCHOR_NONE")
+      GameTooltip:ClearAllPoints()
+      GameTooltip:SetPoint("TOPLEFT", "UIParent", "BOTTOMLEFT", x + 10, y - 10)
+      local whiteColor = AutoLFM.Core.Utils.GetColor("WHITE")
+      if whiteColor then
+        GameTooltip:SetText(options.tooltipZone, whiteColor.r, whiteColor.g, whiteColor.b)
+      else
+        GameTooltip:SetText(options.tooltipZone, 1, 1, 1)
+      end
+      GameTooltip:Show()
     end
-    GameTooltip:Show()
-  end
   end)
 
   element:SetScript("OnLeave", function()
@@ -143,12 +143,12 @@ end
 --- @return frame|nil - The configured row frame, or nil on error
 function AutoLFM.UI.RowList.GetOrCreateRow(rowName, scrollChild, template, index, rowHeight)
   if not rowName or not scrollChild or not template then
-  return nil
+    return nil
   end
 
   local row = getglobal(rowName)
   if not row then
-  row = CreateFrame("Frame", rowName, scrollChild, template)
+    row = CreateFrame("Frame", rowName, scrollChild, template)
   end
 
   row:ClearAllPoints()
@@ -177,7 +177,7 @@ function AutoLFM.UI.RowList.UpdateScrollFrame(scrollChild)
   if not scrollChild then return end
   local scrollFrame = scrollChild:GetParent()
   if scrollFrame and scrollFrame.UpdateScrollChildRect then
-  scrollFrame:UpdateScrollChildRect()
+    scrollFrame:UpdateScrollChildRect()
   end
 end
 
@@ -200,12 +200,12 @@ end
 local function hideAllRows(rowPrefix)
   local index = 1
   while index <= AutoLFM.Core.Constants.MAX_ROWS_SAFETY do
-  local row = getglobal(rowPrefix .. index)
-  if not row then
-    break
-  end
-  row:Hide()
-  index = index + 1
+    local row = getglobal(rowPrefix .. index)
+    if not row then
+      break
+    end
+    row:Hide()
+    index = index + 1
   end
 end
 
@@ -217,7 +217,7 @@ end
 --- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
 function AutoLFM.UI.RowList.OnShowHandler(frame, createRowsFunc, clearCacheFunc, rowPrefix)
   if not frame or not createRowsFunc or not rowPrefix then
-  return
+    return
   end
 
   -- Hide all existing rows first
@@ -225,12 +225,12 @@ function AutoLFM.UI.RowList.OnShowHandler(frame, createRowsFunc, clearCacheFunc,
 
   -- Clear cache if function provided
   if clearCacheFunc then
-  clearCacheFunc()
+    clearCacheFunc()
   end
 
   local scrollChild = AutoLFM.UI.RowList.GetScrollChild(frame)
   if scrollChild then
-  -- Create/update rows (will reuse existing frames or create new ones)
-  createRowsFunc(scrollChild)
+    -- Create/update rows (will reuse existing frames or create new ones)
+    createRowsFunc(scrollChild)
   end
 end

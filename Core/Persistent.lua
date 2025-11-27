@@ -9,7 +9,7 @@ AutoLFM.Core.Persistent = {}
 -----------------------------------------------------------------------------
 -- Private State
 -----------------------------------------------------------------------------
-local characterID = nil
+local characterID
 
 -----------------------------------------------------------------------------
 -- Utility Functions
@@ -313,23 +313,16 @@ function AutoLFM.Core.Persistent.MovePresetUp(presetName)
   if not presetName or presetName == "" then return false end
   local presets = AutoLFM.Core.Persistent.GetPresets()
 
-  -- Find preset index
-  local index = nil
+  local index
   for i = 1, table.getn(presets.order) do
     if presets.order[i] == presetName then
       index = i
       break
     end
   end
-
-  -- Can't move up if first or not found
   if not index or index == 1 then return false end
 
-  -- Swap with previous
-  local temp = presets.order[index - 1]
-  presets.order[index - 1] = presets.order[index]
-  presets.order[index] = temp
-
+  presets.order[index - 1], presets.order[index] = presets.order[index], presets.order[index - 1]
   return true
 end
 
@@ -340,23 +333,16 @@ function AutoLFM.Core.Persistent.MovePresetDown(presetName)
   if not presetName or presetName == "" then return false end
   local presets = AutoLFM.Core.Persistent.GetPresets()
 
-  -- Find preset index
-  local index = nil
+  local index
   for i = 1, table.getn(presets.order) do
     if presets.order[i] == presetName then
       index = i
       break
     end
   end
-
-  -- Can't move down if last or not found
   if not index or index == table.getn(presets.order) then return false end
 
-  -- Swap with next
-  local temp = presets.order[index + 1]
-  presets.order[index + 1] = presets.order[index]
-  presets.order[index] = temp
-
+  presets.order[index], presets.order[index + 1] = presets.order[index + 1], presets.order[index]
   return true
 end
 

@@ -20,7 +20,7 @@ function AutoLFM.UI.MainFrame.OnLoad(frame)
 
   -- Register frame for DarkUI theme
   if AutoLFM.Components.DarkUI and AutoLFM.Components.DarkUI.RegisterFrame then
-  AutoLFM.Components.DarkUI.RegisterFrame(frame)
+    AutoLFM.Components.DarkUI.RegisterFrame(frame)
   end
 end
 
@@ -29,18 +29,18 @@ end
 function AutoLFM.UI.MainFrame.OnShow(frame)
   -- Initialize content frames on first show (child frames are guaranteed to exist)
   if not frame.initialized then
-  AutoLFM.Logic.MainFrame.InitializeContentFrames()
-  frame.initialized = true
+    AutoLFM.Logic.MainFrame.InitializeContentFrames()
+    frame.initialized = true
   else
-  -- Apply default panel every time the window opens
-  if AutoLFM.Logic.MainFrame.ApplyDefaultPanel then
-    AutoLFM.Logic.MainFrame.ApplyDefaultPanel()
-  end
+    -- Apply default panel every time the window opens
+    if AutoLFM.Logic.MainFrame.ApplyDefaultPanel then
+      AutoLFM.Logic.MainFrame.ApplyDefaultPanel()
+    end
   end
 
   -- Apply dark theme if enabled
   if AutoLFM.Components.DarkUI and AutoLFM.Components.DarkUI.IsEnabled() then
-  AutoLFM.Components.DarkUI.DarkenFrame(frame)
+    AutoLFM.Components.DarkUI.DarkenFrame(frame)
   end
   
   -- Force update message preview with current state

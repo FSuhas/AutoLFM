@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(find:*)",
+      "Bash(del \"c:\\Users\\NSO\\Data\\Divers\\TWoW\\WoW\\Interface\\AddOns\\AutoLFM\\Core\\IDs.lua\")",
+      "Bash(cat:*)",
+      "Bash(grep:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

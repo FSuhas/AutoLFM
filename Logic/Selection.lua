@@ -354,7 +354,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRoles", function()
   AutoLFM.Core.Utils.LogAction("Cleared all roles")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C09" })
+end, { id = "C10" })
 
 --=============================================================================
 -- COMMANDS - CUSTOM MESSAGE
@@ -390,7 +390,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomMessage", function(text
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C10" })
+end, { id = "C11" })
 
 --- Clears custom message
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearCustomMessage", function()
@@ -410,7 +410,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearCustomMessage", function()
   AutoLFM.Core.Utils.LogAction("Cleared custom message")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C11" })
+end, { id = "C12" })
 
 --- Sets custom group size for custom messages with variables
 AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomGroupSize", function(size)
@@ -434,7 +434,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomGroupSize", function(si
   if mode == "custom" and customMessage ~= "" then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C12" })
+end, { id = "C13" })
 
 --- Sets details text (appended to auto-generated message in details mode)
 AutoLFM.Core.Maestro.RegisterCommand("Selection.SetDetailsText", function(text)
@@ -452,7 +452,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetDetailsText", function(text)
   if mode ~= "custom" then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C13" })
+end, { id = "C16" })
 
 --=============================================================================
 -- COMMANDS - GLOBAL
@@ -499,6 +499,4 @@ AutoLFM.Core.Maestro.RegisterEvent("Selection.Changed", { id = "E01" })
 --=============================================================================
 -- INITIALIZATION
 --=============================================================================
-
-AutoLFM.Core.SafeRegisterInit("Logic.Selection", function()
-end, { id = "I12" })
+AutoLFM.Core.SafeRegisterInit("Logic.Selection", function() end, { id = "I12" })

@@ -31,10 +31,10 @@ local function getQuestZone(questIndex)
 
   local numEntries = GetNumQuestLogEntries()
   for i = questIndex - 1, 1, -1 do
-  local headerTitle, headerLevel, _, isHeader = GetQuestLogTitle(i)
-  if headerTitle and isHeader then
-    return headerTitle
-  end
+    local headerTitle, headerLevel, _, isHeader = GetQuestLogTitle(i)
+    if headerTitle and isHeader then
+      return headerTitle
+    end
   end
 
   return nil
@@ -49,25 +49,25 @@ local function buildSortedQuests()
   local numEntries = GetNumQuestLogEntries()
 
   for i = 1, numEntries do
-  local questLogTitleText, level, questTag, isHeader = GetQuestLogTitle(i)
+    local questLogTitleText, level, questTag, isHeader = GetQuestLogTitle(i)
 
-  if questLogTitleText and not isHeader then
-    local color = getQuestColor(level, playerLevel)
-    local zone = getQuestZone(i)
+    if questLogTitleText and not isHeader then
+      local color = getQuestColor(level, playerLevel)
+      local zone = getQuestZone(i)
 
-    table.insert(quests, {
-      index = i,
-      name = questLogTitleText,
-      level = level or 1,
-      tag = questTag,
-      zone = zone,
-      color = color
-    })
-  end
+      table.insert(quests, {
+        index = i,
+        name = questLogTitleText,
+        level = level or 1,
+        tag = questTag,
+        zone = zone,
+        color = color
+      })
+    end
   end
 
   table.sort(quests, function(a, b)
-  return a.level < b.level
+    return a.level < b.level
   end)
 
   return quests

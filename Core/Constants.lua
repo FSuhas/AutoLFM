@@ -135,9 +135,7 @@ AutoLFM.Core.Constants.RAIDS = {
 AutoLFM.Core.Constants.DEBUG_LINE_HEIGHT = 14
 
 --=============================================================================
--- LOOKUP TABLES (PERFORMANCE OPTIMIZATION)
---   O(1) lookup by name instead of O(n) linear search
---   Built by Core/Utils.lua initialization
+-- LOOKUP TABLES (built on-demand by Core/Utils.lua lazy loading)
 --=============================================================================
 AutoLFM.Core.Constants.DUNGEONS_BY_NAME = {}
 AutoLFM.Core.Constants.RAIDS_BY_NAME = {}

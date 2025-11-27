@@ -85,9 +85,11 @@ end
 --- Handles incoming whisper messages and auto-invites if keyword matches
 --- @param data table - Whisper data with message and sender fields
 local function handleWhisper(data)
+  if not data then return end
+
   local enabled = AutoLFM.Core.Persistent.GetAutoInviteEnabled()
   if not enabled then return end
-  
+
   local message = data.message
   local sender = data.sender
   if not message or not sender then return end

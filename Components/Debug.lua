@@ -21,10 +21,7 @@ local SCROLL_BAR_WIDTH = 20
 --=============================================================================
 -- PRIVATE STATE
 --=============================================================================
-
-local debugFrame = nil
-local scrollFrame = nil
-local editBox = nil
+local debugFrame, scrollFrame, editBox
 local logBuffer = {}
 local isEnabled = false
 

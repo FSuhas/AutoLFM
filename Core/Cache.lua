@@ -12,6 +12,36 @@ AutoLFM.Core.Cache = {}
 local caches = {}
 
 --=============================================================================
+-- PRIVATE HELPERS
+--=============================================================================
+
+--- Serializes arguments to a string key for cache lookup
+--- @param args table - Arguments table
+--- @return string - Serialized key
+local function serializeArgs(args)
+  if not args or table.getn(args) == 0 then
+    return ""
+  end
+
+  local parts = {}
+  for i = 1, table.getn(args) do
+    local v = args[i]
+    if type(v) == "table" then
+      -- Simple table serialization (shallow)
+      local tableParts = {}
+      for k, val in pairs(v) do
+        table.insert(tableParts, tostring(k) .. "=" .. tostring(val))
+      end
+      table.sort(tableParts)
+      table.insert(parts, "{" .. table.concat(tableParts, ",") .. "}")
+    else
+      table.insert(parts, tostring(v))
+    end
+  end
+  return table.concat(parts, "|")
+end
+
+--=============================================================================
 -- PUBLIC API
 --=============================================================================
 
@@ -31,11 +61,12 @@ function AutoLFM.Core.Cache.Register(name, builder)
 
   caches[name] = {
     data = nil,
-    builder = builder
+    builder = builder,
+    lastArgsKey = nil
   }
 end
 
---- Gets cached data, building it if not available
+--- Gets cached data, building it if not available or if arguments changed
 --- @param name string - Cache name
 --- @param ... any - Optional arguments to pass to builder function
 --- @return any - Cached data
@@ -44,6 +75,14 @@ function AutoLFM.Core.Cache.Get(name, ...)
   if not cache then
     AutoLFM.Core.Utils.LogError("Cache not found: " .. tostring(name))
     return nil
+  end
+
+  local argsKey = serializeArgs(arg)
+
+  -- Invalidate if arguments changed
+  if cache.lastArgsKey ~= argsKey then
+    cache.data = nil
+    cache.lastArgsKey = argsKey
   end
 
   if not cache.data then
@@ -59,6 +98,7 @@ function AutoLFM.Core.Cache.Clear(name)
   local cache = caches[name]
   if cache then
     cache.data = nil
+    cache.lastArgsKey = nil
   end
 end
 
@@ -66,6 +106,7 @@ end
 function AutoLFM.Core.Cache.ClearAll()
   for name, cache in pairs(caches) do
     cache.data = nil
+    cache.lastArgsKey = nil
   end
 end
 

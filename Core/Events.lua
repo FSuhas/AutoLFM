@@ -9,16 +9,31 @@ AutoLFM.Core.Events = {}
 --=============================================================================
 -- PRIVATE STATE
 --=============================================================================
-local eventFrame = nil
-local initFrame = nil
-local lastGroupSize = 0  -- Track group size changes
+local eventFrame, initFrame
+local lastGroupSize = 0
+
+--=============================================================================
+-- PRIVATE HELPERS
+--=============================================================================
+
+--- Gets current group size and type
+--- @return number, string - Current size and type ("solo", "party", "raid")
+local function getGroupInfo()
+  local raidCount = GetNumRaidMembers() or 0
+  local partyCount = GetNumPartyMembers() or 0
+
+  if raidCount > 0 then
+    return raidCount, "raid"
+  elseif partyCount > 0 then
+    return partyCount + 1, "party"
+  else
+    return 1, "solo"
+  end
+end
 
 --=============================================================================
 -- EVENT HANDLERS
 --=============================================================================
------------------------------------------------------------------------------
--- Quest Log Update Handler
------------------------------------------------------------------------------
 
 --- Handles QUEST_LOG_UPDATE event - clears cache and refreshes quest UI
 local function onQuestLogUpdate()
@@ -27,15 +42,9 @@ local function onQuestLogUpdate()
   end
 
   if AutoLFM_MainFrame and AutoLFM_MainFrame:IsVisible() then
-    if AutoLFM.Core.Maestro then
-      AutoLFM.Core.Maestro.Dispatch("QuestsList.Refresh")
-    end
+    AutoLFM.Core.Maestro.Dispatch("QuestsList.Refresh")
   end
 end
-
------------------------------------------------------------------------------
--- Player Level Up Handler
------------------------------------------------------------------------------
 
 --- Handles PLAYER_LEVEL_UP event - clears caches and refreshes dungeon/quest UI
 local function onPlayerLevelUp()
@@ -50,152 +59,59 @@ local function onPlayerLevelUp()
   end
 
   if AutoLFM_MainFrame and AutoLFM_MainFrame:IsVisible() then
-    if AutoLFM.Core.Maestro then
-      AutoLFM.Core.Maestro.Dispatch("QuestsList.Refresh")
-    end
+    AutoLFM.Core.Maestro.Dispatch("QuestsList.Refresh")
   end
 
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
-    AutoLFM.Core.Utils.LogInfo("Level up! New level: " .. tostring(newLevel))
-  end
+  AutoLFM.Core.Utils.LogInfo("Level up! New level: " .. tostring(newLevel))
 end
-
------------------------------------------------------------------------------
--- Group Roster Change Handler
---   Handles PARTY_MEMBERS_CHANGED and RAID_ROSTER_UPDATE
---   Updates broadcast message when group composition changes
------------------------------------------------------------------------------
 
 --- Handles group roster change events - tracks group size and dispatches events
 local function onGroupRosterChange()
-  -- Get current group size
-  local currentSize = 1
-  local raidCount = GetNumRaidMembers()
-  local partyCount = GetNumPartyMembers()
+  local currentSize, groupType = getGroupInfo()
 
-  -- Debug log
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
-    AutoLFM.Core.Utils.LogInfo("onGroupRosterChange: raidCount=" .. tostring(raidCount) .. ", partyCount=" .. tostring(partyCount))
-  end
-
-  if raidCount and raidCount > 0 then
-    currentSize = raidCount
-  elseif partyCount and partyCount > 0 then
-    currentSize = partyCount + 1
-  end
-
-  -- Determine group type
-  local groupType = "solo"
-  if raidCount and raidCount > 0 then
-    groupType = "raid"
-  elseif partyCount and partyCount > 0 then
-    groupType = "party"
-  end
-
-  -- Debug log
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
-    AutoLFM.Core.Utils.LogInfo("onGroupRosterChange: currentSize=" .. currentSize .. ", lastGroupSize=" .. lastGroupSize .. ", groupType=" .. groupType)
-  end
-
-  -- Only process if size actually changed (prevents duplicate triggers)
   if currentSize ~= lastGroupSize then
-    if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogAction then
-      AutoLFM.Core.Utils.LogAction("Group size changed: " .. lastGroupSize .. " -> " .. currentSize)
-    end
+    AutoLFM.Core.Utils.LogAction("Group size: " .. lastGroupSize .. " -> " .. currentSize)
 
     lastGroupSize = currentSize
 
-    -- Update Maestro states
-    if AutoLFM.Core.Maestro then
-      AutoLFM.Core.Maestro.SetState("Group.Type", groupType)
-      AutoLFM.Core.Maestro.SetState("Group.Size", currentSize)
-    end
-
-    -- Dispatch Maestro event for listeners (e.g., Broadcaster)
-    if AutoLFM.Core.Maestro then
-      AutoLFM.Core.Maestro.Dispatch("Group.SizeChanged", { size = currentSize })
-    end
+    -- Update Maestro states and dispatch event
+    AutoLFM.Core.Maestro.SetState("Group.Type", groupType)
+    AutoLFM.Core.Maestro.SetState("Group.Size", currentSize)
+    AutoLFM.Core.Maestro.Dispatch("Group.SizeChanged", { size = currentSize })
   end
 end
 
------------------------------------------------------------------------------
--- Party Leader Changed Handler
---   Triggers when party/raid leader changes
---   Important for Auto Invite: can only invite if leader
------------------------------------------------------------------------------
-
---- Handles PARTY_LEADER_CHANGED event - logs change and dispatches event
+--- Handles PARTY_LEADER_CHANGED event - dispatches event
 local function onPartyLeaderChanged()
-  local isLeader = UnitIsPartyLeader("player")
-
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
-    if isLeader then
-      AutoLFM.Core.Utils.LogInfo("You are now the party leader")
-    else
-      AutoLFM.Core.Utils.LogInfo("Party leader changed")
-    end
-  end
-
-  -- Update Maestro state
-  if AutoLFM.Core.Maestro then
-    AutoLFM.Core.Maestro.SetState("Group.IsLeader", isLeader)
-  end
-
-  -- Dispatch event for modules that care about leader status (e.g., Auto Invite)
-  if AutoLFM.Core.Maestro then
-    AutoLFM.Core.Maestro.Dispatch("Group.LeaderChanged", {
-      isLeader = isLeader
-    })
-  end
+  local isLeader = UnitIsPartyLeader("player") or false
+  AutoLFM.Core.Maestro.SetState("Group.IsLeader", isLeader)
+  AutoLFM.Core.Maestro.Dispatch("Group.LeaderChanged", { isLeader = isLeader })
 end
-
------------------------------------------------------------------------------
--- Chat Message Handler
---   Handles whispers for Auto Invite module (keyword detection)
------------------------------------------------------------------------------
 
 --- Handles CHAT_MSG_WHISPER event - dispatches whisper data to modules
 local function onChatMsgWhisper()
   local message = arg1
   local sender = arg2
 
-  -- Dispatch to modules that need whisper handling (e.g., Auto Invite)
-  if AutoLFM.Core.Maestro then
-    AutoLFM.Core.Maestro.Dispatch("Chat.WhisperReceived", {
-      message = message,
-      sender = sender
-    })
-  end
+  AutoLFM.Core.Maestro.Dispatch("Chat.WhisperReceived", {
+    message = message,
+    sender = sender
+  })
 end
 
------------------------------------------------------------------------------
--- Main Event Router
------------------------------------------------------------------------------
-
 --- Routes WoW events to appropriate handler functions
---- @param event string - WoW event name
-local function onEvent(event)
-  -- Debug log for all events
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogDebug then
-    AutoLFM.Core.Utils.LogDebug("WoW Event received: " .. tostring(event))
-  end
+--- @param eventName string - WoW event name
+local function onEvent(eventName)
 
-  if event == "QUEST_LOG_UPDATE" then
+  if eventName == "QUEST_LOG_UPDATE" then
     onQuestLogUpdate()
-
-  elseif event == "PLAYER_LEVEL_UP" then
+  elseif eventName == "PLAYER_LEVEL_UP" then
     onPlayerLevelUp()
-
-  elseif event == "PARTY_MEMBERS_CHANGED" then
+  elseif eventName == "PARTY_MEMBERS_CHANGED" or eventName == "RAID_ROSTER_UPDATE" then
     onGroupRosterChange()
-
-  elseif event == "RAID_ROSTER_UPDATE" then
-    onGroupRosterChange()
-
-  elseif event == "PARTY_LEADER_CHANGED" then
+  elseif eventName == "PARTY_LEADER_CHANGED" then
     onPartyLeaderChanged()
-
-  elseif event == "CHAT_MSG_WHISPER" then
+  elseif eventName == "CHAT_MSG_WHISPER" then
     onChatMsgWhisper()
   end
 end
@@ -205,13 +121,6 @@ end
 --=============================================================================
 
 --- Initializes the WoW event system and registers all required event listeners
---- Events registered:
----   - QUEST_LOG_UPDATE: Quest log changes
----   - PLAYER_LEVEL_UP: Player gains a level
----   - PARTY_MEMBERS_CHANGED: Party composition changes (CRITICAL for broadcast)
----   - RAID_ROSTER_UPDATE: Raid composition changes (CRITICAL for broadcast)
----   - PARTY_LEADER_CHANGED: Party leader changes (for Auto Invite)
----   - CHAT_MSG_WHISPER: Whisper received (for Auto Invite)
 function AutoLFM.Core.Events.Init()
   if not eventFrame then
     eventFrame = CreateFrame("Frame", "AutoLFM_EventFrame")
@@ -220,52 +129,24 @@ function AutoLFM.Core.Events.Init()
     end)
   end
 
-  -- Quest & Progression
+  -- Register all events
   eventFrame:RegisterEvent("QUEST_LOG_UPDATE")
   eventFrame:RegisterEvent("PLAYER_LEVEL_UP")
-
-  -- Group & Raid Management (CRITICAL)
   eventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
   eventFrame:RegisterEvent("RAID_ROSTER_UPDATE")
   eventFrame:RegisterEvent("PARTY_LEADER_CHANGED")
-
-  -- Chat (for Auto Invite)
   eventFrame:RegisterEvent("CHAT_MSG_WHISPER")
 
-  -- Debug log to confirm events are registered
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
-    AutoLFM.Core.Utils.LogInfo("Events registered: PARTY_MEMBERS_CHANGED, RAID_ROSTER_UPDATE, PARTY_LEADER_CHANGED, CHAT_MSG_WHISPER, QUEST_LOG_UPDATE, PLAYER_LEVEL_UP")
-  end
-
   -- Initialize group size tracker and Maestro states
-  local raidCount = GetNumRaidMembers()
-  local partyCount = GetNumPartyMembers()
-  local initialSize = 1
-  local initialType = "solo"
-
-  if raidCount and raidCount > 0 then
-    initialSize = raidCount
-    initialType = "raid"
-  elseif partyCount and partyCount > 0 then
-    initialSize = partyCount + 1
-    initialType = "party"
-  end
-
+  local initialSize, initialType = getGroupInfo()
   lastGroupSize = initialSize
 
-  -- Update initial Maestro states
-  if AutoLFM.Core.Maestro then
-    AutoLFM.Core.Maestro.SetState("Group.Type", initialType)
-    AutoLFM.Core.Maestro.SetState("Group.Size", initialSize)
-    AutoLFM.Core.Maestro.SetState("Group.IsLeader", UnitIsPartyLeader("player") or false)
-  end
+  AutoLFM.Core.Maestro.SetState("Group.Type", initialType)
+  AutoLFM.Core.Maestro.SetState("Group.Size", initialSize)
+  AutoLFM.Core.Maestro.SetState("Group.IsLeader", UnitIsPartyLeader("player") or false)
 
-  if AutoLFM.Core.Utils and AutoLFM.Core.Utils.LogInfo then
-    AutoLFM.Core.Utils.LogInfo("Event system initialized (6 events registered)")
-  end
+  AutoLFM.Core.Utils.LogInfo("Event system initialized (6 events registered)")
 end
-
-
 
 --- Forces a refresh of the group size (useful when starting broadcaster)
 function AutoLFM.Core.Events.RefreshGroupSize()
@@ -279,25 +160,17 @@ end
 --- Handles slash command input and routes to appropriate actions
 --- @param msg string - Command arguments (empty for toggle, "debug" for debug window)
 local function handleSlashCommand(msg)
-  -- Ensure msg is a string
   msg = msg or ""
-
-  -- Extract the command (first word, case-insensitive)
   local cmd = string.lower(string.sub(msg, 1, string.find(msg .. " ", " ") - 1))
 
   if cmd == "" then
-      -- Toggle main window
-      AutoLFM.Core.Maestro.Dispatch("MainFrame.Toggle")
-
+    AutoLFM.Core.Maestro.Dispatch("MainFrame.Toggle")
   elseif cmd == "debug" then
-      -- Toggle debug window
-      AutoLFM.Core.Maestro.Dispatch("Debug.Toggle")
-      
+    AutoLFM.Core.Maestro.Dispatch("Debug.Toggle")
   else
-      -- Show help in chat
-      AutoLFM.Core.Utils.PrintTitle("=== AutoLFM Commands ===")
-      AutoLFM.Core.Utils.Print("  /lfm - Toggle main window")
-      AutoLFM.Core.Utils.Print("  /lfm debug - Toggle debug window")
+    AutoLFM.Core.Utils.PrintTitle("=== AutoLFM Commands ===")
+    AutoLFM.Core.Utils.Print("  /lfm - Toggle main window")
+    AutoLFM.Core.Utils.Print("  /lfm debug - Toggle debug window")
   end
 end
 
@@ -318,7 +191,6 @@ AutoLFM.Core.Maestro.RegisterEvent("Chat.WhisperReceived", { id = "E04" })
 --=============================================================================
 -- INITIALIZATION
 --=============================================================================
-
 AutoLFM.Core.SafeRegisterInit("Core.Events", function()
   AutoLFM.Core.Events.Init()
 end, { id = "I01" })
@@ -334,6 +206,5 @@ end)
 --=============================================================================
 -- SLASH COMMAND REGISTRATION
 --=============================================================================
-
 SLASH_AUTOLFM1 = "/lfm"
 SlashCmdList["AUTOLFM"] = handleSlashCommand

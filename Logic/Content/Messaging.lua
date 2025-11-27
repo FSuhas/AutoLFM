@@ -263,7 +263,7 @@ function AutoLFM.Logic.Content.Messaging.ToggleChannel(channelName)
 
   -- Save to persistent storage
   if AutoLFM.Core and AutoLFM.Core.Persistent then
-    AutoLFM.Core.Persistent.SetSelectedChannels(channelsList)
+    AutoLFM.Core.Persistent.SetSelectedChannels(newChannelsList)
   end
 
   -- Dispatch event

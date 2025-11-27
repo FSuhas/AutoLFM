@@ -42,11 +42,9 @@ end
 --- @param colorName string - The name of the color (e.g., "RED", "GREEN", "YELLOW")
 --- @return table - Color object with r, g, b, hex, name fields. Returns GRAY if color not found.
 function AutoLFM.Core.Utils.GetColor(colorName)
-  if type(colorName) == "string" then
-      local color = COLORS_BY_NAME[colorName]
-      if color then return color end
+  if type(colorName) == "string" and COLORS_BY_NAME[colorName] then
+    return COLORS_BY_NAME[colorName]
   end
-  -- Fallback to GRAY (index 5), not GREEN (index 1)
   return COLORS_BY_NAME["GRAY"] or AutoLFM.Core.Constants.COLORS[5]
 end
 
@@ -266,68 +264,38 @@ end
 --- @param name string - The dungeon name to search for
 --- @return number|nil - The dungeon index (1-based), or nil if not found
 function AutoLFM.Core.Utils.GetDungeonIndexByName(name)
-  BuildLookupTables()  -- Lazy init
-  
-  if not name or type(name) ~= "string" then
-    return nil
-  end
-
-  local dungeonInfo = AutoLFM.Core.Constants.DUNGEONS_BY_NAME[name]
-  if dungeonInfo then
-    return dungeonInfo.index
-  end
-
-  return nil
+  BuildLookupTables()
+  if not name or type(name) ~= "string" then return nil end
+  local info = AutoLFM.Core.Constants.DUNGEONS_BY_NAME[name]
+  return info and info.index
 end
 
 --- Finds a dungeon's name by its index
 --- @param index number - The dungeon index (1-based)
 --- @return string|nil - The dungeon name, or nil if index is invalid
 function AutoLFM.Core.Utils.GetDungeonNameByIndex(index)
-  if not index or type(index) ~= "number" then
-    return nil
-  end
-
+  if not index or type(index) ~= "number" then return nil end
   local dungeon = AutoLFM.Core.Constants.DUNGEONS[index]
-  if dungeon then
-    return dungeon.name
-  end
-
-  return nil
+  return dungeon and dungeon.name
 end
 
 --- Finds a raid's index by its name using O(1) lookup table
 --- @param name string - The raid name to search for
 --- @return number|nil - The raid index (1-based), or nil if not found
 function AutoLFM.Core.Utils.GetRaidIndexByName(name)
-  BuildLookupTables()  -- Lazy init
-  
-  if not name or type(name) ~= "string" then
-    return nil
-  end
-
-  local raidInfo = AutoLFM.Core.Constants.RAIDS_BY_NAME[name]
-  if raidInfo then
-    return raidInfo.index
-  end
-
-  return nil
+  BuildLookupTables()
+  if not name or type(name) ~= "string" then return nil end
+  local info = AutoLFM.Core.Constants.RAIDS_BY_NAME[name]
+  return info and info.index
 end
 
 --- Finds a raid's name by its index
 --- @param index number - The raid index (1-based)
 --- @return string|nil - The raid name, or nil if index is invalid
 function AutoLFM.Core.Utils.GetRaidNameByIndex(index)
-  if not index or type(index) ~= "number" then
-    return nil
-  end
-
+  if not index or type(index) ~= "number" then return nil end
   local raid = AutoLFM.Core.Constants.RAIDS[index]
-  if raid then
-    return raid.name
-  end
-
-  return nil
+  return raid and raid.name
 end
 
 --=============================================================================
@@ -516,9 +484,4 @@ end
 -- Build color lookup table immediately (before any other module loads)
 BuildColorLookupTable()
 
-AutoLFM.Core.SafeRegisterInit("Core.Utils", function()
-  -- Lookup tables are now built on-demand (lazy loading)
-end, {
-  id = "I03",
-  dependencies = {}
-})
+AutoLFM.Core.SafeRegisterInit("Core.Utils", function() end, { id = "I03" })

@@ -106,15 +106,14 @@ end
 --- Applies dark color to frame backdrop if conditions are met
 --- @param frame frame - The frame to process
 local function processBackdropColor(frame)
-  if not frame then return end
-  if isFrameBlacklisted(frame) then return end
-  if not frame.SetBackdropColor then return end
-  if not frame.GetBackdrop then return end
+  if not frame or isFrameBlacklisted(frame) or not frame.SetBackdropColor or not frame.GetBackdrop then
+    return
+  end
 
   local backdrop = frame:GetBackdrop()
   if not backdrop then return end
 
-  local r, g, b, a = frame:GetBackdropColor()
+  local _, _, _, a = frame:GetBackdropColor()
   if not a or a <= 0 then return end
 
   frame:SetBackdropColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
@@ -123,33 +122,24 @@ end
 --- Applies dark color to frame backdrop border if conditions are met
 --- @param frame frame - The frame to process
 local function processBackdropBorder(frame)
-  if not frame then return end
-  if isFrameBlacklisted(frame) then return end
-  if not frame.SetBackdropBorderColor then return end
-
+  if not frame or isFrameBlacklisted(frame) or not frame.SetBackdropBorderColor then
+    return
+  end
   frame:SetBackdropBorderColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
 end
 
 --- Applies dark color to all texture regions in a frame
 --- @param frame frame - The frame whose regions to process
 local function processRegions(frame)
-  if not frame then return end
-  if not frame.GetRegions then return end
+  if not frame or not frame.GetRegions then return end
 
   for _, region in pairs({frame:GetRegions()}) do
-      if region and region.SetVertexColor and region:GetObjectType() == "Texture" then
-          local skipRegion = false
-
-          if region.GetBlendMode and region:GetBlendMode() == "ADD" then
-              skipRegion = true
-          elseif isBlacklisted(region) then
-              skipRegion = true
-          end
-
-          if not skipRegion then
-              region:SetVertexColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
-          end
+    if region and region.SetVertexColor and region:GetObjectType() == "Texture" then
+      local skip = (region.GetBlendMode and region:GetBlendMode() == "ADD") or isBlacklisted(region)
+      if not skip then
+        region:SetVertexColor(DARK_COLOR.r, DARK_COLOR.g, DARK_COLOR.b, DARK_COLOR.a)
       end
+    end
   end
 end
 
@@ -157,13 +147,10 @@ end
 --- @param frame frame - The parent frame
 --- @param processFunc function - Function to call on each child frame
 local function processChildren(frame, processFunc)
-  if not frame then return end
-  if not frame.GetChildren then return end
+  if not frame or not frame.GetChildren then return end
 
   for _, child in pairs({frame:GetChildren()}) do
-      if child then
-          processFunc(child)
-      end
+    if child then processFunc(child) end
   end
 end
 

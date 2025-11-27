@@ -20,12 +20,13 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **C07** | `Selection.ToggleRaid` | Logic.Selection | Toggle raid selection (exclusive) |
 | **C08** | `Selection.SetRaidSize` | Logic.Selection | Set custom raid size (1-40) |
 | **C09** | `Selection.ToggleRole` | Logic.Selection | Toggle role selection (TANK/HEAL/DPS) |
-| **C10** | `Selection.SetCustomMessage` | Logic.Selection | Set custom broadcast message |
-| **C11** | `Selection.ClearCustomMessage` | Logic.Selection | Clear custom message |
-| **C12** | `Selection.SetCustomGroupSize` | Logic.Selection | Set custom group size for custom messages (1-40) |
-| **C13** | `Selection.SetDetailsText` | Logic.Selection | Set details text (appended to auto-generated messages) |
+| **C10** | `Selection.ClearRoles` | Logic.Selection | Clear all role selections |
+| **C11** | `Selection.SetCustomMessage` | Logic.Selection | Set custom broadcast message |
+| **C12** | `Selection.ClearCustomMessage` | Logic.Selection | Clear custom message |
+| **C13** | `Selection.SetCustomGroupSize` | Logic.Selection | Set custom group size for custom messages (1-40) |
 | **C14** | `Selection.ClearDungeons` | Logic.Selection | Clear all dungeon selections |
 | **C15** | `Selection.ClearRaid` | Logic.Selection | Clear raid selection |
+| **C16** | `Selection.SetDetailsText` | Logic.Selection | Set details text (appended to auto-generated messages) |
 | **C17** | `Selection.ClearAll` | Logic.Selection | Clear all selections (dungeons/raids/roles/custom/details) |
 | **C21** | `Broadcaster.Toggle` | Logic.Broadcaster | Toggle broadcasting on/off |
 | **C23** | `Channels.ToggleChannel` | Logic.Content.Messaging | Toggle channel selection |
@@ -36,7 +37,7 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **C30** | `Presets.Delete` | Logic.Content.Presets | Delete a saved preset |
 | **C31** | `AutoInvite.Enable` | Logic.AutoInvite | Enable auto-invite |
 | **C32** | `AutoInvite.Disable` | Logic.AutoInvite | Disable auto-invite |
-| **C34** | `AutoInvite.ToggleConfirm` | Logic.AutoInvite | Toggle confirmation requirement |
+| **C36** | `AutoInvite.SetKeywords` | Logic.AutoInvite | Set auto-invite keywords |
 
 ---
 
@@ -68,7 +69,6 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **L09** | `UI.Messaging.OnChannelsChanged` | E05 (Channels.Changed) | UI.Content.Messaging | Update messaging UI when channels change |
 | **L10** | `UI.Messaging.OnSelectionChanged` | E01 (Selection.Changed) | UI.Content.Messaging | Update messaging UI when selection changes |
 | **L11** | `UI.Presets.OnChanged` | E07 (Presets.Changed) | UI.Content.Presets | Update presets UI when presets list changes |
-| **L12** | `UI.AutoInvite.OnChanged` | E06 (AutoInvite.Changed) | UI.Content.AutoInvite | Update auto-invite UI when settings change |
 | **L16** | `AutoInvite.OnWhisper` | E04 (Chat.WhisperReceived) | Logic.AutoInvite | Process whispers for auto-invite |
 | **L17** | `AutoInvite.OnLeaderChanged` | E03 (Group.LeaderChanged) | Logic.AutoInvite | Handle leader changes for auto-invite |
 
@@ -89,10 +89,10 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **I09** | `Components.WelcomePopup` | Components.WelcomePopup | - | Initialize welcome popup |
 | **I11** | `MainFrame` | Logic.MainFrame | - | Register main frame command (C01) |
 | **I12** | `Logic.Selection` | Logic.Selection | - | Register selection commands (C06-C17), event (E01), states (S01-S08) |
-| **I13** | `Logic.Message` | Logic.Message | Logic.Selection, Core.Events | Register message listeners (L01, L03), state (S16) |
+| **I13** | `Logic.Message` | Logic.Message | Logic.Selection, Logic.Group, Core.Events | Register message listeners (L01, L03), state (S16) |
 | **I14** | `Logic.Broadcaster` | Logic.Broadcaster | Logic.Message, Logic.Content.Messaging, Core.Events | Initialize broadcaster, register command (C21), states (S20-S25), listener (L02) |
 | **I15** | `Logic.Content.Settings` | Logic.Content.Settings | Core.Persistent | Initialize settings panel, register state (S30), load dry run from persistent |
-| **I16** | `Logic.Content.Messaging` | Logic.Content.Messaging | - | Initialize messaging, register command (C23), event (E05), state (S15) |
+| **I16** | `Logic.Content.Messaging` | Logic.Content.Messaging | Core.Persistent | Initialize messaging, register command (C23), event (E05), state (S15) |
 | **I17** | `Logic.Content.Presets` | Logic.Content.Presets | Core.Persistent, Logic.Selection | Initialize presets, register commands (C28-C30), events (E07-E08) |
 | **I18** | `Logic.AutoInvite` | Logic.AutoInvite | Core.Events | Initialize auto-invite, register commands (C31-C32, C34), event (E06), listeners (L16-L17) |
 | **I19** | `Logic.Content.Dungeons` | Logic.Content.Dungeons | - | Initialize dungeons cache builder |
@@ -101,10 +101,9 @@ This file lists **ALL** IDs used in AutoLFM for the Maestro system.
 | **I22** | `UI.Dungeons` | UI.Content.Dungeons | - | Initialize dungeons UI, register listener (L06) |
 | **I23** | `UI.Raids` | UI.Content.Raids | - | Initialize raids UI, register listener (L07) |
 | **I24** | `UI.Quests` | UI.Content.Quests | - | Initialize quests UI, register command (C26-C27), listener (L08) |
-| **I25** | `UI.Messaging` | UI.Content.Messaging | - | Initialize messaging UI, register listeners (L09-L10) |
+| **I25** | `UI.Messaging` | UI.Content.Messaging | Logic.Content.Messaging, Logic.Broadcaster | Initialize messaging UI, register listeners (L09-L10) |
 | **I26** | `Components.EyeAnimation` | Components.EyeAnimation | Logic.Broadcaster | Initialize eye animation system, auto-triggers on broadcast state change |
-| **I27** | `UI.Content.Presets` | UI.Content.Presets | - | Initialize presets UI, register listener (L11) |
-| **I28** | `UI.Content.AutoInvite` | UI.Content.AutoInvite | - | Initialize auto-invite UI, register listener (L12) |
+| **I27** | `UI.Content.Presets` | UI.Content.Presets | Logic.Content.Presets | Initialize presets UI, register listener (L11) |
 
 ---
 
