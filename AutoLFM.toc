@@ -1,0 +1,75 @@
+## Interface: 11200
+## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r
+## Notes: Automated LFM Broadcaster
+## Author: Gondoleon, NSO73
+## SavedVariables: V3_Settings, V3_Presets
+## OptionalDeps: pfQuest, ShaguTweaks
+## Version: 3.0
+
+#=============================================================================
+# Github Repository: https://github.com/FSuhas/AutoLFM
+#=============================================================================
+
+#=============================================================================
+# Core
+#=============================================================================
+Core\Maestro.lua
+Core\Cache.lua
+Core\Constants.lua
+Core\Events.lua
+Core\Storage.lua
+Core\Utils.lua
+Core\API.lua
+
+#=============================================================================
+# Components
+#=============================================================================
+Components\DarkUI.lua
+Components\Debug.lua
+Components\EyeAnimation.lua
+Components\MinimapButton.lua
+Components\WelcomePopup.lua
+
+#=============================================================================
+# Logic
+#=============================================================================
+Logic\Broadcaster.lua
+Logic\Group.lua
+Logic\MainFrame.lua
+Logic\Message.lua
+Logic\Selection.lua
+Logic\Content\AutoInvite.lua
+Logic\Content\Dungeons.lua
+Logic\Content\Messaging.lua
+Logic\Content\Presets.lua
+Logic\Content\Quests.lua
+Logic\Content\Raids.lua
+Logic\Content\Settings.lua
+
+#=============================================================================
+# UI Utilities
+#=============================================================================
+UI\RowList.lua
+UI\SizeControl.lua
+
+#=============================================================================
+# UI Handlers
+#=============================================================================
+UI\MainFrame.lua
+UI\Content\AutoInvite.lua
+UI\Content\Dungeons.lua
+UI\Content\Messaging.lua
+UI\Content\Presets.lua
+UI\Content\Quests.lua
+UI\Content\Raids.lua
+UI\Content\Settings.lua
+
+#=============================================================================
+# UI Templates
+#=============================================================================
+UI\Templates\MainFrame.xml
+UI\Templates\AutoInvite.xml
+UI\Templates\Lists.xml
+UI\Templates\Messaging.xml
+UI\Templates\Presets.xml
+UI\Templates\Settings.xml
