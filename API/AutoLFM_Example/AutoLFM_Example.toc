@@ -1,9 +1,0 @@
-## Interface: 11200
-## Title: AutoLFM Example Integration
-## Notes: Example addon demonstrating AutoLFM API integration
-## Version: 1.0
-## Author: AutoLFM Team
-## Dependencies: AutoLFM
-## DefaultState: Enabled
-
-AutoLFM_Example.lua
