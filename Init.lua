@@ -155,8 +155,8 @@ function AutoLFM.Init.Run()
             AutoLFM.Color("/lfm help", "yellow")
         )
         AutoLFM.Core.Utils.PrintTitle(
-            "AutoLFM v3 available for beta testing! " ..
-            AutoLFM.Color("More info on github repo", "white")
+            "AutoLFM v3 available! " ..
+            AutoLFM.Color("Get last version on github repo", "white")
         )
     end
 

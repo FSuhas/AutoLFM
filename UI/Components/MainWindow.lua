@@ -44,7 +44,7 @@ function AutoLFM.UI.MainWindow.Init()
 
   local mainTitle = mainFrame:CreateFontString(nil, "MEDIUM", "GameFontNormal")
   mainTitle:SetPoint("TOP", 0, -18)
-  mainTitle:SetText("AutoLFM - V3 Beta available!")
+  mainTitle:SetText("AutoLFM - V3 available!")
 
   local close = CreateFrame("Button", nil, mainFrame, "UIPanelCloseButton")
   close:SetPoint("TOPRIGHT", -27, -8)

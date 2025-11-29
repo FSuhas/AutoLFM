@@ -1,5 +1,9 @@
 # AutoLFM Changelog
 
+## [2.27] - V3 available
+
+- Added informations about the V3 version availability.
+
 ## [2.26] - V3 Beta available
 
 - Added informations about the V3 beta testing availability.
