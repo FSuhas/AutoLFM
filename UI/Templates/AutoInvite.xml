@@ -1,0 +1,772 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+  <!--==========================================================================
+    AutoInvite Content Panel
+    ==========================================================================-->
+  <Frame name="AutoLFM_Content_AutoInvite" parent="AutoLFM_MainFrame_ContentContainer" hidden="true">
+    <Size>
+      <AbsDimension x="298" y="252"/>
+    </Size>
+    <Anchors>
+      <Anchor point="TOPLEFT"/>
+    </Anchors>
+    <Frames>
+      <ScrollFrame name="$parent_ScrollFrame" inherits="UIPanelScrollFrameTemplate">
+        <Size>
+          <AbsDimension x="295" y="252"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="3" y="0"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <ScrollChild>
+          <Frame name="AutoLFM_Content_AutoInvite_ScrollFrame_ScrollChild">
+            <Size>
+              <AbsDimension x="298" y="252"/>
+            </Size>
+            <Anchors>
+              <Anchor point="TOPLEFT"/>
+            </Anchors>
+            <Frames>
+              <!--==================================================================
+                Group Leader Status (Read-Only Radio Buttons at Top)
+                ==================================================================-->
+              <!-- Yes Radio (Green) -->
+              <CheckButton name="$parent_LeaderYesRadio" inherits="UIRadioButtonTemplate">
+                <Size>
+                  <AbsDimension x="16" y="16"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="40" y="-5"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Label" inherits="GameFontNormal" text="Group leader">
+                      <Anchors>
+                        <Anchor point="LEFT" relativePoint="RIGHT">
+                          <Offset>
+                            <AbsDimension x="2" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+                <Scripts>
+                  <OnLoad>
+                    this:Disable()
+                  </OnLoad>
+                </Scripts>
+              </CheckButton>
+              <!-- No Radio (Red) -->
+              <CheckButton name="$parent_LeaderNoRadio" inherits="UIRadioButtonTemplate">
+                <Size>
+                  <AbsDimension x="16" y="16"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="LEFT" relativeTo="$parent_LeaderYesRadio" relativePoint="RIGHT">
+                    <Offset>
+                      <AbsDimension x="100" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Label" inherits="GameFontNormal" text="No leadership">
+                      <Anchors>
+                        <Anchor point="LEFT" relativePoint="RIGHT">
+                          <Offset>
+                            <AbsDimension x="2" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+                <Scripts>
+                  <OnLoad>
+                    this:Disable()
+                  </OnLoad>
+                </Scripts>
+              </CheckButton>
+              <!-- Separator Line -->
+              <Frame name="$parent_LeaderSeparator">
+                <Size>
+                  <AbsDimension x="300" y="1"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="0" y="-28"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <Texture>
+                      <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                        <Anchor point="BOTTOMRIGHT"/>
+                      </Anchors>
+                      <Color r="0.3" g="0.3" b="0.3" a="0.8"/>
+                    </Texture>
+                  </Layer>
+                </Layers>
+              </Frame>
+              <!--==================================================================
+                Auto-Invite Enable/Disable Radio Buttons
+                ==================================================================-->
+              <Frame name="$parent_StatusContainer">
+                <Size>
+                  <AbsDimension x="320" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="5" y="-35"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Header" inherits="GameFontNormal" text="Auto-Invite on /w:" justifyH="LEFT">
+                      <Color r="1" g="1" b="1"/>
+                      <Size>
+                        <AbsDimension x="120" y="24"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="TOPLEFT">
+                          <Offset>
+                            <AbsDimension x="0" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+                <Frames>
+                  <!-- On Radio -->
+                  <CheckButton name="$parent_OnRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_Header" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="30" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="On" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="20" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnEnableRadioClick(true)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                  <!-- Off Radio -->
+                  <CheckButton name="$parent_OffRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_OnRadio" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="50" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="Off" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="32" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnEnableRadioClick(false)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                </Frames>
+              </Frame>
+              <!--==================================================================
+                Confirmation Message Radio Buttons
+                ==================================================================-->
+              <Frame name="$parent_ConfirmContainer">
+                <Size>
+                  <AbsDimension x="320" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="5" y="-65"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Header" inherits="GameFontNormal" text="Confirmation msg:" justifyH="LEFT">
+                      <Color r="1" g="1" b="1"/>
+                      <Size>
+                        <AbsDimension x="120" y="24"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="TOPLEFT">
+                          <Offset>
+                            <AbsDimension x="0" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+                <Frames>
+                  <!-- On Radio -->
+                  <CheckButton name="$parent_OnRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_Header" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="30" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="On" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="20" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnConfirmRadioClick(true)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                  <!-- Off Radio -->
+                  <CheckButton name="$parent_OffRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_OnRadio" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="50" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="Off" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="32" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnConfirmRadioClick(false)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                </Frames>
+              </Frame>
+              <!--==================================================================
+                Random Messages Radio Buttons
+                ==================================================================-->
+              <Frame name="$parent_RandomMessagesContainer">
+                <Size>
+                  <AbsDimension x="320" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="5" y="-95"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Header" inherits="GameFontNormal" text="Random messages:" justifyH="LEFT">
+                      <Color r="1" g="1" b="1"/>
+                      <Size>
+                        <AbsDimension x="120" y="24"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="TOPLEFT">
+                          <Offset>
+                            <AbsDimension x="0" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+                <Frames>
+                  <!-- On Radio -->
+                  <CheckButton name="$parent_OnRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_Header" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="30" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="On" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="20" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnRandomMessagesRadioClick(true)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                  <!-- Off Radio -->
+                  <CheckButton name="$parent_OffRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_OnRadio" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="50" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="Off" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="32" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnRandomMessagesRadioClick(false)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                </Frames>
+              </Frame>
+              <!--==================================================================
+                Respond When Not Leader Radio Buttons
+                ==================================================================-->
+              <Frame name="$parent_RespondNotLeaderContainer">
+                <Size>
+                  <AbsDimension x="320" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="5" y="-125"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Header" inherits="GameFontNormal" text="Answer if not leader:" justifyH="LEFT">
+                      <Color r="1" g="1" b="1"/>
+                      <Size>
+                        <AbsDimension x="120" y="24"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="TOPLEFT">
+                          <Offset>
+                            <AbsDimension x="0" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+                <Frames>
+                  <!-- On Radio -->
+                  <CheckButton name="$parent_OnRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_Header" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="30" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="On" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="20" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnRespondNotLeaderRadioClick(true)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                  <!-- Off Radio -->
+                  <CheckButton name="$parent_OffRadio" inherits="UIRadioButtonTemplate">
+                    <Size>
+                      <AbsDimension x="16" y="16"/>
+                    </Size>
+                    <Anchors>
+                      <Anchor point="LEFT" relativeTo="$parent_OnRadio" relativePoint="RIGHT">
+                        <Offset>
+                          <AbsDimension x="50" y="0"/>
+                        </Offset>
+                      </Anchor>
+                    </Anchors>
+                    <Layers>
+                      <Layer level="ARTWORK">
+                        <FontString name="$parent_Label" inherits="GameFontNormal" text="Off" justifyH="LEFT">
+                          <Size>
+                            <AbsDimension x="32" y="16"/>
+                          </Size>
+                          <Anchors>
+                            <Anchor point="LEFT" relativePoint="RIGHT">
+                              <Offset>
+                                <AbsDimension x="2" y="0"/>
+                              </Offset>
+                            </Anchor>
+                          </Anchors>
+                        </FontString>
+                      </Layer>
+                    </Layers>
+                    <Scripts>
+                      <OnClick>
+                        AutoLFM.UI.Content.AutoInvite.OnRespondNotLeaderRadioClick(false)
+                      </OnClick>
+                    </Scripts>
+                  </CheckButton>
+                </Frames>
+              </Frame>
+              <!--==================================================================
+                Keywords Section
+                ==================================================================-->
+              <Frame name="$parent_KeywordsContainer">
+                <Size>
+                  <AbsDimension x="320" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT">
+                    <Offset>
+                      <AbsDimension x="5" y="-155"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Header" inherits="GameFontNormal" text="Keywords:" justifyH="LEFT">
+                      <Color r="1" g="1" b="1"/>
+                      <Size>
+                        <AbsDimension x="120" y="24"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="TOPLEFT">
+                          <Offset>
+                            <AbsDimension x="0" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+              </Frame>
+              <!-- Clear Button for Keyword 1 (Between label and editbox) -->
+              <Button name="$parent_Keyword1_Clear" inherits="UIPanelButtonTemplate">
+                <Size>
+                  <AbsDimension x="40" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="LEFT" relativeTo="$parent_KeywordsContainer_Header" relativePoint="RIGHT">
+                    <Offset>
+                      <AbsDimension x="-45" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.AutoInvite.OnClearKeywordClick(1)
+                  </OnClick>
+                </Scripts>
+                <NormalFont inherits="GameFontNormalSmall"/>
+                <HighlightFont inherits="GameFontHighlightSmall"/>
+                <DisabledFont inherits="GameFontDisableSmall"/>
+                <ButtonText text="Clear"/>
+              </Button>
+              <!-- Keyword Row 1 (After Clear button) -->
+              <EditBox name="$parent_Keyword1_Input" autoFocus="false" multiline="false" maxLetters="50" justifyH="LEFT">
+                <Size>
+                  <AbsDimension x="85" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="LEFT" relativeTo="$parent_Keyword1_Clear" relativePoint="RIGHT">
+                    <Offset>
+                      <AbsDimension x="10" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <FontString inherits="GameFontNormal"/>
+                <TextInsets>
+                  <AbsInset left="6" right="6" top="3" bottom="3"/>
+                </TextInsets>
+                <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                  <EdgeSize>
+                    <AbsValue val="12"/>
+                  </EdgeSize>
+                  <TileSize>
+                    <AbsValue val="16"/>
+                  </TileSize>
+                  <BackgroundInsets>
+                    <AbsInset left="2" right="2" top="2" bottom="2"/>
+                  </BackgroundInsets>
+                </Backdrop>
+              </EditBox>
+              <!-- Add Keyword Button (On same line, right of editbox, hidden when Keyword2 shown) -->
+              <Button name="$parent_AddKeywordButton" inherits="UIPanelButtonTemplate">
+                <Size>
+                  <AbsDimension x="40" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="LEFT" relativeTo="$parent_Keyword1_Input" relativePoint="RIGHT">
+                    <Offset>
+                      <AbsDimension x="5" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.AutoInvite.OnAddKeywordLineClick()
+                  </OnClick>
+                </Scripts>
+                <NormalFont inherits="GameFontNormalSmall"/>
+                <HighlightFont inherits="GameFontHighlightSmall"/>
+                <DisabledFont inherits="GameFontDisableSmall"/>
+                <ButtonText text="New"/>
+              </Button>
+              <!-- Keyword Row 2 (Initially Hidden) -->
+              <!-- Delete Button for Keyword 2 (Left side, same as Keyword1 Clear) -->
+              <Button name="$parent_Keyword2_Delete" inherits="UIPanelButtonTemplate" hidden="true">
+                <Size>
+                  <AbsDimension x="40" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT" relativeTo="$parent_Keyword1_Clear" relativePoint="BOTTOMLEFT">
+                    <Offset>
+                      <AbsDimension x="0" y="-5"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.AutoInvite.OnDeleteKeywordLineClick(2)
+                  </OnClick>
+                </Scripts>
+                <NormalFont inherits="GameFontNormalSmall"/>
+                <HighlightFont inherits="GameFontHighlightSmall"/>
+                <DisabledFont inherits="GameFontDisableSmall"/>
+                <ButtonText text="Del"/>
+              </Button>
+              <!-- Keyword2 Input EditBox -->
+              <EditBox name="$parent_Keyword2_Input" autoFocus="false" multiline="false" maxLetters="50" justifyH="LEFT" hidden="true">
+                <Size>
+                  <AbsDimension x="85" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="LEFT" relativeTo="$parent_Keyword2_Delete" relativePoint="RIGHT">
+                    <Offset>
+                      <AbsDimension x="10" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <FontString inherits="GameFontNormal"/>
+                <TextInsets>
+                  <AbsInset left="6" right="6" top="3" bottom="3"/>
+                </TextInsets>
+                <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                  <EdgeSize>
+                    <AbsValue val="12"/>
+                  </EdgeSize>
+                  <TileSize>
+                    <AbsValue val="16"/>
+                  </TileSize>
+                  <BackgroundInsets>
+                    <AbsInset left="2" right="2" top="2" bottom="2"/>
+                  </BackgroundInsets>
+                </Backdrop>
+              </EditBox>
+              <!-- Add Keyword Button for Row 2 (Right side, same as Keyword1 Add, initially hidden) -->
+              <Button name="$parent_AddKeywordButton2" inherits="UIPanelButtonTemplate" hidden="true">
+                <Size>
+                  <AbsDimension x="40" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="LEFT" relativeTo="$parent_Keyword2_Input" relativePoint="RIGHT">
+                    <Offset>
+                      <AbsDimension x="5" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.AutoInvite.OnAddKeywordLineClick()
+                  </OnClick>
+                </Scripts>
+                <NormalFont inherits="GameFontNormalSmall"/>
+                <HighlightFont inherits="GameFontHighlightSmall"/>
+                <DisabledFont inherits="GameFontDisableSmall"/>
+                <ButtonText text="New"/>
+              </Button>
+              <!-- Keyword Row 3 (Initially Hidden) -->
+              <!-- Delete Button for Keyword 3 (Left side, initially hidden) -->
+              <Button name="$parent_Keyword3_Delete" inherits="UIPanelButtonTemplate" hidden="true">
+                <Size>
+                  <AbsDimension x="40" y="18"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT" relativeTo="$parent_Keyword2_Delete" relativePoint="BOTTOMLEFT">
+                    <Offset>
+                      <AbsDimension x="0" y="-5"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.AutoInvite.OnDeleteKeywordLineClick(3)
+                  </OnClick>
+                </Scripts>
+                <NormalFont inherits="GameFontNormalSmall"/>
+                <HighlightFont inherits="GameFontHighlightSmall"/>
+                <DisabledFont inherits="GameFontDisableSmall"/>
+                <ButtonText text="Del"/>
+              </Button>
+              <!-- Keyword3 Input EditBox -->
+              <EditBox name="$parent_Keyword3_Input" autoFocus="false" multiline="false" maxLetters="50" justifyH="LEFT" hidden="true">
+                <Size>
+                  <AbsDimension x="85" y="24"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="LEFT" relativeTo="$parent_Keyword3_Delete" relativePoint="RIGHT">
+                    <Offset>
+                      <AbsDimension x="10" y="0"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <FontString inherits="GameFontNormal"/>
+                <TextInsets>
+                  <AbsInset left="6" right="6" top="3" bottom="3"/>
+                </TextInsets>
+                <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                  <EdgeSize>
+                    <AbsValue val="12"/>
+                  </EdgeSize>
+                  <TileSize>
+                    <AbsValue val="16"/>
+                  </TileSize>
+                  <BackgroundInsets>
+                    <AbsInset left="2" right="2" top="2" bottom="2"/>
+                  </BackgroundInsets>
+                </Backdrop>
+              </EditBox>
+            </Frames>
+          </Frame>
+        </ScrollChild>
+      </ScrollFrame>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        AutoLFM.UI.Content.AutoInvite.OnLoad(this)
+      </OnLoad>
+      <OnShow>
+        AutoLFM.UI.Content.AutoInvite.OnShow(this)
+      </OnShow>
+    </Scripts>
+  </Frame>
+</Ui>
