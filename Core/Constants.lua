@@ -1,79 +1,158 @@
 --=============================================================================
 -- AutoLFM: Constants
---   Shared constants, data tables, and configuration values
 --=============================================================================
-AutoLFM = AutoLFM or {}
-AutoLFM.Core = AutoLFM.Core or {}
-AutoLFM.Core.Constants = {}
 
---=============================================================================
--- UI CONSTANTS
---=============================================================================
+if not AutoLFM then AutoLFM = {} end
+if not AutoLFM.Core then AutoLFM.Core = {} end
+if not AutoLFM.Core.Constants then AutoLFM.Core.Constants = {} end
+
+-----------------------------------------------------------------------------
+-- General Constants
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON = 5
+AutoLFM.Core.Constants.GROUP_SIZE_RAID = 10
+AutoLFM.Core.Constants.MAX_DUNGEONS = 4
+AutoLFM.Core.Constants.MAX_MESSAGE_LENGTH = 150
+AutoLFM.Core.Constants.UPDATE_THROTTLE = 0.1
+
+-----------------------------------------------------------------------------
+-- Interval Settings
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.INTERVAL_MIN = 30
+AutoLFM.Core.Constants.INTERVAL_MAX = 120
+AutoLFM.Core.Constants.INTERVAL_STEP = 10
+AutoLFM.Core.Constants.INTERVAL_DEFAULT = 60
+
+-----------------------------------------------------------------------------
+-- UI Dimensions
+-----------------------------------------------------------------------------
 AutoLFM.Core.Constants.ROW_HEIGHT = 20
-AutoLFM.Core.Constants.MAX_ROWS_SAFETY = 100
-AutoLFM.Core.Constants.INVALID_LEVEL = 999
-AutoLFM.Core.Constants.MESSAGE_PREVIEW_TEXT_WIDTH = 290
+AutoLFM.Core.Constants.CHECKBOX_SIZE = 20
+AutoLFM.Core.Constants.ICON_SIZE = 16
+AutoLFM.Core.Constants.EDITBOX_HEIGHT = 28
+AutoLFM.Core.Constants.EDITBOX_WIDTH = 285
+AutoLFM.Core.Constants.BUTTON_HEIGHT = 20
+AutoLFM.Core.Constants.BUTTON_WIDTH_SMALL = 60
+AutoLFM.Core.Constants.BUTTON_WIDTH_MEDIUM = 80
+AutoLFM.Core.Constants.BUTTON_WIDTH_LARGE = 110
+AutoLFM.Core.Constants.SPACING_SMALL = 5
+AutoLFM.Core.Constants.SPACING_MEDIUM = 10
+AutoLFM.Core.Constants.SPACING_LARGE = 20
 
---=============================================================================
--- GROUP CONSTANTS
---=============================================================================
-AutoLFM.Core.Constants.MAX_GROUP_SIZE = 40
-AutoLFM.Core.Constants.MAX_PARTY_SIZE = 5
+-----------------------------------------------------------------------------
+-- Content Types
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.TYPE_DUNGEON = "dungeon"
+AutoLFM.Core.Constants.TYPE_RAID = "raid"
 
---=============================================================================
--- BROADCAST CONSTANTS
---=============================================================================
-AutoLFM.Core.Constants.MIN_BROADCAST_INTERVAL = 30
-AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL = 120
-AutoLFM.Core.Constants.DEFAULT_BROADCAST_INTERVAL = 60
+-----------------------------------------------------------------------------
+-- Paths
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.TEXTURE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
+AutoLFM.Core.Constants.SOUND_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\"
 
---=============================================================================
--- SELECTION CONSTANTS
---=============================================================================
-AutoLFM.Core.Constants.MAX_DUNGEONS = 3
-AutoLFM.Core.Constants.MAX_DUNGEON_GROUP_SIZE = 5
+-----------------------------------------------------------------------------
+-- Chat
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.CHAT_PREFIX = "|cff808080[|r|cffffffffAuto|r|cff0070ddL|r|cffffffffF|r|cffff0000M|r|cff808080]|r "
 
---=============================================================================
--- TIMER CONSTANTS
---=============================================================================
-AutoLFM.Core.Constants.TIMER_UPDATE_INTERVAL = 1  -- Update timer every 1 second
-
---=============================================================================
--- CHAT PREFIX
---=============================================================================
-AutoLFM.Core.Constants.CHAT_PREFIX = "|cff808080[|r|cffffffffAuto|r|cff0070ddL|r|cffffffffF|r|cffff0000M|r|cff808080]|r"
-
---=============================================================================
--- LEVEL COLOR THRESHOLDS
---=============================================================================
-AutoLFM.Core.Constants.GREEN_THRESHOLDS = {
-  [1] = 4,  -- Level 1-9
-  [2] = 5,  -- Level 10-19
-  [3] = 6,  -- Level 20-29
-  [4] = 7,  -- Level 30-39
-  [5] = 8   -- Level 40+
+-----------------------------------------------------------------------------
+-- Textures
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.TEXTURES = {
+  TOOLTIP_BACKGROUND = "tooltipBackground",
+  TOOLTIP_BORDER = "tooltipBorder",
+  SLIDER_BUTTON = "sliderButtonHorizontal",
+  SLIDER_BACKGROUND = "sliderBackground",
+  SLIDER_BORDER = "sliderBorder",
+  WHITE = "white",
+  BUTTON_ROTATION_LEFT = "Icons\\buttonRotationLeft",
+  BUTTON_HIGHLIGHT = "Icons\\buttonHighlight"
 }
 
---=============================================================================
--- COLORS
---=============================================================================
-AutoLFM.Core.Constants.COLORS = {
-  {name = "GREEN", priority = 1, r = 0.25, g = 0.75, b = 0.25, hex = "40BF40", debugCategory = "STATE"},
-  {name = "YELLOW", priority = 2, r = 1.0, g = 1.0, b = 0.0, hex = "FFFF00", debugCategory = "INFO"},
-  {name = "ORANGE", priority = 3, r = 1.0, g = 0.5, b = 0.25, hex = "FF8040", debugCategory = "WARNING"},
-  {name = "RED", priority = 4, r = 1.0, g = 0.0, b = 0.0, hex = "FF0000", debugCategory = "ERROR"},
-  {name = "GRAY", priority = 5, r = 0.5, g = 0.5, b = 0.5, hex = "808080", debugCategory = "TIMESTAMP"},
-  {name = "WHITE", priority = 99, r = 1.0, g = 1.0, b = 1.0, hex = "FFFFFF", debugCategory = "ACTION"},
-  {name = "PURPLE", priority = 99, r = 0.67, g = 0.0, b = 1.0, hex = "AA00FF", debugCategory = "INIT"},
-  {name = "BLUE", priority = 99, r = 0.0, g = 0.67, b = 1.0, hex = "00AAFF", debugCategory = "COMMAND"},
-  {name = "CYAN", priority = 99, r = 0.0, g = 1.0, b = 1.0, hex = "00FFFF", debugCategory = "EVENT"},
-  {name = "MAGENTA", priority = 99, r = 1.0, g = 0.0, b = 1.0, hex = "FF00FF", debugCategory = "LISTENER"},
-  {name = "GOLD", priority = 99, r = 1.0, g = 0.82, b = 0.0, hex = "FFD100"}
+-----------------------------------------------------------------------------
+-- Sounds
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.SOUNDS = {
+  START = "LFG_RoleCheck.ogg",
+  STOP = "LFG_Denied.ogg"
 }
 
---=============================================================================
--- DUNGEONS DATABASE
---=============================================================================
+-----------------------------------------------------------------------------
+-- Color Presets (RGB)
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.COLOR_PRESETS = {
+  yellow = {r = 1, g = 1, b = 0},
+  gold = {r = 1, g = 0.82, b = 0},
+  white = {r = 1, g = 1, b = 1},
+  green = {r = 0.25, g = 0.75, b = 0.25},
+  red = {r = 1, g = 0, b = 0},
+  orange = {r = 1, g = 0.5, b = 0.25},
+  gray = {r = 0.5, g = 0.5, b = 0.5},
+  blue = {r = 0.3, g = 0.6, b = 1},
+  disabled = {r = 0.5, g = 0.5, b = 0.5}
+}
+
+-----------------------------------------------------------------------------
+-- Chat Colors (Hex)
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.CHAT_COLORS = {
+  yellow = "ffff00",
+  gold = "ffd100",
+  white = "ffffff",
+  green = "40bf40",
+  red = "ff0000",
+  orange = "ff8040",
+  gray = "808080",
+  blue = "0070dd"
+}
+
+-----------------------------------------------------------------------------
+-- Priority Colors
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.PRIORITY_COLORS = {
+  {priority = 5, key = "gray", r = 0.5, g = 0.5, b = 0.5},
+  {priority = 1, key = "green", r = 0.25, g = 0.75, b = 0.25},
+  {priority = 2, key = "yellow", r = 1.0, g = 1.0, b = 0.0},
+  {priority = 3, key = "orange", r = 1.0, g = 0.50, b = 0.25},
+  {priority = 4, key = "red", r = 1.0, g = 0.0, b = 0.0}
+}
+
+-----------------------------------------------------------------------------
+-- Default Settings
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.DEFAULTS = {
+  MINIMAP_ANGLE = 235,
+  MINIMAP_HIDDEN = false,
+  DARK_MODE = nil,
+  BROADCAST_INTERVAL = 60,
+  MISC_MODULES = {
+    fpsDisplay = false,
+    restedXP = false,
+    autoInvite = false,
+    guildSpam = false,
+    autoMarker = false
+  }
+}
+
+-----------------------------------------------------------------------------
+-- Link Patterns
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.LINK_PATTERNS = {
+  QUEST = "|c.-|Hquest:.-|h%[.-%]|h|r",
+  ITEM = "|c.-|Hitem:.-|h%[.-%]|h|r"
+}
+
+-----------------------------------------------------------------------------
+-- Link Formats
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.LINK_FORMATS = {
+  QUEST = "|c%s|Hquest:%d:%d|h[%s]|h|r"
+}
+
+-----------------------------------------------------------------------------
+-- Dungeons Database
+-----------------------------------------------------------------------------
 AutoLFM.Core.Constants.DUNGEONS = {
   {name = "Ragefire Chasm", tag = "RFC", levelMin = 13, levelMax = 19},
   {name = "Wailing Caverns", tag = "WC", levelMin = 16, levelMax = 25},
@@ -116,32 +195,21 @@ AutoLFM.Core.Constants.DUNGEONS = {
   {name = "Caverns of Time. Black Morass", tag = "Black Morass", levelMin = 60, levelMax = 60}
 }
 
---=============================================================================
--- RAIDS DATABASE
---=============================================================================
+-----------------------------------------------------------------------------
+-- Raids Database
+-----------------------------------------------------------------------------
 AutoLFM.Core.Constants.RAIDS = {
-  {name = "Scholomance 10", tag = "Scholo 10", raidSizeMin = 10, raidSizeMax = 10},
-  {name = "Stratholme Live 10", tag = "Strat Live 10", raidSizeMin = 10, raidSizeMax = 10},
-  {name = "Stratholme UD 10", tag = "Strat UD 10", raidSizeMin = 10, raidSizeMax = 10},
-  {name = "Upper Blackrock Spire", tag = "UBRS", raidSizeMin = 10, raidSizeMax = 10},
-  {name = "Zul'Gurub", tag = "ZG", raidSizeMin = 12, raidSizeMax = 20},
-  {name = "Ruins of Ahn'Qiraj", tag = "AQ20", raidSizeMin = 12, raidSizeMax = 20},
-  {name = "Molten Core", tag = "MC", raidSizeMin = 20, raidSizeMax = 40},
-  {name = "Onyxia's Lair", tag = "Ony", raidSizeMin = 15, raidSizeMax = 40},
-  {name = "Lower Karazhan Halls", tag = "Kara10", raidSizeMin = 10, raidSizeMax = 10},
-  {name = "Blackwing Lair", tag = "BWL", raidSizeMin = 20, raidSizeMax = 40},
-  {name = "Emerald Sanctum", tag = "ES", raidSizeMin = 30, raidSizeMax = 40},
-  {name = "Temple of Ahn'Qiraj", tag = "AQ40", raidSizeMin = 20, raidSizeMax = 40},
-  {name = "Naxxramas", tag = "Naxx", raidSizeMin = 30, raidSizeMax = 40}
+  {name = "Scholomance 10", tag = "Scholo 10", sizeMin = 10, sizeMax = 10},
+  {name = "Stratholme Live 10", tag = "Strat Live 10", sizeMin = 10, sizeMax = 10},
+  {name = "Stratholme UD 10", tag = "Strat UD 10", sizeMin = 10, sizeMax = 10},
+  {name = "Upper Blackrock Spire", tag = "UBRS", sizeMin = 10, sizeMax = 10},
+  {name = "Zul'Gurub", tag = "ZG", sizeMin = 12, sizeMax = 20},
+  {name = "Ruins of Ahn'Qiraj", tag = "AQ20", sizeMin = 12, sizeMax = 20},
+  {name = "Molten Core", tag = "MC", sizeMin = 20, sizeMax = 40},
+  {name = "Onyxia's Lair", tag = "Ony", sizeMin = 15, sizeMax = 40},
+  {name = "Lower Karazhan Halls", tag = "Kara10", sizeMin = 10, sizeMax = 10},
+  {name = "Blackwing Lair", tag = "BWL", sizeMin = 20, sizeMax = 40},
+  {name = "Emerald Sanctum", tag = "ES", sizeMin = 30, sizeMax = 40},
+  {name = "Temple of Ahn'Qiraj", tag = "AQ40", sizeMin = 20, sizeMax = 40},
+  {name = "Naxxramas", tag = "Naxx", sizeMin = 30, sizeMax = 40}
 }
-
---=============================================================================
--- DEBUG CONSTANTS
---=============================================================================
-AutoLFM.Core.Constants.DEBUG_LINE_HEIGHT = 14
-
---=============================================================================
--- LOOKUP TABLES (built on-demand by Core/Utils.lua lazy loading)
---=============================================================================
-AutoLFM.Core.Constants.DUNGEONS_BY_NAME = {}
-AutoLFM.Core.Constants.RAIDS_BY_NAME = {}
