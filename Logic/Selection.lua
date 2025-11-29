@@ -10,7 +10,7 @@ AutoLFM.Logic.Selection = {}
 --=============================================================================
 -- CONSTANTS
 --=============================================================================
-local MAX_DUNGEONS = AutoLFM.Core.Constants.MAX_DUNGEONS or 3
+local MAX_DUNGEONS = AutoLFM.Core.Constants.MAX_DUNGEONS
 
 --=============================================================================
 -- STATE DECLARATIONS (MUST BE FIRST)

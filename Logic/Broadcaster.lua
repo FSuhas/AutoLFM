@@ -177,7 +177,7 @@ local function startTimer()
 
   broadcastTimer = CreateFrame("Frame", "AutoLFM_BroadcastTimer")
   broadcastTimer:SetScript("OnUpdate", function()
-    if not this.lastUpdate or GetTime() - this.lastUpdate >= 1 then
+    if not this.lastUpdate or GetTime() - this.lastUpdate >= AutoLFM.Core.Constants.TIMER_UPDATE_INTERVAL then
       this.lastUpdate = GetTime()
       onTimerTick()
     end

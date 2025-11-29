@@ -77,18 +77,6 @@ local function addToBuffer(line)
   end
 end
 
---- Removes WoW color codes from a string for display in EditBox
---- @param text string - Text with WoW color codes
---- @return string - Text without color codes
-local function stripColorCodes(text)
-  if not text then return "" end
-  -- Remove |cff##### format (color codes)
-  text = string.gsub(text, "|cff%x%x%x%x%x%x", "")
-  -- Remove |r format (color reset)
-  text = string.gsub(text, "|r", "")
-  return text
-end
-
 --- Updates the debug window display with current buffer contents
 --- Dynamically resizes scroll frame based on content
 --- Auto-scrolls to bottom when new logs are added

@@ -77,7 +77,7 @@ local function buildDungeonMessage()
 
   AutoLFM.Core.Utils.EnsureLookupTables()
 
-  local targetSize = 5
+  local targetSize = AutoLFM.Core.Constants.MAX_DUNGEON_GROUP_SIZE
   local missing, isFull = calculateMissing(targetSize)
   if isFull then
     return ""
@@ -177,7 +177,7 @@ local function buildCustomMessage()
     return ""
   end
 
-  local targetSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or 5
+  local targetSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or AutoLFM.Core.Constants.MAX_DUNGEON_GROUP_SIZE
   local missing, isFull = calculateMissing(targetSize)
   local currentSize = AutoLFM.Logic.Group.GetSize()
 
