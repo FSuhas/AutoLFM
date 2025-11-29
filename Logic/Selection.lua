@@ -28,6 +28,39 @@ AutoLFM.Core.SafeRegisterState("Selection.CustomGroupSize", 5, { id = "S08" })
 -- PRIVATE HELPERS
 --=============================================================================
 
+--- Cache for dungeon lookup tables (O(1) access after first call)
+--- Key: serialized dungeon names, Value: lookup table
+local dungeonLookupCache = {}
+local CACHE_MAX_SIZE = 20  -- Prevent unbounded cache growth
+
+--- Serializes dungeon names array to cache key
+--- @param dungeonNames table - Array of dungeon names
+--- @return string - Cache key
+local function serializeDungeonNames(dungeonNames)
+  if not dungeonNames or table.getn(dungeonNames) == 0 then
+    return ""
+  end
+  return table.concat(dungeonNames, "|")
+end
+
+--- Enforces cache size limit by removing oldest entry (FIFO)
+--- Prevents unbounded memory growth from cache accumulation
+local function enforceCacheLimit()
+  local cacheSize = 0
+  for _ in pairs(dungeonLookupCache) do
+    cacheSize = cacheSize + 1
+  end
+
+  if cacheSize > CACHE_MAX_SIZE then
+    -- Remove first entry (oldest) - simple FIFO
+    -- Note: Lua pairs() iteration order is undefined, but acceptable for cache eviction
+    for key in pairs(dungeonLookupCache) do
+      dungeonLookupCache[key] = nil
+      break  -- Only remove one entry to stay just under limit
+    end
+  end
+end
+
 --- Checks if a dungeon is visible (not filtered by color)
 --- @param index number - Dungeon index to check
 --- @return boolean - True if dungeon appears in sorted (filtered) list
@@ -46,7 +79,8 @@ local function isDungeonVisible(index)
   return false
 end
 
---- Checks if dungeon is selected by name (O(1) with lookup table)
+--- Checks if dungeon is selected by name (O(1) with cached lookup table)
+--- Uses closure cache to avoid rebuilding lookup table on every call
 --- @param dungeonNames table - Array of selected dungeon names
 --- @param name string - Name to check
 --- @return boolean - True if dungeon is in array
@@ -55,13 +89,20 @@ local function isDungeonSelected(dungeonNames, name)
     return false
   end
 
-  -- Build O(1) lookup table for this array
-  local lookupMap = {}
-  for i = 1, table.getn(dungeonNames) do
-    lookupMap[dungeonNames[i]] = true
+  -- Build cache key from dungeon names
+  local cacheKey = serializeDungeonNames(dungeonNames)
+
+  -- Build or reuse cached lookup table
+  if not dungeonLookupCache[cacheKey] then
+    local lookupMap = {}
+    for i = 1, table.getn(dungeonNames) do
+      lookupMap[dungeonNames[i]] = true
+    end
+    dungeonLookupCache[cacheKey] = lookupMap
+    enforceCacheLimit()  -- Keep cache size bounded
   end
 
-  return lookupMap[name] or false
+  return dungeonLookupCache[cacheKey][name] or false
 end
 
 --- Removes a dungeon from the array
@@ -78,6 +119,28 @@ local function removeDungeon(dungeonNames, name)
   return newNames
 end
 
+--- Sets the selection mode and clears incompatible selections
+--- Ensures mutual exclusivity between dungeons, raids, custom, and quests modes
+--- @param newMode string - The new mode to switch to ("dungeons", "raid", "custom", "quests", or "none")
+local function setSelectionMode(newMode)
+  -- Clear all modes except the new one (atomic operation)
+  if newMode ~= "dungeons" then
+    AutoLFM.Core.Maestro.SetState("Selection.DungeonNames", {})
+  end
+
+  if newMode ~= "raid" then
+    AutoLFM.Core.Maestro.SetState("Selection.RaidName", nil)
+    AutoLFM.Core.Maestro.SetState("Selection.RaidSize", 40)
+  end
+
+  if newMode ~= "custom" then
+    AutoLFM.Core.Maestro.SetState("Selection.CustomMessage", "")
+  end
+
+  -- Set the new mode
+  AutoLFM.Core.Maestro.SetState("Selection.Mode", newMode)
+end
+
 --=============================================================================
 -- COMMANDS - DUNGEONS
 --=============================================================================
@@ -85,14 +148,14 @@ end
 --- Toggles dungeon selection with FIFO limit
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleDungeon", function(index)
   if not index or type(index) ~= "number" then
-    AutoLFM.Core.Utils.LogError("ToggleDungeon: invalid index")
+    AutoLFM.Core.Utils.LogError("Selection.ToggleDungeon: Invalid index type %s (expected number)", type(index))
     return
   end
 
   -- Verify dungeon exists and get its name
   local dungeon = AutoLFM.Core.Constants.DUNGEONS[index]
   if not dungeon then
-    AutoLFM.Core.Utils.LogError("ToggleDungeon: dungeon " .. index .. " does not exist")
+    AutoLFM.Core.Utils.LogError("Selection.ToggleDungeon: Dungeon at index %d does not exist (max: %d)", index, table.getn(AutoLFM.Core.Constants.DUNGEONS))
     return
   end
 
@@ -105,18 +168,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleDungeon", function(index)
   end
 
   -- Read current state
-  local mode = AutoLFM.Core.Maestro.GetState("Selection.Mode")
   local dungeonNames = AutoLFM.Core.Maestro.GetState("Selection.DungeonNames") or {}
-
-  -- Switch from custom/raid to dungeons mode
-  if mode == "custom" then
-    AutoLFM.Core.Maestro.SetState("Selection.CustomMessage", "")
-    mode = "dungeons"
-  elseif mode == "raid" then
-    AutoLFM.Core.Maestro.SetState("Selection.RaidName", nil)
-    AutoLFM.Core.Maestro.SetState("Selection.RaidSize", 40)
-    mode = "dungeons"
-  end
 
   -- Toggle selection
   if isDungeonSelected(dungeonNames, dungeonName) then
@@ -126,7 +178,10 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleDungeon", function(index)
 
     -- If no more dungeons selected, reset mode
     if table.getn(dungeonNames) == 0 then
-      mode = "none"
+      setSelectionMode("none")
+      AutoLFM.Core.Maestro.SetState("Selection.DungeonNames", dungeonNames)
+      AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
+      return
     end
   else
     -- Check FIFO limit
@@ -141,17 +196,16 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleDungeon", function(index)
 
     -- Select new
     table.insert(dungeonNames, dungeonName)
-    mode = "dungeons"
     AutoLFM.Core.Utils.LogAction("Selected dungeon " .. dungeonName)
   end
 
-  -- Update states
-  AutoLFM.Core.Maestro.SetState("Selection.Mode", mode)
+  -- Update states and ensure dungeons mode is active
   AutoLFM.Core.Maestro.SetState("Selection.DungeonNames", dungeonNames)
+  setSelectionMode("dungeons")
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C06" })
+end, { id = "C03" })
 
 --- Clears all dungeon selections
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearDungeons", function()
@@ -172,7 +226,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearDungeons", function()
   AutoLFM.Core.Utils.LogAction("Cleared all dungeons")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C14" })
+end, { id = "C11" })
 
 --=============================================================================
 -- COMMANDS - RAIDS
@@ -181,52 +235,42 @@ end, { id = "C14" })
 --- Toggles raid selection (exclusive with dungeons)
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleRaid", function(index)
   if not index or type(index) ~= "number" then
-    AutoLFM.Core.Utils.LogError("ToggleRaid: invalid index")
+    AutoLFM.Core.Utils.LogError("Selection.ToggleRaid: Invalid index type %s (expected number)", type(index))
     return
   end
 
   -- Verify raid exists and get its name
   local raid = AutoLFM.Core.Constants.RAIDS[index]
   if not raid then
-    AutoLFM.Core.Utils.LogError("ToggleRaid: raid " .. index .. " does not exist")
+    AutoLFM.Core.Utils.LogError("Selection.ToggleRaid: Raid at index %d does not exist (max: %d)", index, table.getn(AutoLFM.Core.Constants.RAIDS))
     return
   end
 
   local raidName = raid.name
 
   -- Read current state
-  local mode = AutoLFM.Core.Maestro.GetState("Selection.Mode")
   local selectedRaidName = AutoLFM.Core.Maestro.GetState("Selection.RaidName")
-
-  -- Switch from custom/dungeons to raid mode
-  if mode == "custom" then
-    AutoLFM.Core.Maestro.SetState("Selection.CustomMessage", "")
-  elseif mode == "dungeons" then
-    AutoLFM.Core.Maestro.SetState("Selection.DungeonNames", {})
-  end
 
   -- Toggle selection
   if selectedRaidName == raidName then
-    -- Deselect
-    AutoLFM.Core.Maestro.SetState("Selection.RaidName", nil)
-    AutoLFM.Core.Maestro.SetState("Selection.RaidSize", 40)
-    AutoLFM.Core.Maestro.SetState("Selection.Mode", "none")
+    -- Deselect: clear raid and switch to none mode
+    setSelectionMode("none")
     AutoLFM.Core.Utils.LogAction("Deselected raid " .. raidName)
   else
-    -- Select
+    -- Select: clear other modes and set raid
+    setSelectionMode("raid")
     -- Use minimum raid size as default (will be adjusted by SetRaidSize if needed)
     local raidSize = raid.raidSizeMin or 40
 
     AutoLFM.Core.Maestro.SetState("Selection.RaidName", raidName)
     AutoLFM.Core.Maestro.SetState("Selection.RaidSize", raidSize)
-    AutoLFM.Core.Maestro.SetState("Selection.Mode", "raid")
 
     AutoLFM.Core.Utils.LogAction("Selected raid " .. raidName .. " (size: " .. raidSize .. ")")
   end
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C07" })
+end, { id = "C04" })
 
 --- Sets custom raid size
 --- @param size number - The new raid size
@@ -242,7 +286,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetRaidSize", function(size, sil
 
   local newSize = tonumber(size)
   if not newSize then
-    AutoLFM.Core.Utils.LogError("SetRaidSize: invalid size")
+    AutoLFM.Core.Utils.LogError("Selection.SetRaidSize: Invalid size value %s (expected number)", tostring(size))
     return
   end
 
@@ -256,7 +300,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetRaidSize", function(size, sil
   end
 
   if not raid then
-    AutoLFM.Core.Utils.LogError("SetRaidSize: raid '" .. selectedRaidName .. "' does not exist")
+    AutoLFM.Core.Utils.LogError("Selection.SetRaidSize: Selected raid '%s' not found in raid database", tostring(selectedRaidName))
     return
   end
 
@@ -275,7 +319,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetRaidSize", function(size, sil
   if not silent then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C08" })
+end, { id = "C05" })
 
 --- Clears raid selection
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRaid", function()
@@ -297,7 +341,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRaid", function()
   AutoLFM.Core.Utils.LogAction("Cleared raid")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C15" })
+end, { id = "C12" })
 
 --=============================================================================
 -- COMMANDS - ROLES
@@ -306,14 +350,14 @@ end, { id = "C15" })
 --- Toggles role selection
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleRole", function(role)
   if not role or type(role) ~= "string" then
-    AutoLFM.Core.Utils.LogError("ToggleRole: invalid role")
+    AutoLFM.Core.Utils.LogError("Selection.ToggleRole: Invalid role type %s (expected string)", type(role))
     return
   end
 
   -- Validate role
   local validRoles = { TANK = true, HEAL = true, DPS = true }
   if not validRoles[role] then
-    AutoLFM.Core.Utils.LogError("ToggleRole: invalid role '" .. role .. "'")
+    AutoLFM.Core.Utils.LogError("Selection.ToggleRole: Invalid role '%s' (valid: TANK, HEAL, DPS)", role)
     return
   end
 
@@ -345,7 +389,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleRole", function(role)
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C09" })
+end, { id = "C06" })
 
 --- Clears all role selections
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRoles", function()
@@ -359,7 +403,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRoles", function()
   AutoLFM.Core.Utils.LogAction("Cleared all roles")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C10" })
+end, { id = "C07" })
 
 --=============================================================================
 -- COMMANDS - CUSTOM MESSAGE
@@ -371,31 +415,20 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomMessage", function(text
     text = ""
   end
 
-  local mode = AutoLFM.Core.Maestro.GetState("Selection.Mode")
-
   -- If non-empty, switch to custom mode
   if text ~= "" then
-    if mode == "dungeons" then
-      AutoLFM.Core.Maestro.SetState("Selection.DungeonNames", {})
-    elseif mode == "raid" then
-      AutoLFM.Core.Maestro.SetState("Selection.RaidName", nil)
-      AutoLFM.Core.Maestro.SetState("Selection.RaidSize", 40)
-    end
-
-    AutoLFM.Core.Maestro.SetState("Selection.Mode", "custom")
+    setSelectionMode("custom")
     AutoLFM.Core.Maestro.SetState("Selection.CustomMessage", text)
     AutoLFM.Core.Utils.LogAction("Set custom message")
   else
     -- If empty, clear custom mode
-    if mode == "custom" then
-      AutoLFM.Core.Maestro.SetState("Selection.Mode", "none")
-    end
+    setSelectionMode("none")
     AutoLFM.Core.Maestro.SetState("Selection.CustomMessage", "")
   end
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C11" })
+end, { id = "C08" })
 
 --- Clears custom message
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearCustomMessage", function()
@@ -405,17 +438,12 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearCustomMessage", function()
     return  -- Nothing to clear
   end
 
-  local mode = AutoLFM.Core.Maestro.GetState("Selection.Mode")
-
-  if mode == "custom" then
-    AutoLFM.Core.Maestro.SetState("Selection.Mode", "none")
-  end
-
+  setSelectionMode("none")
   AutoLFM.Core.Maestro.SetState("Selection.CustomMessage", "")
   AutoLFM.Core.Utils.LogAction("Cleared custom message")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C12" })
+end, { id = "C09" })
 
 --- Sets custom group size for custom messages with variables
 AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomGroupSize", function(size)
@@ -439,7 +467,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomGroupSize", function(si
   if mode == "custom" and customMessage ~= "" then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C13" })
+end, { id = "C10" })
 
 --- Sets details text (appended to auto-generated message in details mode)
 AutoLFM.Core.Maestro.RegisterCommand("Selection.SetDetailsText", function(text)
@@ -457,7 +485,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetDetailsText", function(text)
   if mode ~= "custom" then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C16" })
+end, { id = "C13" })
 
 --=============================================================================
 -- COMMANDS - GLOBAL
@@ -494,7 +522,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearAll", function()
   AutoLFM.Core.Utils.LogAction("Cleared all selections")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C17" })
+end, { id = "C14" })
 
 --=============================================================================
 -- EVENT DECLARATIONS
@@ -504,4 +532,14 @@ AutoLFM.Core.Maestro.RegisterEvent("Selection.Changed", { id = "E01" })
 --=============================================================================
 -- INITIALIZATION
 --=============================================================================
-AutoLFM.Core.SafeRegisterInit("Logic.Selection", function() end, { id = "I12" })
+AutoLFM.Core.SafeRegisterInit("Logic.Selection", function()
+  -- Clear the dungeon lookup cache whenever selection changes
+  AutoLFM.Core.Maestro.Listen(
+    "Selection.CacheInvalidation",
+    "Selection.Changed",
+    function()
+      dungeonLookupCache = {}
+    end,
+    { id = "L02" }
+  )
+end, { id = "I05" })

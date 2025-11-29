@@ -43,7 +43,7 @@ local function createSlider(config)
       edgeSize = 8,
       insets = { left = 3, right = 3, top = 6, bottom = 6 }
     })
-    slider:SetThumbTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\SliderButtonl")
+    slider:SetThumbTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\SliderButton")
     slider:EnableMouseWheel(true)
   end
 
@@ -88,7 +88,7 @@ local function createEditBox(config)
     editBox:SetFontObject(GameFontNormal)
     editBox:SetTextInsets(2, 2, 2, 2)
     editBox:SetBackdrop({
-      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+      edgeFile = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\TooltipBorder",
       tile = false,
       edgeSize = 12,
       insets = { left = 2, right = 2, top = 2, bottom = 2 }

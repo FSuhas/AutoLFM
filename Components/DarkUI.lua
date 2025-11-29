@@ -28,13 +28,19 @@ local DARKUI_BLACKLIST = {
   ["Check"] = true,
   ["Radio"] = true,
   ["Icon"] = true,
-  ["Slider"] = true
+  ["Slider"] = true,
+  ["EditBox"] = true,
+  ["Row"] = true,
+  ["DungeonRow"] = true,
+  ["RaidRow"] = true,
+  ["QuestRow"] = true
 }
 
 local DARKUI_WHITELIST = {
   ["MainFrame"] = true,
   ["MinimapBorder"] = true,
-  ["BottomTabActive"] = true
+  ["BottomTabActive"] = true,
+  ["White"] = true
 }
 
 -----------------------------------------------------------------------------
@@ -132,6 +138,9 @@ end
 --- @param frame frame - The frame whose regions to process
 local function processRegions(frame)
   if not frame or not frame.GetRegions then return end
+
+  -- Skip if the frame itself is blacklisted
+  if isFrameBlacklisted(frame) then return end
 
   for _, region in pairs({frame:GetRegions()}) do
     if region and region.SetVertexColor and region:GetObjectType() == "Texture" then
@@ -236,6 +245,6 @@ end
 AutoLFM.Core.SafeRegisterInit("Components.DarkUI", function()
   AutoLFM.Components.DarkUI.Init()
 end, {
-  id = "I08",
+  id = "I14",
   dependencies = {"Core.Storage"}
 })

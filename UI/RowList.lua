@@ -25,7 +25,9 @@ function AutoLFM.UI.RowList.SetupRowBackdrop(row)
     tileSize = 8,
     insets = { left = 0, right = 0, top = 0, bottom = 0 }
   })
+  -- Ensure both backdrop and border are fully transparent
   row:SetBackdropColor(0, 0, 0, 0)
+  row:SetBackdropBorderColor(0, 0, 0, 0)
   row:EnableMouse(true)
 end
 
@@ -44,6 +46,10 @@ function AutoLFM.UI.RowList.SetupHover(element, row, color, elements, options)
 
   elements = elements or {}
   options = options or {}
+
+  -- Initialize backdrop to transparent state (both color and border)
+  row:SetBackdropColor(0, 0, 0, 0)
+  row:SetBackdropBorderColor(0, 0, 0, 0)
 
   element:SetScript("OnEnter", function()
     -- Set all elements to white
@@ -87,19 +93,20 @@ function AutoLFM.UI.RowList.SetupHover(element, row, color, elements, options)
   element:SetScript("OnLeave", function()
     -- Restore original color for all elements
     local restoreColor = color
-    
+
     -- Fallback to gold if restoreColor is invalid
     if not restoreColor or type(restoreColor) ~= "table" or not restoreColor.r then
       restoreColor = AutoLFM.Core.Utils.GetColor("GOLD")
     end
-    
+
     for _, elem in ipairs(elements) do
       if elem and elem.SetTextColor then
         elem:SetTextColor(restoreColor.r, restoreColor.g, restoreColor.b)
       end
     end
-    
+
     row:SetBackdropColor(0, 0, 0, 0)
+    row:SetBackdropBorderColor(0, 0, 0, 0)
 
     -- Hide tooltip
     if options.tooltipZone then
@@ -210,6 +217,22 @@ local function hideAllRows(rowPrefix)
   end
 end
 
+--- Resets backdrop colors for all rows with the given prefix (private helper)
+--- Ensures rows are transparent after DarkUI may have modified them
+--- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
+local function resetAllRowBackdrops(rowPrefix)
+  local index = 1
+  while index <= AutoLFM.Core.Constants.MAX_ROWS_SAFETY do
+    local row = getglobal(rowPrefix .. index)
+    if not row then
+      break
+    end
+    row:SetBackdropColor(0, 0, 0, 0)
+    row:SetBackdropBorderColor(0, 0, 0, 0)
+    index = index + 1
+  end
+end
+
 --- Generic OnShow handler for content frames with row-based lists
 --- Hides all existing rows, clears cache, then recreates rows from scratch
 --- @param frame frame - The content frame being shown
@@ -233,5 +256,8 @@ function AutoLFM.UI.RowList.OnShowHandler(frame, createRowsFunc, clearCacheFunc,
   if scrollChild then
     -- Create/update rows (will reuse existing frames or create new ones)
     createRowsFunc(scrollChild)
+
+    -- Reset row backdrops to transparent (in case DarkUI modified them)
+    resetAllRowBackdrops(rowPrefix)
   end
 end

@@ -7,6 +7,14 @@ AutoLFM = AutoLFM or {}
 AutoLFM.API = {}
 
 --=============================================================================
+-- PRIVATE SUBSCRIPTION TRACKING
+--=============================================================================
+
+--- Tracks subscription groups for unsubscribe functionality
+--- Maps listenerId → {stateNames: array, callbacks: array}
+local subscriptionGroups = {}
+
+--=============================================================================
 -- BROADCAST STATE API
 --=============================================================================
 
@@ -122,58 +130,134 @@ end
 -- EVENT SUBSCRIPTION API
 --=============================================================================
 
---- Subscribes to broadcast state changes
---- Callback will be invoked when any broadcast state changes
+--- Subscribes to state changes for broadcast-related states
+--- Callback receives (newValue, oldValue) when state changes
+--- Use Unsubscribe(listenerId) to stop listening
 --- @param listenerId string - Unique listener identifier
---- @param callback function - Function(newValue) called on state change
+--- @param callback function - Function(newValue, oldValue) called on state change
 --- @return boolean - True if subscription successful
 function AutoLFM.API.OnBroadcastStateChanged(listenerId, callback)
   if type(listenerId) ~= "string" or type(callback) ~= "function" then
     return false
   end
 
-  AutoLFM.Core.Maestro.Listen(listenerId, "Broadcaster.*", callback)
+  -- Subscribe to state changes directly via Maestro state subscription
+  local broadcastStates = {
+    "Broadcaster.IsRunning",
+    "Broadcaster.Interval",
+    "Broadcaster.MessagesSent",
+    "Broadcaster.TimeRemaining"
+  }
+
+  -- Store callbacks for unsubscribe functionality
+  local callbacks = {}
+
+  for i = 1, table.getn(broadcastStates) do
+    local stateName = broadcastStates[i]
+    local wrappedCallback = function(newValue, oldValue)
+      callback(newValue, oldValue)
+    end
+    table.insert(callbacks, { stateName = stateName, callback = wrappedCallback })
+    AutoLFM.Core.Maestro.SubscribeState(stateName, wrappedCallback)
+  end
+
+  -- Track subscription group for unsubscribe
+  subscriptionGroups[listenerId] = {
+    type = "broadcast",
+    stateNames = broadcastStates,
+    callbacks = callbacks
+  }
+
   return true
 end
 
 --- Subscribes to selection state changes
---- Callback will be invoked when selection changes
+--- Callback receives (newValue, oldValue) when selection changes
 --- @param listenerId string - Unique listener identifier
---- @param callback function - Function(newValue) called on state change
+--- @param callback function - Function(newValue, oldValue) called on state change
 --- @return boolean - True if subscription successful
 function AutoLFM.API.OnSelectionChanged(listenerId, callback)
   if type(listenerId) ~= "string" or type(callback) ~= "function" then
     return false
   end
 
-  AutoLFM.Core.Maestro.Listen(listenerId, "Selection.*", callback)
+  -- Use the Selection.Changed event which is fired when any selection changes
+  AutoLFM.Core.Maestro.Listen(listenerId, "Selection.Changed", callback)
   return true
 end
 
 --- Subscribes to group state changes
---- Callback will be invoked when group state changes
+--- Callback receives (newValue, oldValue) when group state changes
+--- Use Unsubscribe(listenerId) to stop listening
 --- @param listenerId string - Unique listener identifier
---- @param callback function - Function(newValue) called on state change
+--- @param callback function - Function(newValue, oldValue) called on state change
 --- @return boolean - True if subscription successful
 function AutoLFM.API.OnGroupStateChanged(listenerId, callback)
   if type(listenerId) ~= "string" or type(callback) ~= "function" then
     return false
   end
 
-  AutoLFM.Core.Maestro.Listen(listenerId, "Group.*", callback)
+  -- Subscribe to group state changes directly via Maestro state subscription
+  local groupStates = {
+    "Group.Size",
+    "Group.Type",
+    "Group.IsLeader"
+  }
+
+  -- Store callbacks for unsubscribe functionality
+  local callbacks = {}
+
+  for i = 1, table.getn(groupStates) do
+    local stateName = groupStates[i]
+    local wrappedCallback = function(newValue, oldValue)
+      callback(newValue, oldValue)
+    end
+    table.insert(callbacks, { stateName = stateName, callback = wrappedCallback })
+    AutoLFM.Core.Maestro.SubscribeState(stateName, wrappedCallback)
+  end
+
+  -- Track subscription group for unsubscribe
+  subscriptionGroups[listenerId] = {
+    type = "group",
+    stateNames = groupStates,
+    callbacks = callbacks
+  }
+
   return true
 end
 
---- Unsubscribes from state changes
---- @param listenerId string - Listener identifier to remove
---- @return boolean - True if unsubscription successful
+--- Unsubscribes from all state/event changes for a listener
+--- Works for: OnBroadcastStateChanged, OnGroupStateChanged, OnSelectionChanged
+--- @param listenerId string - Listener identifier returned by subscribe functions
+--- @return boolean - True if unsubscription successful, false if listener not found
 function AutoLFM.API.Unsubscribe(listenerId)
   if type(listenerId) ~= "string" then
     return false
   end
 
-  AutoLFM.Core.Maestro.UnListen(listenerId)
-  return true
+  -- Check if it's a state subscription group (broadcast or group states)
+  local subGroup = subscriptionGroups[listenerId]
+  if subGroup then
+    -- Unsubscribe from all tracked callbacks in the group
+    for i = 1, table.getn(subGroup.callbacks) do
+      local cb = subGroup.callbacks[i]
+      AutoLFM.Core.Maestro.UnSubscribeState(cb.stateName, cb.callback)
+    end
+    subscriptionGroups[listenerId] = nil
+    AutoLFM.Core.Utils.LogInfo("API: Unsubscribed listener '" .. listenerId .. "'")
+    return true
+  end
+
+  -- Try to remove event listeners (for Selection.Changed subscriptions)
+  if AutoLFM.Core.Maestro.UnListen then
+    local success = AutoLFM.Core.Maestro.UnListen(listenerId)
+    if success then
+      return true
+    end
+  end
+
+  AutoLFM.Core.Utils.LogWarning("API: Unsubscribe - Listener '" .. listenerId .. "' not found")
+  return false
 end
 
 --=============================================================================

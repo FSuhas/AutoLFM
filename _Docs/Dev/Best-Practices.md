@@ -230,7 +230,7 @@ end
 -- Registration at bottom
 SafeRegisterInit("Logic.Selection", function()
     -- Initialize module
-end, { id = "I07" })
+end, { id = "I05" })
 
 -- Export
 AutoLFM.Logic.Selection = Selection

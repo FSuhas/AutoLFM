@@ -62,13 +62,13 @@ end
 --- @param tabIndex number - The index of the tab being hovered (1-4)
 function AutoLFM.UI.MainFrame.OnBottomTabEnter(tabIndex)
   if AutoLFM.Logic.MainFrame.ShouldShowTabHighlight(tabIndex) then
-  local tab = getglobal("AutoLFM_MainFrame_Tab" .. tabIndex)
-  if tab then
-    local highlight = getglobal(tab:GetName() .. "_Highlight")
-    if highlight then
-      highlight:Show()
+    local tab = getglobal("AutoLFM_MainFrame_Tab" .. tabIndex)
+    if tab then
+      local highlight = getglobal(tab:GetName() .. "_Highlight")
+      if highlight then
+        highlight:Show()
+      end
     end
-  end
   end
 end
 
@@ -77,10 +77,10 @@ end
 function AutoLFM.UI.MainFrame.OnBottomTabLeave(tabIndex)
   local tab = getglobal("AutoLFM_MainFrame_Tab" .. tabIndex)
   if tab then
-  local highlight = getglobal(tab:GetName() .. "_Highlight")
-  if highlight then
-    highlight:Hide()
-  end
+    local highlight = getglobal(tab:GetName() .. "_Highlight")
+    if highlight then
+      highlight:Hide()
+    end
   end
 end
 
@@ -465,6 +465,6 @@ AutoLFM.Core.SafeRegisterInit("UI.MainFrame", function()
   AutoLFM.Core.Maestro.SubscribeState("Selection.DetailsText", updateSelectionButtons)
   AutoLFM.Core.Maestro.SubscribeState("Selection.CustomGroupSize", updateSelectionButtons)
 end, {
-  id = "I21",
+  id = "I11",
   dependencies = { "Logic.Broadcaster", "Logic.Message", "Logic.Selection" }
 })

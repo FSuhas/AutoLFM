@@ -70,6 +70,7 @@ local function onGroupChange()
 
   if groupSize >= targetSize then
     AutoLFM.Core.Utils.PrintSuccess("Group is full! Stopping broadcast.")
+    -- Silently attempt sound (no error logging if file missing)
     pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.FULL)
     AutoLFM.Logic.Broadcaster.Toggle()
   end
@@ -172,22 +173,40 @@ local function onTimerTick()
 end
 
 --- Starts the broadcast timer
+--- Uses OnUpdate with proper throttle (avoid 'this' context issues)
+--- Design: Synchronous OnUpdate with 1-second throttle is simpler and more reliable than
+--- async timers, avoiding race conditions while maintaining acceptable CPU efficiency.
 local function startTimer()
   if broadcastTimer then return end
 
   broadcastTimer = CreateFrame("Frame", "AutoLFM_BroadcastTimer")
-  broadcastTimer:SetScript("OnUpdate", function()
-    if not this.lastUpdate or GetTime() - this.lastUpdate >= 1 then
-      this.lastUpdate = GetTime()
+  local lastTick = GetTime()
+
+  broadcastTimer:SetScript("OnUpdate", function(self)
+    -- Guard against broadcaster being stopped while timer is running
+    local isRunning = AutoLFM.Core.Maestro.GetState("Broadcaster.IsRunning")
+    if not isRunning then
+      stopTimer()
+      return
+    end
+
+    local now = GetTime()
+    -- Throttle to 1 second intervals to minimize CPU usage
+    -- Fires approximately 5-10 times per second from OnUpdate, we process ~1 per second
+    if now - lastTick >= 1 then
+      lastTick = now
       onTimerTick()
     end
   end)
 end
 
---- Stops the broadcast timer
+--- Stops the broadcast timer and cleans up resources
 local function stopTimer()
   if broadcastTimer then
     broadcastTimer:SetScript("OnUpdate", nil)
+    broadcastTimer:Hide()
+    -- Note: Frame is not destroyed (would require unregistering from name registry)
+    -- but is hidden and disabled, so it won't consume resources
     broadcastTimer = nil
   end
 end
@@ -208,6 +227,7 @@ local function start()
 
   resetStats()
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", true)
+  -- Silently attempt sound (no error logging if file missing)
   pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.START)
 
   if isDryRun then
@@ -234,6 +254,7 @@ local function stop()
   stopTimer()
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", false)
   AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", 0)
+  -- Silently attempt sound (no error logging if file missing)
   pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.STOP)
 
   AutoLFM.Core.Utils.PrintSuccess("Broadcast stopped")
@@ -311,19 +332,19 @@ end
 --=============================================================================
 -- STATE DECLARATIONS
 --=============================================================================
-AutoLFM.Core.SafeRegisterState("Broadcaster.IsRunning", false, { id = "S20" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.Interval", 60, { id = "S21" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.MessagesSent", 0, { id = "S22" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.SessionStartTime", 0, { id = "S23" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.LastBroadcastTime", 0, { id = "S24" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.TimeRemaining", 0, { id = "S25" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.IsRunning", false, { id = "S13" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.Interval", 60, { id = "S14" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.MessagesSent", 0, { id = "S15" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.SessionStartTime", 0, { id = "S16" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.LastBroadcastTime", 0, { id = "S17" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.TimeRemaining", 0, { id = "S19" })
 
 --=============================================================================
 -- COMMAND DECLARATIONS
 --=============================================================================
 AutoLFM.Core.Maestro.RegisterCommand("Broadcaster.Toggle", function()
   AutoLFM.Logic.Broadcaster.Toggle()
-end, { id = "C21" })
+end, { id = "C18" })
 
 --=============================================================================
 -- INITIALIZATION
@@ -333,7 +354,7 @@ AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
     "Broadcaster.OnGroupSizeChanged",
     "Group.SizeChanged",
     onGroupChange,
-    { id = "L02" }
+    { id = "L05" }
   )
 
   local savedInterval = AutoLFM.Core.Storage.GetBroadcastInterval()
@@ -341,6 +362,6 @@ AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
     AutoLFM.Core.Maestro.SetState("Broadcaster.Interval", savedInterval)
   end
 end, {
-  id = "I14",
+  id = "I09",
   dependencies = { "Logic.Message", "Logic.Group", "Logic.Content.Messaging", "Core.Events" }
 })

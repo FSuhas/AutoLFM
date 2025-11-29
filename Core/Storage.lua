@@ -246,6 +246,7 @@ function AutoLFM.Core.Storage.GetPresets()
 end
 
 --- Saves a preset with the given name and data
+--- If preset already exists, it will be overwritten (data updated, order preserved)
 --- @param presetName string - Name of the preset
 --- @param presetData table - Preset data to save
 --- @return boolean - True if successful
@@ -264,12 +265,13 @@ function AutoLFM.Core.Storage.SavePreset(presetName, presetData)
     end
   end
 
-  -- Add to order if new
+  -- Add to order if new (preserve order for existing presets)
   if not exists then
     table.insert(presets.order, presetName)
   end
 
   -- Save data (deep copy to avoid reference issues)
+  -- This will overwrite existing preset data if it exists
   presets.data[presetName] = deepCopy(presetData)
 
   return true

@@ -15,10 +15,15 @@ local BuildLookupTables  -- Forward declaration for lazy loading function
 -- COLOR LOOKUP TABLE (PERFORMANCE OPTIMIZATION)
 --=============================================================================
 local COLORS_BY_NAME = {}
+local colorTableBuilt = false
 
 --- Builds color lookup table from constants for O(1) access
 --- Populates COLORS_BY_NAME hash table from COLORS array for performance
+--- Only builds once, subsequent calls are no-ops (uses colorTableBuilt flag)
 local function BuildColorLookupTable()
+  if colorTableBuilt then return end
+  colorTableBuilt = true
+
   for i = 1, table.getn(AutoLFM.Core.Constants.COLORS) do
     local color = AutoLFM.Core.Constants.COLORS[i]
     COLORS_BY_NAME[color.name] = color

@@ -352,6 +352,9 @@ function AutoLFM.Components.Debug.ShowRegistry()
     -- Already showing registry - toggle back to monitoring
     currentViewMode = "monitoring"
     updateButtonStyling()
+    if debugFrame and debugFrame:IsVisible() then
+        updateDisplay()
+    end
     return
   end
 
@@ -427,6 +430,9 @@ function AutoLFM.Components.Debug.ShowState()
     -- Already showing state - toggle back to monitoring
     currentViewMode = "monitoring"
     updateButtonStyling()
+    if debugFrame and debugFrame:IsVisible() then
+        updateDisplay()
+    end
     return
   end
 
@@ -526,8 +532,8 @@ function AutoLFM.Components.Debug.CreateFrame()
 
   -- Add backdrop (dialog box style)
   debugFrame:SetBackdrop({
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+    bgFile = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\DialogBoxBackground",
+    edgeFile = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\DialogBoxBorder",
     tile = true,
     tileSize = 32,
     edgeSize = 32,
@@ -651,4 +657,4 @@ end
 
 AutoLFM.Core.SafeRegisterInit("Debug", function()
   AutoLFM.Core.Maestro.RegisterCommand("Debug.Toggle", AutoLFM.Components.Debug.Toggle, { id = "C02" })
-end, { id = "I06" })
+end, { id = "I14" })

@@ -1,23 +1,25 @@
-[v3.0] 2025/11/29
+## [v3.1] 2025/11/29
+- Fix dungeons filters settings
+- Rename Settings.lua and add in .toc
+- Fix hover row list darkUI
+- Clean texture files
+- UI.ContentPanel factory pattern
+- Add documentation to Core/Constants files
+- Improve error messages with context
+- Add API and improve documentation
+- Optimize dungeon selection lookup performance
+- Fix timer context issue in OnUpdate handler
+- Fix SavePreset() to allow overwriting existing presets
+- Implement UnSubscribeState() function
+- Add cache size limit to prevent unbounded growth
+- Verify JoinChannelByName() success
+- Optimized BuildColorLookupTable()
+- Implement Unsubscribe functionality for broadcast and group state listeners
+- Enhance Maestro init logging with events and commands registry display
+- Refactor Selection.lua with setSelectionMode() for mutual exclusivity
+- Optimize registry IDs for better organization and clarity
+- Reduce Save Preset popup window size and remove preset name label
+- Add screenshots
+
+## [v3.0] 2025/11/29
 - Maestro, initial release.
-                                                                                                                                                                            
-                           ▒                                                  
-                         ░                                                    
-                        ░           ░░░░░░░                                   
-                       ░          ░░░░░░░░░░                                  
-                     ▒░          ▒░░░░░░░░░░░                                 
-                    ▒            ▒░░░░░░░░░░░                                 
-                   ▒              ░░░░░░░░░░                                  
-                ░░░░               ░░░░░░░▒               ▒░░░                
-               ░░░░░░░                   ░              ░░░░░░▒               
-                ▒░░░░░░░    ▒░░░░░░  ░░░░░ ░░░░░░░    ░░░░░░░▒                
-                  ▒░░░░░░░░░░░░░░░░░     ░░░░░░░░░░░░░░░░░░▒                  
-                    ▒░░░░░░░░░░░░░░░      ░░░░░░░░░░░░░░░░                    
-                      ░░░░░░▒░ ░░░░░░ ░▒ ▒░░░░░▒ ▒░░░░░░                      
-                               ░░░░░░    ░░░░░░▒                              
-                               ░░░░░░▒  ▒░░░░░░▒                              
-                               ░░░░░░░  ░░░░░░░▒                              
-                               ░░░░░░░░░░░░░░░░▒                              
-                               ░░░░░░░░░░░░░░░░▒                              
-                               ░░░░░░░░░░░░░░░░▒                              
-                               ░░░░░░░░░░░░░░░░▒                              

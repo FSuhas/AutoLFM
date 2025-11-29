@@ -46,12 +46,12 @@
   <!-- Save Preset Popup -->
   <Frame name="AutoLFM_SavePresetPopup" parent="UIParent" frameStrata="DIALOG" hidden="true" toplevel="true" enableMouse="true">
     <Size>
-      <AbsDimension x="320" y="180"/>
+      <AbsDimension x="300" y="160"/>
     </Size>
     <Anchors>
       <Anchor point="CENTER"/>
     </Anchors>
-    <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+    <Backdrop bgFile="Interface\AddOns\AutoLFM\UI\Textures\DialogBoxBackground" edgeFile="Interface\AddOns\AutoLFM\UI\Textures\DialogBoxBorder" tile="true">
       <BackgroundInsets>
         <AbsInset left="11" right="12" top="12" bottom="11"/>
       </BackgroundInsets>
@@ -68,16 +68,7 @@
           <Anchors>
             <Anchor point="TOP">
               <Offset>
-                <AbsDimension x="0" y="-20"/>
-              </Offset>
-            </Anchor>
-          </Anchors>
-        </FontString>
-        <FontString name="$parent_Label" inherits="GameFontNormalSmall" text="Preset Name:">
-          <Anchors>
-            <Anchor point="TOPLEFT">
-              <Offset>
-                <AbsDimension x="30" y="-50"/>
+                <AbsDimension x="0" y="-15"/>
               </Offset>
             </Anchor>
           </Anchors>
@@ -97,12 +88,12 @@
     <Frames>
       <EditBox name="$parent_NameInput" inherits="InputBoxTemplate" autoFocus="true" letters="32">
         <Size>
-          <AbsDimension x="260" y="32"/>
+          <AbsDimension x="240" y="28"/>
         </Size>
         <Anchors>
           <Anchor point="TOP">
             <Offset>
-              <AbsDimension x="0" y="-70"/>
+              <AbsDimension x="0" y="-45"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -117,12 +108,12 @@
       </EditBox>
       <Button name="$parent_SaveButton" inherits="UIPanelButtonTemplate" text="Save">
         <Size>
-          <AbsDimension x="100" y="22"/>
+          <AbsDimension x="90" y="22"/>
         </Size>
         <Anchors>
           <Anchor point="BOTTOM">
             <Offset>
-              <AbsDimension x="-55" y="20"/>
+              <AbsDimension x="-50" y="15"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -134,12 +125,12 @@
       </Button>
       <Button name="$parent_CancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
         <Size>
-          <AbsDimension x="100" y="22"/>
+          <AbsDimension x="90" y="22"/>
         </Size>
         <Anchors>
           <Anchor point="BOTTOM">
             <Offset>
-              <AbsDimension x="55" y="20"/>
+              <AbsDimension x="50" y="15"/>
             </Offset>
           </Anchor>
         </Anchors>

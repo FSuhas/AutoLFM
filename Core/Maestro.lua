@@ -92,7 +92,6 @@ local stateRegistry = {}
 function AutoLFM.Core.Maestro.RegisterCommand(key, handler, options)
   if commands[key] then
     error("Maestro: Command '" .. key .. "' already registered")
-    return
   end
 
   local opts = options or {}
@@ -156,18 +155,20 @@ end
 --- @param key string - The command/event key to dispatch (e.g., "MainFrame.Toggle", "Selection.Changed")
 --- @param ... any - Optional arguments to pass to the command handler or event listeners
 function AutoLFM.Core.Maestro.Dispatch(key, ...)
+  local args = arg  -- Store varargs as table for Lua 5.0 compatibility
+
   -- Check if it's a registered command first
   local command = commands[key]
   if command then
       if not command.silent then
           -- Pass arguments to LogCommand for display in logs
-          AutoLFM.Core.Utils.LogCommand(key, command.id, unpack(arg))
+          AutoLFM.Core.Utils.LogCommand(key, command.id, unpack(args))
 
           local eventName = generateEventName(key)
           AutoLFM.Core.Utils.LogEvent(eventName)
       end
 
-      local success, err = pcall(command.handler, unpack(arg))
+      local success, err = pcall(command.handler, unpack(args))
       if not success then
           AutoLFM.Core.Utils.LogError("Command '" .. key .. "' failed: " .. tostring(err))
           error("Maestro: Error executing command '" .. key .. "': " .. tostring(err))
@@ -180,12 +181,12 @@ function AutoLFM.Core.Maestro.Dispatch(key, ...)
   if event then
       if not event.silent then
           -- Pass arguments to LogEvent for display in logs
-          AutoLFM.Core.Utils.LogEvent(key, event.id, unpack(arg))
+          AutoLFM.Core.Utils.LogEvent(key, event.id, unpack(args))
       end
 
       -- Call all listeners for this event
       for i = 1, table.getn(event.listeners) do
-          local success, err = pcall(event.listeners[i], unpack(arg))
+          local success, err = pcall(event.listeners[i], unpack(args))
           if not success then
               AutoLFM.Core.Utils.LogError("Event listener failed for '" .. key .. "': " .. tostring(err))
           end
@@ -209,7 +210,6 @@ end
 function AutoLFM.Core.Maestro.RegisterEvent(key, options)
   if events[key] then
     error("Maestro: Event '" .. key .. "' already registered")
-    return
   end
 
   local opts = options or {}
@@ -255,14 +255,14 @@ function AutoLFM.Core.Maestro.Listen(listenerId, eventKey, callback, options)
   listenId, listenerCounter = getOrGenerateId(opts.id, "L", listenerCounter)
 
   -- Store in listeners registry
-  listeners[listenerId] = {
+  listeners[listenId] = {
       eventKey = eventKey,
       callback = callback
   }
 
   table.insert(listenersRegistry, {
       id = listenId,
-      key = listenerId,
+      key = listenId,
       eventKey = eventKey
   })
 
@@ -313,7 +313,6 @@ end
 function AutoLFM.Core.Maestro.RegisterInit(id, handler, options)
   if initHandlers[id] then
     error("Maestro: Init handler '" .. id .. "' already registered")
-    return
   end
 
   local opts = options or {}
@@ -485,6 +484,34 @@ function AutoLFM.Core.Maestro.RunInit()
     AutoLFM.Core.Utils.LogState(idColored .. " " .. item.namespace)
   end
 
+  -- Phase 1b: Log all registered events (in sorted order by ID)
+  local eventList = {}
+  for i = 1, table.getn(eventsRegistry) do
+    local event = eventsRegistry[i]
+    table.insert(eventList, event)
+  end
+  table.sort(eventList, function(a, b) return a.id < b.id end)
+
+  for i = 1, table.getn(eventList) do
+    local item = eventList[i]
+    local idColored = AutoLFM.Core.Utils.ColorText("[" .. item.id .. "]", "GRAY")
+    AutoLFM.Core.Utils.LogEvent(idColored .. " " .. item.key)
+  end
+
+  -- Phase 1c: Log all registered commands (in sorted order by ID)
+  local commandList = {}
+  for i = 1, table.getn(commandsRegistry) do
+    local cmd = commandsRegistry[i]
+    table.insert(commandList, cmd)
+  end
+  table.sort(commandList, function(a, b) return a.id < b.id end)
+
+  for i = 1, table.getn(commandList) do
+    local item = commandList[i]
+    local idColored = AutoLFM.Core.Utils.ColorText("[" .. item.id .. "]", "GRAY")
+    AutoLFM.Core.Utils.LogCommand(idColored .. " " .. item.key)
+  end
+
   -- Phase 2: Log all INIT events
   for i = 1, table.getn(sorted) do
       local id = sorted[i]
@@ -597,18 +624,49 @@ end
 --- The callback receives (newValue, oldValue) when state changes
 --- @param namespace string - The state namespace to watch
 --- @param callback function - Function to call when state changes: callback(newValue, oldValue)
+--- @return boolean - True if subscription successful
 function AutoLFM.Core.Maestro.SubscribeState(namespace, callback)
   if not stateRegistry[namespace] then
     AutoLFM.Core.Utils.LogError("SubscribeState: namespace '" .. tostring(namespace) .. "' not registered")
-    return
+    return false
   end
 
   if type(callback) ~= "function" then
     AutoLFM.Core.Utils.LogError("SubscribeState: callback must be a function")
-    return
+    return false
   end
 
   table.insert(stateRegistry[namespace].subscribers, callback)
+  return true
+end
+
+--- Unsubscribes a callback function from state changes
+--- Removes the callback so it won't be called on future state changes
+--- @param namespace string - The state namespace to unwatch
+--- @param callback function - The callback function to remove
+--- @return boolean - True if unsubscription successful, false if callback not found
+function AutoLFM.Core.Maestro.UnSubscribeState(namespace, callback)
+  if not stateRegistry[namespace] then
+    AutoLFM.Core.Utils.LogWarning("UnSubscribeState: namespace '" .. tostring(namespace) .. "' not registered")
+    return false
+  end
+
+  if type(callback) ~= "function" then
+    AutoLFM.Core.Utils.LogError("UnSubscribeState: callback must be a function")
+    return false
+  end
+
+  local subscribers = stateRegistry[namespace].subscribers
+  for i = 1, table.getn(subscribers) do
+    if subscribers[i] == callback then
+      table.remove(subscribers, i)
+      AutoLFM.Core.Utils.LogInfo("UnSubscribeState: Removed subscriber for '" .. namespace .. "'")
+      return true
+    end
+  end
+
+  AutoLFM.Core.Utils.LogWarning("UnSubscribeState: callback not found for '" .. namespace .. "'")
+  return false
 end
 
 --- Updates a state value using a transformer function

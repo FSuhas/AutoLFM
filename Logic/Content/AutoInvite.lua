@@ -133,7 +133,7 @@ AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.Enable", function()
   AutoLFM.Core.Storage.SetAutoInviteEnabled(true)
   AutoLFM.Core.Utils.PrintSuccess("Auto Invite enabled")
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
-end, { id = "C31" })
+end, { id = "C29" })
 
 --- Command: Disable AutoInvite
 --- Deactivates automatic group invitations
@@ -141,7 +141,7 @@ AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.Disable", function()
   AutoLFM.Core.Storage.SetAutoInviteEnabled(false)
   AutoLFM.Core.Utils.PrintWarning("Auto Invite disabled")
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
-end, { id = "C32" })
+end, { id = "C30" })
 
 --- Command: Toggle confirmation messages
 --- Enables/disables sending confirmation whispers to invited players
@@ -151,7 +151,7 @@ AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.ToggleConfirm", function()
   local status = (not current) and "enabled" or "disabled"
   AutoLFM.Core.Utils.PrintInfo("Confirmation whisper " .. status)
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
-end, { id = "C36" })
+end, { id = "C31" })
 
 --=============================================================================
 -- EVENTS
@@ -159,7 +159,7 @@ end, { id = "C36" })
 
 --- Event: AutoInvite.Changed
 --- Dispatched when AutoInvite settings change (enabled, keyword, confirmation)
-AutoLFM.Core.Maestro.RegisterEvent("AutoInvite.Changed", { id = "E06" })
+AutoLFM.Core.Maestro.RegisterEvent("AutoInvite.Changed", { id = "E10" })
 
 --=============================================================================
 -- EVENT HANDLERS
@@ -189,16 +189,16 @@ AutoLFM.Core.SafeRegisterInit("Logic.AutoInvite", function()
     "AutoInvite.OnWhisper",
     "Chat.WhisperReceived",
     handleWhisper,
-    { id = "L16" }
+    { id = "L12" }
   )
   
   AutoLFM.Core.Maestro.Listen(
     "AutoInvite.OnLeaderChanged",
     "Group.LeaderChanged",
     onLeaderChanged,
-    { id = "L17" }
+    { id = "L13" }
   )
 end, {
-  id = "I18",
+  id = "I16",
   dependencies = { "Core.Events" }
 })

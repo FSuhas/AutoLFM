@@ -27,27 +27,27 @@ local function ApplyLeaderColors()
   -- Color "Group leader" radio button green
   local leaderRadio = getglobal(scrollChild:GetName().."_LeaderYesRadio")
   if leaderRadio then
-    leaderRadio:SetCheckedTexture("Interface\\Buttons\\UI-RadioButton-Highlight")
+    leaderRadio:SetCheckedTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\RadioButton")
     local texture = leaderRadio:GetCheckedTexture()
     if texture then
       texture:SetVertexColor(0, 1, 0)  -- Green
     end
-    leaderRadio:SetHighlightTexture("Interface\\Buttons\\UI-RadioButton-Highlight")
+    leaderRadio:SetHighlightTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\RadioButton")
     local highlight = leaderRadio:GetHighlightTexture()
     if highlight then
       highlight:SetVertexColor(0, 1, 0)  -- Green
     end
   end
-  
+
   -- Color "No leadership" radio button red
   local noLeaderRadio = getglobal(scrollChild:GetName().."_LeaderNoRadio")
   if noLeaderRadio then
-    noLeaderRadio:SetCheckedTexture("Interface\\Buttons\\UI-RadioButton-Highlight")
+    noLeaderRadio:SetCheckedTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\RadioButton")
     local texture = noLeaderRadio:GetCheckedTexture()
     if texture then
       texture:SetVertexColor(1, 0, 0)  -- Red
     end
-    noLeaderRadio:SetHighlightTexture("Interface\\Buttons\\UI-RadioButton-Highlight")
+    noLeaderRadio:SetHighlightTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\RadioButton")
     local highlight = noLeaderRadio:GetHighlightTexture()
     if highlight then
       highlight:SetVertexColor(1, 0, 0)  -- Red

@@ -69,16 +69,15 @@ function AutoLFM.Logic.Content.Settings.SetDungeonFilter(colorId, isEnabled)
     return false
   end
 
-  -- Validate colorId is a valid filter
-  if not dungeonFilters[colorId] then
-    AutoLFM.Core.Utils.LogError("SetDungeonFilter: invalid colorId '" .. colorId .. "'")
-    return false
-  end
-
   -- Validate isEnabled parameter
   if type(isEnabled) ~= "boolean" then
     AutoLFM.Core.Utils.LogError("SetDungeonFilter: isEnabled must be boolean, got " .. type(isEnabled))
     return false
+  end
+
+  -- Initialize missing color keys with default value (enabled)
+  if dungeonFilters[colorId] == nil then
+    dungeonFilters[colorId] = true
   end
 
   dungeonFilters[colorId] = isEnabled
@@ -207,7 +206,7 @@ end
 -- State Declarations
 -----------------------------------------------------------------------------
 --- State: Dry run mode enabled/disabled
-AutoLFM.Core.SafeRegisterState("Settings.DryRun", false, { id = "S30" })
+AutoLFM.Core.SafeRegisterState("Settings.DryRun", false, { id = "S20" })
 
 -----------------------------------------------------------------------------
 -- Auto-register initialization
@@ -222,6 +221,6 @@ AutoLFM.Core.SafeRegisterInit("Logic.Content.Settings", function()
     AutoLFM.Core.Maestro.SetState("Settings.DryRun", dryRunEnabled)
   end
 end, {
-  id = "I15",
+  id = "I13",
   dependencies = {"Core.Storage"} -- Must run after Storage
 })

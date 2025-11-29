@@ -415,6 +415,6 @@ AutoLFM.Core.SafeRegisterInit("UI.Content.Presets", function()
     { id = "L11" }
   )
 end, {
-  id = "I27",
+  id = "I22",
   dependencies = { "Logic.Content.Presets" }
 })

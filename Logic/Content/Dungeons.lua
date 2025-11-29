@@ -125,4 +125,4 @@ end
 --=============================================================================
 AutoLFM.Core.SafeRegisterInit("Logic.Content.Dungeons", function()
   AutoLFM.Core.Cache.Register("Dungeons", buildSortedDungeons)
-end, { id = "I19" })
+end, { id = "I06" })

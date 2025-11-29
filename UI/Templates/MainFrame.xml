@@ -961,7 +961,7 @@
         </Texture>
       </Layer>
       <Layer level="OVERLAY">
-        <Texture file="Interface\Minimap\MiniMap-TrackingBorder">
+        <Texture file="Interface\AddOns\AutoLFM\UI\Textures\MinimapBorder">
           <Size>
             <AbsDimension x="52" y="52"/>
           </Size>
@@ -971,7 +971,7 @@
         </Texture>
       </Layer>
     </Layers>
-    <HighlightTexture file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight" alphaMode="ADD"/>
+    <HighlightTexture file="Interface\AddOns\AutoLFM\UI\Textures\MinimapHighlight" alphaMode="ADD"/>
     <Scripts>
       <OnLoad>
         AutoLFM.UI.MainFrame.OnMinimapButtonLoad(this)

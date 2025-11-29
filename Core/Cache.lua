@@ -83,6 +83,8 @@ function AutoLFM.Core.Cache.Get(name, ...)
     return nil
   end
 
+  -- In Lua 5.0, 'arg' is the implicit varargs table when ... is used
+  -- This is compatible with both Lua 5.0 and preserved for clarity
   local argsKey = serializeArgs(arg)
 
   -- Invalidate if arguments changed

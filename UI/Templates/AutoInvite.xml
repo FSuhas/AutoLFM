@@ -441,7 +441,7 @@
                 </Anchors>
                 <Layers>
                   <Layer level="ARTWORK">
-                    <FontString name="$parent_Header" inherits="GameFontNormal" text="Answer if not leader:" justifyH="LEFT">
+                    <FontString name="$parent_Header" inherits="GameFontNormal" text="Answer if no lead:" justifyH="LEFT">
                       <Color r="1" g="1" b="1"/>
                       <Size>
                         <AbsDimension x="120" y="24"/>
@@ -597,7 +597,7 @@
                 <TextInsets>
                   <AbsInset left="6" right="6" top="3" bottom="3"/>
                 </TextInsets>
-                <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                <Backdrop bgFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBackground" edgeFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBorder" tile="true">
                   <EdgeSize>
                     <AbsValue val="12"/>
                   </EdgeSize>
@@ -670,7 +670,7 @@
                 <TextInsets>
                   <AbsInset left="6" right="6" top="3" bottom="3"/>
                 </TextInsets>
-                <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                <Backdrop bgFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBackground" edgeFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBorder" tile="true">
                   <EdgeSize>
                     <AbsValue val="12"/>
                   </EdgeSize>
@@ -743,7 +743,7 @@
                 <TextInsets>
                   <AbsInset left="6" right="6" top="3" bottom="3"/>
                 </TextInsets>
-                <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                <Backdrop bgFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBackground" edgeFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBorder" tile="true">
                   <EdgeSize>
                     <AbsValue val="12"/>
                   </EdgeSize>

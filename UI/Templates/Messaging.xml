@@ -127,7 +127,7 @@
                     </Offset>
                   </Anchor>
                 </Anchors>
-                <Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="false">
+                <Backdrop edgeFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBorder" tile="false">
                   <EdgeSize>
                     <AbsValue val="12"/>
                   </EdgeSize>
@@ -508,7 +508,7 @@
                       </Anchor>
                     </Anchors>
                     <FontString inherits="GameFontNormal"/>
-                    <Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="false">
+                    <Backdrop edgeFile="Interface\AddOns\AutoLFM\UI\Textures\TooltipBorder" tile="false">
                       <BackgroundInsets>
                         <AbsInset left="2" right="2" top="2" bottom="2"/>
                       </BackgroundInsets>
@@ -891,7 +891,7 @@
                     <AbsValue val="8"/>
                   </EdgeSize>
                 </Backdrop>
-                <ThumbTexture file="Interface\AddOns\AutoLFM\UI\Textures\SliderButtonl"/>
+                <ThumbTexture file="Interface\AddOns\AutoLFM\UI\Textures\SliderButton"/>
                 <Scripts>
                   <OnLoad>
                     this:EnableMouseWheel(true)

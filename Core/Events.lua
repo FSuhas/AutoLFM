@@ -145,7 +145,7 @@ function AutoLFM.Core.Events.Init()
   AutoLFM.Core.Maestro.SetState("Group.Size", initialSize)
   AutoLFM.Core.Maestro.SetState("Group.IsLeader", UnitIsPartyLeader("player") or false)
 
-  AutoLFM.Core.Utils.LogInfo("Event system initialized (6 events registered)")
+  AutoLFM.Core.Utils.LogInfo("Event system initialized (6 WoW events monitored)")
 end
 
 --- Forces a refresh of the group size (useful when starting broadcaster)
@@ -177,16 +177,16 @@ end
 --=============================================================================
 -- STATE DECLARATIONS
 --=============================================================================
-AutoLFM.Core.SafeRegisterState("Group.Type", "solo", { id = "S10" })
-AutoLFM.Core.SafeRegisterState("Group.Size", 1, { id = "S11" })
-AutoLFM.Core.SafeRegisterState("Group.IsLeader", false, { id = "S12" })
+AutoLFM.Core.SafeRegisterState("Group.Type", "solo", { id = "S09" })
+AutoLFM.Core.SafeRegisterState("Group.Size", 1, { id = "S10" })
+AutoLFM.Core.SafeRegisterState("Group.IsLeader", false, { id = "S11" })
 
 --=============================================================================
 -- EVENT DECLARATIONS
 --=============================================================================
 AutoLFM.Core.Maestro.RegisterEvent("Group.SizeChanged", { id = "E02" })
 AutoLFM.Core.Maestro.RegisterEvent("Group.LeaderChanged", { id = "E03" })
-AutoLFM.Core.Maestro.RegisterEvent("Chat.WhisperReceived", { id = "E04" })
+AutoLFM.Core.Maestro.RegisterEvent("Chat.WhisperReceived", { id = "E09" })
 
 --=============================================================================
 -- INITIALIZATION

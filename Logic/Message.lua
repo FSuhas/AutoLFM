@@ -140,7 +140,8 @@ local function buildRaidMessage()
   local raid = raidInfo.data
 
   -- Get target size and calculate missing
-  local targetSize = AutoLFM.Core.Maestro.GetState("Selection.RaidSize") or raid.size or 40
+  -- Selection.RaidSize is already set to raid.raidSizeMin on selection
+  local targetSize = AutoLFM.Core.Maestro.GetState("Selection.RaidSize") or 40
   local missing, isFull = calculateMissing(targetSize)
   
   -- If raid is full, don't show LFM
@@ -298,7 +299,7 @@ end
 --=============================================================================
 -- STATE DECLARATIONS
 --=============================================================================
-AutoLFM.Core.SafeRegisterState("Message.ToBroadcast", "", { id = "S16" })
+AutoLFM.Core.SafeRegisterState("Message.ToBroadcast", "", { id = "S12" })
 
 --=============================================================================
 -- INITIALIZATION
@@ -314,7 +315,7 @@ AutoLFM.Core.SafeRegisterInit("Logic.Message", function()
     function()
       AutoLFM.Logic.Message.RebuildMessage()
     end,
-    { id = "L03" }
+    { id = "L02" }
   )
 
   --- Rebuilds message when group size changes (for LF3M -> LF2M updates)
@@ -334,11 +335,11 @@ AutoLFM.Core.SafeRegisterInit("Logic.Message", function()
         end
       end
     end,
-    { id = "L01" }
+    { id = "L02" }
   )
 
   AutoLFM.Logic.Message.RebuildMessage()
 end, {
-  id = "I13",
+  id = "I08",
   dependencies = { "Logic.Selection", "Logic.Group", "Core.Events" }
 })

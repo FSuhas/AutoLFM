@@ -122,11 +122,11 @@ SafeRegisterInit("UI.Content.Dungeons", function()
     Listen("DungeonsUI.OnSelectionChanged", "Selection.Changed", function(eventData)
         RefreshDungeonCheckboxes()
         UpdateSelectionCounter()
-    end, { id = "L05" })
+    end, { id = "L01" })
 
     Listen("DungeonsUI.OnGroupSizeChanged", "Group.SizeChanged", function(eventData)
         UpdateAvailableDungeons()
-    end, { id = "L06" })
+    end, { id = "L07" })
 end, { id = "I12", dependencies = { "Logic.Selection" } })
 ```
 
@@ -151,7 +151,7 @@ SafeRegisterInit("Logic.Selection", function()
 
     -- Setup periodic tasks
     SetupSelectionValidation()
-end, { id = "I07", dependencies = { "Core.Events" } })
+end, { id = "I05", dependencies = { "Core.Events" } })
 ```
 
 ## 🔄 Communication Patterns
@@ -183,7 +183,7 @@ end, { id = "C03" })
 Listen("DungeonsUI.OnChanged", "Selection.Changed", function()
     local dungeons = GetState("Selection.DungeonNames")
     UpdateCheckboxStates(dungeons)
-end, { id = "L05" })
+end, { id = "L01" })
 ```
 
 ### 2. Cross-Module Communication
@@ -203,7 +203,7 @@ Listen("Selection.OnGroupChange", "Group.SizeChanged", function(eventData)
     else
         Dispatch("Selection.DisableRaids")
     end
-end, { id = "L03" })
+end, { id = "L05" })
 ```
 
 ### 3. State Synchronization
@@ -226,7 +226,7 @@ end, { id = "L02" })
 Listen("MessageUI.OnGenerated", "Message.Generated", function()
     local message = GetState("Message.ToBroadcast")
     messagePreview:SetText(message)
-end, { id = "L07" })
+end, { id = "L06" })
 ```
 
 ## 🎯 Benefits of Command Bus

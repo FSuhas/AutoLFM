@@ -932,6 +932,6 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
     ChatFrame_Dropdown_Show = function() end
   end
 end, {
-  id = "I25",
+  id = "I15",
   dependencies = { "Logic.Content.Messaging", "Logic.Broadcaster" }  -- Wait for Broadcaster to be initialized
 })

@@ -207,8 +207,17 @@ function AutoLFM.Logic.Content.Messaging.JoinChannel(channelName)
   local frameId = chatFrame:GetID()
   JoinChannelByName(channelName, nil, frameId)
 
+  -- Verify the join succeeded by checking if we're now in the channel
+  local verifyChannelID = GetChannelName(channelName)
+  if verifyChannelID <= 0 then
+    if AutoLFM.Core and AutoLFM.Core.Utils then
+      AutoLFM.Core.Utils.LogWarning("Failed to join channel: " .. channelName)
+    end
+    return false
+  end
+
   if AutoLFM.Core and AutoLFM.Core.Utils then
-    AutoLFM.Core.Utils.LogAction("Joined channel: " .. channelName)
+    AutoLFM.Core.Utils.LogAction("Joined channel: " .. channelName .. " (ID: " .. verifyChannelID .. ")")
     AutoLFM.Core.Utils.Print("Joined channel: " .. channelName)
   end
 
@@ -302,13 +311,13 @@ end
 --- Command: Toggle channel selection
 AutoLFM.Core.Maestro.RegisterCommand("Channels.ToggleChannel", function(channelName)
   AutoLFM.Logic.Content.Messaging.ToggleChannel(channelName)
-end, { id = "C23" })
+end, { id = "C20" })
 
 --- Event: Channels selection changed
-AutoLFM.Core.Maestro.RegisterEvent("Channels.Changed", { id = "E05" })
+AutoLFM.Core.Maestro.RegisterEvent("Channels.Changed", { id = "E04" })
 
 --- State: Active channels list
-AutoLFM.Core.SafeRegisterState("Channels.ActiveChannels", {}, { id = "S15" })
+AutoLFM.Core.SafeRegisterState("Channels.ActiveChannels", {}, { id = "S18" })
 
 -----------------------------------------------------------------------------
 -- Load Saved Channels
@@ -339,4 +348,4 @@ end
 AutoLFM.Core.SafeRegisterInit("Logic.Content.Messaging", function()
   AutoLFM.Logic.Content.Messaging.InitLinkIntegration()
   loadSavedChannels()
-end, { id = "I16", dependencies = { "Core.Storage" } })
+end, { id = "I10", dependencies = { "Core.Storage" } })

@@ -187,14 +187,14 @@ end
 --- Toggles quest selection and adds/removes its link from the current message
 AutoLFM.Core.Maestro.RegisterCommand("Quests.Toggle", function(questIndex)
   if not questIndex or type(questIndex) ~= "number" then
-    AutoLFM.Core.Utils.LogError("ToggleQuest: invalid index")
+    AutoLFM.Core.Utils.LogError("Quests.Toggle: Invalid index type %s (expected number)", type(questIndex))
     return
   end
 
   -- Create quest link
   local link = AutoLFM.Logic.Content.Quests.CreateQuestLink(questIndex)
   if not link then
-    AutoLFM.Core.Utils.LogError("ToggleQuest: failed to create link for quest " .. questIndex)
+    AutoLFM.Core.Utils.LogError("Quests.Toggle: Failed to create link for quest at index %d (quest may not exist)", questIndex)
     return
   end
 
@@ -206,7 +206,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Quests.Toggle", function(questIndex)
     addQuestLinkToMessage(link)
     AutoLFM.Core.Utils.LogAction("Added quest link to message")
   end
-end, { id = "C26" })
+end, { id = "C22" })
 
 --=============================================================================
 -- PUBLIC API

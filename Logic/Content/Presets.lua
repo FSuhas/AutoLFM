@@ -110,13 +110,13 @@ end
 --- Saves current state as a preset
 AutoLFM.Core.Maestro.RegisterCommand("Presets.Save", function(presetName)
   if not presetName or presetName == "" then
-    AutoLFM.Core.Utils.LogError("Preset name cannot be empty")
+    AutoLFM.Core.Utils.LogError("Presets.Save: Preset name cannot be empty")
     return
   end
 
   -- Check if preset already exists
   if AutoLFM.Core.Storage.PresetExists(presetName) then
-    AutoLFM.Core.Utils.LogWarning("Preset '" .. presetName .. "' already exists")
+    AutoLFM.Core.Utils.LogWarning("Presets.Save: Preset '%s' already exists, use Rename to overwrite", presetName)
     return
   end
 
@@ -130,14 +130,14 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Save", function(presetName)
     AutoLFM.Core.Utils.LogAction("Preset saved: " .. presetName)
     AutoLFM.Core.Maestro.Dispatch("Presets.Changed")
   else
-    AutoLFM.Core.Utils.LogError("Failed to save preset")
+    AutoLFM.Core.Utils.LogError("Presets.Save: Failed to save preset '%s' to storage", presetName)
   end
-end, { id = "C28" })
+end, { id = "C24" })
 
 --- Loads a preset and restores its state
 AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
   if not presetName or presetName == "" then
-    AutoLFM.Core.Utils.LogError("Preset name cannot be empty")
+    AutoLFM.Core.Utils.LogError("Presets.Load: Preset name cannot be empty")
     return
   end
 
@@ -146,7 +146,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
   local presetData = presets.data[presetName]
 
   if not presetData then
-    AutoLFM.Core.Utils.LogError("Preset not found: " .. presetName)
+    AutoLFM.Core.Utils.LogError("Presets.Load: Preset '%s' not found (available: %d presets)", presetName, table.getn(presets.data))
     return
   end
 
@@ -154,12 +154,12 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
   restorePresetState(presetData)
   AutoLFM.Core.Utils.LogAction("Preset loaded: " .. presetName)
   AutoLFM.Core.Maestro.Dispatch("Presets.Loaded", presetName)
-end, { id = "C29" })
+end, { id = "C25" })
 
 --- Deletes a preset
 AutoLFM.Core.Maestro.RegisterCommand("Presets.Delete", function(presetName)
   if not presetName or presetName == "" then
-    AutoLFM.Core.Utils.LogError("Preset name cannot be empty")
+    AutoLFM.Core.Utils.LogError("Presets.Delete: Preset name cannot be empty")
     return
   end
 
@@ -169,21 +169,21 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Delete", function(presetName)
     AutoLFM.Core.Utils.LogAction("Preset deleted: " .. presetName)
     AutoLFM.Core.Maestro.Dispatch("Presets.Changed")
   else
-    AutoLFM.Core.Utils.LogError("Failed to delete preset")
+    AutoLFM.Core.Utils.LogError("Presets.Delete: Failed to delete preset '%s' from storage", presetName)
   end
-end, { id = "C30" })
+end, { id = "C26" })
 
 --=============================================================================
 -- EVENTS
 --=============================================================================
-AutoLFM.Core.Maestro.RegisterEvent("Presets.Changed", { id = "E07" })
-AutoLFM.Core.Maestro.RegisterEvent("Presets.Loaded", { id = "E08" })
+AutoLFM.Core.Maestro.RegisterEvent("Presets.Changed", { id = "E05" })
+AutoLFM.Core.Maestro.RegisterEvent("Presets.Loaded", { id = "E06" })
 
 --=============================================================================
 -- INITIALIZATION
 --=============================================================================
 AutoLFM.Core.SafeRegisterInit("Logic.Content.Presets", function()
 end, {
-  id = "I17",
+  id = "I14",
   dependencies = { "Core.Storage", "Logic.Selection" }
 })

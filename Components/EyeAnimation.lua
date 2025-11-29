@@ -131,6 +131,6 @@ AutoLFM.Core.SafeRegisterInit("Components.EyeAnimation", function()
     AutoLFM.Components.EyeAnimation.Start()
   end
 end, {
-  id = "I26",
+  id = "I21",
   dependencies = { "Logic.Broadcaster" }
 })

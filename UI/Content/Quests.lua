@@ -1,21 +1,19 @@
 --=============================================================================
 -- AutoLFM: Quests UI
---   UI handlers for quest selection
+--   UI handlers for quest selection (uses ContentPanel factory)
 --=============================================================================
 
 AutoLFM = AutoLFM or {}
 AutoLFM.UI = AutoLFM.UI or {}
 AutoLFM.UI.Content = AutoLFM.UI.Content or {}
-AutoLFM.UI.Content.Quests = {}
 
 --=============================================================================
--- PUBLIC API
---   UI rendering functions for quest list
+-- PRIVATE: Row creation logic
 --=============================================================================
 
 --- Creates and updates quest rows in the scroll frame with zone tooltips
 --- @param scrollChild frame - The scroll child frame to populate
-function AutoLFM.UI.Content.Quests.CreateRows(scrollChild)
+local function CreateQuestRows(scrollChild)
   if not scrollChild then
     return
   end
@@ -91,46 +89,23 @@ function AutoLFM.UI.Content.Quests.CreateRows(scrollChild)
   AutoLFM.UI.RowList.UpdateScrollFrame(scrollChild)
 end
 
---- XML OnLoad callback - stores frame reference
---- @param frame frame - The quests content frame
-function AutoLFM.UI.Content.Quests.OnLoad(frame)
-  AutoLFM.UI.Content.Quests.frame = frame
-end
+--=============================================================================
+-- PUBLIC API
+--=============================================================================
 
---- XML OnShow callback - rebuilds quest rows when frame is shown
---- @param frame frame - The quests content frame
-function AutoLFM.UI.Content.Quests.OnShow(frame)
-  AutoLFM.UI.RowList.OnShowHandler(
-    frame,
-    AutoLFM.UI.Content.Quests.CreateRows,
-    AutoLFM.Logic.Content.Quests.ClearCache,
-    "AutoLFM_QuestRow"
-  )
-end
+-- Create panel using ContentPanel factory
+AutoLFM.UI.Content.Quests = AutoLFM.UI.CreateContentPanel({
+  name = "Quests",
+  rowTemplatePrefix = "AutoLFM_QuestRow",
+  createRowsFunc = CreateQuestRows,
+  clearCacheFunc = AutoLFM.Logic.Content.Quests.ClearCache,
+  listeningEvent = "Selection.Changed",
+  listenerInitHandler = "I24",
+  listenerDependencies = {},
+  listenerId = "L08"
+})
 
---- Refreshes the quest list display if frame is visible
---- Called by Maestro command "QuestsList.Refresh"
-function AutoLFM.UI.Content.Quests.Refresh()
-  if AutoLFM.UI.Content.Quests.frame and AutoLFM.UI.Content.Quests.frame:IsVisible() then
-    AutoLFM.UI.Content.Quests.OnShow(AutoLFM.UI.Content.Quests.frame)
-  end
-end
-
------------------------------------------------------------------------------
--- Auto-register commands and listeners
------------------------------------------------------------------------------
-if AutoLFM.Core.Maestro and AutoLFM.Core.Maestro.RegisterInit then
-  AutoLFM.Core.Maestro.RegisterInit("UI.Quests", function()
-    AutoLFM.Core.Maestro.RegisterCommand("QuestsList.Refresh", AutoLFM.UI.Content.Quests.Refresh, { id = "C27" })
-
-    -- Listen to Selection.Changed to refresh checkboxes when custom message changes
-    AutoLFM.Core.Maestro.Listen(
-      "UI.Quests.OnSelectionChanged",
-      "Selection.Changed",
-      function()
-        AutoLFM.UI.Content.Quests.Refresh()
-      end,
-      { id = "L08" }
-    )
-  end, { id = "I24" })
-end
+-- Additional command registration for QuestsList.Refresh (legacy support)
+AutoLFM.Core.SafeRegisterInit("UI.Quests.Commands", function()
+  AutoLFM.Core.Maestro.RegisterCommand("QuestsList.Refresh", AutoLFM.UI.Content.Quests.Refresh, { id = "C23" })
+end, { id = "I15", dependencies = { "UI.Quests" } })

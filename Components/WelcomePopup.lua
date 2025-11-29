@@ -177,7 +177,7 @@ end
 local function createPopup()
   local frame = CreateFrame("Frame", "AutoLFM_WelcomePopup", UIParent)
   frame:SetBackdrop({
-    bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+    bgFile = "Interface/AddOns/AutoLFM/UI/Textures/TooltipBackground",
     tile = true, tileSize = 16,
     insets = {left = 4, right = 4, top = 4, bottom = 4}
   })
@@ -353,6 +353,6 @@ AutoLFM.Core.SafeRegisterInit("Components.WelcomePopup", function()
     AutoLFM.Components.WelcomePopup.Show()
   end
 end, {
-  id = "I09",
+  id = "I07",
   dependencies = { "Core.Storage" }
 })

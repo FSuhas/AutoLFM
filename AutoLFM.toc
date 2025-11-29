@@ -4,7 +4,7 @@
 ## Author: Gondoleon, NSO73
 ## SavedVariables: V3_Settings, V3_Presets
 ## OptionalDeps: pfQuest, ShaguTweaks
-## Version: 3.0
+## Version: 3.1
 
 #=============================================================================
 # Github Repository: https://github.com/FSuhas/AutoLFM
@@ -14,12 +14,13 @@
 # Core
 #=============================================================================
 Core\Maestro.lua
+Core\API.lua
 Core\Cache.lua
 Core\Constants.lua
 Core\Events.lua
+Core\Settings.lua
 Core\Storage.lua
 Core\Utils.lua
-Core\API.lua
 
 #=============================================================================
 # Components
@@ -49,6 +50,7 @@ Logic\Content\Settings.lua
 #=============================================================================
 # UI Utilities
 #=============================================================================
+UI\ContentPanel.lua
 UI\RowList.lua
 UI\SizeControl.lua
 

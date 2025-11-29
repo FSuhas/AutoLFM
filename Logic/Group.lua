@@ -13,6 +13,10 @@ local conversionPending = false
 local conversionFrame = CreateFrame("Frame")
 conversionFrame:Hide()
 
+-- Retry logic for failed conversion attempts
+local MAX_CONVERSION_ATTEMPTS = 3
+local conversionAttempts = 0
+
 --=============================================================================
 -- PUBLIC API
 --=============================================================================
@@ -58,6 +62,7 @@ end
 
 --- Attempts to convert party to raid if conditions are met
 --- Uses deferred execution to avoid API call issues in event callbacks
+--- Implements retry logic with exponential backoff for failed conversion attempts
 --- Conditions: 2+ players, target size > 5, player is leader, in party (not raid)
 function AutoLFM.Logic.Group.ConvertToRaidIfNeeded()
   local groupSize = AutoLFM.Logic.Group.GetSize()
@@ -85,19 +90,46 @@ function AutoLFM.Logic.Group.ConvertToRaidIfNeeded()
   end
 
   conversionPending = true
+  conversionAttempts = 0
 
-  conversionFrame:SetScript("OnUpdate", function()
-    conversionFrame:Hide()
-    conversionFrame:SetScript("OnUpdate", nil)
-
+  local function attemptConversion()
+    conversionAttempts = conversionAttempts + 1
     local success, err = pcall(ConvertToRaid)
+
     if success then
       AutoLFM.Core.Utils.PrintSuccess("Converted party to raid")
-    else
-      AutoLFM.Core.Utils.LogError("Failed to convert to raid: " .. tostring(err))
+      conversionPending = false
+      return true
     end
 
+    -- Retry with exponential backoff if attempts remain
+    if conversionAttempts < MAX_CONVERSION_ATTEMPTS then
+      AutoLFM.Core.Utils.LogWarning("Conversion attempt " .. conversionAttempts .. " failed, retrying...")
+      -- Exponential backoff: 1 frame, 2 frames, 3 frames
+      local backoffFrames = conversionAttempts
+      local frameCounter = 0
+
+      conversionFrame:SetScript("OnUpdate", function()
+        frameCounter = frameCounter + 1
+        if frameCounter >= backoffFrames then
+          conversionFrame:SetScript("OnUpdate", nil)
+          attemptConversion()
+        end
+      end)
+      conversionFrame:Show()
+      return false
+    end
+
+    -- Max attempts reached
+    AutoLFM.Core.Utils.LogError("Failed to convert to raid after " .. MAX_CONVERSION_ATTEMPTS .. " attempts: " .. tostring(err))
     conversionPending = false
+    return false
+  end
+
+  conversionFrame:SetScript("OnUpdate", function()
+    conversionFrame:SetScript("OnUpdate", nil)
+    conversionFrame:Hide()
+    attemptConversion()
   end)
   conversionFrame:Show()
 end
@@ -106,6 +138,6 @@ end
 -- INITIALIZATION
 --=============================================================================
 AutoLFM.Core.SafeRegisterInit("Logic.Group", function() end, {
-  id = "I20",
+  id = "I07",
   dependencies = { "Core.Events" }
 })

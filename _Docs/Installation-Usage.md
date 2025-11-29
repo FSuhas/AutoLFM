@@ -14,12 +14,19 @@
 - World of Warcraft Vanilla 1.12 (TurtleWoW)
 - AddOn compatible folder
 
-### Step-by-Step Installation
+### Method 1: Manual Installation
 
-1. **Download** the AutoLFM addon
+1. **Download** the AutoLFM addon from [GitHub](https://github.com/FSuhas/AutoLFM)
 2. **Extract** the folder to your World of Warcraft `Interface/AddOns/` directory
 3. **Restart** World of Warcraft
 4. **Verify**: You should see "AutoLFM" in your AddOns list at login
+
+### Method 2: TurtleWoW Launcher
+
+1. Open the **TurtleWoW Launcher**
+2. Navigate to the **AddOns** section
+3. Add new addon and paste the repository URL: `https://github.com/FSuhas/AutoLFM`
+4. Click **Install**
 
 ### Directory Structure
 ```
@@ -118,25 +125,24 @@ Start here: This guide covers installation, basic usage, configuration, and trou
 
 **Quick Start:**
 1. [Dev/README.md](Dev/README.md) - Developer overview and quick reference
-2. [Dev/Guide/Maestro-Architecture.md](Dev/Guide/Maestro-Architecture.md) - Understand the CQRS command bus system
-3. [Dev/Guide/Best-Practices.md](Dev/Guide/Best-Practices.md) - Lua 5.0 compatibility and coding standards
-4. [Dev/Guide/Registry-System.md](Dev/Guide/Registry-System.md) - Component registration and state management
-5. [Dev/Reference/Component-Registry.md](Dev/Reference/Component-Registry.md) - Complete list of all registered components
+2. [Dev/Maestro-Architecture.md](Dev/Maestro-Architecture.md) - Understand the CQRS command bus system
+3. [Dev/Best-Practices.md](Dev/Best-Practices.md) - Lua 5.0 compatibility and coding standards
+4. [Dev/Registry-and-Components.md](Dev/Registry-and-Components.md) - Component registration and comprehensive reference
+5. [Dev/API.md](Dev/API.md) - Public API documentation for external addons
 
 **Project Structure:**
 ```
 AutoLFM/
 ├── README.md                          (Project overview)
 ├── _Docs/
-│   ├── Installation-Usage.md          (This file)
-│   └── Dev/
+│   ├── Installation-Usage.md          (This file - user guide)
+│   └── Dev/                           (Developer documentation)
 │       ├── README.md                  (Developer entry point)
-│       ├── Guide/                     (Learning materials)
-│       │   ├── Maestro-Architecture.md
-│       │   ├── Best-Practices.md
-│       │   └── Registry-System.md
-│       └── Reference/                 (Component reference)
-│           └── Component-Registry.md
+│       ├── Maestro-Architecture.md
+│       ├── Best-Practices.md
+│       ├── Registry-and-Components.md
+│       ├── API.md
+│       └── Documentation-Structure.md
 ├── Core/                              (Framework)
 ├── Components/                        (Reusable components)
 ├── Logic/                             (Business logic)
@@ -148,6 +154,6 @@ AutoLFM/
 ## 📞 Support
 
 Found a bug or have suggestions? Please report at:
-[GitHub Issues - AutoLFM](https://github.com/FSuhas/AutoLFM/issues/44)
+[GitHub Issues - AutoLFM](https://github.com/FSuhas/AutoLFM/issues)
 
 For development questions, see [Dev/README.md](Dev/README.md)
