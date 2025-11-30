@@ -15,14 +15,14 @@ local MAX_DUNGEONS = AutoLFM.Core.Constants.MAX_DUNGEONS or 3
 --=============================================================================
 -- STATE DECLARATIONS (MUST BE FIRST)
 --=============================================================================
-AutoLFM.Core.SafeRegisterState("Selection.Mode", "none", { id = "S01" })
-AutoLFM.Core.SafeRegisterState("Selection.Roles", {}, { id = "S02" })
-AutoLFM.Core.SafeRegisterState("Selection.DungeonNames", {}, { id = "S03" })
-AutoLFM.Core.SafeRegisterState("Selection.RaidName", nil, { id = "S04" })
-AutoLFM.Core.SafeRegisterState("Selection.RaidSize", 40, { id = "S05" })
-AutoLFM.Core.SafeRegisterState("Selection.DetailsText", "", { id = "S06" })
-AutoLFM.Core.SafeRegisterState("Selection.CustomMessage", "", { id = "S07" })
-AutoLFM.Core.SafeRegisterState("Selection.CustomGroupSize", 5, { id = "S08" })
+AutoLFM.Core.SafeRegisterState("Selection.Mode", "none", { id = "S05" })
+AutoLFM.Core.SafeRegisterState("Selection.Roles", {}, { id = "S08" })
+AutoLFM.Core.SafeRegisterState("Selection.DungeonNames", {}, { id = "S04" })
+AutoLFM.Core.SafeRegisterState("Selection.RaidName", nil, { id = "S06" })
+AutoLFM.Core.SafeRegisterState("Selection.RaidSize", 40, { id = "S07" })
+AutoLFM.Core.SafeRegisterState("Selection.DetailsText", "", { id = "S03" })
+AutoLFM.Core.SafeRegisterState("Selection.CustomMessage", "", { id = "S02" })
+AutoLFM.Core.SafeRegisterState("Selection.CustomGroupSize", 5, { id = "S01" })
 
 --=============================================================================
 -- PRIVATE HELPERS
@@ -205,7 +205,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleDungeon", function(index)
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C03" })
+end, { id = "C12" })
 
 --- Clears all dungeon selections
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearDungeons", function()
@@ -226,7 +226,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearDungeons", function()
   AutoLFM.Core.Utils.LogAction("Cleared all dungeons")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C11" })
+end, { id = "C05" })
 
 --=============================================================================
 -- COMMANDS - RAIDS
@@ -270,7 +270,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleRaid", function(index)
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C04" })
+end, { id = "C13" })
 
 --- Sets custom raid size
 --- @param size number - The new raid size
@@ -319,7 +319,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetRaidSize", function(size, sil
   if not silent then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C05" })
+end, { id = "C11" })
 
 --- Clears raid selection
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRaid", function()
@@ -341,7 +341,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRaid", function()
   AutoLFM.Core.Utils.LogAction("Cleared raid")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C12" })
+end, { id = "C06" })
 
 --=============================================================================
 -- COMMANDS - ROLES
@@ -389,7 +389,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleRole", function(role)
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C06" })
+end, { id = "C14" })
 
 --- Clears all role selections
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearRoles", function()
@@ -428,7 +428,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomMessage", function(text
 
   -- Emit event
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C08" })
+end, { id = "C09" })
 
 --- Clears custom message
 AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearCustomMessage", function()
@@ -443,7 +443,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearCustomMessage", function()
   AutoLFM.Core.Utils.LogAction("Cleared custom message")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C09" })
+end, { id = "C04" })
 
 --- Sets custom group size for custom messages with variables
 AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomGroupSize", function(size)
@@ -467,7 +467,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetCustomGroupSize", function(si
   if mode == "custom" and customMessage ~= "" then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C10" })
+end, { id = "C08" })
 
 --- Sets details text (appended to auto-generated message in details mode)
 AutoLFM.Core.Maestro.RegisterCommand("Selection.SetDetailsText", function(text)
@@ -485,7 +485,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetDetailsText", function(text)
   if mode ~= "custom" then
     AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
   end
-end, { id = "C13" })
+end, { id = "C10" })
 
 --=============================================================================
 -- COMMANDS - GLOBAL
@@ -522,7 +522,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ClearAll", function()
   AutoLFM.Core.Utils.LogAction("Cleared all selections")
 
   AutoLFM.Core.Maestro.Dispatch("Selection.Changed")
-end, { id = "C14" })
+end, { id = "C03" })
 
 --=============================================================================
 -- EVENT DECLARATIONS
@@ -540,6 +540,6 @@ AutoLFM.Core.SafeRegisterInit("Logic.Selection", function()
     function()
       dungeonLookupCache = {}
     end,
-    { id = "L02" }
+    { id = "L04" }
   )
 end, { id = "I05" })

@@ -206,7 +206,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Quests.Toggle", function(questIndex)
     addQuestLinkToMessage(link)
     AutoLFM.Core.Utils.LogAction("Added quest link to message")
   end
-end, { id = "C22" })
+end, { id = "C20" })
 
 --=============================================================================
 -- PUBLIC API

@@ -6,10 +6,10 @@ This guide provides entry points to AutoLFM's development documentation:
 
 | Document | Purpose |
 |----------|----------|
-| [**Maestro-Architecture.md**](Maestro-Architecture.md) | Complete guide to the Maestro architecture |
-| [**Best-Practices.md**](Best-Practices.md) | Lua 5.0 compatibility and coding standards |
-| [**Registry-and-Components.md**](Registry-and-Components.md) | Registry system, state management patterns, and component reference |
-| [**API.md**](API.md) | Public API documentation for external addon integration |
+| [**Maestro-Architecture.md**](Maestro-Architecture.md) | Complete guide to the Maestro command bus architecture |
+| [**Best-Practices.md**](Best-Practices.md) | Lua 5.0 compatibility and development standards |
+| [**ID-System-Reference.md**](ID-System-Reference.md) | **Registry & IDs** - All 97 IDs, state management, and component organization |
+| [**API.md**](API.md) | Public API for external addon integration |
 
 ## 🚀 Quick Start
 
@@ -19,8 +19,8 @@ Read [**Maestro-Architecture.md**](Maestro-Architecture.md) to understand the co
 ### 2. Coding Standards
 Read [**Best-Practices.md**](Best-Practices.md) for Lua 5.0 compatibility rules and development guidelines.
 
-### 3. Component Management
-Read [**Registry-and-Components.md**](Registry-and-Components.md) to learn how the registry system works, state management patterns, and view the complete component reference.
+### 3. Component Management & State
+Read [**ID-System-Reference.md**](ID-System-Reference.md) to understand component organization, state management patterns, and all 97 IDs.
 
 ### 4. External Integration
 Check [**API.md**](API.md) for the public API documentation to integrate AutoLFM with other addons.
@@ -44,7 +44,7 @@ User Action → Command → State Change → Event → UI Update
 2. **Listeners ONLY in Init Handlers** - never at file load
 3. **States are single source of truth** - don't duplicate data
 4. **Commands are the only way to modify state**
-5. **Update Registry-and-Components.md** when adding components
+5. **Update ID-System-Reference.md** when adding components
 
 ## 🔧 Development Workflow
 
@@ -52,7 +52,7 @@ User Action → Command → State Change → Event → UI Update
 2. **Logic** - Implement business logic and state management
 3. **UI** - Create user interface and synchronization
 4. **Listeners** - Add event handlers for reactivity
-5. **Registry** - Update Registry-and-Components.md with new IDs
+5. **Registry** - Update ID-System-Reference.md with new IDs and state patterns
 6. **Test** - Use `/lfm debug` to verify registration
 
 ## 📁 Project Structure
@@ -69,9 +69,8 @@ AutoLFM/
         ├── README.md
         ├── Maestro-Architecture.md
         ├── Best-Practices.md
-        ├── Registry-and-Components.md
-        ├── API.md
-        └── Documentation-Structure.md
+        ├── ID-System-Reference.md
+        └── API.md
 ```
 
 ---

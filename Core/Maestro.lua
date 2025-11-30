@@ -262,7 +262,7 @@ function AutoLFM.Core.Maestro.Listen(listenerId, eventKey, callback, options)
 
   table.insert(listenersRegistry, {
       id = listenId,
-      key = listenId,
+      key = listenerId,
       eventKey = eventKey
   })
 

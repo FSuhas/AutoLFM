@@ -17,7 +17,7 @@ end
 -- @param commandKey string Unique command identifier (e.g., "Selection.ToggleDungeon")
 -- @param handler function Function to execute when command is dispatched
 -- @param options table Configuration options with id field
--- @usage RegisterCommand("MyModule.DoSomething", handler, { id = "C25" })
+-- @usage RegisterCommand("MyModule.DoSomething", handler, { id = "C24" })
 function RegisterCommand(commandKey, handler, options)
     -- Implementation
 end

@@ -133,7 +133,7 @@ AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.Enable", function()
   AutoLFM.Core.Storage.SetAutoInviteEnabled(true)
   AutoLFM.Core.Utils.PrintSuccess("Auto Invite enabled")
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
-end, { id = "C29" })
+end, { id = "C23" })
 
 --- Command: Disable AutoInvite
 --- Deactivates automatic group invitations
@@ -141,7 +141,7 @@ AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.Disable", function()
   AutoLFM.Core.Storage.SetAutoInviteEnabled(false)
   AutoLFM.Core.Utils.PrintWarning("Auto Invite disabled")
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
-end, { id = "C30" })
+end, { id = "C22" })
 
 --- Command: Toggle confirmation messages
 --- Enables/disables sending confirmation whispers to invited players
@@ -151,7 +151,7 @@ AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.ToggleConfirm", function()
   local status = (not current) and "enabled" or "disabled"
   AutoLFM.Core.Utils.PrintInfo("Confirmation whisper " .. status)
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
-end, { id = "C31" })
+end, { id = "C24" })
 
 --=============================================================================
 -- EVENTS

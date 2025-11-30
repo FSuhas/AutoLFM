@@ -152,6 +152,11 @@
                         <Anchor point="CENTER"/>
                       </Anchors>
                     </FontString>
+                    <FontString name="$parent_PlaceholderCustom" inherits="GameFontDisableSmall" text="">
+                      <Anchors>
+                        <Anchor point="CENTER"/>
+                      </Anchors>
+                    </FontString>
                   </Layer>
                 </Layers>
                 <Scripts>

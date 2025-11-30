@@ -203,6 +203,12 @@ function AutoLFM.Logic.Content.Settings.ToggleDryRun(isEnabled)
 end
 
 -----------------------------------------------------------------------------
+-- Event Declarations
+-----------------------------------------------------------------------------
+--- Event: Settings changed
+AutoLFM.Core.Maestro.RegisterEvent("Settings.Changed", { id = "E08" })
+
+-----------------------------------------------------------------------------
 -- State Declarations
 -----------------------------------------------------------------------------
 --- State: Dry run mode enabled/disabled

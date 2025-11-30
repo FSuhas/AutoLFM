@@ -137,4 +137,4 @@ end
 
 AutoLFM.Core.SafeRegisterInit("Core.Settings", function()
   AutoLFM.Core.Utils.LogInfo("Settings initialized")
-end, { dependencies = {"Core.Storage"} })
+end, { id = "I17", dependencies = {"Core.Storage"} })

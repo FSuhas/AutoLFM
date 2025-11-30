@@ -161,13 +161,13 @@ end
 --=============================================================================
 
 -- Create panel using ContentPanel factory
+-- Init Handler ID will be auto-assigned by ContentPanel factory
 AutoLFM.UI.Content.Raids = AutoLFM.UI.CreateContentPanel({
   name = "Raids",
   rowTemplatePrefix = "AutoLFM_RaidRow",
   createRowsFunc = CreateRaidRows,
   clearCacheFunc = nil,  -- No cache to clear for raids
   listeningEvent = "Selection.Changed",
-  listenerInitHandler = "I23",
   listenerDependencies = { "Logic.Selection" },
   listenerId = "L07"
 })

@@ -333,18 +333,18 @@ end
 -- STATE DECLARATIONS
 --=============================================================================
 AutoLFM.Core.SafeRegisterState("Broadcaster.IsRunning", false, { id = "S13" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.Interval", 60, { id = "S14" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.Interval", 60, { id = "S12" })
 AutoLFM.Core.SafeRegisterState("Broadcaster.MessagesSent", 0, { id = "S15" })
 AutoLFM.Core.SafeRegisterState("Broadcaster.SessionStartTime", 0, { id = "S16" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.LastBroadcastTime", 0, { id = "S17" })
-AutoLFM.Core.SafeRegisterState("Broadcaster.TimeRemaining", 0, { id = "S19" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.LastBroadcastTime", 0, { id = "S14" })
+AutoLFM.Core.SafeRegisterState("Broadcaster.TimeRemaining", 0, { id = "S17" })
 
 --=============================================================================
 -- COMMAND DECLARATIONS
 --=============================================================================
 AutoLFM.Core.Maestro.RegisterCommand("Broadcaster.Toggle", function()
   AutoLFM.Logic.Broadcaster.Toggle()
-end, { id = "C18" })
+end, { id = "C15" })
 
 --=============================================================================
 -- INITIALIZATION

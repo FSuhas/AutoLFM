@@ -8,6 +8,13 @@ AutoLFM = AutoLFM or {}
 AutoLFM.UI = AutoLFM.UI or {}
 
 --=============================================================================
+-- PRIVATE: Content Panel ID Registry
+--   Auto-assigns Init Handler IDs to content panels (I28+)
+--=============================================================================
+
+local nextContentPanelId = 28  -- Next available ID for content panels
+
+--=============================================================================
 -- ContentPanel Factory
 --   Creates a content panel with standard lifecycle hooks and event listeners
 --=============================================================================
@@ -16,14 +23,14 @@ AutoLFM.UI = AutoLFM.UI or {}
 --- Provides: OnLoad, OnShow, Refresh, and Maestro event listener registration
 ---
 --- @param config table - Configuration object
----   - name: string - Panel identifier (e.g., "Dungeons", "Raids")
+---   - name: string - Panel identifier (e.g., "Dungeons", "Raids", "Quests")
 ---   - rowTemplatePrefix: string - XML template prefix (e.g., "AutoLFM_DungeonRow")
 ---   - createRowsFunc: function - Function to create/update rows (signature: function(scrollChild))
 ---   - clearCacheFunc: function|nil - Optional function to clear cache on show
 ---   - listeningEvent: string - Maestro event to listen to (e.g., "Selection.Changed")
----   - listenerInitHandler: string - Init handler ID (e.g., "I22")
 ---   - listenerDependencies: table - Init handler dependencies (e.g., { "Logic.Selection" })
 ---   - listenerId: string - Listener ID (e.g., "L06")
+---   - listenerInitHandler: string|nil - Init handler ID (optional, auto-assigned if not provided)
 ---
 --- @return table - The panel module with standard API
 ---
@@ -34,9 +41,9 @@ AutoLFM.UI = AutoLFM.UI or {}
 ---     createRowsFunc = function(scrollChild) ... end,
 ---     clearCacheFunc = AutoLFM.Logic.Content.Dungeons.ClearCache,
 ---     listeningEvent = "Selection.Changed",
----     listenerInitHandler = "I22",
 ---     listenerDependencies = { "Logic.Selection" },
 ---     listenerId = "L06"
+---     -- listenerInitHandler is auto-assigned if not provided
 ---   })
 ---
 function AutoLFM.UI.CreateContentPanel(config)
@@ -91,11 +98,18 @@ function AutoLFM.UI.CreateContentPanel(config)
 
   --- Registers the panel's initialization handler with Maestro
   --- Called automatically during addon startup
-  if config.listenerInitHandler and config.listeningEvent then
+  if config.listeningEvent then
+    -- Auto-assign Init Handler ID if not provided
+    local initHandlerId = config.listenerInitHandler
+    if not initHandlerId then
+      initHandlerId = "I" .. nextContentPanelId
+      nextContentPanelId = nextContentPanelId + 1
+    end
+
     AutoLFM.Core.SafeRegisterInit("UI." .. config.name, function()
       panel.RegisterListener()
     end, {
-      id = config.listenerInitHandler,
+      id = initHandlerId,
       dependencies = config.listenerDependencies or {}
     })
   end

@@ -353,6 +353,6 @@ AutoLFM.Core.SafeRegisterInit("Components.WelcomePopup", function()
     AutoLFM.Components.WelcomePopup.Show()
   end
 end, {
-  id = "I07",
+  id = "I21",
   dependencies = { "Core.Storage" }
 })

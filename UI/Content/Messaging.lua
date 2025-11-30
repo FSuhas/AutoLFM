@@ -25,7 +25,7 @@ local MODE_CUSTOM = "custom"
 local PLACEHOLDER_DETAILS = "Shift+Click to add links or items"
 local PLACEHOLDER_CUSTOM = "See icon tooltip for variables usage"
 local LABEL_DETAILS = "Add details after generated message:"
-local LABEL_CUSTOM = "Create full custom message:"
+local LABEL_CUSTOM = "Create custom message:"
 
 --=============================================================================
 -- PRIVATE STATE
@@ -222,13 +222,36 @@ end
 -- EDITBOX FUNCTIONS
 --=============================================================================
 
---- Updates editbox placeholder visibility based on text content
+--- Updates editbox placeholder visibility based on text content and mode
 local function updatePlaceholder()
-  if not customMessageEditBox or not customMessagePlaceholder then return end
-  if customMessageEditBox:GetText() == "" then
-    customMessagePlaceholder:Show()
-  else
-    customMessagePlaceholder:Hide()
+  if not customMessageEditBox then return end
+
+  local isTextEmpty = customMessageEditBox:GetText() == ""
+  local currentMode = getCurrentMode()
+  local isCustomMode = (currentMode == MODE_CUSTOM)
+
+  -- Get placeholder elements
+  local detailsPlaceholder = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer_Placeholder")
+  local customPlaceholder = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer_PlaceholderCustom")
+
+  -- Show/hide Details placeholder
+  if detailsPlaceholder then
+    if isTextEmpty and not isCustomMode then
+      detailsPlaceholder:Show()
+    else
+      detailsPlaceholder:Hide()
+    end
+  end
+
+  -- Show/hide Custom placeholder
+  if customPlaceholder then
+    if isTextEmpty and isCustomMode then
+      -- Display placeholder with red icon symbol for custom mode
+      customPlaceholder:SetText("See [|cffff0000?|r] tooltip for variables usage")
+      customPlaceholder:Show()
+    else
+      customPlaceholder:Hide()
+    end
   end
 end
 
@@ -290,19 +313,10 @@ local function setupGroupSizeControls()
 
   if groupSizeControl and customMessageContainer then
     groupSizeControl:ClearAllPoints()
-    groupSizeControl:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -4)
+    groupSizeControl:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -3)
   end
 end
 
---- Positions UI elements relative to the custom message container
---- Anchors channels icon below the custom message editbox
-local function positionUIElements()
-  local channelsIcon = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_ChannelsIcon")
-  if channelsIcon and customMessageContainer then
-    channelsIcon:ClearAllPoints()
-    channelsIcon:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -10)
-  end
-end
 
 --- Updates ScrollChild height based on content
 local function updateScrollChildHeight()
@@ -360,6 +374,26 @@ local function setFrameVisibility(frame, visible)
   end
 end
 
+--- Repositions the channels icon based on broadcast mode
+--- In Details mode: anchors below editbox
+--- In Custom mode: anchors below group size control
+--- @param isCustomMode boolean - True for Custom mode, false for Details mode
+local function repositionChannelsIcon(isCustomMode)
+  local channelsIcon = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_ChannelsIcon")
+  if not channelsIcon then return end
+
+  channelsIcon:ClearAllPoints()
+  if isCustomMode and groupSizeControl then
+    -- Custom mode: anchor below group size control
+    channelsIcon:SetPoint("TOPLEFT", groupSizeControl, "BOTTOMLEFT", 0, -10)
+  else
+    -- Details mode: anchor below editbox container with reduced spacing
+    if customMessageContainer then
+      channelsIcon:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -5)
+    end
+  end
+end
+
 --- Updates UI elements based on broadcast mode (Details vs Custom)
 --- Adjusts labels, placeholder text, editbox content, and control visibility
 --- Restores editbox content from State when refreshing display
@@ -369,8 +403,10 @@ local function updateModeUI(isCustomMode, clearOnModeSwitch)
   if customMessageLabel then
     customMessageLabel:SetText(isCustomMode and LABEL_CUSTOM or LABEL_DETAILS)
   end
-  if customMessagePlaceholder then
-    customMessagePlaceholder:SetText(isCustomMode and PLACEHOLDER_CUSTOM or PLACEHOLDER_DETAILS)
+
+  -- Update placeholder text based on mode
+  if customMessagePlaceholder and not isCustomMode then
+    customMessagePlaceholder:SetText(PLACEHOLDER_DETAILS)
   end
 
   if customMessageEditBox then
@@ -409,25 +445,14 @@ local function updateModeUI(isCustomMode, clearOnModeSwitch)
   setFrameVisibility(varTButton, isCustomMode)
   setFrameVisibility(varMButton, isCustomMode)
   setFrameVisibility(groupSizeControl, isCustomMode)
-  
+
+  -- Reposition channels icon based on mode
+  repositionChannelsIcon(isCustomMode)
+
   -- Update scroll after visibility changes
   updateScrollChildHeight()
 end
 
---- Repositions the channels icon based on broadcast mode and control visibility
---- In Custom mode with visible group size control, anchors below control; otherwise anchors below editbox
---- @param isCustomMode boolean - True for Custom mode, false for Details mode
-local function repositionChannelsIcon(isCustomMode)
-  local channelsIcon = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_ChannelsIcon")
-  if not channelsIcon or not customMessageContainer then return end
-
-  channelsIcon:ClearAllPoints()
-  if isCustomMode and groupSizeControl and groupSizeControl:IsShown() then
-    channelsIcon:SetPoint("TOPLEFT", groupSizeControl, "BOTTOMLEFT", 0, -10)
-  else
-    channelsIcon:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -10)
-  end
-end
 
 --- Updates Hardcore checkbox state and label color based on player's hardcore status
 --- If player is hardcore: enables checkbox and shows white label
@@ -467,17 +492,19 @@ function AutoLFM.UI.Content.Messaging.OnLoad(frame)
   initializeUIReferences()
   setupBroadcastIntervalSlider()
   setupGroupSizeControls()
-  positionUIElements()
   setRadioButtonStates(MODE_DETAILS)
   if customMessageLabel then
     customMessageLabel:SetText(LABEL_DETAILS)
   end
-  
+
   -- Apply gold border to main editbox container
   if customMessageContainer then
     customMessageContainer:SetBackdropBorderColor(1, 0.82, 0, 0.8)
   end
-  
+
+  -- Initial positioning of channels icon (Details mode)
+  repositionChannelsIcon(false)
+
   applyLabelColors()
   updateScrollChildHeight()
 end
@@ -525,21 +552,21 @@ end
 --- @param editBox frame - The editbox frame
 function AutoLFM.UI.Content.Messaging.OnEditBoxTextChanged(editBox)
   if not editBox then return end
-  
+
   local text = editBox:GetText()
   if text and string.find(text, "\n") then
     editBox:SetText(string.gsub(text, "\n", ""))
+    text = editBox:GetText()
   end
-  
-  -- Update placeholder
+
+  -- Update placeholder visibility
   customMessageEditBox = editBox
-  customMessagePlaceholder = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer_Placeholder")
   updatePlaceholder()
-  
+
   -- Skip dispatch if we're restoring from State
   if isRestoringFromState then return end
-  
-  -- Dispatch appropriate command based on current mode
+
+  -- Dispatch text to state
   if not text then text = "" end
   local currentMode = getCurrentMode()
   if currentMode == MODE_CUSTOM then
@@ -586,6 +613,7 @@ function AutoLFM.UI.Content.Messaging.UpdateModeDisplay(clearOnModeSwitch)
 
   updateModeUI(isCustomMode, clearOnModeSwitch)
   repositionChannelsIcon(isCustomMode)
+  updatePlaceholder()  -- Update placeholder visibility when mode changes
 end
 
 --- Handles group size slider value changes - updates the editbox display
@@ -652,15 +680,52 @@ function AutoLFM.UI.Content.Messaging.OnVarButtonEnter(frame)
   if highlight then
     highlight:Show()
   end
+
+  -- Show tooltip with variable description
+  local buttonName = frame:GetName()
+  local variable = ""
+  local description = ""
+
+  if string.find(buttonName, "VarRButton", 1, true) then
+    variable = "{ROL}"
+    description = "Required roles"
+  elseif string.find(buttonName, "VarCButton", 1, true) then
+    variable = "{CUR}"
+    description = "Current group size"
+  elseif string.find(buttonName, "VarTButton", 1, true) then
+    variable = "{TAR}"
+    description = "Target group size"
+  elseif string.find(buttonName, "VarMButton", 1, true) then
+    variable = "{MIS}"
+    description = "Missing players"
+  end
+
+  if variable ~= "" then
+    local goldColor = AutoLFM.Core.Utils.GetColor("GOLD")
+    local cyanColor = AutoLFM.Core.Utils.GetColor("CYAN")
+    local whiteColor = AutoLFM.Core.Utils.GetColor("WHITE")
+
+    local function colorText(text, colorName)
+      return AutoLFM.Core.Utils.ColorText(text, colorName)
+    end
+
+    GameTooltip:SetOwner(frame, "ANCHOR_TOPRIGHT", 0, 0)
+    GameTooltip:ClearLines()
+    GameTooltip:AddLine(colorText("Insert", "GOLD") .. " " .. colorText(variable, "CYAN") .. " " .. colorText("-", "WHITE") .. " " .. description, whiteColor.r, whiteColor.g, whiteColor.b)
+    GameTooltip:Show()
+  end
 end
 
---- Handles variable button mouse leave - hides highlight
+--- Handles variable button mouse leave - hides highlight and tooltip
 --- @param frame frame - The variable button frame
 function AutoLFM.UI.Content.Messaging.OnVarButtonLeave(frame)
   local highlight = getUIElement(frame:GetName() .. "_Highlight")
   if highlight then
     highlight:Hide()
   end
+
+  -- Hide tooltip
+  GameTooltip:Hide()
 end
 
 --- Handles variable button clicks - inserts variable into editbox
@@ -864,7 +929,7 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
     function()
       AutoLFM.UI.Content.Messaging.RefreshChannelCheckboxes()
     end,
-    { id = "L09" }
+    { id = "L08" }
   )
 
   --- Listens to Selection.Changed to refresh editbox content and group size
@@ -883,7 +948,7 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
       isRestoringFromState = true
       customMessageEditBox:SetText(text)
       isRestoringFromState = false
-      
+
       -- Update group size slider and editbox (only if changed)
       local groupSize = AutoLFM.Core.Maestro.GetState("Selection.CustomGroupSize") or 5
       if groupSizeSlider and groupSizeSlider:GetValue() ~= groupSize then
@@ -893,7 +958,7 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
         groupSizeControlEditBox:SetText(tostring(groupSize))
       end
     end,
-    { id = "L10" }
+    { id = "L11" }
   )
 
   --- Listens to Broadcaster state changes to update UI
@@ -935,3 +1000,4 @@ end, {
   id = "I15",
   dependencies = { "Logic.Content.Messaging", "Logic.Broadcaster" }  -- Wait for Broadcaster to be initialized
 })
+

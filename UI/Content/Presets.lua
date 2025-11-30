@@ -112,6 +112,11 @@ function AutoLFM.UI.Content.Presets.ClearRows()
 end
 
 local function createPresetRow(index, presetName, presetData, isFirst, isLast, yOffset)
+  -- Ensure lookup tables are built for dungeon/raid lookups
+  if AutoLFM.Core.Utils then
+    AutoLFM.Core.Utils.EnsureLookupTables()
+  end
+
   local presetType = "Custom"
   if presetData.dungeonNames and table.getn(presetData.dungeonNames) > 0 then
     presetType = "Dungeons"
@@ -254,15 +259,16 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
     end
   end
   
-  local btnSize = 16
-  local btnY = -5
+  local btnSize = 20
+  local btnY = 0
   local btnSpacing = 15
   
   if not isFirst then
     local upBtn = CreateFrame("Button", nil, row)
     upBtn:SetWidth(btnSize)
     upBtn:SetHeight(btnSize)
-    upBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", -5 - (btnSpacing * 2), btnY)
+    local upBtnOffset = isLast and (-2 - btnSpacing) or (-2 - (btnSpacing * 2))
+    upBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", upBtnOffset, btnY)
     local upIcon = upBtn:CreateTexture(nil, "ARTWORK")
     upIcon:SetAllPoints()
     upIcon:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Up")
@@ -281,7 +287,7 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
     local downBtn = CreateFrame("Button", nil, row)
     downBtn:SetWidth(btnSize)
     downBtn:SetHeight(btnSize)
-    downBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", -5 - btnSpacing, btnY)
+    downBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", -1 - btnSpacing, btnY)
     local downIcon = downBtn:CreateTexture(nil, "ARTWORK")
     downIcon:SetAllPoints()
     downIcon:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Down")
@@ -299,7 +305,7 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
   local deleteBtn = CreateFrame("Button", nil, row)
   deleteBtn:SetWidth(btnSize)
   deleteBtn:SetHeight(btnSize)
-  deleteBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", -5, btnY)
+  deleteBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", 0, btnY)
   local deleteIcon = deleteBtn:CreateTexture(nil, "ARTWORK")
   deleteIcon:SetAllPoints()
   deleteIcon:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Close")
@@ -412,9 +418,9 @@ AutoLFM.Core.SafeRegisterInit("UI.Content.Presets", function()
         AutoLFM.UI.Content.Presets.Refresh()
       end
     end,
-    { id = "L11" }
+    { id = "L09" }
   )
 end, {
-  id = "I22",
+  id = "I18",
   dependencies = { "Logic.Content.Presets" }
 })

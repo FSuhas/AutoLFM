@@ -94,18 +94,18 @@ end
 --=============================================================================
 
 -- Create panel using ContentPanel factory
+-- Init Handler ID will be auto-assigned by ContentPanel factory
 AutoLFM.UI.Content.Quests = AutoLFM.UI.CreateContentPanel({
   name = "Quests",
   rowTemplatePrefix = "AutoLFM_QuestRow",
   createRowsFunc = CreateQuestRows,
   clearCacheFunc = AutoLFM.Logic.Content.Quests.ClearCache,
   listeningEvent = "Selection.Changed",
-  listenerInitHandler = "I24",
   listenerDependencies = {},
-  listenerId = "L08"
+  listenerId = "L10"
 })
 
 -- Additional command registration for QuestsList.Refresh (legacy support)
 AutoLFM.Core.SafeRegisterInit("UI.Quests.Commands", function()
-  AutoLFM.Core.Maestro.RegisterCommand("QuestsList.Refresh", AutoLFM.UI.Content.Quests.Refresh, { id = "C23" })
-end, { id = "I15", dependencies = { "UI.Quests" } })
+  AutoLFM.Core.Maestro.RegisterCommand("QuestsList.Refresh", AutoLFM.UI.Content.Quests.Refresh, { id = "C21" })
+end, { id = "I19", dependencies = { "UI.Quests" } })

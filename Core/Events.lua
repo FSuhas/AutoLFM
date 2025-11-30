@@ -177,9 +177,9 @@ end
 --=============================================================================
 -- STATE DECLARATIONS
 --=============================================================================
-AutoLFM.Core.SafeRegisterState("Group.Type", "solo", { id = "S09" })
+AutoLFM.Core.SafeRegisterState("Group.Type", "solo", { id = "S11" })
 AutoLFM.Core.SafeRegisterState("Group.Size", 1, { id = "S10" })
-AutoLFM.Core.SafeRegisterState("Group.IsLeader", false, { id = "S11" })
+AutoLFM.Core.SafeRegisterState("Group.IsLeader", false, { id = "S09" })
 
 --=============================================================================
 -- EVENT DECLARATIONS

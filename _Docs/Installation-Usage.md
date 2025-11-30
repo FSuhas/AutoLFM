@@ -127,7 +127,7 @@ Start here: This guide covers installation, basic usage, configuration, and trou
 1. [Dev/README.md](Dev/README.md) - Developer overview and quick reference
 2. [Dev/Maestro-Architecture.md](Dev/Maestro-Architecture.md) - Understand the CQRS command bus system
 3. [Dev/Best-Practices.md](Dev/Best-Practices.md) - Lua 5.0 compatibility and coding standards
-4. [Dev/Registry-and-Components.md](Dev/Registry-and-Components.md) - Component registration and comprehensive reference
+4. [Dev/ID-System-Reference.md](Dev/ID-System-Reference.md) - Registry, IDs, state management, and component patterns
 5. [Dev/API.md](Dev/API.md) - Public API documentation for external addons
 
 **Project Structure:**
@@ -140,9 +140,8 @@ AutoLFM/
 │       ├── README.md                  (Developer entry point)
 │       ├── Maestro-Architecture.md
 │       ├── Best-Practices.md
-│       ├── Registry-and-Components.md
-│       ├── API.md
-│       └── Documentation-Structure.md
+│       ├── ID-System-Reference.md     (Registry, IDs, state management)
+│       └── API.md
 ├── Core/                              (Framework)
 ├── Components/                        (Reusable components)
 ├── Logic/                             (Business logic)

@@ -1,3 +1,10 @@
+## [v3.2] 2025/12/05
+- Add quests links requirements
+- Reduce space in messaging content: no more scroll in details
+- Fix dungeons/raids not visible in presets list
+- Add tooltip on VAR insert button for custom message
+- Fix Maestro ID lists
+
 ## [v3.1] 2025/11/29
 - Fix dungeons filters settings
 - Rename Settings.lua and add in .toc

@@ -657,4 +657,4 @@ end
 
 AutoLFM.Core.SafeRegisterInit("Debug", function()
   AutoLFM.Core.Maestro.RegisterCommand("Debug.Toggle", AutoLFM.Components.Debug.Toggle, { id = "C02" })
-end, { id = "I14" })
+end, { id = "I22" })

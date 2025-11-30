@@ -91,13 +91,13 @@ end
 --=============================================================================
 
 -- Create panel using ContentPanel factory
+-- Init Handler ID will be auto-assigned by ContentPanel factory
 AutoLFM.UI.Content.Dungeons = AutoLFM.UI.CreateContentPanel({
   name = "Dungeons",
   rowTemplatePrefix = "AutoLFM_DungeonRow",
   createRowsFunc = CreateDungeonRows,
   clearCacheFunc = AutoLFM.Logic.Content.Dungeons.ClearCache,
   listeningEvent = "Selection.Changed",
-  listenerInitHandler = "I22",
   listenerDependencies = { "Logic.Selection" },
   listenerId = "L06"
 })

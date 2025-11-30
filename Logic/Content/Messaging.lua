@@ -311,7 +311,7 @@ end
 --- Command: Toggle channel selection
 AutoLFM.Core.Maestro.RegisterCommand("Channels.ToggleChannel", function(channelName)
   AutoLFM.Logic.Content.Messaging.ToggleChannel(channelName)
-end, { id = "C20" })
+end, { id = "C16" })
 
 --- Event: Channels selection changed
 AutoLFM.Core.Maestro.RegisterEvent("Channels.Changed", { id = "E04" })

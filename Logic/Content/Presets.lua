@@ -132,7 +132,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Save", function(presetName)
   else
     AutoLFM.Core.Utils.LogError("Presets.Save: Failed to save preset '%s' to storage", presetName)
   end
-end, { id = "C24" })
+end, { id = "C19" })
 
 --- Loads a preset and restores its state
 AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
@@ -154,7 +154,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
   restorePresetState(presetData)
   AutoLFM.Core.Utils.LogAction("Preset loaded: " .. presetName)
   AutoLFM.Core.Maestro.Dispatch("Presets.Loaded", presetName)
-end, { id = "C25" })
+end, { id = "C18" })
 
 --- Deletes a preset
 AutoLFM.Core.Maestro.RegisterCommand("Presets.Delete", function(presetName)
@@ -171,7 +171,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Delete", function(presetName)
   else
     AutoLFM.Core.Utils.LogError("Presets.Delete: Failed to delete preset '%s' from storage", presetName)
   end
-end, { id = "C26" })
+end, { id = "C17" })
 
 --=============================================================================
 -- EVENTS
@@ -184,6 +184,6 @@ AutoLFM.Core.Maestro.RegisterEvent("Presets.Loaded", { id = "E06" })
 --=============================================================================
 AutoLFM.Core.SafeRegisterInit("Logic.Content.Presets", function()
 end, {
-  id = "I14",
+  id = "I12",
   dependencies = { "Core.Storage", "Logic.Selection" }
 })

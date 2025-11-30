@@ -297,9 +297,14 @@ function AutoLFM.Logic.Message.ReplaceVariables(message, currentSize, targetSize
 end
 
 --=============================================================================
+-- EVENT DECLARATIONS
+--=============================================================================
+AutoLFM.Core.Maestro.RegisterEvent("Message.Generated", { id = "E07" })
+
+--=============================================================================
 -- STATE DECLARATIONS
 --=============================================================================
-AutoLFM.Core.SafeRegisterState("Message.ToBroadcast", "", { id = "S12" })
+AutoLFM.Core.SafeRegisterState("Message.ToBroadcast", "", { id = "S19" })
 
 --=============================================================================
 -- INITIALIZATION
@@ -335,7 +340,7 @@ AutoLFM.Core.SafeRegisterInit("Logic.Message", function()
         end
       end
     end,
-    { id = "L02" }
+    { id = "L03" }
   )
 
   AutoLFM.Logic.Message.RebuildMessage()
