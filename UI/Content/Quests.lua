@@ -102,7 +102,7 @@ AutoLFM.UI.Content.Quests = AutoLFM.UI.CreateContentPanel({
   clearCacheFunc = AutoLFM.Logic.Content.Quests.ClearCache,
   listeningEvent = "Selection.Changed",
   listenerDependencies = {},
-  listenerId = "L10"
+  listenerId = "L09"
 })
 
 -- Additional command registration for QuestsList.Refresh (legacy support)

@@ -3,8 +3,8 @@
 ## Quick Links
 
 - **Getting Started**: [Installation](#-installation) | [Basic Usage](#-basic-usage)
-- **Developers**: [Dev Guide](Dev/README.md) | [Documentation Structure](#-documentation-1)
-- **Support**: [Troubleshooting](#-troubleshooting) | [GitHub Issues](https://github.com/FSuhas/AutoLFM/issues/44)
+- **Developers**: [Dev Guide](Dev/README.md)
+- **Support**: [Troubleshooting](#-troubleshooting) | [GitHub Issues](https://github.com/FSuhas/AutoLFM/issues)
 
 ---
 

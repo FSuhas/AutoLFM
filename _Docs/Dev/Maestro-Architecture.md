@@ -320,4 +320,4 @@ EmitEvent("DataRequested")
 
 **The command bus ensures predictable, testable, and maintainable code by enforcing clear separation between data (State), actions (Commands), and reactions (Events/Listeners).**
 
-[← Back to README](../README.md)
+[← Back to Developer Guide](README.md)

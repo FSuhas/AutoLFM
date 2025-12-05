@@ -9,10 +9,10 @@ AutoLFM.UI = AutoLFM.UI or {}
 
 --=============================================================================
 -- PRIVATE: Content Panel ID Registry
---   Auto-assigns Init Handler IDs to content panels (I28+)
+--   Auto-assigns Init Handler IDs to content panels (I25+)
 --=============================================================================
 
-local nextContentPanelId = 28  -- Next available ID for content panels
+local nextContentPanelId = 25  -- Next available ID for content panels
 
 --=============================================================================
 -- ContentPanel Factory

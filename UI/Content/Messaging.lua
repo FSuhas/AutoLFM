@@ -929,7 +929,7 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
     function()
       AutoLFM.UI.Content.Messaging.RefreshChannelCheckboxes()
     end,
-    { id = "L08" }
+    { id = "L07" }
   )
 
   --- Listens to Selection.Changed to refresh editbox content and group size
@@ -958,7 +958,7 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
         groupSizeControlEditBox:SetText(tostring(groupSize))
       end
     end,
-    { id = "L11" }
+    { id = "L10" }
   )
 
   --- Listens to Broadcaster state changes to update UI

@@ -354,7 +354,7 @@ AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
     "Broadcaster.OnGroupSizeChanged",
     "Group.SizeChanged",
     onGroupChange,
-    { id = "L05" }
+    { id = "L04" }
   )
 
   local savedInterval = AutoLFM.Core.Storage.GetBroadcastInterval()

@@ -320,7 +320,7 @@ AutoLFM.Core.SafeRegisterInit("Logic.Message", function()
     function()
       AutoLFM.Logic.Message.RebuildMessage()
     end,
-    { id = "L02" }
+    { id = "L01" }
   )
 
   --- Rebuilds message when group size changes (for LF3M -> LF2M updates)
@@ -340,7 +340,7 @@ AutoLFM.Core.SafeRegisterInit("Logic.Message", function()
         end
       end
     end,
-    { id = "L03" }
+    { id = "L02" }
   )
 
   AutoLFM.Logic.Message.RebuildMessage()

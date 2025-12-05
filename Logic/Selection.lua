@@ -540,6 +540,6 @@ AutoLFM.Core.SafeRegisterInit("Logic.Selection", function()
     function()
       dungeonLookupCache = {}
     end,
-    { id = "L04" }
+    { id = "L03" }
   )
 end, { id = "I05" })

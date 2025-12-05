@@ -283,7 +283,7 @@ end
 -- PUBLIC API - REMOVED
 -----------------------------------------------------------------------------
 -- All public getters removed - use Maestro States directly:
---   GetState("Channels.ActiveChannels") → S11
+--   GetState("Channels.ActiveChannels") → S18
 -- To check if channel selected: iterate State and check presence
 
 --=============================================================================

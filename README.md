@@ -14,7 +14,6 @@ AutoLFM is a powerful World of Warcraft 1.12 (Vanilla) addon that automates the 
 ## 📖 Documentation
 - **Users**: [Installation & Usage Guide](_Docs/Installation-Usage.md) - How to install and use AutoLFM
 - **Developers**: [Developer Guide](_Docs/Dev/README.md) - Architecture, best practices, and component registry
-- **Doc Structure**: [Documentation Structure](_Docs/Dev/Documentation-Structure.md) - Overview of all docs and how they relate
 
 ## ✨ Features
 ### 🎯 Content Selection

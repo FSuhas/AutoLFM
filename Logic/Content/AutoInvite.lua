@@ -189,14 +189,14 @@ AutoLFM.Core.SafeRegisterInit("Logic.AutoInvite", function()
     "AutoInvite.OnWhisper",
     "Chat.WhisperReceived",
     handleWhisper,
-    { id = "L12" }
+    { id = "L11" }
   )
   
   AutoLFM.Core.Maestro.Listen(
     "AutoInvite.OnLeaderChanged",
     "Group.LeaderChanged",
     onLeaderChanged,
-    { id = "L13" }
+    { id = "L12" }
   )
 end, {
   id = "I16",

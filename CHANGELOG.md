@@ -1,3 +1,7 @@
+## [v3.3] 2025/12/05
+- Fix Maestro ID lists
+- Fix docs files
+
 ## [v3.2] 2025/12/05
 - Add quests links requirements
 - Reduce space in messaging content: no more scroll in details

@@ -418,7 +418,7 @@ AutoLFM.Core.SafeRegisterInit("UI.Content.Presets", function()
         AutoLFM.UI.Content.Presets.Refresh()
       end
     end,
-    { id = "L09" }
+    { id = "L08" }
   )
 end, {
   id = "I18",

@@ -23,7 +23,7 @@ Start with the [Developer Guide](Dev/README.md) for a quick introduction.
 |----------|---------|
 | [Dev/Maestro-Architecture.md](Dev/Maestro-Architecture.md) | Maestro command bus architecture and patterns |
 | [Dev/Best-Practices.md](Dev/Best-Practices.md) | Lua 5.0 coding standards and conventions |
-| [Dev/ID-System-Reference.md](Dev/ID-System-Reference.md) | **Registry & IDs** - All 97 Maestro IDs, state management, and component organization |
+| [Dev/ID-System-Reference.md](Dev/ID-System-Reference.md) | **Registry & IDs** - All 91 Maestro IDs, state management, and component organization |
 | [Dev/API.md](Dev/API.md) | Public API for external addon integration |
 
 ---
@@ -58,11 +58,11 @@ Start with the [Developer Guide](Dev/README.md) for a quick introduction.
 ```
 Commands:       C01 - C24  (24 commands, all used)
 Events:         E01 - E10  (10 events, all used)
-Listeners:      L01 - L13  (13 listeners, all used)
+Listeners:      L01 - L12  (12 listeners, all used)
 States:         S01 - S20  (20 states, all used)
-Init Handlers:  I01 - I30  (30 handlers: 27 static + 3 dynamic auto-assigned)
+Init Handlers:  I01 - I30  (26 handlers: 23 explicit + 3 auto-assigned)
 
-TOTAL: 97 unique IDs
+TOTAL: 91 unique IDs
 ```
 
 ### Core Data Flow
@@ -75,14 +75,12 @@ User Action → Command → State Change → Event → UI Update
 
 ## ✅ Verification Status
 
-**All 97 Maestro registry IDs have been verified and are:**
+**All 91 Maestro registry IDs have been verified and are:**
 - ✅ Correctly implemented in source code
 - ✅ Consistently documented
 - ✅ Organized by functional domain
 - ✅ Free of gaps, duplicates, or conflicts
 - ✅ All code examples use real, existing IDs
-
-For details, see [FINAL_VERIFICATION_SUMMARY.md](FINAL_VERIFICATION_SUMMARY.md)
 
 ---
 
@@ -129,7 +127,7 @@ For detailed instructions, see [Dev/ID-System-Reference.md#adding-new-components
 
 ## ❓ FAQ
 
-**Q: Where do I find all 97 IDs?**
+**Q: Where do I find all 91 IDs?**
 → [Dev/ID-System-Reference.md](Dev/ID-System-Reference.md) - Complete inventory, state management, and component organization
 
 **Q: What's the next available ID for a new command?**
@@ -145,18 +143,14 @@ For detailed instructions, see [Dev/ID-System-Reference.md#adding-new-components
 → [Dev/API.md](Dev/API.md) - Complete external addon integration documentation
 
 **Q: Are all IDs correct everywhere?**
-→ Yes - ✅ All 97 IDs verified in source code and documentation
+→ Yes - ✅ All 91 IDs verified in source code and documentation
 
 ---
 
 ## 🔗 Quick Links
 
 - **[Developer Guide](Dev/README.md)** - Start here
-- **[Registry & IDs](Dev/ID-System-Reference.md)** - All 97 IDs and state management
+- **[Registry & IDs](Dev/ID-System-Reference.md)** - All 91 IDs and state management
 - **[Architecture](Dev/Maestro-Architecture.md)** - System design
 - **[Best Practices](Dev/Best-Practices.md)** - Coding standards
 - **[Public API](Dev/API.md)** - External integration
-
----
-
-**Last Updated:** 2025-11-30 ✅ All systems verified and consistent

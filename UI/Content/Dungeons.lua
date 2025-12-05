@@ -99,5 +99,5 @@ AutoLFM.UI.Content.Dungeons = AutoLFM.UI.CreateContentPanel({
   clearCacheFunc = AutoLFM.Logic.Content.Dungeons.ClearCache,
   listeningEvent = "Selection.Changed",
   listenerDependencies = { "Logic.Selection" },
-  listenerId = "L06"
+  listenerId = "L05"
 })

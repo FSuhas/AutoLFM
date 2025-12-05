@@ -8,8 +8,9 @@ This guide provides entry points to AutoLFM's development documentation:
 |----------|----------|
 | [**Maestro-Architecture.md**](Maestro-Architecture.md) | Complete guide to the Maestro command bus architecture |
 | [**Best-Practices.md**](Best-Practices.md) | Lua 5.0 compatibility and development standards |
-| [**ID-System-Reference.md**](ID-System-Reference.md) | **Registry & IDs** - All 97 IDs, state management, and component organization |
+| [**ID-System-Reference.md**](ID-System-Reference.md) | **Registry & IDs** - All 91 IDs, state management, and component organization |
 | [**API.md**](API.md) | Public API for external addon integration |
+| [**README.md**](../README.md) | Main documentation hub |
 
 ## 🚀 Quick Start
 
@@ -20,7 +21,7 @@ Read [**Maestro-Architecture.md**](Maestro-Architecture.md) to understand the co
 Read [**Best-Practices.md**](Best-Practices.md) for Lua 5.0 compatibility rules and development guidelines.
 
 ### 3. Component Management & State
-Read [**ID-System-Reference.md**](ID-System-Reference.md) to understand component organization, state management patterns, and all 97 IDs.
+Read [**ID-System-Reference.md**](ID-System-Reference.md) to understand component organization, state management patterns, and all 91 IDs.
 
 ### 4. External Integration
 Check [**API.md**](API.md) for the public API documentation to integrate AutoLFM with other addons.
