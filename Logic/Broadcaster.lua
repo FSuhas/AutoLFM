@@ -96,6 +96,21 @@ local function sendToChannel(channelName, message)
   end
 end
 
+--- Sends a message to the General channel (/1)
+--- Uses channel index 1 directly since General has zone-specific names
+--- @param message string - The message to send
+local function sendToGeneralChannel(message)
+  local channelID, channelName = GetChannelName(1)
+  if channelID and channelID > 0 then
+    SendChatMessage(message, "CHANNEL", nil, channelID)
+    AutoLFM.Core.Utils.LogAction("Broadcast to General (" .. (channelName or "1") .. "): " .. message)
+    return true
+  else
+    AutoLFM.Core.Utils.LogWarning("Not in General channel")
+    return false
+  end
+end
+
 --- Sends a message to the Hardcore channel (special handling)
 --- @param message string - The message to send
 local function sendToHardcoreChannel(message)
@@ -136,6 +151,8 @@ local function broadcastMessage()
       local channelName = channels[i]
       if channelName == "Hardcore" then
         sendToHardcoreChannel(message)
+      elseif channelName == "General" then
+        sendToGeneralChannel(message)
       else
         sendToChannel(channelName, message)
       end

@@ -1,3 +1,8 @@
+## [v3.4] 2025/12/05
+- Add General channel
+- Move interval slider in settings (add state info)
+- Fix alignment messaging details/custom
+
 ## [v3.3] 2025/12/05
 - Fix Maestro ID lists
 - Fix docs files

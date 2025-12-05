@@ -364,6 +364,42 @@ function AutoLFM.UI.Content.Settings.OnPresetsRadioClick(isCondensed)
 end
 
 -----------------------------------------------------------------------------
+-- Event Handlers - Broadcast Interval Slider
+-----------------------------------------------------------------------------
+--- Handles broadcast interval slider value changes
+--- Updates both the display label and saves the value to Broadcaster
+--- @param slider frame - The broadcast interval slider
+function AutoLFM.UI.Content.Settings.OnBroadcastIntervalSliderChanged(slider)
+  if isRestoringState then return end
+
+  local value = math.floor(slider:GetValue())
+
+  -- Update display label (inside SliderValueFrame)
+  local container = slider:GetParent()
+  local valueLabel = container and getglobal(container:GetName() .. "_SliderValueFrame_Text")
+  if valueLabel then
+    valueLabel:SetText(value .. " secs")
+  end
+
+  -- Save to Broadcaster (which will save to persistent storage)
+  if AutoLFM.Logic and AutoLFM.Logic.Broadcaster and AutoLFM.Logic.Broadcaster.SetInterval then
+    AutoLFM.Logic.Broadcaster.SetInterval(value)
+  end
+end
+
+--- Handles broadcast interval slider mousewheel scrolling
+--- @param slider frame - The broadcast interval slider
+--- @param delta number - Mouse wheel direction (positive = scroll up, negative = scroll down)
+function AutoLFM.UI.Content.Settings.OnBroadcastIntervalSliderMouseWheel(slider, delta)
+  local value = slider:GetValue()
+  local step = delta > 0 and 10 or -10
+  local min = AutoLFM.Core.Constants.MIN_BROADCAST_INTERVAL or 30
+  local max = AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL or 120
+  local newValue = math.max(min, math.min(max, value + step))
+  slider:SetValue(newValue)
+end
+
+-----------------------------------------------------------------------------
 -- Event Handlers - Bottom Checkboxes
 -----------------------------------------------------------------------------
 --- Handles dry run checkbox toggle - enables/disables message simulation mode
@@ -482,6 +518,17 @@ function AutoLFM.UI.Content.Settings.RestoreState()
           local displayName = string.upper(string.sub(defaultPanel, 1, 1)) .. string.sub(defaultPanel, 2)
           UIDropDownMenu_SetSelectedValue(defaultPanelDropdown, displayName)
           UIDropDownMenu_SetText(displayName, defaultPanelDropdown)
+      end
+
+      -- Restore broadcast interval slider
+      local broadcastIntervalSlider = getglobal(scrollChild:GetName().."_BroadcastIntervalContainer_Slider")
+      if broadcastIntervalSlider and AutoLFM.Core.Maestro then
+        local interval = AutoLFM.Core.Maestro.GetState("Broadcaster.Interval") or 60
+        broadcastIntervalSlider:SetValue(interval)
+        local valueLabel = getglobal(scrollChild:GetName() .. "_BroadcastIntervalContainer_SliderValueFrame_Text")
+        if valueLabel then
+          valueLabel:SetText(interval .. " secs")
+        end
       end
 
       -- Restore dry run

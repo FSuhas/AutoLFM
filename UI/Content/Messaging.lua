@@ -17,9 +17,6 @@ local EDITBOX_SPACING = 3
 local GROUP_SIZE_MIN = 2
 local GROUP_SIZE_MAX = 40
 local GROUP_SIZE_DEFAULT = 5
-local BROADCAST_INTERVAL_MIN = 30
-local BROADCAST_INTERVAL_MAX = 120
-local BROADCAST_INTERVAL_STEP = 10
 local MODE_DETAILS = "details"
 local MODE_CUSTOM = "custom"
 local PLACEHOLDER_DETAILS = "Shift+Click to add links or items"
@@ -34,8 +31,6 @@ local uiFrame
 local customMessageEditBox
 local customMessagePlaceholder
 local customMessageContainer
-local broadcastIntervalSlider
-local broadcastIntervalValue
 local detailsRadio
 local customRadio
 local customMessageLabel
@@ -258,8 +253,6 @@ end
 --- Caches references to all Messaging panel UI elements for quick access
 --- Retrieves and stores references to sliders, icons, radios, editboxes, and labels
 local function initializeUIReferences()
-  broadcastIntervalSlider = getUIElement("AutoLFM_Content_Messaging_BroadcastIntervalSlider")
-  broadcastIntervalValue = getUIElement("AutoLFM_Content_Messaging_BroadcastIntervalSlider_Value")
   usageIcon = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_UsageIcon")
   usageIconTexture = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_UsageIcon_Texture")
   usageIconHighlight = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_UsageIcon_Highlight")
@@ -276,24 +269,6 @@ local function initializeUIReferences()
   customMessageEditBox = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer_EditBox")
   customMessagePlaceholder = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer_Placeholder")
   customMessageContainer = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_EditBoxContainer")
-end
-
---- Initializes the broadcast interval slider with mousewheel support
---- Hides default labels and configures mousewheel scrolling with min/max bounds
---- Loads the saved interval value from state
-local function setupBroadcastIntervalSlider()
-  hideSliderLabels(broadcastIntervalSlider)
-  setupSliderMouseWheel(broadcastIntervalSlider, BROADCAST_INTERVAL_STEP, BROADCAST_INTERVAL_MIN, BROADCAST_INTERVAL_MAX)
-
-  -- Load interval value from state (already loaded by Broadcaster init)
-  if broadcastIntervalSlider and AutoLFM.Core.Maestro then
-    local interval = AutoLFM.Core.Maestro.GetState("Broadcaster.Interval") or 60
-    broadcastIntervalSlider:SetValue(interval)
-    -- Update the display label
-    if broadcastIntervalValue then
-      broadcastIntervalValue:SetText(interval .. " secs")
-    end
-  end
 end
 
 --- Sets up group size slider and editbox with default values and positioning
@@ -322,24 +297,13 @@ end
 local function updateScrollChildHeight()
   local scrollChild = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild")
   if not scrollChild then return end
-  
-  local totalHeight = 0
-  
-  -- Measure actual positions of elements
-  local intervalSlider = getUIElement("AutoLFM_Content_Messaging_BroadcastIntervalSlider")
-  if intervalSlider then
-    local _, _, _, _, bottom = intervalSlider:GetPoint(1)
-    totalHeight = math.abs(bottom) + 30  -- Add margin
-  else
-    -- Fallback calculation
-    totalHeight = 240
-    if groupSizeControl and groupSizeControl:IsShown() then
-      totalHeight = totalHeight + 30
-    end
-  end
-  
+
+  -- Fixed height: ChannelsIcon at y=-150, 4 checkboxes (~84px) + padding
+  -- Total: 150 + 84 + 15 = 249
+  local totalHeight = 249
+
   scrollChild:SetHeight(totalHeight)
-  
+
   -- Force scroll frame update like in Dungeons
   AutoLFM.UI.RowList.UpdateScrollFrame(scrollChild)
 end
@@ -354,9 +318,9 @@ local function applyLabelColors()
   applyWhiteColor("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_GroupSizeControl_Label")
   applyWhiteColor("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_ChannelsIcon_Label")
   applyWhiteColor("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_ChannelsIcon_StatsTitle")
-  applyWhiteColor("AutoLFM_Content_Messaging_BroadcastIntervalSlider_Label")
 
   -- Stats labels in white
+  applyWhiteColor("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_General_IntervalLabel")
   applyWhiteColor("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_World_DurationLabel")
   applyWhiteColor("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_LookingForGroup_SentLabel")
   applyWhiteColor("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_Hardcore_NextLabel")
@@ -374,23 +338,37 @@ local function setFrameVisibility(frame, visible)
   end
 end
 
---- Repositions the channels icon based on broadcast mode
---- In Details mode: anchors below editbox
---- In Custom mode: anchors below group size control
+-- Constants for editbox heights
+local EDITBOX_HEIGHT_DETAILS = 83
+local EDITBOX_HEIGHT_CUSTOM = 63
+
+--- Resizes the editbox container based on broadcast mode
+--- In Custom mode: smaller to leave room for GroupSize control
 --- @param isCustomMode boolean - True for Custom mode, false for Details mode
-local function repositionChannelsIcon(isCustomMode)
+local function resizeEditBoxContainer(isCustomMode)
+  if not customMessageContainer then return end
+
+  local newHeight = isCustomMode and EDITBOX_HEIGHT_CUSTOM or EDITBOX_HEIGHT_DETAILS
+  customMessageContainer:SetHeight(newHeight)
+
+  -- Also resize the inner editbox
+  if customMessageEditBox then
+    customMessageEditBox:SetHeight(newHeight)
+  end
+end
+
+--- Positions the channels icon at a fixed location
+--- Always at the same Y position regardless of mode
+--- Calculation: EditBox(y=-58, h=63) + gap(3) + GroupSize(h=20) + gap(6) = y=-150
+local function positionChannelsIcon()
   local channelsIcon = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_ChannelsIcon")
   if not channelsIcon then return end
 
   channelsIcon:ClearAllPoints()
-  if isCustomMode and groupSizeControl then
-    -- Custom mode: anchor below group size control
-    channelsIcon:SetPoint("TOPLEFT", groupSizeControl, "BOTTOMLEFT", 0, -10)
-  else
-    -- Details mode: anchor below editbox container with reduced spacing
-    if customMessageContainer then
-      channelsIcon:SetPoint("TOPLEFT", customMessageContainer, "BOTTOMLEFT", 0, -5)
-    end
+  -- Fixed position: below the GroupSizeControl area
+  local scrollChild = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild")
+  if scrollChild then
+    channelsIcon:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 5, -150)
   end
 end
 
@@ -446,8 +424,8 @@ local function updateModeUI(isCustomMode, clearOnModeSwitch)
   setFrameVisibility(varMButton, isCustomMode)
   setFrameVisibility(groupSizeControl, isCustomMode)
 
-  -- Reposition channels icon based on mode
-  repositionChannelsIcon(isCustomMode)
+  -- Resize editbox based on mode (smaller in custom to leave room for GroupSize)
+  resizeEditBoxContainer(isCustomMode)
 
   -- Update scroll after visibility changes
   updateScrollChildHeight()
@@ -490,7 +468,6 @@ end
 function AutoLFM.UI.Content.Messaging.OnLoad(frame)
   uiFrame = frame
   initializeUIReferences()
-  setupBroadcastIntervalSlider()
   setupGroupSizeControls()
   setRadioButtonStates(MODE_DETAILS)
   if customMessageLabel then
@@ -503,7 +480,7 @@ function AutoLFM.UI.Content.Messaging.OnLoad(frame)
   end
 
   -- Initial positioning of channels icon (Details mode)
-  repositionChannelsIcon(false)
+  positionChannelsIcon()
 
   applyLabelColors()
   updateScrollChildHeight()
@@ -533,15 +510,6 @@ function AutoLFM.UI.Content.Messaging.OnShow(frame)
 
   -- Sync channel checkboxes with saved state
   AutoLFM.UI.Content.Messaging.RefreshChannelCheckboxes()
-
-  -- Refresh broadcast interval slider from state
-  if broadcastIntervalSlider and AutoLFM.Core.Maestro then
-    local interval = AutoLFM.Core.Maestro.GetState("Broadcaster.Interval") or 60
-    broadcastIntervalSlider:SetValue(interval)
-    if broadcastIntervalValue then
-      broadcastIntervalValue:SetText(interval .. " secs")
-    end
-  end
 end
 
 --=============================================================================
@@ -576,23 +544,6 @@ function AutoLFM.UI.Content.Messaging.OnEditBoxTextChanged(editBox)
   end
 end
 
---- Handles broadcast interval slider value changes
---- Updates both the display label and saves the value to Broadcaster
---- @param slider frame - The broadcast interval slider
-function AutoLFM.UI.Content.Messaging.OnBroadcastIntervalSliderChanged(slider)
-  local value = math.floor(slider:GetValue())
-
-  -- Update display label
-  if broadcastIntervalValue then
-    broadcastIntervalValue:SetText(value .. " secs")
-  end
-
-  -- Save to Broadcaster (which will save to persistent storage)
-  if AutoLFM.Logic and AutoLFM.Logic.Broadcaster and AutoLFM.Logic.Broadcaster.SetInterval then
-    AutoLFM.Logic.Broadcaster.SetInterval(value)
-  end
-end
-
 --- Handles broadcast mode radio button clicks (Details/Custom)
 --- Updates session mode (does NOT save to persistent storage during session)
 --- @param mode string - The selected mode ("details" or "custom")
@@ -612,7 +563,7 @@ function AutoLFM.UI.Content.Messaging.UpdateModeDisplay(clearOnModeSwitch)
   local isCustomMode = (currentMode == MODE_CUSTOM)
 
   updateModeUI(isCustomMode, clearOnModeSwitch)
-  repositionChannelsIcon(isCustomMode)
+  -- Channels icon is at fixed position, no need to reposition
   updatePlaceholder()  -- Update placeholder visibility when mode changes
 end
 
@@ -790,11 +741,15 @@ end
 --- Refreshes channel checkboxes to match current selection state
 function AutoLFM.UI.Content.Messaging.RefreshChannelCheckboxes()
   -- Get channel checkboxes
+  local GeneralCheckbox = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_General")
   local WorldCheckbox = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_World")
   local LookingForGroupCheckbox = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_LookingForGroup")
   local hardcoreCheckbox = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_Hardcore")
 
   -- Sync checkbox states with Maestro State
+  if GeneralCheckbox then
+    GeneralCheckbox:SetChecked(isChannelSelected("General"))
+  end
   if WorldCheckbox then
     WorldCheckbox:SetChecked(isChannelSelected("World"))
   end
@@ -843,11 +798,18 @@ function AutoLFM.UI.Content.Messaging.UpdateStats()
   local messagesSent = AutoLFM.Core.Maestro.GetState("Broadcaster.MessagesSent") or 0
   local sessionStartTime = AutoLFM.Core.Maestro.GetState("Broadcaster.SessionStartTime") or 0
   local timeRemaining = AutoLFM.Core.Maestro.GetState("Broadcaster.TimeRemaining") or 0
+  local interval = AutoLFM.Core.Maestro.GetState("Broadcaster.Interval") or 60
 
   -- Get UI elements
+  local intervalValue = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_General_IntervalValue")
   local durationValue = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_World_DurationValue")
   local sentValue = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_LookingForGroup_SentValue")
   local nextValue = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_Hardcore_NextValue")
+
+  -- Update Interval (from settings)
+  if intervalValue then
+    intervalValue:SetText(tostring(interval) .. "s")
+  end
 
   -- Update Duration (session time)
   if durationValue then
@@ -969,6 +931,14 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
       stopStatsUpdateTimer()
       -- Update stats one last time when stopping
       AutoLFM.UI.Content.Messaging.UpdateStats()
+    end
+  end)
+
+  --- Listens to Broadcaster.Interval changes to update Interval stat immediately
+  AutoLFM.Core.Maestro.SubscribeState("Broadcaster.Interval", function(newValue, oldValue)
+    local intervalValue = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_General_IntervalValue")
+    if intervalValue then
+      intervalValue:SetText(tostring(newValue or 60) .. "s")
     end
   end)
 

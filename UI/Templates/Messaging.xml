@@ -630,7 +630,8 @@
                 </Layers>
               </Frame>
               <!-- Channel Checkboxes -->
-              <CheckButton name="$parent_World" inherits="UICheckButtonTemplate">
+              <!-- General Channel (first) -->
+              <CheckButton name="$parent_General" inherits="UICheckButtonTemplate">
                 <Size>
                   <AbsDimension x="20" y="20"/>
                 </Size>
@@ -638,6 +639,78 @@
                   <Anchor point="TOPLEFT" relativeTo="$parent_ChannelsIcon" relativePoint="BOTTOMLEFT">
                     <Offset>
                       <AbsDimension x="10" y="-2"/>
+                    </Offset>
+                  </Anchor>
+                </Anchors>
+                <Layers>
+                  <Layer level="ARTWORK">
+                    <FontString name="$parent_Label" inherits="GameFontNormal" text="General">
+                      <Anchors>
+                        <Anchor point="LEFT" relativePoint="RIGHT">
+                          <Offset>
+                            <AbsDimension x="2" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                  <Layer level="OVERLAY">
+                    <!-- Interval Icon -->
+                    <Texture name="$parent_IntervalIcon" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\Interval">
+                      <Size>
+                        <AbsDimension x="14" y="14"/>
+                      </Size>
+                      <Anchors>
+                        <Anchor point="LEFT" relativeTo="AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_ChannelsIcon_StatsTitle" relativePoint="LEFT">
+                          <Offset>
+                            <AbsDimension x="-6" y="0"/>
+                          </Offset>
+                        </Anchor>
+                        <Anchor point="TOP" relativeTo="$parent_Label" relativePoint="TOP">
+                          <Offset>
+                            <AbsDimension x="0" y="2"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </Texture>
+                    <!-- Interval Label -->
+                    <FontString name="$parent_IntervalLabel" inherits="GameFontNormal" text="Interval:" justifyH="LEFT">
+                      <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parent_IntervalIcon" relativePoint="RIGHT">
+                          <Offset>
+                            <AbsDimension x="3" y="0"/>
+                          </Offset>
+                        </Anchor>
+                        <Anchor point="TOP" relativeTo="$parent_Label" relativePoint="TOP"/>
+                      </Anchors>
+                    </FontString>
+                    <!-- Interval Value -->
+                    <FontString name="$parent_IntervalValue" inherits="GameFontNormal" text="60s" justifyH="LEFT">
+                      <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parent_IntervalLabel" relativePoint="RIGHT">
+                          <Offset>
+                            <AbsDimension x="5" y="0"/>
+                          </Offset>
+                        </Anchor>
+                      </Anchors>
+                    </FontString>
+                  </Layer>
+                </Layers>
+                <Scripts>
+                  <OnClick>
+                    AutoLFM.UI.Content.Messaging.OnChannelCheckboxClick("General")
+                  </OnClick>
+                </Scripts>
+              </CheckButton>
+              <!-- World Channel -->
+              <CheckButton name="$parent_World" inherits="UICheckButtonTemplate">
+                <Size>
+                  <AbsDimension x="20" y="20"/>
+                </Size>
+                <Anchors>
+                  <Anchor point="TOPLEFT" relativeTo="$parent_General" relativePoint="BOTTOMLEFT">
+                    <Offset>
+                      <AbsDimension x="0" y="-1"/>
                     </Offset>
                   </Anchor>
                 </Anchors>
@@ -843,98 +916,6 @@
                   </OnClick>
                 </Scripts>
               </CheckButton>
-              <!-- Broadcast Interval Icon -->
-              <Frame name="$parent_IntervalIcon">
-                <Size>
-                  <AbsDimension x="20" y="20"/>
-                </Size>
-                <Anchors>
-                  <Anchor point="TOPLEFT" relativeTo="$parent_Hardcore" relativePoint="BOTTOMLEFT">
-                    <Offset>
-                      <AbsDimension x="-10" y="-8"/>
-                    </Offset>
-                  </Anchor>
-                </Anchors>
-                <Layers>
-                  <Layer level="ARTWORK">
-                    <Texture name="$parent_Texture" file="Interface\AddOns\AutoLFM\UI\Textures\Icons\Interval">
-                      <Size>
-                        <AbsDimension x="16" y="16"/>
-                      </Size>
-                      <Anchors>
-                        <Anchor point="CENTER"/>
-                      </Anchors>
-                    </Texture>
-                  </Layer>
-                </Layers>
-              </Frame>
-              <!-- Broadcast Interval Slider -->
-              <Slider name="AutoLFM_Content_Messaging_BroadcastIntervalSlider" minValue="30" maxValue="120" valueStep="10" defaultValue="60" orientation="HORIZONTAL">
-                <Size>
-                  <AbsDimension x="80" y="17"/>
-                </Size>
-                <Anchors>
-                  <Anchor point="LEFT" relativeTo="$parent_IntervalIcon" relativePoint="RIGHT">
-                    <Offset>
-                      <AbsDimension x="60" y="0"/>
-                    </Offset>
-                  </Anchor>
-                  <Anchor point="RIGHT" relativeTo="AutoLFM_Content_Messaging_ScrollFrame_ScrollChild" relativePoint="RIGHT">
-                    <Offset>
-                      <AbsDimension x="-65" y="0"/>
-                    </Offset>
-                  </Anchor>
-                </Anchors>
-                <Backdrop bgFile="Interface\AddOns\AutoLFM\UI\Textures\SliderBackground" edgeFile="Interface\AddOns\AutoLFM\UI\Textures\SliderBorder" tile="true">
-                  <BackgroundInsets>
-                    <AbsInset left="3" right="3" top="6" bottom="6"/>
-                  </BackgroundInsets>
-                  <TileSize>
-                    <AbsValue val="8"/>
-                  </TileSize>
-                  <EdgeSize>
-                    <AbsValue val="8"/>
-                  </EdgeSize>
-                </Backdrop>
-                <ThumbTexture file="Interface\AddOns\AutoLFM\UI\Textures\SliderButton"/>
-                <Scripts>
-                  <OnLoad>
-                    this:EnableMouseWheel(true)
-                  </OnLoad>
-                  <OnValueChanged>
-                    AutoLFM.UI.Content.Messaging.OnBroadcastIntervalSliderChanged(this)
-                  </OnValueChanged>
-                </Scripts>
-                <Layers>
-                  <Layer level="OVERLAY">
-                    <!-- Interval Label -->
-                    <FontString name="$parent_Label" inherits="GameFontNormal" text="Interval:">
-                      <Anchors>
-                        <Anchor point="RIGHT" relativePoint="LEFT">
-                          <Offset>
-                            <AbsDimension x="-10" y="0"/>
-                          </Offset>
-                        </Anchor>
-                      </Anchors>
-                    </FontString>
-                    <!-- Interval Value -->
-                    <FontString name="$parent_Value" inherits="GameFontNormal" text="60 secs" justifyH="RIGHT">
-                      <Anchors>
-                        <Anchor point="RIGHT" relativeTo="AutoLFM_Content_Messaging_ScrollFrame_ScrollChild" relativePoint="RIGHT">
-                          <Offset>
-                            <AbsDimension x="-10" y="0"/>
-                          </Offset>
-                        </Anchor>
-                        <Anchor point="TOP" relativePoint="TOP">
-                          <Offset>
-                            <AbsDimension x="0" y="-2"/>
-                          </Offset>
-                        </Anchor>
-                      </Anchors>
-                    </FontString>
-                  </Layer>
-                </Layers>
-              </Slider>
             </Frames>
           </Frame>
         </ScrollChild>

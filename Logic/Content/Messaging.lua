@@ -192,6 +192,24 @@ function AutoLFM.Logic.Content.Messaging.JoinChannel(channelName)
     return false
   end
 
+  -- General channel is auto-joined per zone, no need to join manually
+  if channelName == "General" then
+    -- Check if we're in the General channel (slot 1)
+    -- GetChannelName returns: id, name (id first!)
+    local generalID, generalName = GetChannelName(1)
+    if generalID and generalID > 0 then
+      if AutoLFM.Core and AutoLFM.Core.Utils then
+        AutoLFM.Core.Utils.LogInfo("General channel available: " .. (generalName or "1"))
+      end
+      return true
+    else
+      if AutoLFM.Core and AutoLFM.Core.Utils then
+        AutoLFM.Core.Utils.LogWarning("General channel not available in this zone")
+      end
+      return false
+    end
+  end
+
   -- GetChannelName returns channelID (> 0) if in channel, 0 if not
   local channelID = GetChannelName(channelName)
 

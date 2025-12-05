@@ -182,7 +182,7 @@ Init Handlers run during addon initialization with dependency resolution. Static
 | I07 | Logic.Group | Core.Events | Group tracking |
 | I08 | Logic.Message | Logic.Selection, Logic.Group | Message builder |
 | I09 | Logic.Broadcaster | Logic.Message | Broadcaster system |
-| I10 | Logic.Content.Messaging | Core.Events | Channel management |
+| I10 | Logic.Content.Messaging | Core.Storage | Channel management |
 
 ### Content & Settings (I11-I18)
 | ID | Module | Dependencies | Purpose |

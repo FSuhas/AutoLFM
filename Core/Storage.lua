@@ -31,8 +31,8 @@ end
 -- Settings Registry
 -----------------------------------------------------------------------------
 local SETTINGS_REGISTRY = {
-  {key = "isHardcore", type = "boolean", default = nil},
   {key = "dungeonFilters", type = "table", default = {GRAY = true, GREEN = true, YELLOW = true, ORANGE = true, RED = true}},
+  {key = "broadcastInterval", type = "number", default = 60},
   {key = "minimapHidden", type = "boolean", default = false},
   {key = "minimapPos", type = "table", default = nil},
   {key = "darkMode", type = "boolean", default = nil},
@@ -42,13 +42,13 @@ local SETTINGS_REGISTRY = {
   {key = "defaultPanel", type = "string", default = "dungeons"},
   {key = "dryRun", type = "boolean", default = false},
   {key = "selectedChannels", type = "table", default = {}},
-  {key = "broadcastInterval", type = "number", default = 60},
-  {key = "welcomeShown", type = "boolean", default = false},
   {key = "autoInviteEnabled", type = "boolean", default = false},
   {key = "autoInviteKeywords", type = "table", default = {"+1"}},
   {key = "autoInviteConfirm", type = "boolean", default = true},
   {key = "autoInviteRandomMessages", type = "boolean", default = true},
-  {key = "autoInviteRespondWhenNotLeader", type = "boolean", default = false}
+  {key = "autoInviteRespondWhenNotLeader", type = "boolean", default = false},
+  {key = "isHardcore", type = "boolean", default = nil},
+  {key = "welcomeShown", type = "boolean", default = false}
 }
 
 -----------------------------------------------------------------------------

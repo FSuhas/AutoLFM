@@ -150,6 +150,97 @@
         </Frames>
       </Frame>
       <!--==================================================================
+        Broadcast Interval
+        ==================================================================-->
+      <Frame name="$parent_BroadcastIntervalContainer">
+        <Size>
+          <AbsDimension x="320" y="24"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="5" y="-32"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Header" inherits="GameFontNormal" text="Repeat interval:" justifyH="LEFT">
+              <Color r="1" g="1" b="1"/>
+              <Size>
+                <AbsDimension x="120" y="24"/>
+              </Size>
+              <Anchors>
+                <Anchor point="TOPLEFT">
+                  <Offset>
+                    <AbsDimension x="0" y="0"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Frames>
+          <Slider name="$parent_Slider" minValue="30" maxValue="120" valueStep="10" defaultValue="60" orientation="HORIZONTAL">
+            <Size>
+              <AbsDimension x="120" y="17"/>
+            </Size>
+            <Anchors>
+              <Anchor point="LEFT" relativeTo="$parent_Header" relativePoint="RIGHT">
+                <Offset>
+                  <AbsDimension x="-12" y="0"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+            <Backdrop bgFile="Interface\AddOns\AutoLFM\UI\Textures\SliderBackground" edgeFile="Interface\AddOns\AutoLFM\UI\Textures\SliderBorder" tile="true">
+              <BackgroundInsets>
+                <AbsInset left="3" right="3" top="6" bottom="6"/>
+              </BackgroundInsets>
+              <TileSize>
+                <AbsValue val="8"/>
+              </TileSize>
+              <EdgeSize>
+                <AbsValue val="8"/>
+              </EdgeSize>
+            </Backdrop>
+            <ThumbTexture file="Interface\AddOns\AutoLFM\UI\Textures\SliderButton"/>
+            <Scripts>
+              <OnLoad>
+                this:EnableMouseWheel(true)
+              </OnLoad>
+              <OnValueChanged>
+                AutoLFM.UI.Content.Settings.OnBroadcastIntervalSliderChanged(this)
+              </OnValueChanged>
+              <OnMouseWheel>
+                AutoLFM.UI.Content.Settings.OnBroadcastIntervalSliderMouseWheel(this, arg1)
+              </OnMouseWheel>
+            </Scripts>
+          </Slider>
+          <!-- Value display aligned with Reset/Reload buttons -->
+          <Frame name="$parent_SliderValueFrame">
+            <Size>
+              <AbsDimension x="60" y="24"/>
+            </Size>
+            <Anchors>
+              <Anchor point="LEFT" relativeTo="$parent">
+                <Offset>
+                  <AbsDimension x="235" y="0"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+            <Layers>
+              <Layer level="OVERLAY">
+                <FontString name="$parent_Text" inherits="GameFontNormal" text="60 secs" justifyH="LEFT">
+                  <Anchors>
+                    <Anchor point="LEFT"/>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
+          </Frame>
+        </Frames>
+      </Frame>
+      <!--==================================================================
         Minimap Button
         ==================================================================-->
       <Frame name="$parent_MinimapContainer">
@@ -159,7 +250,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="5" y="-35"/>
+              <AbsDimension x="5" y="-59"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -283,7 +374,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="5" y="-65"/>
+              <AbsDimension x="5" y="-86"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -407,7 +498,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="5" y="-95"/>
+              <AbsDimension x="5" y="-113"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -509,7 +600,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="5" y="-125"/>
+              <AbsDimension x="5" y="-140"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -611,7 +702,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="5" y="-155"/>
+              <AbsDimension x="5" y="-167"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -713,7 +804,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="5" y="-185"/>
+              <AbsDimension x="5" y="-194"/>
             </Offset>
           </Anchor>
         </Anchors>
