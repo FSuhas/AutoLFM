@@ -210,4 +210,4 @@ AutoLFM.Core.SafeRegisterInit("MainFrame", function()
       AutoLFM.UI.MainFrame.UpdateMessagePreview(newMessage)
     end
   end)
-end, { id = "I23" })
+end, { id = "I22" })

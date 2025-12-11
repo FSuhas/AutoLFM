@@ -93,9 +93,6 @@ AutoLFM.Core.Constants.GREEN_DIFFICULTY_THRESHOLD_BY_LEVEL_BRACKET = {
   [5] = 8   -- Level 40+:   GREEN if dungeon_level < (player_level - 8)
 }
 
--- Legacy name for backward compatibility (deprecated, use GREEN_DIFFICULTY_THRESHOLD_BY_LEVEL_BRACKET)
-AutoLFM.Core.Constants.GREEN_THRESHOLDS = AutoLFM.Core.Constants.GREEN_DIFFICULTY_THRESHOLD_BY_LEVEL_BRACKET
-
 -- DIFFICULTY_RED_THRESHOLD: Dungeon appears RED if its min level is 5+ above player level
 -- RED = Too hard, likely to wipe (5+ levels above player)
 -- Fixed threshold (not level-dependent) because risk scales linearly at all levels
@@ -230,9 +227,9 @@ AutoLFM.Core.Constants.SCROLL_PADDING = 10
 --=============================================================================
 -- UI CONSTANTS (Additional)
 --=============================================================================
--- SOUND_DIRECTORY: File path to broadcast notification sound
--- Used when playing sound effect on message sending (feature-gated)
-AutoLFM.Core.Constants.SOUND_DIRECTORY = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\"
+-- SOUND_PATH: File path to broadcast notification sounds
+-- Used when playing sound effects on broadcast start/stop/full
+AutoLFM.Core.Constants.SOUND_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\"
 
 --=============================================================================
 -- LOOKUP TABLES (built on-demand by Core/Utils.lua lazy loading)

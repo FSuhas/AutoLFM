@@ -206,7 +206,7 @@ end
 -- Event Declarations
 -----------------------------------------------------------------------------
 --- Event: Settings changed
-AutoLFM.Core.Maestro.RegisterEvent("Settings.Changed", { id = "E08" })
+AutoLFM.Core.Maestro.RegisterEvent("Settings.Changed", { id = "E07" })
 
 -----------------------------------------------------------------------------
 -- State Declarations

@@ -68,13 +68,14 @@ local function formatLogLine(category, message)
   return timestamp .. " " .. coloredCategory .. " " .. message
 end
 
---- Adds a log line to the buffer (max 500 lines)
+--- Adds a log line to the buffer (max DEBUG_BUFFER_MAX_LINES lines)
 --- @param line string - Formatted log line to add
 local function addToBuffer(line)
   table.insert(logBuffer, line)
-  
-  -- Keep only last 500 lines to prevent memory bloat
-  if table.getn(logBuffer) > 500 then
+
+  -- Keep only last N lines to prevent memory bloat
+  local maxLines = AutoLFM.Core.Constants.DEBUG_BUFFER_MAX_LINES or 500
+  if table.getn(logBuffer) > maxLines then
     table.remove(logBuffer, 1)
   end
 end
@@ -657,4 +658,4 @@ end
 
 AutoLFM.Core.SafeRegisterInit("Debug", function()
   AutoLFM.Core.Maestro.RegisterCommand("Debug.Toggle", AutoLFM.Components.Debug.Toggle, { id = "C02" })
-end, { id = "I22" })
+end, { id = "I21" })

@@ -133,6 +133,6 @@ AutoLFM.Core.SafeRegisterInit("Minimap", function()
 
   -- No commands to register - all minimap operations go through Settings commands
 end, {
-  id = "I24",
+  id = "I23",
   dependencies = {"Core.Storage"} -- Must run after Persistent loads
 })

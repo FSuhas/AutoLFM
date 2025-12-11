@@ -75,11 +75,12 @@ AutoLFM uses the **Maestro CQRS command bus system** for clean architecture:
 - **Components/**: System components
 - **Logic/**: Business logic (Broadcaster, Content, Selection, State management)
 - **UI/**: User interface (Templates, Content panels, Controls)
+
 For detailed architecture, see [Developer Guide](_Docs/Dev/README.md).
 
 ## 💾 Configuration
 Settings are automatically saved per character in `SavedVariables/AutoLFM.lua`:
-- **Broadcasting:** Interval (30-120s), chat channels
+- **Broadcasting:** Interval (30-120s), chat channels, General channel index
 - **Content:** Dungeon filters (GRAY/GREEN/YELLOW/ORANGE/RED), default panel
 - **Interface:** Minimap position, dark mode, message preview lines
 - **Messages:** Simple vs Custom mode
@@ -105,5 +106,6 @@ Settings are automatically saved per character in `SavedVariables/AutoLFM.lua`:
 - **WoW Version**: 1.12 (Interface 11200)
 - **Lua Version**: 5.0
 - **External Libraries**: None
+- **Quest Links Dependencies**: ShaguTweaks for links and pfQuest for information tooltip
 
 Contributions are welcome! Please feel free to submit issues or pull requests.

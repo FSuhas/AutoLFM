@@ -1,3 +1,17 @@
+## [v3.5] 2025/12/11
+- Remove redundant Core/Settings.lua
+- Remove deprecated GREEN_THRESHOLDS alias
+- Remove unused `createQuestLink()` function
+- Remove unused `Message.Generated` event
+- Add pcall protection for SendChatMessage in Broadcaster.lua
+- Add `Utils.RemoveFromArray()` utility function and refactor array removal patterns in Selection.lua and Messaging.lua
+- Add configurable General channel index in lua file
+- Add `migrateSettings()` to auto-add new settings to existing SavedVariables
+- Move initFrame from Events.lua to Maestro.lua
+- Simplify dungeon selection lookup
+- Unify SOUND_PATH constant
+- Renumber IDs: L01-L08, I01-I26, E07-E09
+
 ## [v3.4] 2025/12/05
 - Add General channel
 - Move interval slider in settings (add state info)

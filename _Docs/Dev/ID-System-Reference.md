@@ -11,12 +11,12 @@ This document provides the complete reference for all Maestro registry IDs (Comm
 
 ```
 Commands:       C01-C24 (24 total)
-Events:         E01-E10 (10 total)
-Listeners:      L01-L12 (12 total)
+Events:         E01-E09 (9 total)
+Listeners:      L01-L08 (8 total)
 States:         S01-S20 (20 total)
-Init Handlers:  I01-I27 (27 total: 24 explicit + 3 auto-assigned)
+Init Handlers:  I01-I26 (26 total: 23 explicit + 3 auto-assigned)
 
-TOTAL: 93 implemented IDs across 5 categories
+TOTAL: 87 implemented IDs across 5 categories
 ```
 
 ### System Data Flow
@@ -80,7 +80,7 @@ User Action → Command Handler → State Change → Event → Listeners → UI 
 
 ---
 
-## Events (E01-E10)
+## Events (E01-E09: 9 Implemented)
 
 | ID | Event | Triggered By | Payload |
 |----|-------|--------------|---------|
@@ -90,14 +90,13 @@ User Action → Command Handler → State Change → Event → Listeners → UI 
 | E04 | Channels.Changed | Channel config updated | channels |
 | E05 | Presets.Changed | Preset saved/deleted | presets |
 | E06 | Presets.Loaded | Preset loaded | - |
-| E07 | Message.Generated | Message rebuilt | message |
-| E08 | Settings.Changed | Settings updated | setting, value |
-| E09 | Chat.WhisperReceived | Whisper message received | sender, message |
-| E10 | AutoInvite.Changed | Auto-invite settings changed | enabled |
+| E07 | Settings.Changed | Settings updated | setting, value |
+| E08 | Chat.WhisperReceived | Whisper message received | sender, message |
+| E09 | AutoInvite.Changed | Auto-invite settings changed | enabled |
 
 ---
 
-## Listeners (L01-L12: 12 Implemented)
+## Listeners (L01-L08: 8 Implemented)
 
 Listeners are registered ONLY in Init Handlers, never at file load.
 
@@ -105,16 +104,12 @@ Listeners are registered ONLY in Init Handlers, never at file load.
 |----|------------|--------|-----------|---------|
 | L01 | Logic.Message.OnSelectionChanged | Logic.Message | Selection.Changed (E01) | Rebuild message |
 | L02 | Logic.Message.OnGroupSizeChanged | Logic.Message | Group.SizeChanged (E02) | Update message |
-| L03 | Selection.CacheInvalidation | Logic.Selection | Selection.Changed (E01) | Invalidate cache |
-| L04 | Broadcaster.OnGroupSizeChanged | Logic.Broadcaster | Group.SizeChanged (E02) | Update broadcaster |
-| L05 | UI.Dungeons.OnSelection | UI.Content.Dungeons | Selection.Changed (E01) | Update dungeon UI |
-| L06 | UI.Raids.OnSelection | UI.Content.Raids | Selection.Changed (E01) | Update raid UI |
-| L07 | UI.Messaging.OnChannelsChanged | UI.Content.Messaging | Channels.Changed (E04) | Update channel UI |
-| L08 | UI.Presets.OnChanged | UI.Content.Presets | Presets.Changed (E05) | Update presets UI |
-| L09 | UI.Quests.OnSelection | UI.Content.Quests | Selection.Changed (E01) | Update quests UI |
-| L10 | UI.Messaging.OnSelectionChanged | UI.Content.Messaging | Selection.Changed (E01) | Update message UI |
-| L11 | AutoInvite.OnWhisper | Logic.AutoInvite | Chat.WhisperReceived (E09) | Monitor whisper invites |
-| L12 | AutoInvite.OnLeaderChanged | Logic.AutoInvite | Group.LeaderChanged (E03) | React to leader changes |
+| L03 | Broadcaster.OnGroupSizeChanged | Logic.Broadcaster | Group.SizeChanged (E02) | Update broadcaster |
+| L04 | UI.Messaging.OnChannelsChanged | UI.Content.Messaging | Channels.Changed (E04) | Update channel UI |
+| L05 | UI.Presets.OnChanged | UI.Content.Presets | Presets.Changed (E05) | Update presets UI |
+| L06 | UI.Messaging.OnSelectionChanged | UI.Content.Messaging | Selection.Changed (E01) | Update message UI |
+| L07 | AutoInvite.OnWhisper | Logic.AutoInvite | Chat.WhisperReceived (E09) | Monitor whisper invites |
+| L08 | AutoInvite.OnLeaderChanged | Logic.AutoInvite | Group.LeaderChanged (E03) | React to leader changes |
 
 ---
 
@@ -162,9 +157,9 @@ Listeners are registered ONLY in Init Handlers, never at file load.
 
 ---
 
-## Init Handlers (I01-I27)
+## Init Handlers (I01-I26)
 
-Init Handlers run during addon initialization with dependency resolution. Static handlers have explicit IDs (I01-I24), while dynamic content panels use auto-assignment (I25+).
+Init Handlers run during addon initialization with dependency resolution. Static handlers have explicit IDs (I01-I23), while dynamic content panels use auto-assignment (I24+).
 
 ### Core Foundation (I01-I04)
 | ID | Module | Dependencies | Purpose |
@@ -184,7 +179,7 @@ Init Handlers run during addon initialization with dependency resolution. Static
 | I09 | Logic.Broadcaster | Logic.Message | Broadcaster system |
 | I10 | Logic.Content.Messaging | Core.Storage | Channel management |
 
-### Content & Settings (I11-I18)
+### Content & Settings (I11-I17)
 | ID | Module | Dependencies | Purpose |
 |----|--------|--------------|---------|
 | I11 | UI.MainFrame | Logic.Broadcaster, Logic.Message, Logic.Selection | Main UI frame |
@@ -193,25 +188,24 @@ Init Handlers run during addon initialization with dependency resolution. Static
 | I14 | Components.DarkUI | Core.Storage | Dark mode theme |
 | I15 | UI.Content.Messaging | Logic.Content.Messaging, Logic.Broadcaster | Channel UI |
 | I16 | Logic.AutoInvite | Core.Events | Auto-invite system |
-| I17 | Core.Settings | Core.Storage | Settings core |
-| I18 | UI.Content.Presets | Logic.Content.Presets | Presets UI |
+| I17 | UI.Content.Presets | Logic.Content.Presets | Presets UI |
 
-### UI Components (I19-I24)
+### UI Components (I18-I23)
 | ID | Module | Dependencies | Purpose |
 |----|--------|--------------|---------|
-| I19 | UI.Quests.Commands | UI.Content.Quests | Quest command registration |
-| I20 | Components.EyeAnimation | Logic.Broadcaster | Eye animation effect |
-| I21 | Components.WelcomePopup | Core.Storage | Welcome dialog |
-| I22 | Components.Debug | None | Debug window UI |
-| I23 | Logic.MainFrame | Logic.Broadcaster, Logic.Message, Logic.Selection | Main window commands |
-| I24 | Components.MinimapButton | Core.Storage | Minimap button |
+| I18 | UI.Quests.Commands | UI.Content.Quests | Quest command registration |
+| I19 | Components.EyeAnimation | Logic.Broadcaster | Eye animation effect |
+| I20 | Components.WelcomePopup | Core.Storage | Welcome dialog |
+| I21 | Components.Debug | None | Debug window UI |
+| I22 | Logic.MainFrame | Logic.Broadcaster, Logic.Message, Logic.Selection | Main window commands |
+| I23 | Components.MinimapButton | Core.Storage | Minimap button |
 
-### Dynamic Content Panels (I25-I27) - Auto-assigned by ContentPanel factory
+### Dynamic Content Panels (I24-I26) - Auto-assigned by ContentPanel factory
 | ID | Module | Dependencies | Purpose |
 |----|--------|--------------|---------|
-| I25 | UI.Content.Dungeons | Logic.Selection | Dungeon selection UI |
-| I26 | UI.Content.Quests | Logic.Selection | Quest selection UI |
-| I27 | UI.Content.Raids | Logic.Selection | Raid selection UI |
+| I24 | UI.Content.Dungeons | Logic.Selection | Dungeon selection UI |
+| I25 | UI.Content.Quests | Logic.Selection | Quest selection UI |
+| I26 | UI.Content.Raids | Logic.Selection | Raid selection UI |
 
 ---
 
@@ -219,11 +213,11 @@ Init Handlers run during addon initialization with dependency resolution. Static
 
 ### 1. Selection System
 **Manage dungeon, raid, quest, custom selections**
-- **Init:** I05-I06, I25-I27 (dynamic UI panels)
+- **Init:** I05-I06, I24-I26 (dynamic UI panels)
 - **Commands:** C03-C14 (12 operations)
 - **Events:** E01
 - **States:** S01-S08
-- **Listeners:** L03, L05-L06, L09
+- **Listeners:** L06 (UI.Messaging.OnSelectionChanged)
 
 ### 2. Group Management
 **Track player group status**
@@ -237,7 +231,7 @@ Init Handlers run during addon initialization with dependency resolution. Static
 - **Init:** I08
 - **Events:** E01, E02, E07
 - **States:** S19
-- **Listeners:** L01-L02, L10
+- **Listeners:** L01-L02, L06
 
 ### 4. Broadcasting
 **Send messages to chat channels**
@@ -245,26 +239,26 @@ Init Handlers run during addon initialization with dependency resolution. Static
 - **Commands:** C15-C16 (2 operations)
 - **Events:** E04-E05
 - **States:** S13-S17
-- **Listeners:** L04, L07
+- **Listeners:** L03, L04
 
 ### 5. Presets
 **Save and load configurations**
-- **Init:** I12, I18
+- **Init:** I12, I17
 - **Commands:** C17-C19 (3 operations)
 - **Events:** E05-E06
 - **States:** S18
-- **Listeners:** L08
+- **Listeners:** L05
 
 ### 6. Auto Invite
 **Automatic group invitations**
 - **Init:** I16
 - **Commands:** C22-C24 (3 operations)
 - **Events:** E09-E10
-- **Listeners:** L11-L12
+- **Listeners:** L07-L08
 
 ### 7. Settings & Configuration
 **User preferences and behavior**
-- **Init:** I13, I17
+- **Init:** I13
 - **Events:** E08
 - **States:** S20
 - **Listeners:** (no dedicated listeners)
@@ -282,12 +276,12 @@ Init Handlers run during addon initialization with dependency resolution. Static
 
 ### 10. UI Panels (Dynamic)
 **Auto-assigned UI content panels via ContentPanel factory**
-- **Init:** I25-I27 (Dungeons, Quests, Raids)
+- **Init:** I24-I26 (Dungeons, Quests, Raids)
 - Auto-assigned in load order without hardcoding
 
 ### 11. Components & UI
 **Visual components and debug tools**
-- **Init:** I11, I14, I19-I24
+- **Init:** I11, I14, I18-I23
 
 ---
 
@@ -320,12 +314,12 @@ AutoLFM.Core.SafeRegisterState("MyFeature.Config", defaultValue, { id = "S21" })
 ### Example: New Static Init Handler
 
 ```lua
--- For static handlers, insert before dynamic IDs (I25+)
--- Current max explicit is I24, next would be to shift dynamic IDs
+-- For static handlers, insert before dynamic IDs (I24+)
+-- Current max explicit is I23, next would be to shift dynamic IDs
 AutoLFM.Core.SafeRegisterInit("MyFeature.Init", function()
     -- Initialization
 end, {
-    id = "I28",  -- Next available static ID (shifts dynamic to I28+)
+    id = "I27",  -- Next available static ID (shifts dynamic to I27+)
     dependencies = { "Core.Events" }
 })
 ```
@@ -333,7 +327,7 @@ end, {
 ### Example: New Content Panel (Auto-assigned ID)
 
 ```lua
--- ContentPanel factory automatically assigns IDs starting at I25
+-- ContentPanel factory automatically assigns IDs starting at I24
 -- No need to specify listenerInitHandler - it's auto-assigned
 AutoLFM.UI.Content.MyPanel = AutoLFM.UI.CreateContentPanel({
   name = "MyPanel",
@@ -341,8 +335,8 @@ AutoLFM.UI.Content.MyPanel = AutoLFM.UI.CreateContentPanel({
   createRowsFunc = function(scrollChild) ... end,
   listeningEvent = "Selection.Changed",
   listenerDependencies = { "Logic.Selection" },
-  listenerId = "L14"
-  -- listenerInitHandler is auto-assigned (I25, I26, I27, etc)
+  listenerId = "L09"
+  -- listenerInitHandler is auto-assigned (I24, I25, I26, etc)
 })
 ```
 
@@ -351,11 +345,11 @@ AutoLFM.UI.Content.MyPanel = AutoLFM.UI.CreateContentPanel({
 ## ID Assignment Rules
 
 1. **Immutable** - Never change an ID after it's used
-2. **Sequential** - Static IDs (I01-I24) are explicit; dynamic IDs (I25+) auto-assign
+2. **Sequential** - Static IDs (I01-I23) are explicit; dynamic IDs (I24+) auto-assign
 3. **Organized** - IDs grouped by functional domain
 4. **Separated** - Each category has its own namespace
 5. **Ordered** - Init handlers execute in approximate order with dependency resolution
-6. **Auto-assignment** - ContentPanel factory auto-assigns IDs starting at I25 (no hardcoding)
+6. **Auto-assignment** - ContentPanel factory auto-assigns IDs starting at I24 (no hardcoding)
 
 ---
 

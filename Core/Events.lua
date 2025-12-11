@@ -9,7 +9,7 @@ AutoLFM.Core.Events = {}
 --=============================================================================
 -- PRIVATE STATE
 --=============================================================================
-local eventFrame, initFrame
+local eventFrame
 local lastGroupSize = 0
 
 --=============================================================================
@@ -186,7 +186,7 @@ AutoLFM.Core.SafeRegisterState("Group.IsLeader", false, { id = "S09" })
 --=============================================================================
 AutoLFM.Core.Maestro.RegisterEvent("Group.SizeChanged", { id = "E02" })
 AutoLFM.Core.Maestro.RegisterEvent("Group.LeaderChanged", { id = "E03" })
-AutoLFM.Core.Maestro.RegisterEvent("Chat.WhisperReceived", { id = "E09" })
+AutoLFM.Core.Maestro.RegisterEvent("Chat.WhisperReceived", { id = "E08" })
 
 --=============================================================================
 -- INITIALIZATION
@@ -194,14 +194,6 @@ AutoLFM.Core.Maestro.RegisterEvent("Chat.WhisperReceived", { id = "E09" })
 AutoLFM.Core.SafeRegisterInit("Core.Events", function()
   AutoLFM.Core.Events.Init()
 end, { id = "I01" })
-
--- Handle PLAYER_ENTERING_WORLD for game initialization
-initFrame = CreateFrame("Frame")
-initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-initFrame:SetScript("OnEvent", function()
-  AutoLFM.Core.Maestro.RunInit()
-  initFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
-end)
 
 --=============================================================================
 -- SLASH COMMAND REGISTRATION

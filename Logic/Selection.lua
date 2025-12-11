@@ -28,39 +28,6 @@ AutoLFM.Core.SafeRegisterState("Selection.CustomGroupSize", 5, { id = "S01" })
 -- PRIVATE HELPERS
 --=============================================================================
 
---- Cache for dungeon lookup tables (O(1) access after first call)
---- Key: serialized dungeon names, Value: lookup table
-local dungeonLookupCache = {}
-local CACHE_MAX_SIZE = 20  -- Prevent unbounded cache growth
-
---- Serializes dungeon names array to cache key
---- @param dungeonNames table - Array of dungeon names
---- @return string - Cache key
-local function serializeDungeonNames(dungeonNames)
-  if not dungeonNames or table.getn(dungeonNames) == 0 then
-    return ""
-  end
-  return table.concat(dungeonNames, "|")
-end
-
---- Enforces cache size limit by removing oldest entry (FIFO)
---- Prevents unbounded memory growth from cache accumulation
-local function enforceCacheLimit()
-  local cacheSize = 0
-  for _ in pairs(dungeonLookupCache) do
-    cacheSize = cacheSize + 1
-  end
-
-  if cacheSize > CACHE_MAX_SIZE then
-    -- Remove first entry (oldest) - simple FIFO
-    -- Note: Lua pairs() iteration order is undefined, but acceptable for cache eviction
-    for key in pairs(dungeonLookupCache) do
-      dungeonLookupCache[key] = nil
-      break  -- Only remove one entry to stay just under limit
-    end
-  end
-end
-
 --- Checks if a dungeon is visible (not filtered by color)
 --- @param index number - Dungeon index to check
 --- @return boolean - True if dungeon appears in sorted (filtered) list
@@ -79,30 +46,19 @@ local function isDungeonVisible(index)
   return false
 end
 
---- Checks if dungeon is selected by name (O(1) with cached lookup table)
---- Uses closure cache to avoid rebuilding lookup table on every call
+--- Checks if dungeon is selected by name
+--- Simple O(n) loop - efficient for max 3 dungeons (MAX_DUNGEONS)
 --- @param dungeonNames table - Array of selected dungeon names
 --- @param name string - Name to check
 --- @return boolean - True if dungeon is in array
 local function isDungeonSelected(dungeonNames, name)
-  if not dungeonNames or table.getn(dungeonNames) == 0 then
-    return false
-  end
-
-  -- Build cache key from dungeon names
-  local cacheKey = serializeDungeonNames(dungeonNames)
-
-  -- Build or reuse cached lookup table
-  if not dungeonLookupCache[cacheKey] then
-    local lookupMap = {}
-    for i = 1, table.getn(dungeonNames) do
-      lookupMap[dungeonNames[i]] = true
+  if not dungeonNames then return false end
+  for i = 1, table.getn(dungeonNames) do
+    if dungeonNames[i] == name then
+      return true
     end
-    dungeonLookupCache[cacheKey] = lookupMap
-    enforceCacheLimit()  -- Keep cache size bounded
   end
-
-  return dungeonLookupCache[cacheKey][name] or false
+  return false
 end
 
 --- Removes a dungeon from the array
@@ -110,13 +66,7 @@ end
 --- @param name string - Name to remove
 --- @return table - New array without the name
 local function removeDungeon(dungeonNames, name)
-  local newNames = {}
-  for i = 1, table.getn(dungeonNames) do
-    if dungeonNames[i] ~= name then
-      table.insert(newNames, dungeonNames[i])
-    end
-  end
-  return newNames
+  return AutoLFM.Core.Utils.RemoveFromArray(dungeonNames, name)
 end
 
 --- Sets the selection mode and clears incompatible selections
@@ -366,20 +316,23 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.ToggleRole", function(role)
 
   -- Toggle role
   local found = false
-  local newRoles = {}
-
   for i = 1, table.getn(selectedRoles) do
     if selectedRoles[i] == role then
       found = true
-      -- Don't add to newRoles (remove it)
-    else
-      table.insert(newRoles, selectedRoles[i])
+      break
     end
   end
 
+  local newRoles
   if found then
+    newRoles = AutoLFM.Core.Utils.RemoveFromArray(selectedRoles, role)
     AutoLFM.Core.Utils.LogAction("Deselected role " .. role)
   else
+    -- Copy existing roles and add new one
+    newRoles = {}
+    for i = 1, table.getn(selectedRoles) do
+      table.insert(newRoles, selectedRoles[i])
+    end
     table.insert(newRoles, role)
     AutoLFM.Core.Utils.LogAction("Selected role " .. role)
   end
@@ -533,13 +486,5 @@ AutoLFM.Core.Maestro.RegisterEvent("Selection.Changed", { id = "E01" })
 -- INITIALIZATION
 --=============================================================================
 AutoLFM.Core.SafeRegisterInit("Logic.Selection", function()
-  -- Clear the dungeon lookup cache whenever selection changes
-  AutoLFM.Core.Maestro.Listen(
-    "Selection.CacheInvalidation",
-    "Selection.Changed",
-    function()
-      dungeonLookupCache = {}
-    end,
-    { id = "L03" }
-  )
+  -- No initialization needed - selection state is managed by Maestro
 end, { id = "I05" })

@@ -159,7 +159,7 @@ end, { id = "C24" })
 
 --- Event: AutoInvite.Changed
 --- Dispatched when AutoInvite settings change (enabled, keyword, confirmation)
-AutoLFM.Core.Maestro.RegisterEvent("AutoInvite.Changed", { id = "E10" })
+AutoLFM.Core.Maestro.RegisterEvent("AutoInvite.Changed", { id = "E09" })
 
 --=============================================================================
 -- EVENT HANDLERS
@@ -189,14 +189,14 @@ AutoLFM.Core.SafeRegisterInit("Logic.AutoInvite", function()
     "AutoInvite.OnWhisper",
     "Chat.WhisperReceived",
     handleWhisper,
-    { id = "L11" }
+    { id = "L07" }
   )
   
   AutoLFM.Core.Maestro.Listen(
     "AutoInvite.OnLeaderChanged",
     "Group.LeaderChanged",
     onLeaderChanged,
-    { id = "L12" }
+    { id = "L08" }
   )
 end, {
   id = "I16",

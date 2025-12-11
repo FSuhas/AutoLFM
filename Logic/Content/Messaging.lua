@@ -111,22 +111,6 @@ local function hookBagClicks()
 end
 
 -----------------------------------------------------------------------------
--- Create Quest Link (WoW 1.12 format)
------------------------------------------------------------------------------
-
---- Creates a manually formatted quest link (WoW 1.12 does not have native quest links)
---- @param questID number - Quest ID (not used in display, for future compatibility)
---- @param level number - Quest level
---- @param title string - Quest name
---- @return string|nil - Formatted quest link, or nil if title missing
-local function createQuestLink(questID, level, title)
-  if not questID or not title then return nil end
-  level = level or 0
-  questID = questID or 0
-  return string.format("|cff808080[Quest]|r |cffffd000[%d %s]|r", level, title)
-end
-
------------------------------------------------------------------------------
 -- Chat Hyperlinks
 -----------------------------------------------------------------------------
 
@@ -264,22 +248,26 @@ function AutoLFM.Logic.Content.Messaging.ToggleChannel(channelName)
   
   -- Check if channel is already selected
   local isSelected = false
-  local newChannelsList = {}
-  
   for i = 1, table.getn(channelsList) do
     if channelsList[i] == channelName then
       isSelected = true
-      -- Don't add to new list (remove it)
-      if AutoLFM.Core and AutoLFM.Core.Utils then
-        AutoLFM.Core.Utils.LogAction("Channel deselected: " .. channelName)
-      end
-    else
-      table.insert(newChannelsList, channelsList[i])
+      break
     end
   end
-  
-  -- If not selected, add it
-  if not isSelected then
+
+  local newChannelsList
+  if isSelected then
+    -- Remove channel from list
+    newChannelsList = AutoLFM.Core.Utils.RemoveFromArray(channelsList, channelName)
+    if AutoLFM.Core and AutoLFM.Core.Utils then
+      AutoLFM.Core.Utils.LogAction("Channel deselected: " .. channelName)
+    end
+  else
+    -- Add channel to list
+    newChannelsList = {}
+    for i = 1, table.getn(channelsList) do
+      table.insert(newChannelsList, channelsList[i])
+    end
     table.insert(newChannelsList, channelName)
     -- Join the channel
     AutoLFM.Logic.Content.Messaging.JoinChannel(channelName)

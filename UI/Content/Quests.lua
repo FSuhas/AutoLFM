@@ -108,4 +108,4 @@ AutoLFM.UI.Content.Quests = AutoLFM.UI.CreateContentPanel({
 -- Additional command registration for QuestsList.Refresh (legacy support)
 AutoLFM.Core.SafeRegisterInit("UI.Quests.Commands", function()
   AutoLFM.Core.Maestro.RegisterCommand("QuestsList.Refresh", AutoLFM.UI.Content.Quests.Refresh, { id = "C21" })
-end, { id = "I19", dependencies = { "UI.Quests" } })
+end, { id = "I18", dependencies = { "UI.Quests" } })

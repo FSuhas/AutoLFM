@@ -128,7 +128,7 @@ function AutoLFM.Core.Utils.GetColorForLevel(playerLevel, minLevel, maxLevel)
 
   -- Dynamic GREEN threshold based on player level
   local thresholdIndex = math.min(math.floor(playerLevel / 10) + 1, 5)
-  local greenThreshold = -(AutoLFM.Core.Constants.GREEN_THRESHOLDS[thresholdIndex] or 8)
+  local greenThreshold = -(AutoLFM.Core.Constants.GREEN_DIFFICULTY_THRESHOLD_BY_LEVEL_BRACKET[thresholdIndex] or 8)
 
   if diff >= greenThreshold then return AutoLFM.Core.Utils.GetColor("GREEN") end
   return AutoLFM.Core.Utils.GetColor("GRAY")
@@ -247,6 +247,21 @@ AutoLFM.Core.Utils.LogInit = CreateLogFunction("LogInit")
 --- @return boolean - True if the table is nil or empty
 function AutoLFM.Core.Utils.IsEmpty(tbl)
   return not tbl or table.getn(tbl) == 0
+end
+
+--- Removes a value from an array and returns a new array
+--- @param array table - The source array
+--- @param value any - The value to remove
+--- @return table - New array without the specified value
+function AutoLFM.Core.Utils.RemoveFromArray(array, value)
+  if not array then return {} end
+  local newArray = {}
+  for i = 1, table.getn(array) do
+    if array[i] ~= value then
+      table.insert(newArray, array[i])
+    end
+  end
+  return newArray
 end
 
 --=============================================================================

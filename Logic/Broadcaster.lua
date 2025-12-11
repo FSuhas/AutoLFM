@@ -10,7 +10,6 @@ AutoLFM.Logic.Broadcaster = {}
 -- PRIVATE STATE
 --=============================================================================
 local broadcastTimer
-local SOUND_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\"
 local SOUNDS = {
   START = "Start.ogg",
   STOP = "Stop.ogg",
@@ -71,7 +70,7 @@ local function onGroupChange()
   if groupSize >= targetSize then
     AutoLFM.Core.Utils.PrintSuccess("Group is full! Stopping broadcast.")
     -- Silently attempt sound (no error logging if file missing)
-    pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.FULL)
+    pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. SOUNDS.FULL)
     AutoLFM.Logic.Broadcaster.Toggle()
   end
 end
@@ -87,26 +86,40 @@ local function sendToChannel(channelName, message)
   local channelID = GetChannelName(channelName)
 
   if channelID > 0 then
-    SendChatMessage(message, "CHANNEL", nil, channelID)
-    AutoLFM.Core.Utils.LogAction("Broadcast to " .. channelName .. ": " .. message)
-    return true
+    local success, err = pcall(SendChatMessage, message, "CHANNEL", nil, channelID)
+    if success then
+      AutoLFM.Core.Utils.LogAction("Broadcast to " .. channelName .. ": " .. message)
+      return true
+    else
+      AutoLFM.Core.Utils.LogWarning("Failed to send to " .. channelName .. ": " .. tostring(err))
+      return false
+    end
   else
     AutoLFM.Core.Utils.LogWarning("Not in channel: " .. channelName)
     return false
   end
 end
 
---- Sends a message to the General channel (/1)
---- Uses channel index 1 directly since General has zone-specific names
+--- Sends a message to the General channel (configurable index, default /1)
+--- Channel index is read from Storage (set via V3_Settings.generalChannelIndex)
 --- @param message string - The message to send
 local function sendToGeneralChannel(message)
-  local channelID, channelName = GetChannelName(1)
+  local channelIndex = 1
+  if AutoLFM.Core.Storage and AutoLFM.Core.Storage.GetGeneralChannelIndex then
+    channelIndex = AutoLFM.Core.Storage.GetGeneralChannelIndex() or 1
+  end
+  local channelID, channelName = GetChannelName(channelIndex)
   if channelID and channelID > 0 then
-    SendChatMessage(message, "CHANNEL", nil, channelID)
-    AutoLFM.Core.Utils.LogAction("Broadcast to General (" .. (channelName or "1") .. "): " .. message)
-    return true
+    local success, err = pcall(SendChatMessage, message, "CHANNEL", nil, channelID)
+    if success then
+      AutoLFM.Core.Utils.LogAction("Broadcast to General /" .. channelIndex .. " (" .. (channelName or tostring(channelIndex)) .. "): " .. message)
+      return true
+    else
+      AutoLFM.Core.Utils.LogWarning("Failed to send to General /" .. channelIndex .. ": " .. tostring(err))
+      return false
+    end
   else
-    AutoLFM.Core.Utils.LogWarning("Not in General channel")
+    AutoLFM.Core.Utils.LogWarning("Not in General channel /" .. channelIndex)
     return false
   end
 end
@@ -245,7 +258,7 @@ local function start()
   resetStats()
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", true)
   -- Silently attempt sound (no error logging if file missing)
-  pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.START)
+  pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. SOUNDS.START)
 
   if isDryRun then
     AutoLFM.Core.Utils.PrintSuccess("Broadcast started in DRY RUN mode (messages will print to chat)")
@@ -272,7 +285,7 @@ local function stop()
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", false)
   AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", 0)
   -- Silently attempt sound (no error logging if file missing)
-  pcall(PlaySoundFile, SOUND_PATH .. SOUNDS.STOP)
+  pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. SOUNDS.STOP)
 
   AutoLFM.Core.Utils.PrintSuccess("Broadcast stopped")
 
@@ -371,12 +384,14 @@ AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
     "Broadcaster.OnGroupSizeChanged",
     "Group.SizeChanged",
     onGroupChange,
-    { id = "L04" }
+    { id = "L03" }
   )
 
-  local savedInterval = AutoLFM.Core.Storage.GetBroadcastInterval()
-  if savedInterval then
-    AutoLFM.Core.Maestro.SetState("Broadcaster.Interval", savedInterval)
+  if AutoLFM.Core.Storage and AutoLFM.Core.Storage.GetBroadcastInterval then
+    local savedInterval = AutoLFM.Core.Storage.GetBroadcastInterval()
+    if savedInterval then
+      AutoLFM.Core.Maestro.SetState("Broadcaster.Interval", savedInterval)
+    end
   end
 end, {
   id = "I09",

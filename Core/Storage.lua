@@ -48,7 +48,8 @@ local SETTINGS_REGISTRY = {
   {key = "autoInviteRandomMessages", type = "boolean", default = true},
   {key = "autoInviteRespondWhenNotLeader", type = "boolean", default = false},
   {key = "isHardcore", type = "boolean", default = nil},
-  {key = "welcomeShown", type = "boolean", default = false}
+  {key = "welcomeShown", type = "boolean", default = false},
+  {key = "generalChannelIndex", type = "number", default = 1}
 }
 
 -----------------------------------------------------------------------------
@@ -204,6 +205,24 @@ end
 --   Sets up character ID and initializes storage on first load
 -----------------------------------------------------------------------------
 
+--- Adds missing settings from SETTINGS_REGISTRY to existing character data
+--- This ensures new settings are available after addon updates
+local function migrateSettings()
+  local charData = getCharData()
+  if not charData then return end
+
+  for i = 1, table.getn(SETTINGS_REGISTRY) do
+    local setting = SETTINGS_REGISTRY[i]
+    if charData[setting.key] == nil then
+      if setting.type == "table" and setting.default then
+        charData[setting.key] = deepCopy(setting.default)
+      else
+        charData[setting.key] = setting.default
+      end
+    end
+  end
+end
+
 --- Initializes persistent storage for current character
 --- Creates character-specific storage and detects hardcore mode
 function AutoLFM.Core.Storage.Init()
@@ -212,6 +231,7 @@ function AutoLFM.Core.Storage.Init()
   if not name or not realm then return end
   characterID = name .. "-" .. realm
   getCharData(true)
+  migrateSettings()
   if not V3_Presets then
       V3_Presets = {}
   end

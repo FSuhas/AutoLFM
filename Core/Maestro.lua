@@ -725,3 +725,14 @@ end
 --=============================================================================
 flushPendingStates()
 flushPendingInits()
+
+--=============================================================================
+-- GAME INITIALIZATION TRIGGER
+--=============================================================================
+-- Handle PLAYER_ENTERING_WORLD to trigger RunInit() when game is ready
+local initFrame = CreateFrame("Frame", "AutoLFM_InitFrame")
+initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+initFrame:SetScript("OnEvent", function()
+  AutoLFM.Core.Maestro.RunInit()
+  initFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+end)
