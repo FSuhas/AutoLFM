@@ -15,14 +15,28 @@ local characterID
 -- Utility Functions
 -----------------------------------------------------------------------------
 
---- Creates a deep copy of a table (recursive)
+--- Maximum depth for deepCopy to prevent stack overflow on circular/deeply nested tables
+local MAX_DEEP_COPY_DEPTH = 10
+
+--- Creates a deep copy of a table (recursive) with depth limit
 --- @param obj any - Object to copy (can be table or primitive)
+--- @param depth number - Current recursion depth (internal use)
 --- @return any - Deep copy of the object
-local function deepCopy(obj)
+local function deepCopy(obj, depth)
   if type(obj) ~= "table" then return obj end
+  depth = depth or 0
+  if depth >= MAX_DEEP_COPY_DEPTH then
+    -- Return shallow copy at max depth to prevent stack overflow
+    AutoLFM.Core.Utils.LogWarning("deepCopy: max depth reached, returning shallow copy")
+    local shallowCopy = {}
+    for k, v in pairs(obj) do
+      shallowCopy[k] = v
+    end
+    return shallowCopy
+  end
   local copy = {}
   for k, v in pairs(obj) do
-    copy[k] = type(v) == "table" and deepCopy(v) or v
+    copy[k] = type(v) == "table" and deepCopy(v, depth + 1) or v
   end
   return copy
 end
@@ -225,10 +239,14 @@ end
 
 --- Initializes persistent storage for current character
 --- Creates character-specific storage and detects hardcore mode
+--- @return boolean - True if initialization succeeded, false otherwise
 function AutoLFM.Core.Storage.Init()
   local name = UnitName("player")
   local realm = GetRealmName()
-  if not name or not realm then return end
+  if not name or not realm then
+    AutoLFM.Core.Utils.LogError("Storage.Init failed: UnitName or GetRealmName returned nil (name=" .. tostring(name) .. ", realm=" .. tostring(realm) .. ")")
+    return false
+  end
   characterID = name .. "-" .. realm
   getCharData(true)
   migrateSettings()
@@ -247,6 +265,8 @@ function AutoLFM.Core.Storage.Init()
     local isHardcore = detectHardcoreCharacter()
     AutoLFM.Core.Storage.SetIsHardcore(isHardcore)
   end
+
+  return true
 end
 
 -----------------------------------------------------------------------------

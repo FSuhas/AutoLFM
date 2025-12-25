@@ -49,6 +49,10 @@ end
 --- Handles PLAYER_LEVEL_UP event - clears caches and refreshes dungeon/quest UI
 local function onPlayerLevelUp()
   local newLevel = arg1
+  if not newLevel then
+    AutoLFM.Core.Utils.LogWarning("PLAYER_LEVEL_UP: arg1 (newLevel) is nil")
+    return
+  end
 
   if AutoLFM.Logic.Content.Quests then
     AutoLFM.Logic.Content.Quests.ClearCache()
@@ -92,6 +96,11 @@ end
 local function onChatMsgWhisper()
   local message = arg1
   local sender = arg2
+
+  if not message or not sender then
+    AutoLFM.Core.Utils.LogWarning("CHAT_MSG_WHISPER: arg1 or arg2 is nil")
+    return
+  end
 
   AutoLFM.Core.Maestro.Dispatch("Chat.WhisperReceived", {
     message = message,

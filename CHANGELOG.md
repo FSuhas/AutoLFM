@@ -1,3 +1,11 @@
+## [v3.6] 2025/12/26
+- Add `ArrayContains()` and `ShallowCopy()` utility functions in Utils.lua
+- Add `SELECTION_MODES`, `ROLES`, and `VALID_ROLES` constants for type-safe mode switching
+- Replace magic strings with constants in Selection.lua (`MODES.DUNGEONS`, `MODES.RAID`, etc.)
+- Fix state mutation bug: create shallow copies before modifying arrays from GetState()
+- Remove dead code (empty if block) in RowList.lua
+- Release memory by setting `pendingStates`/`pendingInits` to nil after flush in Maestro.lua
+
 ## [v3.5] 2025/12/11
 - Remove redundant Core/Settings.lua
 - Remove deprecated GREEN_THRESHOLDS alias

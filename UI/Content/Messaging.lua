@@ -82,10 +82,14 @@ end
 --- @param max number - Maximum slider value
 local function setupSliderMouseWheel(slider, step, min, max)
   if not slider then return end
+  -- NOTE: In Lua 5.0 WoW, 'this' and 'arg1' are implicit globals set by the event system.
+  -- For OnMouseWheel, 'this' is the frame and 'arg1' is the scroll direction.
+  -- We capture slider explicitly to be safe in case of closure context issues.
   slider:SetScript("OnMouseWheel", function()
-    local value = this:GetValue()
-    local delta = arg1 > 0 and step or -step
-    this:SetValue(clamp(value + delta, min, max))
+    local value = slider:GetValue()
+    local scrollDelta = arg1
+    local delta = (scrollDelta and scrollDelta > 0) and step or -step
+    slider:SetValue(clamp(value + delta, min, max))
   end)
 end
 
@@ -867,9 +871,13 @@ local function startStatsUpdateTimer()
   end
 
   statsUpdateTimer = CreateFrame("Frame", "AutoLFM_UI_Messaging_StatsTimer")
+  -- NOTE: Using explicit frame reference instead of 'this' to avoid closure context issues
+  local timerFrame = statsUpdateTimer
+  timerFrame.lastUpdate = 0
   statsUpdateTimer:SetScript("OnUpdate", function()
-    if not this.lastUpdate or GetTime() - this.lastUpdate >= 1 then
-      this.lastUpdate = GetTime()
+    local now = GetTime()
+    if now - timerFrame.lastUpdate >= 1 then
+      timerFrame.lastUpdate = now
       AutoLFM.UI.Content.Messaging.UpdateStats()
     end
   end)

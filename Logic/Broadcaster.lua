@@ -69,7 +69,8 @@ local function onGroupChange()
 
   if groupSize >= targetSize then
     AutoLFM.Core.Utils.PrintSuccess("Group is full! Stopping broadcast.")
-    -- Silently attempt sound (no error logging if file missing)
+    -- NOTE: pcall used intentionally - sound files are optional and may not exist
+    -- Failure to play sound should not interrupt broadcast functionality
     pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. SOUNDS.FULL)
     AutoLFM.Logic.Broadcaster.Toggle()
   end
@@ -257,7 +258,8 @@ local function start()
 
   resetStats()
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", true)
-  -- Silently attempt sound (no error logging if file missing)
+  -- NOTE: pcall used intentionally - sound files are optional and may not exist
+  -- Failure to play sound should not interrupt broadcast functionality
   pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. SOUNDS.START)
 
   if isDryRun then
@@ -284,7 +286,8 @@ local function stop()
   stopTimer()
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", false)
   AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", 0)
-  -- Silently attempt sound (no error logging if file missing)
+  -- NOTE: pcall used intentionally - sound files are optional and may not exist
+  -- Failure to play sound should not interrupt broadcast functionality
   pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. SOUNDS.STOP)
 
   AutoLFM.Core.Utils.PrintSuccess("Broadcast stopped")
@@ -389,7 +392,8 @@ AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
 
   if AutoLFM.Core.Storage and AutoLFM.Core.Storage.GetBroadcastInterval then
     local savedInterval = AutoLFM.Core.Storage.GetBroadcastInterval()
-    if savedInterval then
+    -- NOTE: Use explicit nil check instead of 'if savedInterval' to handle interval = 0 correctly
+    if savedInterval ~= nil then
       AutoLFM.Core.Maestro.SetState("Broadcaster.Interval", savedInterval)
     end
   end

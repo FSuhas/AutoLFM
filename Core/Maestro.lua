@@ -341,7 +341,8 @@ local function flushPendingStates()
       local reg = pendingStates[i]
       AutoLFM.Core.Maestro.RegisterState(reg.namespace, reg.initialValue, reg.options)
   end
-  pendingStates = {}
+  -- Release memory by removing reference to pending table
+  pendingStates = nil
 end
 
 --- Processes all init handlers registered via SafeRegisterInit before Maestro loaded
@@ -350,7 +351,8 @@ local function flushPendingInits()
       local reg = pendingInits[i]
       AutoLFM.Core.Maestro.RegisterInit(reg.id, reg.handler, reg.options)
   end
-  pendingInits = {}
+  -- Release memory by removing reference to pending table
+  pendingInits = nil
 end
 
 --- Builds the dependency graph for topological sort
@@ -532,6 +534,13 @@ function AutoLFM.Core.Maestro.RunInit()
   end
 
   isInitialized = true
+
+  -- Validate initialization - check all critical states and events are registered
+  local valid, errMsg = AutoLFM.Core.Utils.ValidateInitialization()
+  if not valid then
+    AutoLFM.Core.Utils.LogError("Initialization validation failed: " .. tostring(errMsg))
+  end
+
   AutoLFM.Core.Utils.PrintSuccess("Successfully loaded!")
 end
 

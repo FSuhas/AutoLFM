@@ -8,6 +8,38 @@ AutoLFM.UI = AutoLFM.UI or {}
 AutoLFM.UI.RowList = {}
 
 --=============================================================================
+-- ROW CACHE
+--   Caches row frames by prefix to avoid repeated getglobal() calls
+--=============================================================================
+local rowCache = {}  -- { [prefix] = { row1, row2, ... } }
+
+--- Registers a row in the cache for faster iteration
+--- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
+--- @param row frame - The row frame to cache
+function AutoLFM.UI.RowList.RegisterRow(rowPrefix, row)
+  if not rowPrefix or not row then return end
+  if not rowCache[rowPrefix] then
+    rowCache[rowPrefix] = {}
+  end
+  table.insert(rowCache[rowPrefix], row)
+end
+
+--- Gets all cached rows for a prefix
+--- @param rowPrefix string - Prefix for row names
+--- @return table - Array of cached row frames (may be empty)
+local function getCachedRows(rowPrefix)
+  return rowCache[rowPrefix] or {}
+end
+
+--- Clears the row cache for a prefix (call when recreating rows)
+--- @param rowPrefix string - Prefix for row names
+function AutoLFM.UI.RowList.ClearRowCache(rowPrefix)
+  if rowPrefix then
+    rowCache[rowPrefix] = {}
+  end
+end
+
+--=============================================================================
 -- HOVER HELPERS
 --   Functions for creating hover effects on list rows
 --=============================================================================
@@ -55,10 +87,6 @@ function AutoLFM.UI.RowList.SetupHover(element, row, color, elements, options)
     -- Set all elements to white
     for _, elem in ipairs(elements) do
       AutoLFM.Core.Utils.SetTextColorByName(elem, "WHITE")
-      -- Special handling for editboxes that might be hidden
-      if elem and elem.IsVisible and not elem:IsVisible() then
-        -- Skip hidden elements
-      end
     end
 
     -- Use the provided color for hover background (or fallback to gold)
@@ -154,9 +182,18 @@ function AutoLFM.UI.RowList.GetOrCreateRow(rowName, scrollChild, template, index
     return nil
   end
 
+  -- Extract prefix from rowName (e.g., "AutoLFM_DungeonRow1" -> "AutoLFM_DungeonRow")
+  local prefix = string.gsub(rowName, "%d+$", "")
+
   local row = getglobal(rowName)
+  local isNewRow = (row == nil)
   if not row then
     row = CreateFrame("Frame", rowName, scrollChild, template)
+  end
+
+  -- Register new rows in cache for faster iteration in hideAllRows/resetAllRowBackdrops
+  if isNewRow and prefix ~= "" then
+    AutoLFM.UI.RowList.RegisterRow(prefix, row)
   end
 
   row:ClearAllPoints()
@@ -204,32 +241,53 @@ end
 --=============================================================================
 
 --- Hides all existing rows with the given prefix (private helper)
+--- Uses row cache for O(n) iteration instead of O(n) getglobal calls
 --- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
 local function hideAllRows(rowPrefix)
-  local index = 1
-  while index <= AutoLFM.Core.Constants.MAX_ROWS_SAFETY do
-    local row = getglobal(rowPrefix .. index)
-    if not row then
-      break
+  local cachedRows = getCachedRows(rowPrefix)
+  if table.getn(cachedRows) > 0 then
+    -- Use cached rows for faster iteration
+    for i = 1, table.getn(cachedRows) do
+      cachedRows[i]:Hide()
     end
-    row:Hide()
-    index = index + 1
+  else
+    -- Fallback to getglobal if cache is empty (first run)
+    local index = 1
+    while index <= AutoLFM.Core.Constants.MAX_ROWS_SAFETY do
+      local row = getglobal(rowPrefix .. index)
+      if not row then
+        break
+      end
+      row:Hide()
+      index = index + 1
+    end
   end
 end
 
 --- Resets backdrop colors for all rows with the given prefix (private helper)
 --- Ensures rows are transparent after DarkUI may have modified them
+--- Uses row cache for O(n) iteration instead of O(n) getglobal calls
 --- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
 local function resetAllRowBackdrops(rowPrefix)
-  local index = 1
-  while index <= AutoLFM.Core.Constants.MAX_ROWS_SAFETY do
-    local row = getglobal(rowPrefix .. index)
-    if not row then
-      break
+  local cachedRows = getCachedRows(rowPrefix)
+  if table.getn(cachedRows) > 0 then
+    -- Use cached rows for faster iteration
+    for i = 1, table.getn(cachedRows) do
+      cachedRows[i]:SetBackdropColor(0, 0, 0, 0)
+      cachedRows[i]:SetBackdropBorderColor(0, 0, 0, 0)
     end
-    row:SetBackdropColor(0, 0, 0, 0)
-    row:SetBackdropBorderColor(0, 0, 0, 0)
-    index = index + 1
+  else
+    -- Fallback to getglobal if cache is empty (first run)
+    local index = 1
+    while index <= AutoLFM.Core.Constants.MAX_ROWS_SAFETY do
+      local row = getglobal(rowPrefix .. index)
+      if not row then
+        break
+      end
+      row:SetBackdropColor(0, 0, 0, 0)
+      row:SetBackdropBorderColor(0, 0, 0, 0)
+      index = index + 1
+    end
   end
 end
 

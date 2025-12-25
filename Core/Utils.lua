@@ -249,6 +249,32 @@ function AutoLFM.Core.Utils.IsEmpty(tbl)
   return not tbl or table.getn(tbl) == 0
 end
 
+--- Checks if an array contains a specific value
+--- @param array table - The array to search
+--- @param value any - The value to find
+--- @return boolean - True if the value is in the array
+function AutoLFM.Core.Utils.ArrayContains(array, value)
+  if not array then return false end
+  for i = 1, table.getn(array) do
+    if array[i] == value then
+      return true
+    end
+  end
+  return false
+end
+
+--- Creates a shallow copy of an array
+--- @param array table - The source array
+--- @return table - New array with same values
+function AutoLFM.Core.Utils.ShallowCopy(array)
+  if not array then return {} end
+  local copy = {}
+  for i = 1, table.getn(array) do
+    copy[i] = array[i]
+  end
+  return copy
+end
+
 --- Removes a value from an array and returns a new array
 --- @param array table - The source array
 --- @param value any - The value to remove

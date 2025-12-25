@@ -59,6 +59,32 @@ AutoLFM.Core.Constants.DEFAULT_BROADCAST_INTERVAL = 60
 -- Prevents spam messages with too many dungeon choices
 AutoLFM.Core.Constants.MAX_DUNGEONS = 3
 
+-- SELECTION_MODES: Valid selection mode values
+-- Used for type-safe mode switching instead of magic strings
+AutoLFM.Core.Constants.SELECTION_MODES = {
+  NONE = "none",
+  DUNGEONS = "dungeons",
+  RAID = "raid",
+  CUSTOM = "custom",
+  QUESTS = "quests"
+}
+
+-- ROLES: Valid player role values
+-- Used for type-safe role selection instead of magic strings
+AutoLFM.Core.Constants.ROLES = {
+  TANK = "TANK",
+  HEAL = "HEAL",
+  DPS = "DPS"
+}
+
+-- VALID_ROLES: Lookup table for role validation
+-- Allows O(1) validation of role strings
+AutoLFM.Core.Constants.VALID_ROLES = {
+  TANK = true,
+  HEAL = true,
+  DPS = true
+}
+
 --=============================================================================
 -- CHAT PREFIX
 --=============================================================================
