@@ -300,6 +300,31 @@ function AutoLFM.Core.Maestro.UnListen(listenerId)
   return true
 end
 
+--- Unregisters a command by its key
+--- Removes the command so it can no longer be dispatched
+--- @param key string - The command key to unregister (e.g., "MainFrame.Toggle")
+--- @return boolean - true if command was found and removed, false otherwise
+function AutoLFM.Core.Maestro.UnregisterCommand(key)
+  if not commands[key] then
+    AutoLFM.Core.Utils.LogWarning("Maestro: UnregisterCommand - Command '" .. key .. "' not found")
+    return false
+  end
+
+  -- Remove from commands table
+  commands[key] = nil
+
+  -- Remove from commands registry
+  for i = 1, table.getn(commandsRegistry) do
+    if commandsRegistry[i].key == key then
+      table.remove(commandsRegistry, i)
+      break
+    end
+  end
+
+  AutoLFM.Core.Utils.LogInfo("Maestro: UnregisterCommand - Removed command '" .. key .. "'")
+  return true
+end
+
 --=============================================================================
 -- INITIALIZATION SYSTEM
 --=============================================================================
@@ -355,29 +380,58 @@ local function flushPendingInits()
   pendingInits = nil
 end
 
+--[[
+  TOPOLOGICAL SORT ALGORITHM (Kahn's Algorithm)
+
+  Purpose: Determine the correct initialization order for modules with dependencies.
+
+  How it works:
+  1. Build a directed graph where edges represent "depends on" relationships
+  2. Count incoming edges (in-degree) for each node
+  3. Start with nodes that have no dependencies (in-degree = 0)
+  4. Process each node, reducing in-degree of its dependents
+  5. When a dependent's in-degree becomes 0, add it to the queue
+  6. If all nodes are processed, we have a valid order; otherwise, circular dependency exists
+
+  Example:
+    A depends on nothing (in-degree = 0) → processed first
+    B depends on A (in-degree = 1) → processed after A
+    C depends on A and B (in-degree = 2) → processed after both A and B
+
+  Time complexity: O(V + E) where V = vertices (handlers), E = edges (dependencies)
+]]
+
 --- Builds the dependency graph for topological sort
+--- Creates three data structures needed for Kahn's algorithm:
+--- - inDegree: how many dependencies each handler has (incoming edge count)
+--- - adjacency: which handlers depend on each handler (outgoing edges)
+--- - allIds: list of all handler IDs for iteration
 --- @param handlers table - Map of {id = {handler, dependencies}} entries
 --- @return table, table, table - inDegree map, adjacency map, sorted array of all IDs
 local function buildDependencyGraph(handlers)
-  local inDegree = {}
-  local adjacency = {}
-  local allIds = {}
+  local inDegree = {}   -- inDegree[id] = number of dependencies this handler has
+  local adjacency = {}  -- adjacency[id] = array of handlers that depend on this one
+  local allIds = {}     -- All handler IDs for iteration
 
-  -- Initialize structures
+  -- Step 1: Initialize data structures for each handler
+  -- Every handler starts with in-degree 0 and empty adjacency list
   for id, data in pairs(handlers) do
       table.insert(allIds, id)
       inDegree[id] = 0
       adjacency[id] = {}
   end
 
-  -- Sort by ID to ensure deterministic order
+  -- Sort by ID to ensure deterministic order across runs
+  -- Without this, pairs() iteration order is undefined
   table.sort(allIds, function(a, b)
       local idA = handlers[a].id or "I99"
       local idB = handlers[b].id or "I99"
       return idA < idB
   end)
 
-  -- Build dependency edges
+  -- Step 2: Build edges from dependencies
+  -- For each dependency: dependency → handler (dependency must run first)
+  -- Increment in-degree of the handler (it has one more thing to wait for)
   for id, data in pairs(handlers) do
       for i = 1, table.getn(data.dependencies) do
           local dep = data.dependencies[i]
@@ -385,7 +439,9 @@ local function buildDependencyGraph(handlers)
               error("Maestro: Init handler '" .. id .. "' depends on unknown handler '" .. dep .. "'")
               return nil, nil, nil
           end
+          -- Add edge: dep → id (id depends on dep)
           table.insert(adjacency[dep], id)
+          -- Increment in-degree: id now has one more dependency
           inDegree[id] = inDegree[id] + 1
       end
   end
@@ -394,13 +450,15 @@ local function buildDependencyGraph(handlers)
 end
 
 --- Finds all nodes with no dependencies (in-degree = 0)
+--- These are the "roots" of the dependency graph - handlers that can run immediately
 --- @param inDegree table - Map of node ID to in-degree count
 --- @param allIds table - Array of all node IDs
---- @return table - Array of nodes with zero in-degree
+--- @return table - Array of nodes with zero in-degree (ready to process)
 local function findNodesWithoutDependencies(inDegree, allIds)
   local queue = {}
   for i = 1, table.getn(allIds) do
       local id = allIds[i]
+      -- in-degree 0 means no dependencies - this handler can run now
       if inDegree[id] == 0 then
           table.insert(queue, id)
       end
@@ -409,36 +467,48 @@ local function findNodesWithoutDependencies(inDegree, allIds)
 end
 
 --- Processes the dependency queue using Kahn's algorithm
+--- This is the core of the topological sort:
+--- 1. Take a node with no remaining dependencies (in-degree = 0)
+--- 2. Add it to the sorted output
+--- 3. "Remove" it from the graph by decrementing in-degree of all dependents
+--- 4. If any dependent now has in-degree 0, add it to the queue
+--- 5. Repeat until queue is empty
 --- @param queue table - Initial queue of nodes with no dependencies
 --- @param inDegree table - Map of node ID to in-degree count
 --- @param adjacency table - Map of node ID to array of dependent nodes
 --- @param handlers table - Original handlers map (for ID sorting)
 --- @return table|nil - Sorted array of node IDs, or nil if circular dependency detected
 local function processDependencyQueue(queue, inDegree, adjacency, handlers, allIds)
-  local sorted = {}
+  local sorted = {}  -- Output: handlers in correct initialization order
 
   while table.getn(queue) > 0 do
-      -- Always take the handler with lowest ID to ensure deterministic order
+      -- Sort queue by ID for deterministic output order
+      -- Without this, handlers with same dependencies could run in any order
       table.sort(queue, function(a, b)
           local idA = handlers[a].id or "I99"
           local idB = handlers[b].id or "I99"
           return idA < idB
       end)
 
+      -- Take the first handler from queue (lowest ID among ready handlers)
       local current = table.remove(queue, 1)
       table.insert(sorted, current)
 
-      -- Process neighbors and reduce their in-degree
+      -- "Remove" this handler from the graph by processing its dependents
+      -- For each handler that depends on current, decrement its in-degree
       for i = 1, table.getn(adjacency[current]) do
           local neighbor = adjacency[current][i]
           inDegree[neighbor] = inDegree[neighbor] - 1
+          -- If all dependencies are now satisfied, add to queue
           if inDegree[neighbor] == 0 then
               table.insert(queue, neighbor)
           end
       end
   end
 
-  -- Check for circular dependencies
+  -- Circular dependency detection:
+  -- If we processed all handlers, sorted count == total count
+  -- If some handlers remain (in-degree > 0), they form a cycle
   if table.getn(sorted) ~= table.getn(allIds) then
       error("Maestro: Circular dependency detected in init handlers")
       return nil
@@ -557,7 +627,8 @@ end
 --- Registers a state namespace with an initial value
 --- @param namespace string - Unique identifier for this state (e.g., "Selection.Dungeons")
 --- @param initialValue any - Initial state value (can be table, number, boolean, etc.)
---- @param options table - Optional table with {id=string}
+--- @param options table - Optional table with {id=string, validator=function}
+---   validator: Optional function(value) -> boolean that validates state values before SetState
 --- @return string - The ID assigned to this state (e.g., "S01")
 function AutoLFM.Core.Maestro.RegisterState(namespace, initialValue, options)
   if not namespace or type(namespace) ~= "string" then
@@ -577,7 +648,8 @@ function AutoLFM.Core.Maestro.RegisterState(namespace, initialValue, options)
   stateRegistry[namespace] = {
     value = initialValue,
     subscribers = {},
-    id = stateId
+    id = stateId,
+    validator = opts.validator  -- Optional validator function
   }
 
   -- Don't log here anymore - will be logged in batch during RunInit
@@ -598,12 +670,29 @@ end
 
 --- Sets a new value for a state namespace and notifies all subscribers
 --- Emits a Maestro event: "State.Changed.<namespace>"
+--- If a validator was registered, validates the value before setting
 --- @param namespace string - The state namespace to update
 --- @param newValue any - The new state value
+--- @return boolean - true if value was set, false if validation failed
 function AutoLFM.Core.Maestro.SetState(namespace, newValue)
   if not stateRegistry[namespace] then
     AutoLFM.Core.Utils.LogError("SetState: namespace '" .. tostring(namespace) .. "' not registered")
-    return
+    return false
+  end
+
+  -- Run validator if one was registered
+  local validator = stateRegistry[namespace].validator
+  if validator then
+    local isValid, err = pcall(validator, newValue)
+    if not isValid then
+      AutoLFM.Core.Utils.LogError("SetState: validator error for '" .. namespace .. "': " .. tostring(err))
+      return false
+    end
+    -- If validator returned false (not error), reject the value
+    if err == false then
+      AutoLFM.Core.Utils.LogWarning("SetState: validation failed for '" .. namespace .. "'")
+      return false
+    end
   end
 
   local oldValue = stateRegistry[namespace].value
@@ -627,6 +716,8 @@ function AutoLFM.Core.Maestro.SetState(namespace, newValue)
       oldValue = oldValue
     })
   end
+
+  return true
 end
 
 --- Subscribes a callback function to state changes

@@ -41,23 +41,35 @@ local function trim(text)
   return string.gsub(text, "^%s*(.-)%s*$", "%1")
 end
 
+--- Escapes Lua pattern special characters in a string
+--- This prevents users from accidentally (or maliciously) injecting regex patterns
+--- @param text string - Text to escape
+--- @return string - Escaped text safe for pattern matching
+local function escapePattern(text)
+  if not text then return "" end
+  -- Escape all Lua pattern magic characters: ^$()%.[]*+-?
+  return string.gsub(text, "([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+end
+
 --- Checks if a message matches any of the configured keywords
+--- Keywords are sanitized to prevent pattern injection attacks
 --- @param message string - The whisper message to check
 --- @param keywords table - Array of keyword strings to match
 --- @return boolean - True if any keyword matches
 local function matchesKeyword(message, keywords)
   local lowerMsg = string.lower(trim(message))
-  
+
   for i = 1, table.getn(keywords) do
     local keyword = keywords[i]
     if keyword and keyword ~= "" then
-      local lowerKey = string.lower(keyword)
-      if string.find(lowerMsg, lowerKey, 1, true) then
+      -- Sanitize keyword to prevent pattern injection
+      local sanitizedKey = escapePattern(string.lower(keyword))
+      if string.find(lowerMsg, sanitizedKey) then
         return true
       end
     end
   end
-  
+
   return false
 end
 

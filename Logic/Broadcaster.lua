@@ -80,10 +80,42 @@ end
 -- MESSAGE BROADCASTING
 --=============================================================================
 
---- Sends a message to a specific channel
+--- Retry frame for deferred broadcast retries
+local retryFrame = nil
+
+--- Schedules a retry for a failed broadcast
+--- @param sendFunc function - The send function to retry
+--- @param args table - Arguments to pass to the send function
+--- @param retriesLeft number - Number of retries remaining
+local function scheduleRetry(sendFunc, args, retriesLeft)
+  if retriesLeft <= 0 then return end
+
+  if not retryFrame then
+    retryFrame = CreateFrame("Frame", "AutoLFM_RetryFrame")
+  end
+
+  local startTime = GetTime()
+  local delay = AutoLFM.Core.Constants.BROADCAST_RETRY_DELAY or 1
+
+  retryFrame:SetScript("OnUpdate", function()
+    if GetTime() - startTime >= delay then
+      retryFrame:SetScript("OnUpdate", nil)
+      retryFrame:Hide()
+      sendFunc(args.message, retriesLeft - 1)
+    end
+  end)
+  retryFrame:Show()
+end
+
+--- Sends a message to a specific channel with retry support
 --- @param channelName string - The name of the channel
 --- @param message string - The message to send
-local function sendToChannel(channelName, message)
+--- @param retries number - Number of retries remaining (optional, defaults to MAX_BROADCAST_RETRIES)
+local function sendToChannel(channelName, message, retries)
+  if retries == nil then
+    retries = AutoLFM.Core.Constants.MAX_BROADCAST_RETRIES or 2
+  end
+
   local channelID = GetChannelName(channelName)
 
   if channelID > 0 then
@@ -93,6 +125,10 @@ local function sendToChannel(channelName, message)
       return true
     else
       AutoLFM.Core.Utils.LogWarning("Failed to send to " .. channelName .. ": " .. tostring(err))
+      if retries > 0 then
+        AutoLFM.Core.Utils.LogInfo("Retrying broadcast to " .. channelName .. " (" .. retries .. " attempts left)")
+        scheduleRetry(function(msg, r) sendToChannel(channelName, msg, r) end, {message = message}, retries)
+      end
       return false
     end
   else
@@ -207,20 +243,18 @@ end
 --- Uses OnUpdate with proper throttle (avoid 'this' context issues)
 --- Design: Synchronous OnUpdate with 1-second throttle is simpler and more reliable than
 --- async timers, avoiding race conditions while maintaining acceptable CPU efficiency.
+--- Performance: Frame is hidden when not running to completely stop OnUpdate callbacks.
 local function startTimer()
-  if broadcastTimer then return end
+  if broadcastTimer then
+    -- Reuse existing frame, just show it to restart OnUpdate
+    broadcastTimer:Show()
+    return
+  end
 
   broadcastTimer = CreateFrame("Frame", "AutoLFM_BroadcastTimer")
   local lastTick = GetTime()
 
   broadcastTimer:SetScript("OnUpdate", function(self)
-    -- Guard against broadcaster being stopped while timer is running
-    local isRunning = AutoLFM.Core.Maestro.GetState("Broadcaster.IsRunning")
-    if not isRunning then
-      stopTimer()
-      return
-    end
-
     local now = GetTime()
     -- Throttle to 1 second intervals to minimize CPU usage
     -- Fires approximately 5-10 times per second from OnUpdate, we process ~1 per second
@@ -232,13 +266,12 @@ local function startTimer()
 end
 
 --- Stops the broadcast timer and cleans up resources
+--- Performance: Hiding the frame completely stops OnUpdate callbacks without destroying it
 local function stopTimer()
   if broadcastTimer then
-    broadcastTimer:SetScript("OnUpdate", nil)
     broadcastTimer:Hide()
     -- Note: Frame is not destroyed (would require unregistering from name registry)
-    -- but is hidden and disabled, so it won't consume resources
-    broadcastTimer = nil
+    -- Hiding stops OnUpdate from firing, so no CPU usage when stopped
   end
 end
 

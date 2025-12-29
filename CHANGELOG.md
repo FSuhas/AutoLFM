@@ -1,3 +1,16 @@
+## [v3.7] 2025/12/29
+- Add pre-calculated array counts (`DUNGEONS_COUNT`, `RAIDS_COUNT`, `COLORS_COUNT`) to avoid O(n) `table.getn()` calls
+- Optimize broadcast timer: reuse frame with `Show()`/`Hide()` instead of recreating
+- Factorize `forEachRow()` helper in RowList.lua to reduce code duplication
+- Add automatic retry mechanism for failed broadcasts (max 2 retries with 1s delay)
+- Add `scheduleRetry()` with dedicated frame for deferred retry execution
+- Add `escapePattern()` to sanitize auto-invite keywords against Lua pattern injection
+- Add `UnregisterCommand()` function to Maestro for command cleanup
+- Add optional `validator` parameter to `RegisterState()` for state value validation
+- `SetState()` now returns boolean indicating success/failure
+- Add comprehensive inline comments for Kahn's topological sort algorithm
+- Document all algorithm steps with examples and time complexity
+
 ## [v3.6] 2025/12/26
 - Add `ArrayContains()` and `ShallowCopy()` utility functions in Utils.lua
 - Add `SELECTION_MODES`, `ROLES`, and `VALID_ROLES` constants for type-safe mode switching

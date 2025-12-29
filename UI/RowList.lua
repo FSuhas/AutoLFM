@@ -240,15 +240,18 @@ end
 --   Generic OnShow handler for content frames with row lists
 --=============================================================================
 
---- Hides all existing rows with the given prefix (private helper)
---- Uses row cache for O(n) iteration instead of O(n) getglobal calls
+--- Iterates over all rows with a given prefix and applies a callback function
+--- Uses row cache for O(n) iteration, with fallback to getglobal if cache is empty
 --- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
-local function hideAllRows(rowPrefix)
+--- @param callback function - Function to call for each row: callback(row)
+local function forEachRow(rowPrefix, callback)
   local cachedRows = getCachedRows(rowPrefix)
-  if table.getn(cachedRows) > 0 then
+  local cachedCount = table.getn(cachedRows)
+
+  if cachedCount > 0 then
     -- Use cached rows for faster iteration
-    for i = 1, table.getn(cachedRows) do
-      cachedRows[i]:Hide()
+    for i = 1, cachedCount do
+      callback(cachedRows[i])
     end
   else
     -- Fallback to getglobal if cache is empty (first run)
@@ -258,37 +261,28 @@ local function hideAllRows(rowPrefix)
       if not row then
         break
       end
-      row:Hide()
+      callback(row)
       index = index + 1
     end
   end
 end
 
+--- Hides all existing rows with the given prefix (private helper)
+--- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
+local function hideAllRows(rowPrefix)
+  forEachRow(rowPrefix, function(row)
+    row:Hide()
+  end)
+end
+
 --- Resets backdrop colors for all rows with the given prefix (private helper)
 --- Ensures rows are transparent after DarkUI may have modified them
---- Uses row cache for O(n) iteration instead of O(n) getglobal calls
 --- @param rowPrefix string - Prefix for row names (e.g., "AutoLFM_DungeonRow")
 local function resetAllRowBackdrops(rowPrefix)
-  local cachedRows = getCachedRows(rowPrefix)
-  if table.getn(cachedRows) > 0 then
-    -- Use cached rows for faster iteration
-    for i = 1, table.getn(cachedRows) do
-      cachedRows[i]:SetBackdropColor(0, 0, 0, 0)
-      cachedRows[i]:SetBackdropBorderColor(0, 0, 0, 0)
-    end
-  else
-    -- Fallback to getglobal if cache is empty (first run)
-    local index = 1
-    while index <= AutoLFM.Core.Constants.MAX_ROWS_SAFETY do
-      local row = getglobal(rowPrefix .. index)
-      if not row then
-        break
-      end
-      row:SetBackdropColor(0, 0, 0, 0)
-      row:SetBackdropBorderColor(0, 0, 0, 0)
-      index = index + 1
-    end
-  end
+  forEachRow(rowPrefix, function(row)
+    row:SetBackdropColor(0, 0, 0, 0)
+    row:SetBackdropBorderColor(0, 0, 0, 0)
+  end)
 end
 
 --- Generic OnShow handler for content frames with row-based lists

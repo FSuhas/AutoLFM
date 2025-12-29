@@ -269,3 +269,21 @@ AutoLFM.Core.Constants.DUNGEONS_BY_NAME = {}
 -- Built on first use by GetRaidByName() for performance
 -- Allows fast raid lookups without iterating RAIDS array
 AutoLFM.Core.Constants.RAIDS_BY_NAME = {}
+
+--=============================================================================
+-- PRE-CALCULATED COUNTS (PERFORMANCE OPTIMIZATION)
+--=============================================================================
+-- Pre-calculated array lengths to avoid O(n) table.getn() calls
+-- These values are constant and never change at runtime
+AutoLFM.Core.Constants.DUNGEONS_COUNT = 40
+AutoLFM.Core.Constants.RAIDS_COUNT = 13
+AutoLFM.Core.Constants.COLORS_COUNT = 12
+
+--=============================================================================
+-- BROADCAST RETRY CONSTANTS
+--=============================================================================
+-- MAX_BROADCAST_RETRIES: Maximum number of retry attempts for failed broadcasts
+AutoLFM.Core.Constants.MAX_BROADCAST_RETRIES = 2
+
+-- BROADCAST_RETRY_DELAY: Delay in seconds between retry attempts
+AutoLFM.Core.Constants.BROADCAST_RETRY_DELAY = 1
