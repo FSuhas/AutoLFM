@@ -99,7 +99,10 @@ end
 --- Checks if dark mode is enabled
 --- @return boolean - True if dark mode enabled
 function AutoLFM.API.IsDarkModeEnabled()
-  return AutoLFM.Core.Maestro.GetState("Settings.DarkMode") or false
+  if AutoLFM.Core.Storage and AutoLFM.Core.Storage.GetDarkMode then
+    return AutoLFM.Core.Storage.GetDarkMode() or false
+  end
+  return false
 end
 
 --- Checks if dry run mode is enabled

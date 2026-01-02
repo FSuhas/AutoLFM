@@ -1,3 +1,12 @@
+## [v3.8] 2026/01/02
+- Fix duplicate Listener IDs: L05/L06 were used twice (UI panels now use L10-L12)
+- Fix `API.IsDarkModeEnabled()` accessing non-existent Maestro state (now uses Storage)
+- Fix Lua 5.0 compatibility: remove unused `self` parameter in `SetScript("OnUpdate")` callback
+- Optimize `Selection.SetRaidSize()`: use O(1) `RAIDS_BY_NAME` lookup instead of O(n) loop
+- Update documentation: correct ID counts (92 total: 24 Commands, 9 Events, 12 Listeners, 20 States, 27 Init Handlers)
+- Fix documentation: Auto Invite section incorrectly listed E09-E10 (only E09 exists)
+- Update ContentPanel factory comments for clarity on ID auto-assignment (I25+)
+
 ## [v3.7] 2025/12/29
 - Add pre-calculated array counts (`DUNGEONS_COUNT`, `RAIDS_COUNT`, `COLORS_COUNT`) to avoid O(n) `table.getn()` calls
 - Optimize broadcast timer: reuse frame with `Show()`/`Hide()` instead of recreating

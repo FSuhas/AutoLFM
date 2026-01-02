@@ -254,7 +254,7 @@ local function startTimer()
   broadcastTimer = CreateFrame("Frame", "AutoLFM_BroadcastTimer")
   local lastTick = GetTime()
 
-  broadcastTimer:SetScript("OnUpdate", function(self)
+  broadcastTimer:SetScript("OnUpdate", function()
     local now = GetTime()
     -- Throttle to 1 second intervals to minimize CPU usage
     -- Fires approximately 5-10 times per second from OnUpdate, we process ~1 per second

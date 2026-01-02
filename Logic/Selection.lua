@@ -219,14 +219,10 @@ AutoLFM.Core.Maestro.RegisterCommand("Selection.SetRaidSize", function(size, sil
     return
   end
 
-  -- Find the selected raid by name to get its size bounds
-  local raid = nil
-  for i = 1, table.getn(AutoLFM.Core.Constants.RAIDS) do
-    if AutoLFM.Core.Constants.RAIDS[i].name == selectedRaidName then
-      raid = AutoLFM.Core.Constants.RAIDS[i]
-      break
-    end
-  end
+  -- Find the selected raid by name using O(1) lookup table
+  AutoLFM.Core.Utils.EnsureLookupTables()
+  local raidInfo = AutoLFM.Core.Constants.RAIDS_BY_NAME[selectedRaidName]
+  local raid = raidInfo and raidInfo.data
 
   if not raid then
     AutoLFM.Core.Utils.LogError("Selection.SetRaidSize: Selected raid '" .. tostring(selectedRaidName) .. "' not found in raid database")

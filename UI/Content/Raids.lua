@@ -169,5 +169,5 @@ AutoLFM.UI.Content.Raids = AutoLFM.UI.CreateContentPanel({
   clearCacheFunc = nil,  -- No cache to clear for raids
   listeningEvent = "Selection.Changed",
   listenerDependencies = { "Logic.Selection" },
-  listenerId = "L06"
+  listenerId = "L11"
 })
