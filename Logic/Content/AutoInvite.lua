@@ -84,10 +84,10 @@ local function sendInviteConfirmation(sender, useRandomMsg)
   end
 end
 
---- Sends rejection message when not leader
+--- Sends rejection message when not leader or assist
 --- @param sender string - Player name to send to
 local function sendNotLeaderMessage(sender)
-  SendChatMessage("Cannot invite: I'm not the group leader.", "WHISPER", nil, sender)
+  SendChatMessage("Cannot invite: I'm not leader or assist.", "WHISPER", nil, sender)
 end
 
 --=============================================================================
@@ -177,16 +177,16 @@ AutoLFM.Core.Maestro.RegisterEvent("AutoInvite.Changed", { id = "E09" })
 -- EVENT HANDLERS
 --=============================================================================
 
---- Handles group leader changes
---- No longer disables AutoInvite; it simply won't work until player becomes leader again
+--- Handles group leader/assist changes
+--- No longer disables AutoInvite; it simply won't work until player becomes leader or assist again
 --- @param data table - Leader change data with isLeader field
 local function onLeaderChanged(data)
-  -- AutoInvite remains enabled even if player loses leadership
-  -- It will simply not invite anyone until player becomes leader again
+  -- AutoInvite remains enabled even if player loses leadership/assist
+  -- It will simply not invite anyone until player becomes leader or assist again
   if not data.isLeader then
-    AutoLFM.Core.Utils.LogInfo("Auto Invite paused: You are no longer the group leader (will resume if you become leader again)")
+    AutoLFM.Core.Utils.LogInfo("Auto Invite paused: You are no longer leader or assist (will resume if you become leader or assist again)")
   else
-    AutoLFM.Core.Utils.LogInfo("Auto Invite active: You are now the group leader")
+    AutoLFM.Core.Utils.LogInfo("Auto Invite active: You are now leader or assist")
   end
 end
 

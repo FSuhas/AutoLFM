@@ -4,7 +4,7 @@
 ## Author: Gondoleon, NSO73
 ## SavedVariables: V3_Settings, V3_Presets
 ## OptionalDeps: pfQuest, ShaguTweaks
-## Version: 3.8
+## Version: 3.9
 
 #=============================================================================
 # Github Repository: https://github.com/FSuhas/AutoLFM

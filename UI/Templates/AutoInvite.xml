@@ -31,9 +31,8 @@
             </Anchors>
             <Frames>
               <!--==================================================================
-                Group Leader Status (Read-Only Radio Buttons at Top)
+                Leader or Assist Status (Read-Only Radio Buttons at Top)
                 ==================================================================-->
-              <!-- Yes Radio (Green) -->
               <CheckButton name="$parent_LeaderYesRadio" inherits="UIRadioButtonTemplate">
                 <Size>
                   <AbsDimension x="16" y="16"/>
@@ -47,7 +46,8 @@
                 </Anchors>
                 <Layers>
                   <Layer level="ARTWORK">
-                    <FontString name="$parent_Label" inherits="GameFontNormal" text="Group leader">
+                    <FontString name="$parent_Label" inherits="GameFontNormal" text="Leader/Assist">
+                      <Color r="1" g="1" b="1"/>
                       <Anchors>
                         <Anchor point="LEFT" relativePoint="RIGHT">
                           <Offset>
@@ -64,7 +64,6 @@
                   </OnLoad>
                 </Scripts>
               </CheckButton>
-              <!-- No Radio (Red) -->
               <CheckButton name="$parent_LeaderNoRadio" inherits="UIRadioButtonTemplate">
                 <Size>
                   <AbsDimension x="16" y="16"/>
@@ -79,6 +78,7 @@
                 <Layers>
                   <Layer level="ARTWORK">
                     <FontString name="$parent_Label" inherits="GameFontNormal" text="No leadership">
+                      <Color r="1" g="1" b="1"/>
                       <Anchors>
                         <Anchor point="LEFT" relativePoint="RIGHT">
                           <Offset>
@@ -95,7 +95,6 @@
                   </OnLoad>
                 </Scripts>
               </CheckButton>
-              <!-- Separator Line -->
               <Frame name="$parent_LeaderSeparator">
                 <Size>
                   <AbsDimension x="300" y="1"/>

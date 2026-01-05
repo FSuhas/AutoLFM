@@ -17,14 +17,14 @@ local MAX_KEYWORDS = 4  -- Maximum keyword slots in UI
 -----------------------------------------------------------------------------
 -- Helper: Apply Colors to Leader Status Radio Buttons
 -----------------------------------------------------------------------------
---- Colors the "Group leader" radio button green and "No leadership" radio button red
+--- Colors the "Leader/Assist" radio button green and "No leadership" radio button red
 local function ApplyLeaderColors()
   if not panel then return end
   
   local scrollChild = AutoLFM.UI.RowList.GetScrollChild(panel)
   if not scrollChild then return end
   
-  -- Color "Group leader" radio button green
+  -- Color "Leader/Assist" radio button green
   local leaderRadio = getglobal(scrollChild:GetName().."_LeaderYesRadio")
   if leaderRadio then
     leaderRadio:SetCheckedTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\RadioButton")
@@ -138,23 +138,45 @@ function AutoLFM.UI.Content.AutoInvite.SetupKeywordEditBoxes()
 end
 
 -----------------------------------------------------------------------------
+-- Helper: Check if player can lead (leader, raid leader, or raid officer)
+-----------------------------------------------------------------------------
+--- Checks if player has leadership permissions (leader, raid leader, or assistant)
+--- @return boolean - True if player can lead
+local function canPlayerLead()
+  -- Solo player acts like leader
+  if not UnitInParty("player") then
+    return true
+  end
+  -- Party/raid leader
+  if UnitIsPartyLeader("player") then
+    return true
+  end
+  -- Raid leader
+  if IsRaidLeader and IsRaidLeader() then
+    return true
+  end
+  -- Raid assistant (officer)
+  if IsRaidOfficer and IsRaidOfficer() then
+    return true
+  end
+  return false
+end
+
+-----------------------------------------------------------------------------
 -- Helper: Update Leader Status Display
 -----------------------------------------------------------------------------
 --- Updates the leader status radio buttons based on current group status
 local function UpdateLeaderStatus()
   if not panel then return end
-  
+
   local scrollChild = AutoLFM.UI.RowList.GetScrollChild(panel)
   if not scrollChild then return end
-  
-  local isLeader = UnitIsPartyLeader("player")
-  if not UnitInParty("player") then
-    isLeader = true  -- Solo player acts like leader
-  end
-  
+
+  local isLeader = canPlayerLead()
+
   local yesRadio = getglobal(scrollChild:GetName().."_LeaderYesRadio")
   local noRadio = getglobal(scrollChild:GetName().."_LeaderNoRadio")
-  
+
   if yesRadio and noRadio then
     if isLeader then
       yesRadio:SetChecked(1)
@@ -255,7 +277,7 @@ function AutoLFM.UI.Content.AutoInvite.OnRandomMessagesRadioClick(isEnabled)
 end
 
 --- Handles respond when not leader radio button clicks (On/Off)
---- Toggles whether to respond to whispers when player is not group leader
+--- Toggles whether to respond to whispers when player is not leader or assist
 --- @param isEnabled boolean - True to respond when not leader, false to stay silent
 function AutoLFM.UI.Content.AutoInvite.OnRespondNotLeaderRadioClick(isEnabled)
   if isRestoringState then return end

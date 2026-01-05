@@ -1,3 +1,10 @@
+## [v3.9] 2026/01/05
+- Add raid assist (IsRaidOfficer) and raid leader (IsRaidLeader) support for auto-invite
+- Raid assistants can now use auto-invite functions like leaders
+- Listen to RAID_ROSTER_UPDATE for promotion/demotion detection
+- Update UI label "Group leader" to "Leader/Assist" with white text color
+- Update whisper messages to reflect leader/assist terminology
+
 ## [v3.8] 2026/01/02
 - Fix duplicate Listener IDs: L05/L06 were used twice (UI panels now use L10-L12)
 - Fix `API.IsDarkModeEnabled()` accessing non-existent Maestro state (now uses Storage)

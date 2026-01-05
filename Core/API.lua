@@ -86,8 +86,8 @@ function AutoLFM.API.GetGroupType()
   return AutoLFM.Core.Maestro.GetState("Group.Type") or "solo"
 end
 
---- Checks if player is group leader
---- @return boolean - True if leader (or solo)
+--- Checks if player is group leader or raid assist
+--- @return boolean - True if leader, raid leader, raid assist, or solo
 function AutoLFM.API.IsGroupLeader()
   return AutoLFM.Core.Maestro.GetState("Group.IsLeader") or false
 end

@@ -85,9 +85,27 @@ local function onGroupRosterChange()
   end
 end
 
+--- Checks if player can lead (is leader, raid leader, or raid assistant)
+--- @return boolean - True if player is leader, raid leader, or raid officer
+local function canPlayerLead()
+  -- Solo or party leader
+  if UnitIsPartyLeader("player") then
+    return true
+  end
+  -- Raid leader
+  if IsRaidLeader and IsRaidLeader() then
+    return true
+  end
+  -- Raid assistant (officer) can also invite
+  if IsRaidOfficer and IsRaidOfficer() then
+    return true
+  end
+  return false
+end
+
 --- Handles PARTY_LEADER_CHANGED event - dispatches event
 local function onPartyLeaderChanged()
-  local isLeader = UnitIsPartyLeader("player") or false
+  local isLeader = canPlayerLead()
   AutoLFM.Core.Maestro.SetState("Group.IsLeader", isLeader)
   AutoLFM.Core.Maestro.Dispatch("Group.LeaderChanged", { isLeader = isLeader })
 end
@@ -116,8 +134,12 @@ local function onEvent(eventName)
     onQuestLogUpdate()
   elseif eventName == "PLAYER_LEVEL_UP" then
     onPlayerLevelUp()
-  elseif eventName == "PARTY_MEMBERS_CHANGED" or eventName == "RAID_ROSTER_UPDATE" then
+  elseif eventName == "PARTY_MEMBERS_CHANGED" then
     onGroupRosterChange()
+  elseif eventName == "RAID_ROSTER_UPDATE" then
+    onGroupRosterChange()
+    -- Also check leader/officer status on raid roster changes (promotions/demotions)
+    onPartyLeaderChanged()
   elseif eventName == "PARTY_LEADER_CHANGED" then
     onPartyLeaderChanged()
   elseif eventName == "CHAT_MSG_WHISPER" then
@@ -152,7 +174,7 @@ function AutoLFM.Core.Events.Init()
 
   AutoLFM.Core.Maestro.SetState("Group.Type", initialType)
   AutoLFM.Core.Maestro.SetState("Group.Size", initialSize)
-  AutoLFM.Core.Maestro.SetState("Group.IsLeader", UnitIsPartyLeader("player") or false)
+  AutoLFM.Core.Maestro.SetState("Group.IsLeader", canPlayerLead())
 
   AutoLFM.Core.Utils.LogInfo("Event system initialized (6 WoW events monitored)")
 end
