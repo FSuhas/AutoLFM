@@ -10,15 +10,32 @@ AutoLFM.Logic.AutoInvite = {}
 -- PRIVATE STATE
 --=============================================================================
 
+-- Cooldown tracking: stores last invite time per player to prevent spam
+-- Key: player name (lowercase), Value: GetTime() timestamp of last invite
+local lastInviteTime = {}
+
+-- Cleanup timer frame (created on demand)
+local cleanupFrame = nil
+local lastCleanupTime = 0
+
 --=============================================================================
 -- INVITE MESSAGES
 --=============================================================================
+-- Mixed pool of themed (Light/Crusade) and generic messages for variety
 local inviteMessages = {
   "%s, the Light demands your presence!",
   "%s, by the Light! Join us!",
   "%s, the Light calls you to adventure!",
   "%s, the crusade awaits!",
-  "%s, blessed hammer in hand, join the fight!"
+  "%s, blessed hammer in hand, join the fight!",
+  "%s, you're in! Welcome aboard.",
+  "%s, grab your gear and let's go!",
+  "Welcome %s! Let's do this.",
+  "%s, invitation sent! See you soon.",
+  "Hey %s! You're invited, join up!",
+  "%s, pack your bags, adventure awaits!",
+  "Roger that %s, you're in!",
+  "%s, we've got room for one more hero!"
 }
 
 --- Returns a random invitation message with the target name
@@ -49,6 +66,79 @@ local function escapePattern(text)
   if not text then return "" end
   -- Escape all Lua pattern magic characters: ^$()%.[]*+-?
   return string.gsub(text, "([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+end
+
+--- Checks if a player is on cooldown (recently invited)
+--- Prevents spam if someone sends multiple whispers quickly
+--- @param sender string - Player name to check
+--- @return boolean - True if player can be invited, false if on cooldown
+local function canInvitePlayer(sender)
+  local senderLower = string.lower(sender)
+  local now = GetTime()
+  local lastTime = lastInviteTime[senderLower]
+  local cooldown = AutoLFM.Core.Constants.INVITE_COOLDOWN or 5
+
+  if lastTime and (now - lastTime) < cooldown then
+    AutoLFM.Core.Utils.LogInfo("Auto-invite cooldown: " .. sender .. " (wait " .. math.ceil(cooldown - (now - lastTime)) .. "s)")
+    return false
+  end
+
+  return true
+end
+
+--- Records an invite timestamp for cooldown tracking
+--- @param sender string - Player name that was invited
+local function recordInvite(sender)
+  local senderLower = string.lower(sender)
+  lastInviteTime[senderLower] = GetTime()
+end
+
+--- Removes expired entries from cooldown table to prevent unbounded memory growth
+--- Called periodically by cleanup timer
+local function cleanupExpiredCooldowns()
+  local now = GetTime()
+  local cooldown = AutoLFM.Core.Constants.INVITE_COOLDOWN or 5
+  local removedCount = 0
+
+  for playerName, timestamp in pairs(lastInviteTime) do
+    if (now - timestamp) > cooldown then
+      lastInviteTime[playerName] = nil
+      removedCount = removedCount + 1
+    end
+  end
+
+  if removedCount > 0 then
+    AutoLFM.Core.Utils.LogInfo("Auto-invite cleanup: removed " .. removedCount .. " expired entries")
+  end
+end
+
+--- Starts the periodic cleanup timer (only when auto-invite is enabled)
+local function startCleanupTimer()
+  if not cleanupFrame then
+    cleanupFrame = CreateFrame("Frame", "AutoLFM_InviteCooldownCleanup")
+    cleanupFrame:Hide()  -- Hidden by default until Show() is called
+    cleanupFrame:SetScript("OnUpdate", function()
+      local now = GetTime()
+      local interval = AutoLFM.Core.Constants.INVITE_COOLDOWN_CLEANUP_INTERVAL or 60
+
+      if (now - lastCleanupTime) >= interval then
+        lastCleanupTime = now
+        cleanupExpiredCooldowns()
+      end
+    end)
+  end
+
+  lastCleanupTime = GetTime()
+  cleanupFrame:Show()
+end
+
+--- Stops the periodic cleanup timer and clears cooldown data (when auto-invite is disabled)
+local function stopCleanupTimer()
+  if cleanupFrame then
+    cleanupFrame:Hide()
+  end
+  -- Clear cooldown table to free memory immediately
+  lastInviteTime = {}
 end
 
 --- Checks if a message matches any of the configured keywords
@@ -105,32 +195,37 @@ local function handleWhisper(data)
   local message = data.message
   local sender = data.sender
   if not message or not sender then return end
-  
+
   -- Ignore self-whispers
   if sender == UnitName("player") then return end
-  
+
   -- Check if message matches any keyword
   local keywords = AutoLFM.Core.Storage.GetAutoInviteKeywords() or {"+1"}
   if not matchesKeyword(message, keywords) then return end
-  
+
+  -- Check cooldown to prevent spam from same player
+  if not canInvitePlayer(sender) then return end
+
   -- Get settings
   local sendConfirm = AutoLFM.Core.Storage.GetAutoInviteConfirm()
   local useRandomMsg = AutoLFM.Core.Storage.GetAutoInviteRandomMessages()
   local respondWhenNotLeader = AutoLFM.Core.Storage.GetAutoInviteRespondWhenNotLeader()
-  
+
   -- Check if we can invite
   if AutoLFM.Logic.Group.CanInvite() then
     InviteByName(sender)
-    
+    recordInvite(sender)  -- Record invite for cooldown tracking
+
     if sendConfirm then
       sendInviteConfirmation(sender, useRandomMsg)
     end
-    
+
     AutoLFM.Core.Utils.LogAction("Auto-invited " .. sender)
   else
     -- Not leader, optionally send message
     if respondWhenNotLeader and sendConfirm then
       sendNotLeaderMessage(sender)
+      recordInvite(sender)  -- Also record to prevent spam of "not leader" messages
     end
   end
 end
@@ -143,6 +238,7 @@ end
 --- Activates automatic group invitations based on whisper keywords
 AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.Enable", function()
   AutoLFM.Core.Storage.SetAutoInviteEnabled(true)
+  startCleanupTimer()
   AutoLFM.Core.Utils.PrintSuccess("Auto Invite enabled")
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
 end, { id = "C23" })
@@ -151,6 +247,7 @@ end, { id = "C23" })
 --- Deactivates automatic group invitations
 AutoLFM.Core.Maestro.RegisterCommand("AutoInvite.Disable", function()
   AutoLFM.Core.Storage.SetAutoInviteEnabled(false)
+  stopCleanupTimer()
   AutoLFM.Core.Utils.PrintWarning("Auto Invite disabled")
   AutoLFM.Core.Maestro.Dispatch("AutoInvite.Changed")
 end, { id = "C22" })
@@ -203,13 +300,18 @@ AutoLFM.Core.SafeRegisterInit("Logic.AutoInvite", function()
     handleWhisper,
     { id = "L07" }
   )
-  
+
   AutoLFM.Core.Maestro.Listen(
     "AutoInvite.OnLeaderChanged",
     "Group.LeaderChanged",
     onLeaderChanged,
     { id = "L08" }
   )
+
+  -- Start periodic cleanup only if auto-invite is already enabled
+  if AutoLFM.Core.Storage.GetAutoInviteEnabled() then
+    startCleanupTimer()
+  end
 end, {
   id = "I16",
   dependencies = { "Core.Events" }

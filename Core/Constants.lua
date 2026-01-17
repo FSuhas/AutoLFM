@@ -271,13 +271,13 @@ AutoLFM.Core.Constants.DUNGEONS_BY_NAME = {}
 AutoLFM.Core.Constants.RAIDS_BY_NAME = {}
 
 --=============================================================================
--- PRE-CALCULATED COUNTS (PERFORMANCE OPTIMIZATION)
+-- DYNAMIC COUNTS (CALCULATED AT RUNTIME)
 --=============================================================================
--- Pre-calculated array lengths to avoid O(n) table.getn() calls
--- These values are constant and never change at runtime
-AutoLFM.Core.Constants.DUNGEONS_COUNT = 40
-AutoLFM.Core.Constants.RAIDS_COUNT = 13
-AutoLFM.Core.Constants.COLORS_COUNT = 12
+-- These values are calculated dynamically in Core/Utils.lua BuildLookupTables()
+-- Initial values are placeholders - actual counts are set when lookup tables are built
+-- This ensures counts stay in sync when DUNGEONS/RAIDS arrays are modified
+AutoLFM.Core.Constants.DUNGEONS_COUNT = 0  -- Updated by BuildLookupTables()
+AutoLFM.Core.Constants.RAIDS_COUNT = 0     -- Updated by BuildLookupTables()
 
 --=============================================================================
 -- BROADCAST RETRY CONSTANTS
@@ -287,3 +287,14 @@ AutoLFM.Core.Constants.MAX_BROADCAST_RETRIES = 2
 
 -- BROADCAST_RETRY_DELAY: Delay in seconds between retry attempts
 AutoLFM.Core.Constants.BROADCAST_RETRY_DELAY = 1
+
+--=============================================================================
+-- AUTO-INVITE CONSTANTS
+--=============================================================================
+-- INVITE_COOLDOWN: Seconds before same player can trigger auto-invite again
+-- Prevents spam if someone sends multiple whispers quickly
+AutoLFM.Core.Constants.INVITE_COOLDOWN = 5
+
+-- INVITE_COOLDOWN_CLEANUP_INTERVAL: Seconds between cooldown table cleanup runs
+-- Removes expired entries to prevent unbounded memory growth
+AutoLFM.Core.Constants.INVITE_COOLDOWN_CLEANUP_INTERVAL = 60

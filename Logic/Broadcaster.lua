@@ -83,7 +83,8 @@ end
 --- Retry frame for deferred broadcast retries
 local retryFrame = nil
 
---- Schedules a retry for a failed broadcast
+--- Schedules a retry for a failed broadcast with exponential backoff
+--- Delay increases with each retry attempt to avoid spam during network issues
 --- @param sendFunc function - The send function to retry
 --- @param args table - Arguments to pass to the send function
 --- @param retriesLeft number - Number of retries remaining
@@ -95,7 +96,16 @@ local function scheduleRetry(sendFunc, args, retriesLeft)
   end
 
   local startTime = GetTime()
-  local delay = AutoLFM.Core.Constants.BROADCAST_RETRY_DELAY or 1
+  local baseDelay = AutoLFM.Core.Constants.BROADCAST_RETRY_DELAY or 1
+  local maxRetries = AutoLFM.Core.Constants.MAX_BROADCAST_RETRIES or 2
+
+  -- Exponential backoff: delay = baseDelay * 2^(attempt-1)
+  -- Attempt 1 (retriesLeft=2): delay = 1 * 2^0 = 1 sec
+  -- Attempt 2 (retriesLeft=1): delay = 1 * 2^1 = 2 sec
+  local attemptNumber = maxRetries - retriesLeft + 1
+  local delay = baseDelay * math.pow(2, attemptNumber - 1)
+
+  AutoLFM.Core.Utils.LogInfo("Retry scheduled in " .. delay .. "s (attempt " .. attemptNumber .. "/" .. maxRetries .. ")")
 
   retryFrame:SetScript("OnUpdate", function()
     if GetTime() - startTime >= delay then

@@ -8,6 +8,112 @@ AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Presets = {}
 
 --=============================================================================
+-- PRESET VALIDATION
+--=============================================================================
+
+--- Validates preset data structure before loading
+--- Ensures all required fields exist and have correct types
+--- @param presetData table - The preset data to validate
+--- @return boolean, string - true if valid, false + error message if not
+local function validatePresetData(presetData)
+  if not presetData then
+    return false, "Preset data is nil"
+  end
+
+  if type(presetData) ~= "table" then
+    return false, "Preset data is not a table"
+  end
+
+  -- Validate dungeonNames (optional, but must be array if present)
+  if presetData.dungeonNames then
+    if type(presetData.dungeonNames) ~= "table" then
+      return false, "dungeonNames must be a table"
+    end
+    -- Validate each dungeon name is a string
+    for i = 1, table.getn(presetData.dungeonNames) do
+      if type(presetData.dungeonNames[i]) ~= "string" then
+        return false, "dungeonNames[" .. i .. "] must be a string"
+      end
+    end
+  end
+
+  -- Validate raidName (optional, but must be string if present)
+  if presetData.raidName and type(presetData.raidName) ~= "string" then
+    return false, "raidName must be a string"
+  end
+
+  -- Validate raidSize (optional, but must be number in valid range if present)
+  if presetData.raidSize then
+    if type(presetData.raidSize) ~= "number" then
+      return false, "raidSize must be a number"
+    end
+    if presetData.raidSize < 10 or presetData.raidSize > 40 then
+      return false, "raidSize must be between 10 and 40"
+    end
+  end
+
+  -- Validate roles (optional, but must be array of valid role strings if present)
+  if presetData.roles then
+    if type(presetData.roles) ~= "table" then
+      return false, "roles must be a table"
+    end
+    local validRoles = { TANK = true, HEAL = true, DPS = true }
+    for i = 1, table.getn(presetData.roles) do
+      local role = presetData.roles[i]
+      if type(role) ~= "string" or not validRoles[role] then
+        return false, "roles[" .. i .. "] must be TANK, HEAL, or DPS"
+      end
+    end
+  end
+
+  -- Validate customMessage (optional, but must be string if present)
+  if presetData.customMessage and type(presetData.customMessage) ~= "string" then
+    return false, "customMessage must be a string"
+  end
+
+  -- Validate detailsText (optional, but must be string if present)
+  if presetData.detailsText and type(presetData.detailsText) ~= "string" then
+    return false, "detailsText must be a string"
+  end
+
+  -- Validate customGroupSize (optional, but must be number in valid range if present)
+  if presetData.customGroupSize then
+    if type(presetData.customGroupSize) ~= "number" then
+      return false, "customGroupSize must be a number"
+    end
+    if presetData.customGroupSize < 1 or presetData.customGroupSize > 40 then
+      return false, "customGroupSize must be between 1 and 40"
+    end
+  end
+
+  -- Validate activeChannels (optional, but must be array of strings if present)
+  if presetData.activeChannels then
+    if type(presetData.activeChannels) ~= "table" then
+      return false, "activeChannels must be a table"
+    end
+    for i = 1, table.getn(presetData.activeChannels) do
+      if type(presetData.activeChannels[i]) ~= "string" then
+        return false, "activeChannels[" .. i .. "] must be a string"
+      end
+    end
+  end
+
+  -- Validate broadcastInterval (optional, but must be number in valid range if present)
+  if presetData.broadcastInterval then
+    if type(presetData.broadcastInterval) ~= "number" then
+      return false, "broadcastInterval must be a number"
+    end
+    local minInterval = AutoLFM.Core.Constants.MIN_BROADCAST_INTERVAL or 30
+    local maxInterval = AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL or 120
+    if presetData.broadcastInterval < minInterval or presetData.broadcastInterval > maxInterval then
+      return false, "broadcastInterval must be between " .. minInterval .. " and " .. maxInterval
+    end
+  end
+
+  return true, ""
+end
+
+--=============================================================================
 -- PRESET STATE CAPTURE AND RESTORE
 --=============================================================================
 
@@ -147,6 +253,14 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
 
   if not presetData then
     AutoLFM.Core.Utils.LogError("Presets.Load: Preset '%s' not found (available: %d presets)", presetName, table.getn(presets.data))
+    return
+  end
+
+  -- Validate preset data before loading
+  local isValid, validationError = validatePresetData(presetData)
+  if not isValid then
+    AutoLFM.Core.Utils.LogError("Presets.Load: Invalid preset data for '%s': %s", presetName, validationError)
+    AutoLFM.Core.Utils.PrintError("Preset '" .. presetName .. "' is corrupted: " .. validationError)
     return
   end
 

@@ -1,3 +1,17 @@
+## [v3.10] 2026/01/17
+- Replace hardcoded `DUNGEONS_COUNT`/`RAIDS_COUNT` with dynamic calculation in `BuildLookupTables()`
+- Remove unused `COLORS_COUNT` constant
+- Add generic auto-invite messages (8 new messages) for more variety
+- Implement exponential backoff for broadcast retries (1s -> 2s -> 4s...)
+- Add per-player cooldown (5s) for auto-invite to prevent whisper spam
+- Move `INVITE_COOLDOWN` to Constants.lua for consistency
+- Add periodic cleanup of expired cooldown entries (prevents unbounded memory growth)
+- Make cleanup timer conditional: only runs when auto-invite is enabled (saves CPU cycles)
+- Clear cooldown table when auto-invite is disabled (immediate memory release)
+- Create cleanup frame hidden by default, remove verbose timer logging
+- Add `validatePresetData()` function to validate preset structure before loading
+- Presets with corrupted data now show explicit error message instead of failing silently
+
 ## [v3.9] 2026/01/05
 - Add raid assist (IsRaidOfficer) and raid leader (IsRaidLeader) support for auto-invite
 - Raid assistants can now use auto-invite functions like leaders
@@ -76,14 +90,14 @@
 - Add API and improve documentation
 - Optimize dungeon selection lookup performance
 - Fix timer context issue in OnUpdate handler
-- Fix SavePreset() to allow overwriting existing presets
-- Implement UnSubscribeState() function
+- Fix `SavePreset()` to allow overwriting existing presets
+- Implement `UnSubscribeState()` function
 - Add cache size limit to prevent unbounded growth
-- Verify JoinChannelByName() success
-- Optimized BuildColorLookupTable()
+- Verify `JoinChannelByName()` success
+- Optimized `BuildColorLookupTable()`
 - Implement Unsubscribe functionality for broadcast and group state listeners
 - Enhance Maestro init logging with events and commands registry display
-- Refactor Selection.lua with setSelectionMode() for mutual exclusivity
+- Refactor Selection.lua with `setSelectionMode()` for mutual exclusivity
 - Optimize registry IDs for better organization and clarity
 - Reduce Save Preset popup window size and remove preset name label
 - Add screenshots

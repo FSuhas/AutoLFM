@@ -497,26 +497,34 @@ end
 local lookupTablesBuilt = false
 
 --- Builds dungeon and raid lookup tables for O(1) name-based access (lazy loading)
+--- Also calculates and updates the count constants dynamically
 BuildLookupTables = function()
   if lookupTablesBuilt then return end
   lookupTablesBuilt = true
-  -- Build dungeon lookup table
-  for i = 1, table.getn(AutoLFM.Core.Constants.DUNGEONS) do
+
+  -- Build dungeon lookup table and calculate count dynamically
+  local dungeonCount = table.getn(AutoLFM.Core.Constants.DUNGEONS)
+  for i = 1, dungeonCount do
     local dungeon = AutoLFM.Core.Constants.DUNGEONS[i]
     AutoLFM.Core.Constants.DUNGEONS_BY_NAME[dungeon.name] = {
       index = i,
       data = dungeon
     }
   end
+  -- Update count dynamically (replaces hardcoded value)
+  AutoLFM.Core.Constants.DUNGEONS_COUNT = dungeonCount
 
-  -- Build raid lookup table
-  for i = 1, table.getn(AutoLFM.Core.Constants.RAIDS) do
+  -- Build raid lookup table and calculate count dynamically
+  local raidCount = table.getn(AutoLFM.Core.Constants.RAIDS)
+  for i = 1, raidCount do
     local raid = AutoLFM.Core.Constants.RAIDS[i]
     AutoLFM.Core.Constants.RAIDS_BY_NAME[raid.name] = {
       index = i,
       data = raid
     }
   end
+  -- Update count dynamically (replaces hardcoded value)
+  AutoLFM.Core.Constants.RAIDS_COUNT = raidCount
 end
 
 --- Public function to ensure lookup tables are built (for external modules)
