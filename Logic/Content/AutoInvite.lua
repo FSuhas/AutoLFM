@@ -14,10 +14,6 @@ AutoLFM.Logic.AutoInvite = {}
 -- Key: player name (lowercase), Value: GetTime() timestamp of last invite
 local lastInviteTime = {}
 
--- Cleanup timer frame (created on demand)
-local cleanupFrame = nil
-local lastCleanupTime = 0
-
 --=============================================================================
 -- INVITE MESSAGES
 --=============================================================================
@@ -50,24 +46,6 @@ end
 -- HELPERS
 --=============================================================================
 
---- Trims whitespace from both ends of a string
---- @param text string - Text to trim
---- @return string - Trimmed text
-local function trim(text)
-  if not text then return "" end
-  return string.gsub(text, "^%s*(.-)%s*$", "%1")
-end
-
---- Escapes Lua pattern special characters in a string
---- This prevents users from accidentally (or maliciously) injecting regex patterns
---- @param text string - Text to escape
---- @return string - Escaped text safe for pattern matching
-local function escapePattern(text)
-  if not text then return "" end
-  -- Escape all Lua pattern magic characters: ^$()%.[]*+-?
-  return string.gsub(text, "([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
-end
-
 --- Checks if a player is on cooldown (recently invited)
 --- Prevents spam if someone sends multiple whispers quickly
 --- @param sender string - Player name to check
@@ -94,8 +72,9 @@ local function recordInvite(sender)
 end
 
 --- Removes expired entries from cooldown table to prevent unbounded memory growth
---- Called periodically by cleanup timer
-local function cleanupExpiredCooldowns()
+--- Called periodically by the centralized Ticker system
+--- @param elapsed number - Time elapsed since last tick (provided by Ticker)
+local function cleanupExpiredCooldowns(elapsed)
   local now = GetTime()
   local cooldown = AutoLFM.Core.Constants.INVITE_COOLDOWN or 5
   local removedCount = 0
@@ -112,31 +91,14 @@ local function cleanupExpiredCooldowns()
   end
 end
 
---- Starts the periodic cleanup timer (only when auto-invite is enabled)
+--- Starts the periodic cleanup using the centralized Ticker system
 local function startCleanupTimer()
-  if not cleanupFrame then
-    cleanupFrame = CreateFrame("Frame", "AutoLFM_InviteCooldownCleanup")
-    cleanupFrame:Hide()  -- Hidden by default until Show() is called
-    cleanupFrame:SetScript("OnUpdate", function()
-      local now = GetTime()
-      local interval = AutoLFM.Core.Constants.INVITE_COOLDOWN_CLEANUP_INTERVAL or 60
-
-      if (now - lastCleanupTime) >= interval then
-        lastCleanupTime = now
-        cleanupExpiredCooldowns()
-      end
-    end)
-  end
-
-  lastCleanupTime = GetTime()
-  cleanupFrame:Show()
+  AutoLFM.Core.Ticker.Start(AutoLFM.Core.Constants.TICKER_IDS.INVITE_CLEANUP)
 end
 
---- Stops the periodic cleanup timer and clears cooldown data (when auto-invite is disabled)
+--- Stops the periodic cleanup and clears cooldown data
 local function stopCleanupTimer()
-  if cleanupFrame then
-    cleanupFrame:Hide()
-  end
+  AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.INVITE_CLEANUP)
   -- Clear cooldown table to free memory immediately
   lastInviteTime = {}
 end
@@ -147,13 +109,13 @@ end
 --- @param keywords table - Array of keyword strings to match
 --- @return boolean - True if any keyword matches
 local function matchesKeyword(message, keywords)
-  local lowerMsg = string.lower(trim(message))
+  local lowerMsg = string.lower(AutoLFM.Core.Utils.Trim(message))
 
   for i = 1, table.getn(keywords) do
     local keyword = keywords[i]
     if keyword and keyword ~= "" then
       -- Sanitize keyword to prevent pattern injection
-      local sanitizedKey = escapePattern(string.lower(keyword))
+      local sanitizedKey = AutoLFM.Core.Utils.EscapePattern(string.lower(keyword))
       if string.find(lowerMsg, sanitizedKey) then
         return true
       end
@@ -294,6 +256,15 @@ end
 --- Initializes AutoInvite module
 --- Registers listeners for whisper and leader change events
 AutoLFM.Core.SafeRegisterInit("Logic.AutoInvite", function()
+  -- Register cleanup ticker (60 second interval, starts stopped)
+  local cleanupInterval = AutoLFM.Core.Constants.INVITE_COOLDOWN_CLEANUP_INTERVAL or 60
+  AutoLFM.Core.Ticker.Register(
+    AutoLFM.Core.Constants.TICKER_IDS.INVITE_CLEANUP,
+    cleanupInterval,
+    cleanupExpiredCooldowns,
+    false  -- Don't start immediately
+  )
+
   AutoLFM.Core.Maestro.Listen(
     "AutoInvite.OnWhisper",
     "Chat.WhisperReceived",
@@ -314,5 +285,5 @@ AutoLFM.Core.SafeRegisterInit("Logic.AutoInvite", function()
   end
 end, {
   id = "I16",
-  dependencies = { "Core.Events" }
+  dependencies = { "Core.Events", "Core.Ticker" }
 })

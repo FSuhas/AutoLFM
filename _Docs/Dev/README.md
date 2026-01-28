@@ -60,7 +60,7 @@ User Action → Command → State Change → Event → UI Update
 
 ```
 AutoLFM/
-├── Core/           # Framework (Maestro, Events, Utils)
+├── Core/           # Framework (Maestro, Ticker, Events, Utils)
 ├── Components/     # Reusable components (Debug, MinimapButton)
 ├── Logic/          # Business logic and state management
 ├── UI/             # User interface handlers and templates

@@ -9,11 +9,20 @@ AutoLFM.Logic.Broadcaster = {}
 --=============================================================================
 -- PRIVATE STATE
 --=============================================================================
-local broadcastTimer
 local SOUNDS = {
   START = "Start.ogg",
   STOP = "Stop.ogg",
   FULL = "Full.ogg"
+}
+
+-- Retry state for failed broadcasts
+local retryState = {
+  pending = false,
+  retriesLeft = 0,
+  message = nil,
+  channelName = nil,
+  startTime = 0,
+  delay = 0
 }
 
 --=============================================================================
@@ -80,48 +89,59 @@ end
 -- MESSAGE BROADCASTING
 --=============================================================================
 
---- Retry frame for deferred broadcast retries
-local retryFrame = nil
+--- Forward declaration for sendToChannel (needed for retry callback)
+local sendToChannel
+
+--- Handles retry tick callback from Ticker system
+--- Processes pending retry if delay has elapsed
+local function onRetryTick()
+  if not retryState.pending then
+    AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
+    return
+  end
+
+  local now = GetTime()
+  if now - retryState.startTime >= retryState.delay then
+    retryState.pending = false
+    AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
+    sendToChannel(retryState.channelName, retryState.message, retryState.retriesLeft - 1)
+  end
+end
 
 --- Schedules a retry for a failed broadcast with exponential backoff
 --- Delay increases with each retry attempt to avoid spam during network issues
---- @param sendFunc function - The send function to retry
---- @param args table - Arguments to pass to the send function
+--- @param channelName string - The channel name to retry
+--- @param message string - The message to send
 --- @param retriesLeft number - Number of retries remaining
-local function scheduleRetry(sendFunc, args, retriesLeft)
+local function scheduleRetry(channelName, message, retriesLeft)
   if retriesLeft <= 0 then return end
 
-  if not retryFrame then
-    retryFrame = CreateFrame("Frame", "AutoLFM_RetryFrame")
-  end
-
-  local startTime = GetTime()
   local baseDelay = AutoLFM.Core.Constants.BROADCAST_RETRY_DELAY or 1
   local maxRetries = AutoLFM.Core.Constants.MAX_BROADCAST_RETRIES or 2
 
   -- Exponential backoff: delay = baseDelay * 2^(attempt-1)
-  -- Attempt 1 (retriesLeft=2): delay = 1 * 2^0 = 1 sec
-  -- Attempt 2 (retriesLeft=1): delay = 1 * 2^1 = 2 sec
   local attemptNumber = maxRetries - retriesLeft + 1
   local delay = baseDelay * math.pow(2, attemptNumber - 1)
 
   AutoLFM.Core.Utils.LogInfo("Retry scheduled in " .. delay .. "s (attempt " .. attemptNumber .. "/" .. maxRetries .. ")")
 
-  retryFrame:SetScript("OnUpdate", function()
-    if GetTime() - startTime >= delay then
-      retryFrame:SetScript("OnUpdate", nil)
-      retryFrame:Hide()
-      sendFunc(args.message, retriesLeft - 1)
-    end
-  end)
-  retryFrame:Show()
+  -- Store retry state
+  retryState.pending = true
+  retryState.retriesLeft = retriesLeft
+  retryState.message = message
+  retryState.channelName = channelName
+  retryState.startTime = GetTime()
+  retryState.delay = delay
+
+  -- Start retry ticker (checks every 0.5 seconds)
+  AutoLFM.Core.Ticker.Start(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
 end
 
 --- Sends a message to a specific channel with retry support
 --- @param channelName string - The name of the channel
 --- @param message string - The message to send
 --- @param retries number - Number of retries remaining (optional, defaults to MAX_BROADCAST_RETRIES)
-local function sendToChannel(channelName, message, retries)
+sendToChannel = function(channelName, message, retries)
   if retries == nil then
     retries = AutoLFM.Core.Constants.MAX_BROADCAST_RETRIES or 2
   end
@@ -137,7 +157,7 @@ local function sendToChannel(channelName, message, retries)
       AutoLFM.Core.Utils.LogWarning("Failed to send to " .. channelName .. ": " .. tostring(err))
       if retries > 0 then
         AutoLFM.Core.Utils.LogInfo("Retrying broadcast to " .. channelName .. " (" .. retries .. " attempts left)")
-        scheduleRetry(function(msg, r) sendToChannel(channelName, msg, r) end, {message = message}, retries)
+        scheduleRetry(channelName, message, retries)
       end
       return false
     end
@@ -229,7 +249,9 @@ end
 --=============================================================================
 
 --- Timer tick handler - broadcasts message at regular intervals
-local function onTimerTick()
+--- Called by the Ticker system every second
+--- @param elapsed number - Time elapsed since last tick (provided by Ticker)
+local function onTimerTick(elapsed)
   local isRunning = AutoLFM.Core.Maestro.GetState("Broadcaster.IsRunning")
   if not isRunning then
     return
@@ -249,40 +271,16 @@ local function onTimerTick()
   AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", timeRemaining)
 end
 
---- Starts the broadcast timer
---- Uses OnUpdate with proper throttle (avoid 'this' context issues)
---- Design: Synchronous OnUpdate with 1-second throttle is simpler and more reliable than
---- async timers, avoiding race conditions while maintaining acceptable CPU efficiency.
---- Performance: Frame is hidden when not running to completely stop OnUpdate callbacks.
+--- Starts the broadcast timer using the centralized Ticker system
+--- Performance: Uses shared OnUpdate frame instead of dedicated frame
 local function startTimer()
-  if broadcastTimer then
-    -- Reuse existing frame, just show it to restart OnUpdate
-    broadcastTimer:Show()
-    return
-  end
-
-  broadcastTimer = CreateFrame("Frame", "AutoLFM_BroadcastTimer")
-  local lastTick = GetTime()
-
-  broadcastTimer:SetScript("OnUpdate", function()
-    local now = GetTime()
-    -- Throttle to 1 second intervals to minimize CPU usage
-    -- Fires approximately 5-10 times per second from OnUpdate, we process ~1 per second
-    if now - lastTick >= 1 then
-      lastTick = now
-      onTimerTick()
-    end
-  end)
+  AutoLFM.Core.Ticker.Start(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER)
 end
 
---- Stops the broadcast timer and cleans up resources
---- Performance: Hiding the frame completely stops OnUpdate callbacks without destroying it
+--- Stops the broadcast timer
+--- Performance: Ticker system handles frame visibility automatically
 local function stopTimer()
-  if broadcastTimer then
-    broadcastTimer:Hide()
-    -- Note: Frame is not destroyed (would require unregistering from name registry)
-    -- Hiding stops OnUpdate from firing, so no CPU usage when stopped
-  end
+  AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER)
 end
 
 --=============================================================================
@@ -426,6 +424,22 @@ end, { id = "C15" })
 -- INITIALIZATION
 --=============================================================================
 AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
+  -- Register broadcast timer ticker (1 second interval, starts stopped)
+  AutoLFM.Core.Ticker.Register(
+    AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER,
+    AutoLFM.Core.Constants.BROADCASTER_TIMER_INTERVAL or 1,
+    onTimerTick,
+    false  -- Don't start immediately
+  )
+
+  -- Register retry ticker (0.5 second interval for responsive retries, starts stopped)
+  AutoLFM.Core.Ticker.Register(
+    AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY,
+    0.5,
+    onRetryTick,
+    false  -- Don't start immediately
+  )
+
   AutoLFM.Core.Maestro.Listen(
     "Broadcaster.OnGroupSizeChanged",
     "Group.SizeChanged",
@@ -442,5 +456,5 @@ AutoLFM.Core.SafeRegisterInit("Logic.Broadcaster", function()
   end
 end, {
   id = "I09",
-  dependencies = { "Logic.Message", "Logic.Group", "Logic.Content.Messaging", "Core.Events" }
+  dependencies = { "Logic.Message", "Logic.Group", "Logic.Content.Messaging", "Core.Events", "Core.Ticker" }
 })

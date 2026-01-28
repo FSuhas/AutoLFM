@@ -14,9 +14,9 @@ Commands:       C01-C24 (24 total)
 Events:         E01-E09 (9 total)
 Listeners:      L01-L12 (12 total)
 States:         S01-S20 (20 total)
-Init Handlers:  I01-I27 (27 total: 24 explicit + 3 auto-assigned)
+Init Handlers:  I01-I27 (28 total: 25 explicit + 3 auto-assigned)
 
-TOTAL: 92 implemented IDs across 5 categories
+TOTAL: 93 implemented IDs across 5 categories
 ```
 
 ### System Data Flow
@@ -179,7 +179,7 @@ Init Handlers run during addon initialization with dependency resolution. Static
 | I06 | Logic.Content.Dungeons | Logic.Selection | Dungeon integration |
 | I07 | Logic.Group | Core.Events | Group tracking |
 | I08 | Logic.Message | Logic.Selection, Logic.Group | Message builder |
-| I09 | Logic.Broadcaster | Logic.Message | Broadcaster system |
+| I09 | Logic.Broadcaster | Logic.Message, Core.Ticker | Broadcaster system |
 | I10 | Logic.Content.Messaging | Core.Storage | Channel management |
 
 ### Content & Settings (I11-I17)
@@ -190,7 +190,7 @@ Init Handlers run during addon initialization with dependency resolution. Static
 | I13 | Logic.Content.Settings | Core.Storage | Settings logic |
 | I14 | Components.DarkUI | Core.Storage | Dark mode theme |
 | I15 | UI.Content.Messaging | Logic.Content.Messaging, Logic.Broadcaster | Channel UI |
-| I16 | Logic.AutoInvite | Core.Events | Auto-invite system |
+| I16 | Logic.AutoInvite | Core.Events, Core.Ticker | Auto-invite system |
 | I17 | UI.Content.Presets | Logic.Content.Presets | Presets UI |
 
 ### UI Components (I18-I23)
@@ -202,6 +202,11 @@ Init Handlers run during addon initialization with dependency resolution. Static
 | I21 | Components.Debug | None | Debug window UI |
 | I22 | Logic.MainFrame | Logic.Broadcaster, Logic.Message, Logic.Selection | Main window commands |
 | I23 | Components.MinimapButton | Core.Storage | Minimap button |
+
+### Core Ticker (I24)
+| ID | Module | Dependencies | Purpose |
+|----|--------|--------------|---------|
+| I24 | Core.Ticker | None | Centralized timer/tick management system |
 
 ### Dynamic Content Panels (I25-I27) - Auto-assigned by ContentPanel factory
 | ID | Module | Dependencies | Purpose |
@@ -268,7 +273,7 @@ Init Handlers run during addon initialization with dependency resolution. Static
 
 ### 8. Core Foundation
 **System initialization and utilities**
-- **Init:** I01-I04
+- **Init:** I01-I04, I24 (Core.Ticker)
 - **Commands:** C01-C02
 
 ### 9. Channels & Messaging

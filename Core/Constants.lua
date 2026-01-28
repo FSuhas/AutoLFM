@@ -298,3 +298,56 @@ AutoLFM.Core.Constants.INVITE_COOLDOWN = 5
 -- INVITE_COOLDOWN_CLEANUP_INTERVAL: Seconds between cooldown table cleanup runs
 -- Removes expired entries to prevent unbounded memory growth
 AutoLFM.Core.Constants.INVITE_COOLDOWN_CLEANUP_INTERVAL = 60
+
+--=============================================================================
+-- TEXT UTILITIES CONSTANTS
+--=============================================================================
+-- WORD_BREAK_THRESHOLD: Minimum ratio of text to keep when breaking at word boundary
+-- If word break position is less than this ratio of text length, use character break instead
+-- Example: 0.7 means keep at least 70% of the fitted text when breaking at word boundary
+AutoLFM.Core.Constants.WORD_BREAK_THRESHOLD = 0.7
+
+--=============================================================================
+-- TICKER SYSTEM CONSTANTS
+--=============================================================================
+-- TICKER_RESOLUTION: Minimum tick resolution in seconds
+-- Controls how often the ticker system processes callbacks (throttle)
+-- Lower = more precise timing but more CPU usage
+AutoLFM.Core.Constants.TICKER_RESOLUTION = 0.1
+
+-- TICKER_IDS: Standard ticker identifiers used by the addon
+-- Centralized here to avoid magic strings in code
+AutoLFM.Core.Constants.TICKER_IDS = {
+  BROADCASTER = "broadcaster",
+  BROADCASTER_RETRY = "broadcaster_retry",
+  INVITE_CLEANUP = "invite_cleanup"
+}
+
+--=============================================================================
+-- PRESET VALIDATION CONSTANTS
+--=============================================================================
+-- PRESET_DEFAULTS: Default values for preset fields when not specified
+-- Used during validation and loading to ensure complete data
+AutoLFM.Core.Constants.PRESET_DEFAULTS = {
+  dungeonNames = {},
+  raidName = nil,
+  raidSize = 40,
+  roles = {},
+  customMessage = "",
+  detailsText = "",
+  customGroupSize = 5,
+  activeChannels = {},
+  broadcastInterval = 60
+}
+
+-- PRESET_RAID_SIZE_MIN: Minimum valid raid size for presets
+AutoLFM.Core.Constants.PRESET_RAID_SIZE_MIN = 10
+
+-- PRESET_RAID_SIZE_MAX: Maximum valid raid size for presets
+AutoLFM.Core.Constants.PRESET_RAID_SIZE_MAX = 40
+
+-- PRESET_GROUP_SIZE_MIN: Minimum valid custom group size
+AutoLFM.Core.Constants.PRESET_GROUP_SIZE_MIN = 1
+
+-- PRESET_GROUP_SIZE_MAX: Maximum valid custom group size
+AutoLFM.Core.Constants.PRESET_GROUP_SIZE_MAX = 40

@@ -239,6 +239,28 @@ AutoLFM.Core.Utils.LogState = CreateLogFunction("LogState")
 AutoLFM.Core.Utils.LogInit = CreateLogFunction("LogInit")
 
 --=============================================================================
+-- STRING UTILITIES
+--=============================================================================
+
+--- Trims whitespace from both ends of a string
+--- @param text string - Text to trim
+--- @return string - Trimmed text
+function AutoLFM.Core.Utils.Trim(text)
+  if not text then return "" end
+  return string.gsub(text, "^%s*(.-)%s*$", "%1")
+end
+
+--- Escapes Lua pattern special characters in a string
+--- This prevents users from accidentally (or maliciously) injecting regex patterns
+--- @param text string - Text to escape
+--- @return string - Escaped text safe for pattern matching
+function AutoLFM.Core.Utils.EscapePattern(text)
+  if not text then return "" end
+  -- Escape all Lua pattern magic characters: ^$()%.[]*+-?
+  return string.gsub(text, "([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+end
+
+--=============================================================================
 -- TABLE UTILITIES
 --=============================================================================
 
@@ -384,9 +406,10 @@ local function iterativeFit(text, maxWidth, fontString)
     fontString:SetText(result)
   end
 
-  -- Try to break at word boundary if reasonable (70% threshold)
+  -- Try to break at word boundary if reasonable (uses WORD_BREAK_THRESHOLD)
   local breakPos = FindWordBreak(result, string.len(result))
-  if breakPos > string.len(result) * 0.7 then
+  local threshold = AutoLFM.Core.Constants.WORD_BREAK_THRESHOLD or 0.7
+  if breakPos > string.len(result) * threshold then
     result = string.sub(result, 1, breakPos)
   end
 

@@ -8,8 +8,126 @@ AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Presets = {}
 
 --=============================================================================
+-- PRESET VALIDATION SCHEMA
+--=============================================================================
+
+--- Validation schema for preset fields
+--- Each field defines: type, optional validator function, and whether to use default on invalid
+local PRESET_SCHEMA = {
+  dungeonNames = {
+    type = "table",
+    validator = function(value)
+      for i = 1, table.getn(value) do
+        if type(value[i]) ~= "string" then
+          return false, "dungeonNames[" .. i .. "] must be a string"
+        end
+      end
+      return true
+    end
+  },
+  raidName = {
+    type = "string",
+    nullable = true
+  },
+  raidSize = {
+    type = "number",
+    validator = function(value)
+      local min = AutoLFM.Core.Constants.PRESET_RAID_SIZE_MIN or 10
+      local max = AutoLFM.Core.Constants.PRESET_RAID_SIZE_MAX or 40
+      if value < min or value > max then
+        return false, "raidSize must be between " .. min .. " and " .. max
+      end
+      return true
+    end
+  },
+  roles = {
+    type = "table",
+    validator = function(value)
+      local validRoles = AutoLFM.Core.Constants.VALID_ROLES or { TANK = true, HEAL = true, DPS = true }
+      for i = 1, table.getn(value) do
+        local role = value[i]
+        if type(role) ~= "string" or not validRoles[role] then
+          return false, "roles[" .. i .. "] must be TANK, HEAL, or DPS"
+        end
+      end
+      return true
+    end
+  },
+  customMessage = {
+    type = "string"
+  },
+  detailsText = {
+    type = "string"
+  },
+  customGroupSize = {
+    type = "number",
+    validator = function(value)
+      local min = AutoLFM.Core.Constants.PRESET_GROUP_SIZE_MIN or 1
+      local max = AutoLFM.Core.Constants.PRESET_GROUP_SIZE_MAX or 40
+      if value < min or value > max then
+        return false, "customGroupSize must be between " .. min .. " and " .. max
+      end
+      return true
+    end
+  },
+  activeChannels = {
+    type = "table",
+    validator = function(value)
+      for i = 1, table.getn(value) do
+        if type(value[i]) ~= "string" then
+          return false, "activeChannels[" .. i .. "] must be a string"
+        end
+      end
+      return true
+    end
+  },
+  broadcastInterval = {
+    type = "number",
+    validator = function(value)
+      local min = AutoLFM.Core.Constants.MIN_BROADCAST_INTERVAL or 30
+      local max = AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL or 120
+      if value < min or value > max then
+        return false, "broadcastInterval must be between " .. min .. " and " .. max
+      end
+      return true
+    end
+  }
+}
+
+--=============================================================================
 -- PRESET VALIDATION
 --=============================================================================
+
+--- Validates a single field against its schema definition
+--- @param fieldName string - Name of the field being validated
+--- @param value any - Value to validate
+--- @param schema table - Schema definition for the field
+--- @return boolean, string - true if valid, false + error message if not
+local function validateField(fieldName, value, schema)
+  -- Check if field is nil/missing
+  if value == nil then
+    if schema.nullable then
+      return true, ""
+    end
+    -- Missing fields will use defaults, not an error
+    return true, ""
+  end
+
+  -- Check type
+  if type(value) ~= schema.type then
+    return false, fieldName .. " must be a " .. schema.type .. ", got " .. type(value)
+  end
+
+  -- Run custom validator if present
+  if schema.validator then
+    local isValid, err = schema.validator(value)
+    if not isValid then
+      return false, err or (fieldName .. " failed validation")
+    end
+  end
+
+  return true, ""
+end
 
 --- Validates preset data structure before loading
 --- Ensures all required fields exist and have correct types
@@ -24,93 +142,86 @@ local function validatePresetData(presetData)
     return false, "Preset data is not a table"
   end
 
-  -- Validate dungeonNames (optional, but must be array if present)
-  if presetData.dungeonNames then
-    if type(presetData.dungeonNames) ~= "table" then
-      return false, "dungeonNames must be a table"
-    end
-    -- Validate each dungeon name is a string
-    for i = 1, table.getn(presetData.dungeonNames) do
-      if type(presetData.dungeonNames[i]) ~= "string" then
-        return false, "dungeonNames[" .. i .. "] must be a string"
-      end
-    end
-  end
-
-  -- Validate raidName (optional, but must be string if present)
-  if presetData.raidName and type(presetData.raidName) ~= "string" then
-    return false, "raidName must be a string"
-  end
-
-  -- Validate raidSize (optional, but must be number in valid range if present)
-  if presetData.raidSize then
-    if type(presetData.raidSize) ~= "number" then
-      return false, "raidSize must be a number"
-    end
-    if presetData.raidSize < 10 or presetData.raidSize > 40 then
-      return false, "raidSize must be between 10 and 40"
-    end
-  end
-
-  -- Validate roles (optional, but must be array of valid role strings if present)
-  if presetData.roles then
-    if type(presetData.roles) ~= "table" then
-      return false, "roles must be a table"
-    end
-    local validRoles = { TANK = true, HEAL = true, DPS = true }
-    for i = 1, table.getn(presetData.roles) do
-      local role = presetData.roles[i]
-      if type(role) ~= "string" or not validRoles[role] then
-        return false, "roles[" .. i .. "] must be TANK, HEAL, or DPS"
-      end
-    end
-  end
-
-  -- Validate customMessage (optional, but must be string if present)
-  if presetData.customMessage and type(presetData.customMessage) ~= "string" then
-    return false, "customMessage must be a string"
-  end
-
-  -- Validate detailsText (optional, but must be string if present)
-  if presetData.detailsText and type(presetData.detailsText) ~= "string" then
-    return false, "detailsText must be a string"
-  end
-
-  -- Validate customGroupSize (optional, but must be number in valid range if present)
-  if presetData.customGroupSize then
-    if type(presetData.customGroupSize) ~= "number" then
-      return false, "customGroupSize must be a number"
-    end
-    if presetData.customGroupSize < 1 or presetData.customGroupSize > 40 then
-      return false, "customGroupSize must be between 1 and 40"
-    end
-  end
-
-  -- Validate activeChannels (optional, but must be array of strings if present)
-  if presetData.activeChannels then
-    if type(presetData.activeChannels) ~= "table" then
-      return false, "activeChannels must be a table"
-    end
-    for i = 1, table.getn(presetData.activeChannels) do
-      if type(presetData.activeChannels[i]) ~= "string" then
-        return false, "activeChannels[" .. i .. "] must be a string"
-      end
-    end
-  end
-
-  -- Validate broadcastInterval (optional, but must be number in valid range if present)
-  if presetData.broadcastInterval then
-    if type(presetData.broadcastInterval) ~= "number" then
-      return false, "broadcastInterval must be a number"
-    end
-    local minInterval = AutoLFM.Core.Constants.MIN_BROADCAST_INTERVAL or 30
-    local maxInterval = AutoLFM.Core.Constants.MAX_BROADCAST_INTERVAL or 120
-    if presetData.broadcastInterval < minInterval or presetData.broadcastInterval > maxInterval then
-      return false, "broadcastInterval must be between " .. minInterval .. " and " .. maxInterval
+  -- Validate each field against schema
+  for fieldName, schema in pairs(PRESET_SCHEMA) do
+    local isValid, err = validateField(fieldName, presetData[fieldName], schema)
+    if not isValid then
+      return false, err
     end
   end
 
   return true, ""
+end
+
+--- Sanitizes preset data by applying defaults for missing or invalid fields
+--- This allows loading partially corrupted presets with best-effort recovery
+--- @param presetData table - The preset data to sanitize
+--- @return table - Sanitized preset data with defaults applied
+local function sanitizePresetData(presetData)
+  if not presetData or type(presetData) ~= "table" then
+    -- Return complete defaults if data is completely invalid
+    local defaults = AutoLFM.Core.Constants.PRESET_DEFAULTS
+    local result = {}
+    for k, v in pairs(defaults) do
+      if type(v) == "table" then
+        result[k] = {}
+        for i = 1, table.getn(v) do
+          result[k][i] = v[i]
+        end
+      else
+        result[k] = v
+      end
+    end
+    return result
+  end
+
+  local defaults = AutoLFM.Core.Constants.PRESET_DEFAULTS
+  local sanitized = {}
+
+  -- Process each field in schema
+  for fieldName, schema in pairs(PRESET_SCHEMA) do
+    local value = presetData[fieldName]
+    local defaultValue = defaults[fieldName]
+
+    -- Check if value is valid
+    local isValid = true
+    if value ~= nil then
+      if type(value) ~= schema.type then
+        isValid = false
+      elseif schema.validator then
+        isValid = schema.validator(value)
+      end
+    end
+
+    -- Use value if valid, otherwise use default
+    if isValid and value ~= nil then
+      -- Deep copy tables to avoid reference issues
+      if type(value) == "table" then
+        sanitized[fieldName] = {}
+        for i = 1, table.getn(value) do
+          sanitized[fieldName][i] = value[i]
+        end
+      else
+        sanitized[fieldName] = value
+      end
+    else
+      -- Apply default
+      if type(defaultValue) == "table" then
+        sanitized[fieldName] = {}
+        for i = 1, table.getn(defaultValue) do
+          sanitized[fieldName][i] = defaultValue[i]
+        end
+      else
+        sanitized[fieldName] = defaultValue
+      end
+
+      if value ~= nil then
+        AutoLFM.Core.Utils.LogWarning("Preset field '" .. fieldName .. "' was invalid, using default")
+      end
+    end
+  end
+
+  return sanitized
 end
 
 --=============================================================================
@@ -241,6 +352,7 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Save", function(presetName)
 end, { id = "C19" })
 
 --- Loads a preset and restores its state
+--- Uses sanitization to recover from partially corrupted presets
 AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
   if not presetName or presetName == "" then
     AutoLFM.Core.Utils.LogError("Presets.Load: Preset name cannot be empty")
@@ -258,14 +370,17 @@ AutoLFM.Core.Maestro.RegisterCommand("Presets.Load", function(presetName)
 
   -- Validate preset data before loading
   local isValid, validationError = validatePresetData(presetData)
+
+  -- If validation fails, try to sanitize and recover
+  local dataToLoad = presetData
   if not isValid then
-    AutoLFM.Core.Utils.LogError("Presets.Load: Invalid preset data for '%s': %s", presetName, validationError)
-    AutoLFM.Core.Utils.PrintError("Preset '" .. presetName .. "' is corrupted: " .. validationError)
-    return
+    AutoLFM.Core.Utils.LogWarning("Presets.Load: Preset '%s' has issues: %s - attempting recovery", presetName, validationError)
+    AutoLFM.Core.Utils.PrintWarning("Preset '" .. presetName .. "' was partially corrupted, loading with defaults for invalid fields")
+    dataToLoad = sanitizePresetData(presetData)
   end
 
   -- Restore state
-  restorePresetState(presetData)
+  restorePresetState(dataToLoad)
   AutoLFM.Core.Utils.LogAction("Preset loaded: " .. presetName)
   AutoLFM.Core.Maestro.Dispatch("Presets.Loaded", presetName)
 end, { id = "C18" })

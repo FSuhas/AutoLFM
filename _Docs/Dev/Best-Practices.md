@@ -195,6 +195,33 @@ local message = table.concat(parts)
 local message = "LF" .. tostring(needed) .. "M " .. dungeonName
 ```
 
+### Use Core.Ticker for Timers
+```lua
+-- ✅ DO - Use centralized Ticker system for periodic tasks
+AutoLFM.Core.SafeRegisterInit("MyModule", function()
+    -- Register ticker with interval and callback
+    AutoLFM.Core.Ticker.Register(
+        "my_ticker_id",           -- Unique ID
+        5,                        -- Interval in seconds
+        function(elapsed)         -- Callback receives elapsed time
+            DoPeriodicTask()
+        end,
+        false                     -- Don't start immediately
+    )
+end, { id = "I##", dependencies = { "Core.Ticker" } })
+
+-- Start/stop as needed
+AutoLFM.Core.Ticker.Start("my_ticker_id")
+AutoLFM.Core.Ticker.Stop("my_ticker_id")
+
+-- ❌ DON'T - Create dedicated OnUpdate frames
+local myFrame = CreateFrame("Frame")
+myFrame:SetScript("OnUpdate", function()
+    -- This creates a new frame just for one task
+    -- Multiple frames = multiple OnUpdate callbacks = poor performance
+end)
+```
+
 ## 🏗️ Code Organization
 
 ### File Structure

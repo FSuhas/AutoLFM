@@ -1,3 +1,15 @@
+## [v3.11] 2026/01/28
+- Add centralized Ticker system (`Core/Ticker.lua`) to consolidate OnUpdate frames
+- Refactor Broadcaster.lua to use Ticker instead of dedicated frames (3 frames -> 1 shared)
+- Refactor AutoInvite.lua cleanup timer to use Ticker system
+- Move `Trim()` and `EscapePattern()` functions to `Core/Utils.lua` for reusability
+- Add preset validation schema (`PRESET_SCHEMA`) with field-level validators
+- Add `sanitizePresetData()` for best-effort recovery of corrupted presets
+- Corrupted presets now load with defaults for invalid fields instead of failing
+- Centralize magic constants: `WORD_BREAK_THRESHOLD`, `TICKER_RESOLUTION`, `TICKER_IDS`
+- Add preset validation constants: `PRESET_DEFAULTS`, `PRESET_RAID_SIZE_MIN/MAX`, `PRESET_GROUP_SIZE_MIN/MAX`
+- Update dependencies: Broadcaster and AutoInvite now depend on `Core.Ticker`
+
 ## [v3.10] 2026/01/17
 - Replace hardcoded `DUNGEONS_COUNT`/`RAIDS_COUNT` with dynamic calculation in `BuildLookupTables()`
 - Remove unused `COLORS_COUNT` constant
