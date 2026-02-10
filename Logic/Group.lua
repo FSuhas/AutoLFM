@@ -123,6 +123,7 @@ function AutoLFM.Logic.Group.ConvertToRaidIfNeeded()
     -- Max attempts reached
     AutoLFM.Core.Utils.LogError("Failed to convert to raid after " .. MAX_CONVERSION_ATTEMPTS .. " attempts: " .. tostring(err))
     conversionPending = false
+    conversionFrame:Hide()
     return false
   end
 

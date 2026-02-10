@@ -126,6 +126,15 @@ local function onChatMsgWhisper()
   })
 end
 
+--- Handles SPELLS_CHANGED event - detects hardcore status when spellbook is loaded
+local function onSpellsChanged()
+  AutoLFM.Core.Storage.DetectAndPersistHardcore()
+  -- Unregister: spellbook is loaded, detection is done
+  if eventFrame then
+    eventFrame:UnregisterEvent("SPELLS_CHANGED")
+  end
+end
+
 --- Routes WoW events to appropriate handler functions
 --- @param eventName string - WoW event name
 local function onEvent(eventName)
@@ -144,6 +153,8 @@ local function onEvent(eventName)
     onPartyLeaderChanged()
   elseif eventName == "CHAT_MSG_WHISPER" then
     onChatMsgWhisper()
+  elseif eventName == "SPELLS_CHANGED" then
+    onSpellsChanged()
   end
 end
 
@@ -167,6 +178,7 @@ function AutoLFM.Core.Events.Init()
   eventFrame:RegisterEvent("RAID_ROSTER_UPDATE")
   eventFrame:RegisterEvent("PARTY_LEADER_CHANGED")
   eventFrame:RegisterEvent("CHAT_MSG_WHISPER")
+  eventFrame:RegisterEvent("SPELLS_CHANGED")
 
   -- Initialize group size tracker and Maestro states
   local initialSize, initialType = getGroupInfo()
@@ -176,7 +188,7 @@ function AutoLFM.Core.Events.Init()
   AutoLFM.Core.Maestro.SetState("Group.Size", initialSize)
   AutoLFM.Core.Maestro.SetState("Group.IsLeader", canPlayerLead())
 
-  AutoLFM.Core.Utils.LogInfo("Event system initialized (6 WoW events monitored)")
+  AutoLFM.Core.Utils.LogInfo("Event system initialized (7 WoW events monitored)")
 end
 
 --- Forces a refresh of the group size (useful when starting broadcaster)

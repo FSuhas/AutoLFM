@@ -4,7 +4,7 @@
 ## Author: Gondoleon, NSO73
 ## SavedVariables: V3_Settings, V3_Presets
 ## OptionalDeps: pfQuest, ShaguTweaks
-## Version: 3.11
+## Version: 3.12
 
 #=============================================================================
 # Github Repository: https://github.com/FSuhas/AutoLFM
@@ -14,12 +14,12 @@
 # Core
 #=============================================================================
 Core\Maestro.lua
-Core\Ticker.lua
 Core\API.lua
 Core\Cache.lua
 Core\Constants.lua
 Core\Events.lua
 Core\Storage.lua
+Core\Ticker.lua
 Core\Utils.lua
 
 #=============================================================================

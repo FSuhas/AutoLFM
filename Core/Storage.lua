@@ -225,6 +225,12 @@ local function migrateSettings()
   local charData = getCharData()
   if not charData then return end
 
+  -- v3.12: One-time reset of hardcore status so SPELLS_CHANGED can re-detect reliably
+  if charData.isHardcore == false and not charData._hardcoreMigrated then
+    charData.isHardcore = nil
+  end
+  charData._hardcoreMigrated = true
+
   for i = 1, table.getn(SETTINGS_REGISTRY) do
     local setting = SETTINGS_REGISTRY[i]
     if charData[setting.key] == nil then
@@ -260,11 +266,8 @@ function AutoLFM.Core.Storage.Init()
       }
   end
 
-  local charData = getCharData()
-  if charData and charData.isHardcore == nil then
-    local isHardcore = detectHardcoreCharacter()
-    AutoLFM.Core.Storage.SetIsHardcore(isHardcore)
-  end
+  -- Hardcore detection is deferred to SPELLS_CHANGED event (see Events.lua)
+  -- to guarantee the spellbook is fully loaded.
 
   return true
 end
@@ -386,6 +389,24 @@ function AutoLFM.Core.Storage.MovePresetDown(presetName)
 
   presets.order[index], presets.order[index + 1] = presets.order[index + 1], presets.order[index]
   return true
+end
+
+-----------------------------------------------------------------------------
+-- Deferred Hardcore Detection
+--   Called from SPELLS_CHANGED when spellbook is guaranteed to be loaded
+-----------------------------------------------------------------------------
+
+--- Detects and persists hardcore status by scanning the spellbook.
+--- Must be called when the spellbook is guaranteed to be loaded (SPELLS_CHANGED).
+--- Only runs once: skips if isHardcore is already set.
+--- @return boolean - True if character is hardcore
+function AutoLFM.Core.Storage.DetectAndPersistHardcore()
+  local charData = getCharData()
+  if not charData or charData.isHardcore ~= nil then return false end
+
+  local isHardcore = detectHardcoreCharacter()
+  AutoLFM.Core.Storage.SetIsHardcore(isHardcore)
+  return isHardcore
 end
 
 -----------------------------------------------------------------------------

@@ -1,3 +1,9 @@
+## [v3.12] 2026/02/10
+- Fix hardcore detection unreliable at login: defer spellbook scan to SPELLS_CHANGED event
+- One-time migration resets incorrectly persisted `isHardcore = false` for re-detection
+- Fix conversion frame not hidden after max raid conversion attempts
+- Validate dungeon/raid names against Constants when loading presets
+
 ## [v3.11] 2026/01/28
 - Add centralized Ticker system (`Core/Ticker.lua`) to consolidate OnUpdate frames
 - Refactor Broadcaster.lua to use Ticker instead of dedicated frames (3 frames -> 1 shared)

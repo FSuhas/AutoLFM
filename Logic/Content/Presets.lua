@@ -264,17 +264,27 @@ local function restorePresetState(presetData)
   -- Clear current selections first
   AutoLFM.Core.Maestro.Dispatch("Selection.ClearAll")
 
-  -- Restore dungeon names
+  -- Restore dungeon names (filter out any that no longer exist)
   if presetData.dungeonNames and table.getn(presetData.dungeonNames) > 0 then
-    AutoLFM.Core.Maestro.SetState("Selection.DungeonNames", presetData.dungeonNames)
-    AutoLFM.Core.Maestro.SetState("Selection.Mode", "dungeons")
+    local validNames = {}
+    for i = 1, table.getn(presetData.dungeonNames) do
+      if AutoLFM.Core.Utils.GetDungeonIndexByName(presetData.dungeonNames[i]) then
+        table.insert(validNames, presetData.dungeonNames[i])
+      end
+    end
+    if table.getn(validNames) > 0 then
+      AutoLFM.Core.Maestro.SetState("Selection.DungeonNames", validNames)
+      AutoLFM.Core.Maestro.SetState("Selection.Mode", "dungeons")
+    end
   end
 
-  -- Restore raid
+  -- Restore raid (validate it still exists)
   if presetData.raidName then
-    AutoLFM.Core.Maestro.SetState("Selection.RaidName", presetData.raidName)
-    AutoLFM.Core.Maestro.SetState("Selection.RaidSize", presetData.raidSize or 40)
-    AutoLFM.Core.Maestro.SetState("Selection.Mode", "raid")
+    if AutoLFM.Core.Utils.GetRaidIndexByName(presetData.raidName) then
+      AutoLFM.Core.Maestro.SetState("Selection.RaidName", presetData.raidName)
+      AutoLFM.Core.Maestro.SetState("Selection.RaidSize", presetData.raidSize or 40)
+      AutoLFM.Core.Maestro.SetState("Selection.Mode", "raid")
+    end
   end
 
   -- Restore roles
