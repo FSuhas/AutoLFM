@@ -116,11 +116,22 @@ end
 
 --- Hooks chat hyperlink clicks to enable Shift+Click link insertion and right-click player menus
 --- Overrides ChatFrame_OnHyperlinkShow to intercept Shift+Click and right-click events
+local isHandlingHyperlink = false
+
 local function hookChatLinks()
   if not ChatFrame_OnHyperlinkShow then return end
   Original_ChatFrame_OnHyperlinkShow = ChatFrame_OnHyperlinkShow
 
   ChatFrame_OnHyperlinkShow = function(link, text, button)
+    -- Reentrancy guard: prevent stack overflow when other addons hook the same chain
+    if isHandlingHyperlink then
+      if Original_ChatFrame_OnHyperlinkShow then
+        return Original_ChatFrame_OnHyperlinkShow(link, text, button)
+      end
+      return
+    end
+    isHandlingHyperlink = true
+
     -- Try our custom handling first
     local handled = false
 
@@ -131,6 +142,7 @@ local function hookChatLinks()
       if HideDropDownMenu then HideDropDownMenu(1) end
       if ChatFrameDropDown_Show then
         ChatFrameDropDown_Show(nil, playerName)
+        isHandlingHyperlink = false
         return -- Handled, don't call original
       end
     end
@@ -146,6 +158,7 @@ local function hookChatLinks()
         end
 
         if insertLinkIntoEditBox(text) then
+          isHandlingHyperlink = false
           -- Successfully inserted, don't call original
           return
         end
@@ -156,6 +169,7 @@ local function hookChatLinks()
     if Original_ChatFrame_OnHyperlinkShow then
       Original_ChatFrame_OnHyperlinkShow(link, text, button)
     end
+    isHandlingHyperlink = false
   end
 end
 

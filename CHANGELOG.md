@@ -1,3 +1,7 @@
+## [v3.13] 2026/03/11
+- Fix stack overflow when right-clicking player names in chat with other addons (FuBar, Talented-turtle)
+- Add reentrancy guard to ChatFrame_OnHyperlinkShow hook to prevent recursive loops
+
 ## [v3.12] 2026/02/10
 - Fix hardcore detection unreliable at login: defer spellbook scan to SPELLS_CHANGED event
 - One-time migration resets incorrectly persisted `isHardcore = false` for re-detection
