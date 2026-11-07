@@ -1,3 +1,9 @@
+## [v3.16] 2026/11/07
+- Change Dire Maul broadcast abbreviations to DM North and DM West
+- Remove the 5-player suffix from Stratholme Live, Scholomance and Stratholme UD dungeon names and abbreviations
+- Rename Caverns of Time. Black Morass to Black Morass and use BM in broadcasts
+- Change Dragonmaw Retreat, The Crescent Grove, Stormwrought Castle and Stormwrought Descent abbreviations to DMR, CG, SWC and SWD
+
 ## [v3.15] 2026/04/09
 - Fix `Utils.ROW_HEIGHT` → `Constants.ROW_HEIGHT` in Raids UI (scroll height was nil)
 - Fix `LogWarn` → `LogWarning` in AutoInvite UI, remove duplicate `OnShow` in Settings UI
