@@ -321,6 +321,11 @@ local function stop()
   end
 
   stopTimer()
+  AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
+  retryState.pending = false
+  retryState.retriesLeft = 0
+  retryState.message = nil
+  retryState.channelName = nil
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", false)
   AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", 0)
   -- NOTE: pcall used intentionally - sound files are optional and may not exist
