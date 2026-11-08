@@ -108,7 +108,7 @@ function AutoLFM.UI.Content.Presets.OnShow(frame)
   AutoLFM.UI.Content.Presets.Refresh()
 end
 
---- Handles the presets frame being hidden; clears all preset rows
+--- Handles the presets frame being hidden; hides reusable preset rows
 --- @param frame frame - The presets content frame
 function AutoLFM.UI.Content.Presets.OnHide(frame)
   AutoLFM.UI.Content.Presets.ClearRows()
@@ -117,12 +117,58 @@ end
 --=============================================================================
 -- ROW MANAGEMENT
 --=============================================================================
---- Hides and removes all preset row frames from the scroll child
+--- Hides preset row frames while retaining them for reuse
 function AutoLFM.UI.Content.Presets.ClearRows()
   for i = 1, table.getn(presetRows) do
     presetRows[i]:Hide()
   end
-  presetRows = {}
+end
+
+--- Reuses a row's text region and resets its anchors before updating it
+local function getRowText(row, key, font)
+  local text = row.regions[key]
+  if not text then
+    text = row:CreateFontString(nil, "OVERLAY", font)
+    row.regions[key] = text
+  end
+  text:ClearAllPoints()
+  text:Show()
+  return text
+end
+
+--- Reuses a row's role icon
+local function getRoleIcon(row, index)
+  local key = "roleIcon" .. index
+  local icon = row.regions[key]
+  if not icon then
+    icon = row:CreateTexture(nil, "ARTWORK")
+    row.regions[key] = icon
+  end
+  icon:ClearAllPoints()
+  icon:Show()
+  return icon
+end
+
+--- Creates each row action button and its textures only once
+local function getActionButton(row, key, iconName)
+  local button = row[key]
+  if not button then
+    button = CreateFrame("Button", nil, row)
+    button:SetWidth(20)
+    button:SetHeight(20)
+    local texture = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\" .. iconName
+    local icon = button:CreateTexture(nil, "ARTWORK")
+    icon:SetAllPoints()
+    icon:SetTexture(texture)
+    local highlight = button:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetAllPoints()
+    highlight:SetTexture(texture)
+    highlight:SetBlendMode("ADD")
+    row[key] = button
+  end
+  button:ClearAllPoints()
+  button:Show()
+  return button
 end
 
 --- Creates a clickable preset row with name, type tag, content preview, and action buttons
@@ -148,22 +194,37 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
   
   local rowHeight = 38
   
-  local row = CreateFrame("Button", "AutoLFM_PresetRow" .. index, scrollChild)
+  local row = presetRows[index]
+  if not row then
+    row = CreateFrame("Button", "AutoLFM_PresetRow" .. index, scrollChild)
+    row.regions = {}
+    presetRows[index] = row
+
+    local bg = row:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    row.bg = bg
+
+    local border = row:CreateTexture(nil, "BORDER")
+    border:SetTexture(0.3, 0.3, 0.3, 0.5)
+    border:SetHeight(1)
+    border:SetWidth(295)
+    border:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 0, 0)
+  end
+  for _, region in pairs(row.regions) do
+    region:Hide()
+  end
+  if row.upBtn then row.upBtn:Hide() end
+  if row.downBtn then row.downBtn:Hide() end
+  if row.deleteBtn then row.deleteBtn:Hide() end
+
   row:SetWidth(295)
   row:SetHeight(rowHeight)
+  row:ClearAllPoints()
   row:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, -yOffset)
   row.rowHeight = rowHeight
   
-  local bg = row:CreateTexture(nil, "BACKGROUND")
-  bg:SetAllPoints()
+  local bg = row.bg
   bg:SetTexture(0, 0, 0, 0)
-  row.bg = bg
-  
-  local border = row:CreateTexture(nil, "BORDER")
-  border:SetTexture(0.3, 0.3, 0.3, 0.5)
-  border:SetHeight(1)
-  border:SetWidth(295)
-  border:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 0, 0)
   
   if isCondensed then
     local oldState = saveSelectionState()
@@ -178,25 +239,25 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
     row:SetHeight(rowHeight)
     row.rowHeight = rowHeight
     
-    local nameLabel = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local nameLabel = getRowText(row, "nameLabel", "GameFontNormal")
     nameLabel:SetPoint("TOPLEFT", row, "TOPLEFT", 5, -6)
     nameLabel:SetText(presetName)
     nameLabel:SetTextColor(1, 0.82, 0)
     row.nameLabel = nameLabel
     
-    local previewText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local previewText = getRowText(row, "previewText", "GameFontNormalSmall")
     previewText:SetPoint("TOPLEFT", row, "TOPLEFT", 5, -20)
     previewText:SetWidth(230)
     previewText:SetJustifyH("LEFT")
     previewText:SetTextColor(1, 1, 1)
     previewText:SetText(previewMsg)
   else
-    local typeTag = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local typeTag = getRowText(row, "typeTag", "GameFontNormalSmall")
     typeTag:SetPoint("TOPLEFT", row, "TOPLEFT", 5, -6)
     typeTag:SetText("[" .. presetType .. "]")
     typeTag:SetTextColor(1, 1, 1)
     
-    local nameLabel = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local nameLabel = getRowText(row, "nameLabel", "GameFontNormal")
     nameLabel:SetPoint("LEFT", typeTag, "RIGHT", 4, 0)
     nameLabel:SetText(presetName)
     nameLabel:SetTextColor(1, 0.82, 0)
@@ -215,7 +276,7 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
         local role = presetData.roles[i]
         local texture = roleTextures[role]
         if texture then
-          local icon = row:CreateTexture(nil, "ARTWORK")
+          local icon = getRoleIcon(row, i)
           icon:SetWidth(iconSize)
           icon:SetHeight(iconSize)
           icon:SetPoint("TOPLEFT", row, "TOPLEFT", xOffset, -20)
@@ -226,7 +287,7 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
       xOffset = xOffset + 3
     end
     
-    local contentText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local contentText = getRowText(row, "contentText", "GameFontNormalSmall")
     contentText:SetPoint("TOPLEFT", row, "TOPLEFT", xOffset, -20)
     contentText:SetWidth(200)
     contentText:SetJustifyH("LEFT")
@@ -272,7 +333,7 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
       row:SetHeight(rowHeight)
       row.rowHeight = rowHeight
       
-      local detailsMsg = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+      local detailsMsg = getRowText(row, "detailsMsg", "GameFontNormalSmall")
       detailsMsg:SetPoint("TOPLEFT", row, "TOPLEFT", 5, -34)
       detailsMsg:SetWidth(230)
       detailsMsg:SetJustifyH("LEFT")
@@ -281,23 +342,13 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
     end
   end
   
-  local btnSize = 20
   local btnY = 0
   local btnSpacing = 15
   
   if not isFirst then
-    local upBtn = CreateFrame("Button", nil, row)
-    upBtn:SetWidth(btnSize)
-    upBtn:SetHeight(btnSize)
+    local upBtn = getActionButton(row, "upBtn", "Up")
     local upBtnOffset = isLast and (-2 - btnSpacing) or (-2 - (btnSpacing * 2))
     upBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", upBtnOffset, btnY)
-    local upIcon = upBtn:CreateTexture(nil, "ARTWORK")
-    upIcon:SetAllPoints()
-    upIcon:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Up")
-    local upHighlight = upBtn:CreateTexture(nil, "HIGHLIGHT")
-    upHighlight:SetAllPoints()
-    upHighlight:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Up")
-    upHighlight:SetBlendMode("ADD")
     upBtn:SetScript("OnClick", function()
       if AutoLFM.Core.Storage.MovePresetUp(presetName) then
         AutoLFM.UI.Content.Presets.Refresh()
@@ -306,17 +357,8 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
   end
   
   if not isLast then
-    local downBtn = CreateFrame("Button", nil, row)
-    downBtn:SetWidth(btnSize)
-    downBtn:SetHeight(btnSize)
+    local downBtn = getActionButton(row, "downBtn", "Down")
     downBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", -1 - btnSpacing, btnY)
-    local downIcon = downBtn:CreateTexture(nil, "ARTWORK")
-    downIcon:SetAllPoints()
-    downIcon:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Down")
-    local downHighlight = downBtn:CreateTexture(nil, "HIGHLIGHT")
-    downHighlight:SetAllPoints()
-    downHighlight:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Down")
-    downHighlight:SetBlendMode("ADD")
     downBtn:SetScript("OnClick", function()
       if AutoLFM.Core.Storage.MovePresetDown(presetName) then
         AutoLFM.UI.Content.Presets.Refresh()
@@ -324,17 +366,8 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
     end)
   end
   
-  local deleteBtn = CreateFrame("Button", nil, row)
-  deleteBtn:SetWidth(btnSize)
-  deleteBtn:SetHeight(btnSize)
+  local deleteBtn = getActionButton(row, "deleteBtn", "Close")
   deleteBtn:SetPoint("TOPRIGHT", row, "TOPRIGHT", 0, btnY)
-  local deleteIcon = deleteBtn:CreateTexture(nil, "ARTWORK")
-  deleteIcon:SetAllPoints()
-  deleteIcon:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Close")
-  local deleteHighlight = deleteBtn:CreateTexture(nil, "HIGHLIGHT")
-  deleteHighlight:SetAllPoints()
-  deleteHighlight:SetTexture("Interface\\AddOns\\AutoLFM\\UI\\Textures\\Icons\\Close")
-  deleteHighlight:SetBlendMode("ADD")
   deleteBtn:SetScript("OnClick", function()
     AutoLFM.Core.Maestro.Dispatch("Presets.Delete", presetName)
   end)
@@ -356,10 +389,11 @@ local function createPresetRow(index, presetName, presetData, isFirst, isLast, y
     row.nameLabel:SetTextColor(1, 0.82, 0)
   end)
   
+  row:Show()
   return row
 end
 
---- Rebuilds the entire preset list by clearing rows and recreating them from storage
+--- Updates the preset list using reusable rows, hiding unused entries
 function AutoLFM.UI.Content.Presets.Refresh()
   AutoLFM.UI.Content.Presets.ClearRows()
   
@@ -375,7 +409,6 @@ function AutoLFM.UI.Content.Presets.Refresh()
       local isFirst = (i == 1)
       local isLast = (i == totalPresets)
       local row = createPresetRow(i, presetName, presetData, isFirst, isLast, yOffset)
-      table.insert(presetRows, row)
       yOffset = yOffset + (row.rowHeight or 0)
     end
   end
