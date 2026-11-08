@@ -314,12 +314,22 @@ local function restorePresetState(presetData)
 
   -- Restore channels
   if presetData.activeChannels then
-    AutoLFM.Core.Maestro.SetState("Channels.ActiveChannels", presetData.activeChannels)
+    local channels = AutoLFM.Core.Storage.DeepCopy(presetData.activeChannels)
+    for i = 1, table.getn(channels) do
+      -- Hardcore uses its own chat type rather than a numbered channel
+      if channels[i] ~= "Hardcore" then
+        AutoLFM.Logic.Content.Messaging.JoinChannel(channels[i])
+      end
+    end
+    AutoLFM.Core.Maestro.SetState("Channels.ActiveChannels", channels)
+    AutoLFM.Core.Storage.SetSelectedChannels(channels)
+    AutoLFM.Core.Maestro.Dispatch("Channels.Changed")
   end
 
   -- Restore broadcast interval
   if presetData.broadcastInterval then
     AutoLFM.Core.Maestro.SetState("Broadcaster.Interval", presetData.broadcastInterval)
+    AutoLFM.Core.Storage.SetBroadcastInterval(presetData.broadcastInterval)
   end
 
   -- Notify that selection changed
