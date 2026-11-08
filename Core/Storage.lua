@@ -230,6 +230,30 @@ local function migrateSettings()
   end
 end
 
+--- Updates saved dungeon names after display name changes
+local function migratePresetDungeonNames()
+  local presets = V3_Presets and V3_Presets[characterID]
+  if type(presets) ~= "table" or type(presets.data) ~= "table" then return end
+
+  local renamedDungeons = {
+    ["Stratholme Live 5"] = "Stratholme Live",
+    ["Scholomance 5"] = "Scholomance",
+    ["Stratholme UD 5"] = "Stratholme UD",
+    ["Caverns of Time. Black Morass"] = "Black Morass"
+  }
+
+  for _, preset in pairs(presets.data) do
+    if type(preset) == "table" and type(preset.dungeonNames) == "table" then
+      for i = 1, table.getn(preset.dungeonNames) do
+        local name = preset.dungeonNames[i]
+        if type(name) == "string" and renamedDungeons[name] then
+          preset.dungeonNames[i] = renamedDungeons[name]
+        end
+      end
+    end
+  end
+end
+
 --- Initializes persistent storage for current character
 --- Creates character-specific storage and detects hardcore mode
 --- @return boolean - True if initialization succeeded, false otherwise
@@ -252,6 +276,8 @@ function AutoLFM.Core.Storage.Init()
           order = {}
       }
   end
+
+  migratePresetDungeonNames()
 
   -- Hardcore detection is deferred to SPELLS_CHANGED event (see Events.lua)
   -- to guarantee the spellbook is fully loaded.
