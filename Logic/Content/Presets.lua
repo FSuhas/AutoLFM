@@ -294,7 +294,7 @@ local function restorePresetState(presetData)
     AutoLFM.Core.Maestro.SetState("Selection.Mode", "custom")
     -- Switch to custom mode in Messaging UI
     if AutoLFM.UI and AutoLFM.UI.Content and AutoLFM.UI.Content.Messaging then
-      AutoLFM.UI.Content.Messaging.OnModeRadioClick("custom")
+      AutoLFM.UI.Content.Messaging.SetMode("custom", false)
     end
   end
 
@@ -303,7 +303,7 @@ local function restorePresetState(presetData)
     AutoLFM.Core.Maestro.SetState("Selection.DetailsText", presetData.detailsText)
     -- Switch to details mode in Messaging UI if no custom message
     if (not presetData.customMessage or presetData.customMessage == "") and AutoLFM.UI and AutoLFM.UI.Content and AutoLFM.UI.Content.Messaging then
-      AutoLFM.UI.Content.Messaging.OnModeRadioClick("details")
+      AutoLFM.UI.Content.Messaging.SetMode("details", false)
     end
   end
 

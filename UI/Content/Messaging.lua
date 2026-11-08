@@ -529,15 +529,21 @@ function AutoLFM.UI.Content.Messaging.OnEditBoxTextChanged(editBox)
   end
 end
 
---- Handles broadcast mode radio button clicks (Details/Custom)
---- Updates session mode (does NOT save to persistent storage during session)
+--- Updates the session mode and optionally clears the previous mode's content
 --- @param mode string - The selected mode ("details" or "custom")
-function AutoLFM.UI.Content.Messaging.OnModeRadioClick(mode)
+--- @param clearOnModeSwitch boolean - True for manual switches, false when restoring a preset
+function AutoLFM.UI.Content.Messaging.SetMode(mode, clearOnModeSwitch)
   -- Update session mode (persists between tab openings, not saved to disk)
   sessionMode = mode
 
   setRadioButtonStates(mode)
-  AutoLFM.UI.Content.Messaging.UpdateModeDisplay(true)  -- Clear on mode switch
+  AutoLFM.UI.Content.Messaging.UpdateModeDisplay(clearOnModeSwitch)
+end
+
+--- Handles manual broadcast mode radio button clicks (Details/Custom)
+--- @param mode string - The selected mode ("details" or "custom")
+function AutoLFM.UI.Content.Messaging.OnModeRadioClick(mode)
+  AutoLFM.UI.Content.Messaging.SetMode(mode, true)
 end
 
 --- Updates the UI display based on current broadcast mode (details vs custom)
