@@ -14,15 +14,8 @@ local SOUNDS = {
   FULL = "Full.ogg"
 }
 
--- Retry state for failed broadcasts
-local retryState = {
-  pending = false,
-  retriesLeft = 0,
-  message = nil,
-  channelName = nil,
-  startTime = 0,
-  delay = 0
-}
+-- Each failed channel keeps its own retry data
+local pendingRetries = {}
 
 --=============================================================================
 -- PRIVATE HELPERS
@@ -88,18 +81,21 @@ end
 local sendToChannel
 
 --- Handles retry tick callback from Ticker system
---- Processes pending retry if delay has elapsed
+--- Processes each pending retry when its delay has elapsed
 local function onRetryTick()
-  if not retryState.pending then
-    AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
-    return
+  local now = GetTime()
+  -- Remove due entries before sending, so failures can schedule a new attempt
+  -- Walk backwards so removing an entry does not skip other pending channels
+  for i = table.getn(pendingRetries), 1, -1 do
+    local retry = pendingRetries[i]
+    if now - retry.startTime >= retry.delay then
+      table.remove(pendingRetries, i)
+      sendToChannel(retry.channelName, retry.message, retry.retriesLeft - 1)
+    end
   end
 
-  local now = GetTime()
-  if now - retryState.startTime >= retryState.delay then
-    retryState.pending = false
+  if table.getn(pendingRetries) == 0 then
     AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
-    sendToChannel(retryState.channelName, retryState.message, retryState.retriesLeft - 1)
   end
 end
 
@@ -120,13 +116,14 @@ local function scheduleRetry(channelName, message, retriesLeft)
 
   AutoLFM.Core.Utils.LogInfo("Retry scheduled in " .. delay .. "s (attempt " .. attemptNumber .. "/" .. maxRetries .. ")")
 
-  -- Store retry state
-  retryState.pending = true
-  retryState.retriesLeft = retriesLeft
-  retryState.message = message
-  retryState.channelName = channelName
-  retryState.startTime = GetTime()
-  retryState.delay = delay
+  -- Keep this failure separate from retries scheduled for other channels
+  table.insert(pendingRetries, {
+    retriesLeft = retriesLeft,
+    message = message,
+    channelName = channelName,
+    startTime = GetTime(),
+    delay = delay
+  })
 
   -- Start retry ticker (checks every 0.5 seconds)
   AutoLFM.Core.Ticker.Start(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
@@ -322,10 +319,7 @@ local function stop()
 
   stopTimer()
   AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
-  retryState.pending = false
-  retryState.retriesLeft = 0
-  retryState.message = nil
-  retryState.channelName = nil
+  pendingRetries = {}
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", false)
   AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", 0)
   -- NOTE: pcall used intentionally - sound files are optional and may not exist
