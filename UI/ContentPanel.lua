@@ -65,9 +65,9 @@ function AutoLFM.UI.CreateContentPanel(config)
     )
   end
 
-  --- Refreshes the panel display by rebuilding rows
+  --- Refreshes visible panels; hidden panels rebuild through OnShow when opened
   function panel.Refresh()
-    if frameRef then
+    if frameRef and frameRef:IsVisible() then
       panel.OnShow(frameRef)
     end
   end
