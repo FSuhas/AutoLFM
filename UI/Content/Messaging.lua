@@ -49,6 +49,7 @@ local sessionMode = nil
 
 -- Flag to prevent OnTextChanged from dispatching during programmatic updates
 local isRestoringFromState = false
+local startStatsUpdateTimer, stopStatsUpdateTimer
 
 --=============================================================================
 -- HELPER FUNCTIONS
@@ -496,6 +497,16 @@ function AutoLFM.UI.Content.Messaging.OnShow(frame)
 
   -- Sync channel checkboxes with saved state
   AutoLFM.UI.Content.Messaging.RefreshChannelCheckboxes()
+
+  AutoLFM.UI.Content.Messaging.UpdateStats()
+  if AutoLFM.Core.Maestro.GetState("Broadcaster.IsRunning") then
+    startStatsUpdateTimer()
+  end
+end
+
+--- Stops visual statistics updates while the Messaging panel is hidden
+function AutoLFM.UI.Content.Messaging.OnHide(frame)
+  stopStatsUpdateTimer()
 end
 
 --=============================================================================
@@ -529,15 +540,21 @@ function AutoLFM.UI.Content.Messaging.OnEditBoxTextChanged(editBox)
   end
 end
 
---- Handles broadcast mode radio button clicks (Details/Custom)
---- Updates session mode (does NOT save to persistent storage during session)
+--- Updates the session mode and optionally clears the previous mode's content
 --- @param mode string - The selected mode ("details" or "custom")
-function AutoLFM.UI.Content.Messaging.OnModeRadioClick(mode)
+--- @param clearOnModeSwitch boolean - True for manual switches, false when restoring a preset
+function AutoLFM.UI.Content.Messaging.SetMode(mode, clearOnModeSwitch)
   -- Update session mode (persists between tab openings, not saved to disk)
   sessionMode = mode
 
   setRadioButtonStates(mode)
-  AutoLFM.UI.Content.Messaging.UpdateModeDisplay(true)  -- Clear on mode switch
+  AutoLFM.UI.Content.Messaging.UpdateModeDisplay(clearOnModeSwitch)
+end
+
+--- Handles manual broadcast mode radio button clicks (Details/Custom)
+--- @param mode string - The selected mode ("details" or "custom")
+function AutoLFM.UI.Content.Messaging.OnModeRadioClick(mode)
+  AutoLFM.UI.Content.Messaging.SetMode(mode, true)
 end
 
 --- Updates the UI display based on current broadcast mode (details vs custom)
@@ -772,6 +789,9 @@ end
 --- Updates the broadcast statistics display
 --- Called every second while broadcaster is running
 function AutoLFM.UI.Content.Messaging.UpdateStats()
+  local frame = getglobal("AutoLFM_Content_Messaging")
+  if not frame or not frame:IsVisible() then return end
+
   -- Get stats from broadcaster
   local isRunning = AutoLFM.Core.Maestro.GetState("Broadcaster.IsRunning") or false
   local messagesSent = AutoLFM.Core.Maestro.GetState("Broadcaster.MessagesSent") or 0
@@ -839,7 +859,10 @@ local STATS_TICKER_ID = AutoLFM.Core.Constants.TICKER_IDS.MESSAGING_STATS
 local statsTickerRegistered = false
 
 --- Starts the stats update timer via centralized Ticker
-local function startStatsUpdateTimer()
+startStatsUpdateTimer = function()
+  local frame = getglobal("AutoLFM_Content_Messaging")
+  if not frame or not frame:IsVisible() then return end
+
   if not statsTickerRegistered then
     AutoLFM.Core.Ticker.Register(STATS_TICKER_ID, 1, function()
       AutoLFM.UI.Content.Messaging.UpdateStats()
@@ -850,7 +873,7 @@ local function startStatsUpdateTimer()
 end
 
 --- Stops the stats update timer
-local function stopStatsUpdateTimer()
+stopStatsUpdateTimer = function()
   if statsTickerRegistered then
     AutoLFM.Core.Ticker.Stop(STATS_TICKER_ID)
   end
@@ -909,10 +932,7 @@ AutoLFM.Core.SafeRegisterInit("UI.Messaging", function()
 
   --- Listens to Broadcaster.Interval changes to update Interval stat immediately
   AutoLFM.Core.Maestro.SubscribeState("Broadcaster.Interval", function(newValue, oldValue)
-    local intervalValue = getUIElement("AutoLFM_Content_Messaging_ScrollFrame_ScrollChild_General_IntervalValue")
-    if intervalValue then
-      intervalValue:SetText(tostring(newValue or 60) .. "s")
-    end
+    AutoLFM.UI.Content.Messaging.UpdateStats()
   end)
 
   -- Start stats timer immediately if broadcaster is already running

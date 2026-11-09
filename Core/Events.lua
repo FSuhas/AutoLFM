@@ -66,9 +66,14 @@ local function onPlayerLevelUp()
   AutoLFM.Core.Utils.LogInfo("Level up! New level: " .. tostring(newLevel))
 end
 
---- Handles group roster change events - tracks group size and dispatches events
+--- Handles roster changes - tracks group type independently of group size
 local function onGroupRosterChange()
   local currentSize, groupType = getGroupInfo()
+
+  -- Party-to-raid conversion can keep the same number of players
+  if AutoLFM.Core.Maestro.GetState("Group.Type") ~= groupType then
+    AutoLFM.Core.Maestro.SetState("Group.Type", groupType)
+  end
 
   if currentSize ~= lastGroupSize then
     AutoLFM.Core.Utils.LogAction("Group size: " .. lastGroupSize .. " -> " .. currentSize)
@@ -76,7 +81,6 @@ local function onGroupRosterChange()
     lastGroupSize = currentSize
 
     -- Update Maestro states and dispatch event
-    AutoLFM.Core.Maestro.SetState("Group.Type", groupType)
     AutoLFM.Core.Maestro.SetState("Group.Size", currentSize)
     AutoLFM.Core.Maestro.Dispatch("Group.SizeChanged", { size = currentSize })
   end

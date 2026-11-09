@@ -1,3 +1,18 @@
+## [v3.16] 2026/11/08
+- Change Dire Maul broadcast abbreviations to DM North and DM West
+- Remove the 5-player suffix from Stratholme Live, Scholomance and Stratholme UD dungeon names and abbreviations
+- Rename Caverns of Time. Black Morass to Black Morass and use BM in broadcasts
+- Change Dragonmaw Retreat, The Crescent Grove, Stormwrought Castle and Stormwrought Descent abbreviations to DMR, CG, SWC and SWD
+- Migrate saved presets using the previous Scholomance, Stratholme Live/UD and Black Morass dungeon names
+- Fix preset loading clearing restored dungeon and raid selections when switching messaging modes
+- Join preset-selected channels, refresh channel checkboxes and persist restored channels and broadcast intervals
+- Fix party/raid type tracking when conversion preserves the same player count
+- Keep independent broadcast retries for each failed channel and cancel pending retries when broadcasting stops
+- Count broadcast cycles only after at least one channel send succeeds, including retries, without duplicate counts
+- Skip rebuilding hidden dungeon, raid and quest lists; refresh them when opened
+- Pause messaging statistics updates while the panel is hidden and refresh immediately when reopened
+- Reuse preset row frames, buttons, text regions and role icons across refreshes, reordering and display mode changes
+
 ## [v3.15] 2026/04/09
 - Fix `Utils.ROW_HEIGHT` → `Constants.ROW_HEIGHT` in Raids UI (scroll height was nil)
 - Fix `LogWarn` → `LogWarning` in AutoInvite UI, remove duplicate `OnShow` in Settings UI

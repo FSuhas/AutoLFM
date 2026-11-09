@@ -928,6 +928,9 @@
       <OnShow>
         AutoLFM.UI.Content.Messaging.OnShow(this)
       </OnShow>
+      <OnHide>
+        AutoLFM.UI.Content.Messaging.OnHide(this)
+      </OnHide>
     </Scripts>
   </Frame>
 </Ui>

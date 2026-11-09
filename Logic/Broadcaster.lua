@@ -14,15 +14,8 @@ local SOUNDS = {
   FULL = "Full.ogg"
 }
 
--- Retry state for failed broadcasts
-local retryState = {
-  pending = false,
-  retriesLeft = 0,
-  message = nil,
-  channelName = nil,
-  startTime = 0,
-  delay = 0
-}
+-- Each failed channel keeps its own retry data
+local pendingRetries = {}
 
 --=============================================================================
 -- PRIVATE HELPERS
@@ -47,6 +40,14 @@ end
 local function incrementMessageCount()
   local count = (AutoLFM.Core.Maestro.GetState("Broadcaster.MessagesSent") or 0) + 1
   AutoLFM.Core.Maestro.SetState("Broadcaster.MessagesSent", count)
+end
+
+--- Counts a broadcast cycle once, even when multiple channels or retries succeed
+local function recordSuccessfulBroadcast(broadcast)
+  if not broadcast.counted then
+    broadcast.counted = true
+    incrementMessageCount()
+  end
 end
 
 --- Updates the last broadcast timestamp
@@ -88,18 +89,23 @@ end
 local sendToChannel
 
 --- Handles retry tick callback from Ticker system
---- Processes pending retry if delay has elapsed
+--- Processes each pending retry when its delay has elapsed
 local function onRetryTick()
-  if not retryState.pending then
-    AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
-    return
+  local now = GetTime()
+  -- Remove due entries before sending, so failures can schedule a new attempt
+  -- Walk backwards so removing an entry does not skip other pending channels
+  for i = table.getn(pendingRetries), 1, -1 do
+    local retry = pendingRetries[i]
+    if now - retry.startTime >= retry.delay then
+      table.remove(pendingRetries, i)
+      if sendToChannel(retry.channelName, retry.message, retry.retriesLeft - 1, retry.broadcast) then
+        recordSuccessfulBroadcast(retry.broadcast)
+      end
+    end
   end
 
-  local now = GetTime()
-  if now - retryState.startTime >= retryState.delay then
-    retryState.pending = false
+  if table.getn(pendingRetries) == 0 then
     AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
-    sendToChannel(retryState.channelName, retryState.message, retryState.retriesLeft - 1)
   end
 end
 
@@ -108,7 +114,8 @@ end
 --- @param channelName string - The channel name to retry
 --- @param message string - The message to send
 --- @param retriesLeft number - Number of retries remaining
-local function scheduleRetry(channelName, message, retriesLeft)
+--- @param broadcast table - Shared counting state for this broadcast cycle
+local function scheduleRetry(channelName, message, retriesLeft, broadcast)
   if retriesLeft <= 0 then return end
 
   local baseDelay = AutoLFM.Core.Constants.BROADCAST_RETRY_DELAY or 1
@@ -120,13 +127,15 @@ local function scheduleRetry(channelName, message, retriesLeft)
 
   AutoLFM.Core.Utils.LogInfo("Retry scheduled in " .. delay .. "s (attempt " .. attemptNumber .. "/" .. maxRetries .. ")")
 
-  -- Store retry state
-  retryState.pending = true
-  retryState.retriesLeft = retriesLeft
-  retryState.message = message
-  retryState.channelName = channelName
-  retryState.startTime = GetTime()
-  retryState.delay = delay
+  -- Keep this failure separate from retries scheduled for other channels
+  table.insert(pendingRetries, {
+    retriesLeft = retriesLeft,
+    message = message,
+    channelName = channelName,
+    broadcast = broadcast,
+    startTime = GetTime(),
+    delay = delay
+  })
 
   -- Start retry ticker (checks every 0.5 seconds)
   AutoLFM.Core.Ticker.Start(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
@@ -136,8 +145,9 @@ end
 --- @param channelName string - The name of the channel
 --- @param message string - The message to send
 --- @param retries number - Number of retries remaining (optional, defaults to MAX_BROADCAST_RETRIES)
+--- @param broadcast table - Shared counting state for this broadcast cycle
 --- @return boolean - True if message was sent successfully
-sendToChannel = function(channelName, message, retries)
+sendToChannel = function(channelName, message, retries, broadcast)
   if retries == nil then
     retries = AutoLFM.Core.Constants.MAX_BROADCAST_RETRIES or 2
   end
@@ -153,7 +163,7 @@ sendToChannel = function(channelName, message, retries)
       AutoLFM.Core.Utils.LogWarning("Failed to send to " .. channelName .. ": " .. tostring(err))
       if retries > 0 then
         AutoLFM.Core.Utils.LogInfo("Retrying broadcast to " .. channelName .. " (" .. retries .. " attempts left)")
-        scheduleRetry(channelName, message, retries)
+        scheduleRetry(channelName, message, retries, broadcast)
       end
       return false
     end
@@ -220,26 +230,32 @@ local function broadcastMessage()
     return false
   end
 
+  local broadcast = { counted = false }
   if isDryRun then
     local dryRunPrefix = AutoLFM.Core.Utils.ColorText("[DRY RUN]", "YELLOW")
     AutoLFM.Core.Utils.Print(dryRunPrefix .. " " .. message)
     AutoLFM.Core.Utils.LogAction("Dry run broadcast: " .. message)
+    recordSuccessfulBroadcast(broadcast)
   else
     for i = 1, table.getn(channels) do
       local channelName = channels[i]
+      local success
       if channelName == "Hardcore" then
-        sendToHardcoreChannel(message)
+        success = sendToHardcoreChannel(message)
       elseif channelName == "General" then
-        sendToGeneralChannel(message)
+        success = sendToGeneralChannel(message)
       else
-        sendToChannel(channelName, message)
+        success = sendToChannel(channelName, message, nil, broadcast)
+      end
+      if success then
+        recordSuccessfulBroadcast(broadcast)
       end
     end
   end
 
-  incrementMessageCount()
+  -- Keep the interval between attempts even when every channel fails
   updateLastBroadcastTime()
-  return true
+  return broadcast.counted
 end
 
 --=============================================================================
@@ -321,6 +337,8 @@ local function stop()
   end
 
   stopTimer()
+  AutoLFM.Core.Ticker.Stop(AutoLFM.Core.Constants.TICKER_IDS.BROADCASTER_RETRY)
+  pendingRetries = {}
   AutoLFM.Core.Maestro.SetState("Broadcaster.IsRunning", false)
   AutoLFM.Core.Maestro.SetState("Broadcaster.TimeRemaining", 0)
   -- NOTE: pcall used intentionally - sound files are optional and may not exist
